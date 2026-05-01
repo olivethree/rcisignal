@@ -1,0 +1,17 @@
+^CLAUDE\.md$
+^LICENSE\.md$
+^temp$
+^data-raw$
+^docs$
+^_pkgdown\.yml$
+^pkgdown$
+^\.github$
+^\.claude$
+^\.Rproj\.user$
+^rcisignal\.Rproj$
+^cran-comments\.md$
+^\.DS_Store$
+^.*\.Rcheck$
+^doc$
+^Meta$
+^vignettes/precomputed/oliveira_2019/signal_matrices\.rds$

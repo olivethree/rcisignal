@@ -1,0 +1,60 @@
+Package: rcisignal
+Title: Quality Checks for Reverse-Correlation Data and Classification Images
+Version: 0.3.0.9000
+Authors@R:
+    person("Manuel", "Oliveira",
+           email   = "m.j.barbosa.de.oliveira@tue.nl",
+           role    = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-6220-0695"))
+Description: A consolidated toolkit for assessing the quality of reverse
+    correlation (RC) experiments end-to-end. Input-side diagnostics
+    catch silent data-processing errors before classification image (CI)
+    computation: response coding, response time, response bias, trial
+    counts, duplicate trials, stimulus-pool alignment, and 'rcicr'
+    version compatibility. Output-side analyses quantify CI quality
+    after computation: within-condition reliability via permuted
+    split-half with Spearman-Brown correction and ICC(3,k); between-
+    condition discriminability via Welch pixel-wise t-tests, cluster-
+    based permutation with family-wise error control (Maris &
+    Oostenveld, 2007) and threshold-free cluster enhancement (Smith &
+    Nichols, 2009); per-producer informational value with a trial-
+    count-matched reference distribution that closes a calibration gap
+    in the original 'rcicr' implementation. Supports the standard
+    two-image forced-choice (2IFC) pipeline via 'rcicr' (Dotsch, 2016,
+    2023) and the Brief-RC pipeline (Schmitz, Rougier, & Yzerbyt,
+    2024) implemented natively. Operates directly on the pixel-level
+    signal produced by the original producers, so it does not depend
+    on a second-phase trait-rating study.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Language: en-GB
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+URL: https://github.com/olivethree/rcisignal,
+    https://olivethree.github.io/rcisignal/
+BugReports: https://github.com/olivethree/rcisignal/issues
+Depends:
+    R (>= 4.1)
+Imports:
+    cli,
+    data.table,
+    grDevices,
+    graphics,
+    stats,
+    tools
+Suggests:
+    dplyr,
+    foreach,
+    jpeg,
+    knitr,
+    png,
+    psych,
+    rcicr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    tibble,
+    withr
+Remotes:
+    rdotsch/rcicr
+VignetteBuilder: knitr
+Config/testthat/edition: 3
