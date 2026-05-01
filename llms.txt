@@ -326,10 +326,10 @@ April-May 2026).
 
 This package builds on the excellent and thorough foundational work by
 Ron Dotsch, Loek Brinkman, Alex Todorov, Mathias Schmitz, Marine
-Rougiuer, Vincent Yzerbyt, and their many collaborators across the
-years. Reverse correlation is no longer a central part of my research,
-but I still find a lot of enjoyment in working in these side projects.
-The inspiration to build these tools and tutorials comes mostly from
+Rougier, Vincent Yzerbyt, and their many collaborators across the years.
+Reverse correlation is no longer a central part of my research, but I
+still find a lot of enjoyment in working in these side projects. The
+inspiration to build these tools and tutorials comes mostly from
 occasional collaborations with my PhD supervisors (Teresa
 Garcia-Marques, Leonel Garcia-Marques) and all the warm and competent
 colleagues from the research groups in Lisbon (Goncalo Oliveira, Rui
