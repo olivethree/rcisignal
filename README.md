@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 <!-- README.md (rendered at https://olivethree.github.io/rcisignal/) -->
 
 # rcisignal <img src="man/figures/logo.png" align="right" height="139"/>
