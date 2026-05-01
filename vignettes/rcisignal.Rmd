@@ -1858,6 +1858,16 @@ group CI looks weak overall may carry stronger signal in one
 specific region, and a trait that looks strong overall may
 localise to one region rather than spanning the whole face.
 
+In this dataset the regional pattern is informative on its own.
+Dominance carries comparatively strong signal in the **eyes**
+and **upper face** but only modest signal around the **mouth**.
+Friendliness flips that pattern, with the **mouth** carrying its
+strongest regional signal and the **eyes** the weakest of the
+four traits. Trustworthy localises broadly across the eyes and
+mouth without a clear regional peak, and competent's signal is
+the most evenly spread across regions. The headline full-face
+median for each trait masks these regional contrasts.
+
 The two grids (the cluster grid from §12.8 and the infoVal grid
 here) answer two different questions about the same masked
 region. The cluster test asks where conditions A and B disagree;
@@ -1867,6 +1877,18 @@ fuller picture of how producers' representations organise
 across the face.
 
 ### 12.10 Pairwise cluster maps for two motivating contrasts
+
+The two contrasts highlighted in this section are chosen because
+they sit at opposite ends of a methodological prediction. **Trust
+versus Friendly** pits two traits that load on the same warmth
+dimension of social judgement and share much of their facial
+encoding, so the expectation is a comparatively narrow set of
+pixel-level differences. **Dominant versus Competent** pits two
+traits that the original paper (Oliveira et al., 2019) argues
+dissociate: dominance is read off coarser whole-face structure
+while competence draws on finer ability cues, and the two should
+therefore diverge over a broader spatial region. The maps below
+let the reader judge whether the data agree.
 
 For each between-condition contrast we render two complementary
 maps on the same male base face. The **descriptive map** shows
@@ -1963,13 +1985,18 @@ if (olv_have_cache) {
 ```
 
 The two contrasts pick out qualitatively different spatial
-signatures. Trust versus Friendly localises around the eye and
-mid-face regions, consistent with the warmth dimension being
-read off socially-relevant features. Dominant versus Competent
-spreads more widely across the face, consistent with a contrast
-that includes both perceived agency and ability cues. These
-maps extend Oliveira et al. (2019) by adding a between-condition
-inferential filter the original paper did not run.
+signatures, broadly consistent with the prediction set out at the
+start of this section. Trust versus Friendly localises around
+the eye and mid-face regions, consistent with the warmth
+dimension being read off socially-relevant features and shared
+across the two traits. Dominant versus Competent spreads more
+widely across the face, consistent with a contrast that draws on
+both whole-face agency cues and finer ability cues. Among the
+pixels that survive the FWER filter, the Dominant vs Competent
+map retains noticeably more spatial extent than the Trust vs
+Friendly map. These maps extend Oliveira et al. (2019) by adding
+a between-condition inferential filter the original paper did
+not run.
 
 ## 13. Brief-RC end-to-end
 
