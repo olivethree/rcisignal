@@ -2,7 +2,7 @@
 
 # rcisignal <img src="man/figures/logo.png" align="right" height="139"/>
 
-A consolidated toolkit for quality assessment of reverse correlation
+A toolkit for quality assessment of reverse correlation
 (RC) experiments end-to-end. Catches silent data-processing errors
 *before* classification image (CI) computation, then quantifies CI
 quality *after*: magnitude, stability, and discriminability.
