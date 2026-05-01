@@ -295,12 +295,14 @@ If you want the technical details:
 If `rcisignal` helps your research, please cite it:
 
     Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
-    data and classification images. R package v0.1.0. Zenodo.
+    data and classification images (Version 0.1.0) [R package]. Zenodo.
     https://doi.org/10.5281/zenodo.19961180
 
-The DOI above is version-specific to v0.1.0. The Zenodo deposit page
-also exposes a concept DOI that always resolves to the latest release.
-Run `citation("rcisignal")` in R for a BibTeX entry.
+The DOI above is the **concept DOI** and always resolves to the latest
+release on Zenodo. For citations to a specific version, use the version
+DOI listed on the [Zenodo record
+page](https://doi.org/10.5281/zenodo.19961180). Run
+`citation("rcisignal")` in R for a BibTeX entry.
 
 Please also cite the methodological sources appropriate to your
 pipeline:
