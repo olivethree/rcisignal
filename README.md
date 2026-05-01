@@ -8,16 +8,16 @@ A toolkit for quality assessment of reverse correlation
 quality *after*: magnitude, stability, and discriminability.
 
 <!-- badges: start -->
+[![DOI](https://zenodo.org/badge/1226504679.svg)](https://doi.org/10.5281/zenodo.19961180)
+[![R-CMD-check](https://github.com/olivethree/rcisignal/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/olivethree/rcisignal/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/olivethree/rcisignal/actions/workflows/pkgdown.yaml/badge.svg)](https://olivethree.github.io/rcisignal/)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![License:
-MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-<!-- R-CMD-check, pkgdown, and DOI badges land once the workflows and Zenodo deposit are in place. -->
 
 <!-- badges: end -->
 
-> **Note:** package is not on CRAN, distribution is GitHub-only.
+> Package is not on CRAN, distribution is GitHub-only.
 
 ## Why this package?
 
@@ -297,13 +297,15 @@ If you want the technical details:
 
 If `rcisignal` helps your research, please cite it:
 
-```         
+```
 Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
-data and classification images. R package v0.1.0.
+data and classification images. R package v0.1.0. Zenodo.
+https://doi.org/10.5281/zenodo.19961180
 ```
 
-A version DOI will be minted on Zenodo at the first tagged release. Run
-`citation("rcisignal")` in R for a BibTeX entry.
+The DOI above is version-specific to v0.1.0. The Zenodo deposit page
+also exposes a concept DOI that always resolves to the latest
+release. Run `citation("rcisignal")` in R for a BibTeX entry.
 
 Please also cite the methodological sources appropriate to your
 pipeline:
@@ -335,6 +337,5 @@ The inspiration to build these tools and tutorials comes mostly from
 occasional collaborations with my PhD supervisors (Teresa
 Garcia-Marques, Leonel Garcia-Marques) and all the warm and competent
 colleagues from the research groups in Lisbon (Goncalo Oliveira, Rui
-Costa-Lopes and their students) with whom I have been greatly enjoying
-working together on this stuff. Hopefully this helps and inspires the
-small RC research community out there :)
+Costa-Lopes and their teams) with whom I have been greatly enjoying
+working together on this stuff. Hopefully this toolkit will come in handy to the RC research enthusiasts out there! :)
