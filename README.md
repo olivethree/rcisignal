@@ -1,6 +1,6 @@
 <!-- README.md (rendered at https://olivethree.github.io/rcisignal/) -->
 
-# rcisignal
+# rcisignal <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 A consolidated toolkit for quality assessment of reverse correlation
 (RC) experiments end-to-end. Catches silent data-processing errors
@@ -8,15 +8,12 @@ A consolidated toolkit for quality assessment of reverse correlation
 quality *after*: magnitude, stability, and discriminability.
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/olivethree/rcisignal/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/olivethree/rcisignal/actions/workflows/R-CMD-check.yaml)
-[![pkgdown](https://github.com/olivethree/rcisignal/actions/workflows/pkgdown.yaml/badge.svg)](https://olivethree.github.io/rcisignal/)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-<!-- DOI badge will be added once Zenodo mints the first version DOI. -->
+<!-- R-CMD-check, pkgdown, and DOI badges land once the workflows and Zenodo deposit are in place. -->
 <!-- badges: end -->
 
-> **Status:** in development. The API is not yet stable and the
-> package is not on CRAN. Distribution is GitHub-only.
+> **Note:** package is not on CRAN, distribution is GitHub-only.
 
 ## Why this package?
 
@@ -47,24 +44,33 @@ Rougier & Yzerbyt, 2024 — 12 noisy faces per trial instead of 2).
 
 ## What it does
 
-Three families of exported functions:
+The exported functions group into two families, both oriented
+around **signal quality**:
 
-- **Input-side diagnostics** (`check_*`, `run_diagnostics`) — catch
-  silent data-processing errors before CI computation: response
+- **Pipeline diagnostics** (`check_*`, `run_diagnostics`) — catch
+  silent data-processing errors *before* CI computation: response
   coding, response time, response bias, trial counts, duplicate
   trials, stimulus-pool alignment, `rcicr` version compatibility.
-- **Output-side reliability** (`rel_*`, `run_within`, `run_between`)
-  — quantify CI quality after computation. Within-condition
-  stability via permuted split-half with Spearman-Brown correction
-  and ICC(3,k). Between-condition discriminability via Welch
-  pixel-wise *t*-tests, cluster-based permutation with FWER control
-  (Maris & Oostenveld, 2007) and threshold-free cluster enhancement
-  (Smith & Nichols, 2009).
-- **Magnitude** (`infoval`, `face_mask`, `diagnose_infoval`) —
-  per-producer informational value with a trial-count-matched
-  reference distribution that closes a calibration gap in the
-  original `rcicr` implementation. Same function for both 2IFC and
-  Brief-RC.
+- **Reliability and signal analyses** (`rel_*`, `run_reliability`,
+  `run_discriminability`, `infoval`, `diagnose_infoval`,
+  `face_mask`) — quantify CI quality *after* computation.
+  Within-condition stability via permuted split-half with
+  Spearman-Brown correction and ICC(3,k). Between-condition
+  discriminability via Welch pixel-wise *t*-tests, cluster-based
+  permutation with FWER control (Maris & Oostenveld, 2007) and
+  threshold-free cluster enhancement (Smith & Nichols, 2009).
+  Per-producer informational value (`infoval`) with a
+  trial-count-matched reference distribution that closes a
+  calibration gap in the original `rcicr` implementation;
+  `diagnose_infoval()` walks through common pitfalls (mask
+  mismatch, insufficient trials, scaling assumptions) and points
+  at the cause when the headline number looks wrong.
+
+Both families address the same underlying concern. As reverse
+correlation has been deployed more widely in the past few years, a
+recurring pattern of subtle data-processing and inferential issues
+has become more visible. `rcisignal` is one place to diagnose and
+resolve them.
 
 ## Installation
 
@@ -295,28 +301,13 @@ If you want the technical details:
   z-score with a reference distribution matched to each producer's
   trial count — for both 2IFC and Brief-RC.
 
-## Provenance
-
-`rcisignal` consolidates two earlier GitHub-only packages by the same
-author:
-
-- [`rcicrdiagnostics`](https://github.com/olivethree/rcicrdiagnostics)
-  — input-side diagnostics.
-- [`rcicrely`](https://github.com/olivethree/rcicrely) — output-side
-  reliability and discriminability.
-
-Both are superseded by `rcisignal`. Function names and statistical
-commitments carry over verbatim; the only user-facing change is
-`library(rcicrdiagnostics)` / `library(rcicrely)` →
-`library(rcisignal)`.
-
 ## Citation
 
 If `rcisignal` helps your research, please cite it:
 
 ```
 Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
-data and classification images. R package v0.3.0.
+data and classification images. R package v0.1.0.
 ```
 
 A version DOI will be minted on Zenodo at the first tagged release. Run
@@ -331,9 +322,22 @@ pipeline:
 
 ## License
 
-Released under the MIT License. See [LICENSE](LICENSE) (copyright
-notice) and [LICENSE.md](LICENSE.md) (full text).
+Released under the [MIT License](LICENSE.md).
 
 ## Credits
 
-Manuel Oliveira — <https://www.manueloliveira.nl>.
+Designed by [Manuel Oliveira](https://manueloliveira.nl/) <a href="https://orcid.org/0000-0002-6220-0695"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" alt="ORCID iD" width="16" height="16" /></a>.
+Code and documentation were co-built with Claude (Opus 4.6, Anthropic; April-May 2026).
+
+### Acknowledgements
+
+This package builds on the foundational work of Ron Dotsch, Loek
+Brinkman, Alex Todorov, Mathias Schmitz, Marine Rougiuer, Vincent Yzerbyt, and their many collaborators
+across the years. Reverse correlation is no longer a central part
+of my research, but I still find a lot of enjoyment in working
+with these tools, and the inspiration to keep building them comes
+mostly from occasional collaborations with the people who
+supervised me during my PhD and with whom I still enjoy working on
+these topics from time to time. Hopefully this helps and inspires
+the small RC research community out there :)
+

@@ -352,8 +352,8 @@ reset_session_warnings <- function() {
 
 #' Emit the once-per-session rel_loo(flag_method = "sd") deprecation
 #'
-#' Default switched to `"mad"` in v0.3; `"sd"` retained for
-#' backwards compatibility and slated for removal in v0.4.
+#' Default is `"mad"`; `"sd"` retained for backwards compatibility
+#' and slated for removal in v0.2.0.
 #'
 #' @keywords internal
 #' @noRd
@@ -365,8 +365,8 @@ warn_loo_sd_deprecated <- function() {
     return(invisible())
   }
   cli::cli_warn(c(
-    "{.code rel_loo(flag_method = \"sd\")} is deprecated since v0.3 \\
-     and will be removed in v0.4.",
+    "{.code rel_loo(flag_method = \"sd\")} is deprecated and will \\
+     be removed in v0.2.0.",
     "i" = "The MAD/median rule (the new default) is robust to the \\
            influential producers LOO is designed to flag.",
     "*" = "Drop the {.arg flag_method} argument or pass \\

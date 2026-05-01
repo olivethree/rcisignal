@@ -543,7 +543,7 @@ print.rcisignal_rel_dissim <- function(x, ...) {
     cat(sprintf("    z-equivalent          = %+.2f\n", x$d_z))
     cat(sprintf("    observed / null med   = %.2fx\n", x$d_ratio))
   }
-  cat("\n  [Deprecated - will be removed in v0.3]\n")
+  cat("\n  [Deprecated - will be removed in v0.2.0]\n")
   cat(sprintf(
     "    Pearson r             = %.3f   [%.3f, %.3f]   SE = %.3f\n",
     x$correlation, x$ci_cor[1], x$ci_cor[2], x$boot_se_cor

@@ -709,8 +709,8 @@ A thin wrapper around `rcicr::computeInfoVal2IFC()` for the
 legacy 2IFC path. It returns a per-participant z table plus a
 pass/warn summary, useful for direct comparison with previously
 published `rcicr` numbers. For the Brief-RC path or for the
-v0.3 trial-count-matched reference, prefer `diagnose_infoval()`
-or `infoval()` directly.
+trial-count-matched reference, prefer `diagnose_infoval()` or
+`infoval()` directly.
 
 ### 5.6 `check_rt_infoval_consistency()`
 
@@ -720,10 +720,6 @@ negative correlation (correlation <= -0.30) suggests that fast
 clickers are also producing low-infoVal masks, indicating a
 population-level pattern rather than a single-producer fluke.
 WARN if the correlation passes the threshold; PASS otherwise.
-
-(This function was named `cross_validate_rt_infoval()` in
-`rcicrdiagnostics`; it joins the `check_*` family in v0.3 and
-drops the ML-evocative `cross_validate` prefix.)
 
 ### 5.7 Conditional checks and required arguments
 
@@ -987,9 +983,9 @@ mean and the leave-one-out mean share `(N-1)/N` of their data,
 ordering across producers carries the diagnostic information, so
 the function reports `$z_scores` as the recommended quantity.
 
-Two flagging rules are available: `"mad"` (default since v0.3)
-and `"sd"` (retained for back-compat, deprecated, slated for
-removal in v0.4). MAD is robust to the influential producers
+Two flagging rules are available: `"mad"` (default) and `"sd"`
+(retained for back-compat, deprecated, slated for removal in
+v0.2.0). MAD is robust to the influential producers
 the test is meant to flag; SD's mean and standard deviation are
 themselves pulled by the outlier. Default `flag_threshold = 2.5`
 so that a 30-producer dataset flags ~0.3 producers by chance.
@@ -1018,10 +1014,6 @@ result objects. The orchestrator deliberately omits `rel_loo()`,
 since LOO is an influence-screening diagnostic and bundling it
 into a reliability report invites misreading `r_loo`'s near-1
 values as reliability.
-
-(`run_reliability()` was named `run_within()` in `rcicrely`. The
-v0.3 rename drops the within/between-subjects ambiguity that
-clashes with `stats` and `afex` vocabulary.)
 
 ## 8. Step 4: between-condition discriminability
 
@@ -1163,10 +1155,6 @@ plot(rep)
 
 `rep$results$cluster_test` and `rep$results$dissimilarity` are the
 standalone results.
-
-(Renamed from `run_between()` in v0.3, for the same reason as
-`run_reliability`: dropping the within/between-subjects
-ambiguity.)
 
 ### 8.5 `run_discriminability_pairwise()`
 
@@ -1331,10 +1319,6 @@ plot_dissimilarity_grid(
   metric = "euclidean_normalised"
 )
 ```
-
-(Renamed from `compare_dissimilarity()` in v0.3; the new name
-makes it clearer that this is a plot helper, and reduces collision
-with `compare_*` patterns elsewhere in R.)
 
 ## 11. Region-restricted analyses
 

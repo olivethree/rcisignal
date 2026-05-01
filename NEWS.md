@@ -1,10 +1,7 @@
-# rcisignal (development)
+# rcisignal 0.1.0
 
-## rcisignal 0.3.0 (in development)
-
-First release of the consolidated package. Merges the input-side
-`rcicrdiagnostics` and output-side `rcicrely` toolkits into a single
-namespace with a unified API.
-
-Pre-merge histories of the source packages are not reproduced here;
-they remain in their respective archived GitHub repositories.
+First release of the package. Provides a consolidated toolkit for
+quality assessment of reverse-correlation data and classification
+images: input-side diagnostics (response coding, RT, alignment,
+balance) and output-side reliability (pixel-level reliability,
+cluster inference, per-producer infoVal).

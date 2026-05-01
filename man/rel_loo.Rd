@@ -18,9 +18,9 @@ rel_loo(
 \item{flag_threshold}{Numeric multiplier on \code{sd} (or \code{mad})
 below the centre. Default 2.5.}
 
-\item{flag_method}{One of \code{"mad"} (default since v0.3) or
-\code{"sd"}. SD/mean is retained for backwards compatibility and
-emits a one-time per-session deprecation message.}
+\item{flag_method}{One of \code{"mad"} (default) or \code{"sd"}. SD/mean
+is retained for backwards compatibility and emits a one-time
+per-session deprecation message.}
 
 \item{flag_threshold_sd}{Deprecated alias for \code{flag_threshold}.}
 
@@ -60,14 +60,14 @@ plot or report.
 
 Two flagging rules:
 \itemize{
-\item \code{"mad"} (default since v0.3): flag producers with
+\item \code{"mad"} (default): flag producers with
 \code{r_loo < median(r) - flag_threshold * mad(r)}. Robust to the
 few atypical producers RC datasets often contain.
 \item \code{"sd"}: flag producers with
 \code{r_loo < mean(r) - flag_threshold * sd(r)}. Sensitive to the
 very outliers it is trying to detect; emits a one-time
 per-session deprecation message and is scheduled for removal
-in v0.4.
+in v0.2.0.
 }
 
 Default \code{flag_threshold = 2.5} is calibrated so a 30-producer

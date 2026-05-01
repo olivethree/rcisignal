@@ -29,14 +29,14 @@
 #' plot or report.
 #'
 #' Two flagging rules:
-#' * `"mad"` (default since v0.3): flag producers with
+#' * `"mad"` (default): flag producers with
 #'   `r_loo < median(r) - flag_threshold * mad(r)`. Robust to the
 #'   few atypical producers RC datasets often contain.
 #' * `"sd"`: flag producers with
 #'   `r_loo < mean(r) - flag_threshold * sd(r)`. Sensitive to the
 #'   very outliers it is trying to detect; emits a one-time
 #'   per-session deprecation message and is scheduled for removal
-#'   in v0.4.
+#'   in v0.2.0.
 #'
 #' Default `flag_threshold = 2.5` is calibrated so a 30-producer
 #' dataset flags roughly 0.3 producers by chance under `"sd"`,
@@ -84,9 +84,9 @@
 #' @param signal_matrix Pixels x participants, base-subtracted.
 #' @param flag_threshold Numeric multiplier on `sd` (or `mad`)
 #'   below the centre. Default 2.5.
-#' @param flag_method One of `"mad"` (default since v0.3) or
-#'   `"sd"`. SD/mean is retained for backwards compatibility and
-#'   emits a one-time per-session deprecation message.
+#' @param flag_method One of `"mad"` (default) or `"sd"`. SD/mean
+#'   is retained for backwards compatibility and emits a one-time
+#'   per-session deprecation message.
 #' @param flag_threshold_sd Deprecated alias for `flag_threshold`.
 #' @param mask Optional logical vector of length
 #'   `nrow(signal_matrix)`.
