@@ -1,0 +1,146 @@
+# Between-condition dissimilarity with bootstrap confidence intervals
+
+Quantifies overall dissimilarity between two conditions' group-level
+classification images. The primary statistic is Euclidean distance
+between the two group-mean CIs, reported both raw and normalised by
+`sqrt(n_pixels)` for cross-resolution comparability. Percentile
+bootstrap 95% confidence intervals are computed by resampling
+participants with replacement within each condition.
+
+Pair with
+[`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
+when you also want to know **where** the two conditions differ.
+
+## Usage
+
+``` r
+rel_dissimilarity(
+  signal_matrix_a,
+  signal_matrix_b,
+  paired = FALSE,
+  n_boot = 2000L,
+  ci_level = 0.95,
+  null = c("none", "permutation"),
+  n_permutations = 2000L,
+  mask = NULL,
+  seed = NULL,
+  progress = TRUE,
+  acknowledge_scaling = FALSE
+)
+```
+
+## Arguments
+
+- signal_matrix_a, signal_matrix_b:
+
+  Pixels x participants, base-subtracted. Row counts must match.
+
+- paired:
+
+  Logical. `FALSE` (default) for between-subjects: participants
+  resampled within A and B independently. `TRUE` for within-subjects: A
+  and B share a single resample index per replicate so the paired
+  covariance structure is preserved.
+
+- n_boot:
+
+  Bootstrap replicates. Default 2000.
+
+- ci_level:
+
+  Confidence level. Default 0.95.
+
+- null:
+
+  One of `"none"` (default) or `"permutation"`. `"permutation"` builds
+  an empirical chance baseline for the Euclidean distance.
+
+- n_permutations:
+
+  Integer. Number of null iterations when `null = "permutation"`.
+  Default 2000.
+
+- mask:
+
+  Optional logical vector of length `nrow(signal_matrix_a)` restricting
+  the Euclidean / correlation computation to a region.
+
+- seed:
+
+  Optional integer; RNG state restored on exit.
+
+- progress:
+
+  Show a `cli` progress bar.
+
+- acknowledge_scaling:
+
+  Logical. When `FALSE` (default), the shared `assert_raw_signal()`
+  helper errors on a known-rendered matrix on either side.
+
+## Value
+
+Object of class `rcisignal_rel_dissim`.
+
+## Details
+
+For the observed statistics and each bootstrap replicate `i`:
+
+    mean_a      = rowMeans(signal_matrix_a)
+    mean_b      = rowMeans(signal_matrix_b)
+    observed_dist            = sqrt(sum((mean_a - mean_b)^2))
+    observed_dist_normalised = observed_dist / sqrt(n_pixels)
+
+Percentile CI via base R
+[`quantile()`](https://rdrr.io/r/stats/quantile.html); no `boot`
+dependency.
+
+## Why Euclidean and not Pearson correlation as the primary
+
+Two base-subtracted CIs share systematic image-domain spatial structure
+(face shape, oval signal support, low-frequency Gaussian-noise
+smoothness) that pushes their correlation above zero even when the
+underlying mental representations are unrelated. Absolute correlation
+values therefore do not cleanly mean "these conditions are similar".
+Euclidean distance does not share this failure mode. The Pearson
+correlation fields (`$correlation`, `$boot_cor`, `$ci_cor`,
+`$boot_se_cor`) are retained for backwards compatibility and slated for
+removal in a future release.
+
+## Reading the result
+
+- `$euclidean`, observed Euclidean distance between group means (primary
+  statistic).
+
+- `$euclidean_normalised`, `$euclidean / sqrt(n_pixels)`. Use for
+  cross-resolution comparisons.
+
+- `$boot_dist`, `$ci_dist`, `$boot_se_dist`, bootstrap distribution,
+  percentile CI, and SE of the Euclidean distance.
+
+- `$null` (character), the null mode used.
+
+- `$null_distribution`, when `null != "none"`: numeric vector of
+  per-iteration Euclidean distances under the chosen null.
+
+- `$d_null_p95`, 95th percentile of the null distribution.
+
+- `$d_z`, z-equivalent effect size:
+  `(observed_d - mean(null)) / sd(null)`.
+
+- `$d_ratio`, observed Euclidean over the null median.
+
+- `$correlation`, `$boot_cor`, `$ci_cor`, `$boot_se_cor`: Pearson
+  correlation of the group means. Deprecated; see above.
+
+- `$n_boot`, `$ci_level`, `$paired`, metadata.
+
+## References
+
+Efron, B., & Tibshirani, R. J. (1994). *An introduction to the
+bootstrap*. Chapman & Hall / CRC.
+
+## See also
+
+[`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
+[`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
