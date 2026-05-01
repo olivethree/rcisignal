@@ -86,8 +86,8 @@ fully native to `rcisignal`.
 
 ## User’s guide
 
-The **[full user
-guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html)**
+The [**full user
+guide**](https://olivethree.github.io/rcisignal/articles/rcisignal.html)
 walks through every exported function with worked examples, including a
 real-data example from a published 2IFC reverse- correlation study
 ([Oliveira et al., 2019](https://doi.org/10.1002/ejsp.2569)).
@@ -189,8 +189,8 @@ print(run_between(trustworthy, untrustworthy, seed = 1))
 
 For a function-by-function walkthrough — including how to interpret
 cluster maps, sample-size warnings, when to use ICC(3,1) vs ICC(3,k),
-and Brief-RC end-to-end — see the **[full user
-guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html)**.
+and Brief-RC end-to-end — see the [**full user
+guide**](https://olivethree.github.io/rcisignal/articles/rcisignal.html).
 
 ## Worked example: Oliveira et al. (2019)
 
@@ -217,7 +217,7 @@ inferential filter applied. Red = first condition stronger; blue =
 second condition stronger.
 
 |  |  |
-|:--:|:--:|
+|----|----|
 | **Trustworthy − Friendly** | **Dominant − Competent** |
 | ![Descriptive map: trust minus friendly](articles/figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png) | ![Descriptive map: dominant minus competent](articles/figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png) |
 
@@ -228,7 +228,7 @@ Same difference signals, but pixels outside any cluster significant at
 stratified label permutations; max-mass null).
 
 |  |  |
-|:--:|:--:|
+|----|----|
 | **Trustworthy − Friendly** | **Dominant − Competent** |
 | ![FWER map: trust minus friendly](articles/figures/oliveira_2019/pairwise_trust_vs_friendly.png) | ![FWER map: dominant minus competent](articles/figures/oliveira_2019/pairwise_dominant_vs_competent.png) |
 
@@ -315,18 +315,22 @@ License](https://olivethree.github.io/rcisignal/LICENSE.md).
 ## Credits
 
 Designed by [Manuel Oliveira](https://manueloliveira.nl/) [![ORCID
-iD](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0002-6220-0695).
+iD](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0002-6220-0695)
+
 Code and documentation were co-built with Claude (Opus 4.6, Anthropic;
 April-May 2026).
 
-### Acknowledgements
+### Acknowledgements to the community
 
-This package builds on the foundational work of Ron Dotsch, Loek
-Brinkman, Alex Todorov, Mathias Schmitz, Marine Rougiuer, Vincent
-Yzerbyt, and their many collaborators across the years. Reverse
-correlation is no longer a central part of my research, but I still find
-a lot of enjoyment in working with these tools, and the inspiration to
-keep building them comes mostly from occasional collaborations with the
-people who supervised me during my PhD and with whom I still enjoy
-working on these topics from time to time. Hopefully this helps and
-inspires the small RC research community out there :)
+This package builds on the excellent and thorough foundational work by
+Ron Dotsch, Loek Brinkman, Alex Todorov, Mathias Schmitz, Marine
+Rougiuer, Vincent Yzerbyt, and their many collaborators across the
+years. Reverse correlation is no longer a central part of my research,
+but I still find a lot of enjoyment in working in these side projects.
+The inspiration to build these tools and tutorials comes mostly from
+occasional collaborations with my PhD supervisors (Teresa
+Garcia-Marques, Leonel Garcia-Marques) and all the warm and competent
+colleagues from the research groups in Lisbon (Goncalo Oliveira, Rui
+Costa-Lopes and their students) with whom I have been greatly enjoying
+working together on this stuff. Hopefully this helps and inspires the
+small RC research community out there :)

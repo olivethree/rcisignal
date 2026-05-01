@@ -56,6 +56,7 @@
 <p>A consolidated toolkit for quality assessment of reverse correlation (RC) experiments end-to-end. Catches silent data-processing errors <em>before</em> classification image (CI) computation, then quantifies CI quality <em>after</em>: magnitude, stability, and discriminability.</p>
 <!-- badges: start -->
 
+<!-- badges: end -->
 <blockquote>
 <p><strong>Note:</strong> package is not on CRAN, distribution is GitHub-only.</p>
 </blockquote>
@@ -101,7 +102,7 @@
 <div class="section level2">
 <h2 id="users-guide">User’s guide<a class="anchor" aria-label="anchor" href="#users-guide"></a>
 </h2>
-<p>The <strong><a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html">full user guide</a></strong> walks through every exported function with worked examples, including a real-data example from a published 2IFC reverse- correlation study (<a href="https://doi.org/10.1002/ejsp.2569" class="external-link">Oliveira et al., 2019</a>).</p>
+<p>The <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html"><strong>full user guide</strong></a> walks through every exported function with worked examples, including a real-data example from a published 2IFC reverse- correlation study (<a href="https://doi.org/10.1002/ejsp.2569" class="external-link">Oliveira et al., 2019</a>).</p>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -181,7 +182,7 @@
 <blockquote>
 <p><strong>Heads-up.</strong> Results from PNG/JPEG inputs may differ slightly from raw-response inputs because PNGs encode the <em>display-scaled</em> CI, not the raw signal. The package warns you once per session when this matters; see <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html">the user guide</a> for the full story. When possible, work from raw responses rather than rendered images.</p>
 </blockquote>
-<p>For a function-by-function walkthrough — including how to interpret cluster maps, sample-size warnings, when to use ICC(3,1) vs ICC(3,k), and Brief-RC end-to-end — see the <strong><a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html">full user guide</a></strong>.</p>
+<p>For a function-by-function walkthrough — including how to interpret cluster maps, sample-size warnings, when to use ICC(3,1) vs ICC(3,k), and Brief-RC end-to-end — see the <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html"><strong>full user guide</strong></a>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -194,22 +195,20 @@
 </h3>
 <p>Difference of the two group-mean CIs across all face-oval pixels; no inferential filter applied. Red = first condition stronger; blue = second condition stronger.</p>
 <table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<tbody>
 <tr>
-<td align="center">
-<strong>Trustworthy − Friendly</strong>
-</td>
-<td align="center">
-<strong>Dominant − Competent</strong>
-</td>
+<td><strong>Trustworthy − Friendly</strong></td>
+<td><strong>Dominant − Competent</strong></td>
 </tr>
 <tr>
-<td>
-<img src="articles/figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png" alt="Descriptive map: trust minus friendly" width="100%">
-</td>
-<td>
-<img src="articles/figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png" alt="Descriptive map: dominant minus competent" width="100%">
-</td>
+<td><img src="articles/figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png" alt="Descriptive map: trust minus friendly"></td>
+<td><img src="articles/figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png" alt="Descriptive map: dominant minus competent"></td>
 </tr>
+</tbody>
 </table>
 </div>
 <div class="section level3">
@@ -217,22 +216,20 @@
 </h3>
 <p>Same difference signals, but pixels outside any cluster significant at <em>p</em> &lt; .05 are transparent (cluster threshold |t| &gt; 2.0; 2000 stratified label permutations; max-mass null).</p>
 <table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<tbody>
 <tr>
-<td align="center">
-<strong>Trustworthy − Friendly</strong>
-</td>
-<td align="center">
-<strong>Dominant − Competent</strong>
-</td>
+<td><strong>Trustworthy − Friendly</strong></td>
+<td><strong>Dominant − Competent</strong></td>
 </tr>
 <tr>
-<td>
-<img src="articles/figures/oliveira_2019/pairwise_trust_vs_friendly.png" alt="FWER map: trust minus friendly" width="100%">
-</td>
-<td>
-<img src="articles/figures/oliveira_2019/pairwise_dominant_vs_competent.png" alt="FWER map: dominant minus competent" width="100%">
-</td>
+<td><img src="articles/figures/oliveira_2019/pairwise_trust_vs_friendly.png" alt="FWER map: trust minus friendly"></td>
+<td><img src="articles/figures/oliveira_2019/pairwise_dominant_vs_competent.png" alt="FWER map: dominant minus competent"></td>
 </tr>
+</tbody>
 </table>
 <p>The two contrasts pick out qualitatively different spatial signatures, broadly consistent with the prediction. Trustworthy versus Friendly localises around the eyes and mid-face — exactly the kind of socially-relevant feature region the warmth dimension is read off. Dominant versus Competent spreads more widely across the face, consistent with a contrast that draws on both whole-face agency cues and finer ability cues. Among the pixels that survive the FWER filter, the Dominant vs Competent map retains noticeably more spatial extent than the Trustworthy vs Friendly map.</p>
 </div>
@@ -242,8 +239,8 @@
 <p>Magnitude per producer also varies by face region. The grid below runs <code><a href="reference/infoval.html">infoval()</a></code> separately on each (trait, region) cell using the <a href="https://doi.org/10.1002/ejsp.3100" class="external-link">Schmitz et al. (2024)</a> face masks and the trial-count-matched reference distribution. Cells report <strong>median producer z-score</strong> and (in parentheses) <strong>how many of 20 producers cleared the conventional <code>z &gt;= 1.96</code> threshold</strong>.</p>
 <table class="table">
 <colgroup>
-<col width="17%">
-<col width="21%">
+<col width="18%">
+<col width="20%">
 <col width="20%">
 <col width="20%">
 <col width="20%">
@@ -327,11 +324,12 @@ data and classification images. R package v0.1.0.</code></pre>
 <div class="section level2">
 <h2 id="credits">Credits<a class="anchor" aria-label="anchor" href="#credits"></a>
 </h2>
-<p>Designed by <a href="https://manueloliveira.nl/" class="external-link">Manuel Oliveira</a> <a href="https://orcid.org/0000-0002-6220-0695" class="external-link"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" alt="ORCID iD" width="16" height="16"></a>. Code and documentation were co-built with Claude (Opus 4.6, Anthropic; April-May 2026).</p>
+<p>Designed by <a href="https://manueloliveira.nl/" class="external-link">Manuel Oliveira</a> <a href="https://orcid.org/0000-0002-6220-0695" class="external-link"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" alt="ORCID iD" width="16" height="16"></a></p>
+<p>Code and documentation were co-built with Claude (Opus 4.6, Anthropic; April-May 2026).</p>
 <div class="section level3">
-<h3 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
+<h3 id="acknowledgements-to-the-community">Acknowledgements to the community<a class="anchor" aria-label="anchor" href="#acknowledgements-to-the-community"></a>
 </h3>
-<p>This package builds on the foundational work of Ron Dotsch, Loek Brinkman, Alex Todorov, Mathias Schmitz, Marine Rougiuer, Vincent Yzerbyt, and their many collaborators across the years. Reverse correlation is no longer a central part of my research, but I still find a lot of enjoyment in working with these tools, and the inspiration to keep building them comes mostly from occasional collaborations with the people who supervised me during my PhD and with whom I still enjoy working on these topics from time to time. Hopefully this helps and inspires the small RC research community out there :)</p>
+<p>This package builds on the excellent and thorough foundational work by Ron Dotsch, Loek Brinkman, Alex Todorov, Mathias Schmitz, Marine Rougiuer, Vincent Yzerbyt, and their many collaborators across the years. Reverse correlation is no longer a central part of my research, but I still find a lot of enjoyment in working in these side projects. The inspiration to build these tools and tutorials comes mostly from occasional collaborations with my PhD supervisors (Teresa Garcia-Marques, Leonel Garcia-Marques) and all the warm and competent colleagues from the research groups in Lisbon (Goncalo Oliveira, Rui Costa-Lopes and their students) with whom I have been greatly enjoying working together on this stuff. Hopefully this helps and inspires the small RC research community out there :)</p>
 </div>
 </div>
 </div>
