@@ -1,0 +1,46 @@
+{
+  "title": "rcisignal: Quality checks for reverse-correlation data and classification images",
+  "description": "<p>An R package consolidating quality assessment of reverse correlation (RC) experiments end-to-end. Input-side diagnostics catch silent data-processing errors before classification image (CI) computation: response coding, response time, response bias, trial counts, duplicate trials, stimulus-pool alignment, and 'rcicr' version compatibility. Output-side analyses quantify CI quality after computation: within-condition reliability via permuted split-half with Spearman-Brown correction and ICC(3,k); between-condition discriminability via Welch pixel-wise t-tests, cluster-based permutation with family-wise error control (Maris &amp; Oostenveld, 2007) and threshold-free cluster enhancement (Smith &amp; Nichols, 2009); per-producer informational value with a trial-count-matched reference distribution that closes a calibration gap in the original 'rcicr' implementation. Supports the standard two-image forced-choice (2IFC) pipeline via 'rcicr' (Dotsch, 2016, 2023) and the Brief-RC pipeline (Schmitz, Rougier, &amp; Yzerbyt, 2024) implemented natively.</p><p>Consolidates and supersedes the earlier <a href=\"https://github.com/olivethree/rcicrdiagnostics\">rcicrdiagnostics</a> (input-side) and <a href=\"https://github.com/olivethree/rcicrely\">rcicrely</a> (output-side) packages.</p>",
+  "upload_type": "software",
+  "license": "MIT",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Oliveira, Manuel",
+      "affiliation": "Eindhoven University of Technology",
+      "orcid": "0000-0002-6220-0695"
+    }
+  ],
+  "keywords": [
+    "reverse correlation",
+    "classification images",
+    "data quality",
+    "reliability",
+    "psychometrics",
+    "split-half reliability",
+    "intraclass correlation",
+    "cluster-based permutation",
+    "TFCE",
+    "informational value",
+    "Brief-RC",
+    "2IFC",
+    "R package"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/olivethree/rcicrdiagnostics",
+      "relation": "isNewVersionOf",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://github.com/olivethree/rcicrely",
+      "relation": "isNewVersionOf",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://github.com/rdotsch/rcicr",
+      "relation": "isDerivedFrom",
+      "scheme": "url"
+    }
+  ]
+}
