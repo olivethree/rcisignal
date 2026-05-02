@@ -411,3 +411,64 @@ print.rcisignal_diag_infoval <- function(x, ...) {
   ))
   invisible(x)
 }
+
+# ---- Simulation result class ----------------------------------------
+
+#' @keywords internal
+#' @noRd
+new_rcisignal_sim <- function(data, noise_matrix, base_face,
+                              params, p, signal, meta,
+                              rdata_path = NULL) {
+  structure(
+    list(
+      data         = data,
+      noise_matrix = noise_matrix,
+      base_face    = base_face,
+      params       = params,
+      p            = p,
+      signal       = signal,
+      rdata_path   = rdata_path,
+      meta         = meta
+    ),
+    class             = c("rcisignal_sim", "rcisignal_result"),
+    rcisignal_version = utils::packageVersion("rcisignal")
+  )
+}
+
+#' @export
+print.rcisignal_sim <- function(x, ...) {
+  m <- x$meta
+  cat(sprintf("<rcisignal_sim: %s>\n", m$method))
+  cat(sprintf("  participants : %d  (%d per condition x %d)\n",
+              m$n_per_condition * length(m$conditions),
+              m$n_per_condition, length(m$conditions)))
+  cat(sprintf("  conditions   : %s\n",
+              paste(m$conditions, collapse = ", ")))
+  cat(sprintf("  trials/p     : %d\n", m$n_trials))
+  if (identical(m$method, "briefrc")) {
+    cat(sprintf("  images/trial : %d  (= %d pairs)\n",
+                m$images_per_trial, m$images_per_trial %/% 2L))
+    cat(sprintf("  noise pool   : %d\n", m$noise_pool_size))
+  } else {
+    cat(sprintf("  noise pool   : %d  (one pattern per trial)\n",
+                m$n_trials))
+  }
+  cat(sprintf("  image size   : %d x %d px\n",
+              m$img_size, m$img_size))
+  cat(sprintf("  signal       : %s @ %s\n",
+              format(m$signal_strength), m$signal_region))
+  cat(sprintf("  seed         : %d\n", m$seed))
+  cat(sprintf("  elapsed      : %.1f s\n", m$elapsed_secs))
+  cat(sprintf("  data         : %d rows x %d cols\n",
+              nrow(x$data), ncol(x$data)))
+  if (!is.null(x$rdata_path)) {
+    cat(sprintf("  rdata_path   : %s\n", x$rdata_path))
+  }
+  invisible(x)
+}
+
+#' @export
+summary.rcisignal_sim <- function(object, ...) {
+  print(object, ...)
+  invisible(object$data)
+}

@@ -89,6 +89,164 @@ sit in `Suggests` and load on demand.
 library(rcisignal)
 ```
 
+### 2.1 Quickstart with simulated data
+
+Two helpers, `simulate_2ifc_data()` and `simulate_briefrc_data()`,
+generate a complete synthetic dataset (responses + noise pool +,
+for 2IFC, an `rcicr`-format `.Rdata`) so the rest of this vignette
+can be exercised without needing to bring your own files. They are
+also building blocks for simulation studies (power, calibration of
+reliability and discriminability metrics, sensitivity to
+contamination).
+
+#### What they generate
+
+- **Responses.** A long-format `data.table` with one row per trial
+  and the columns every diagnostic / CI function expects:
+  `participant_id`, `condition`, `trial`, `stimulus`, `response`
+  (in `{-1, +1}`), `rt` (in milliseconds).
+- **Noise pool.** A `pixels x n_trials` numeric matrix, generated
+  on the fly via `rcicr::generateNoisePattern()` and
+  `rcicr::generateNoiseImage()`. (`rcicr` must be installed; with
+  the default 256-pixel images and 500 trials the pool takes
+  roughly one to three minutes, with a `cli` progress bar.)
+- **For 2IFC**, an `.Rdata` file in the format that
+  `rcicr::generateStimuli2IFC()` writes, so
+  `ci_from_responses_2ifc()`, `compute_infoval_summary()`, and
+  every other downstream function that asks for an `rdata` argument
+  works out of the box.
+
+The return value is an `rcisignal_sim` S3 object:
+
+```{r sim-shape, eval = FALSE}
+sim <- simulate_2ifc_data()
+str(sim, max.level = 1)
+#> List of 9
+#>  $ data         : data.table  [50000 x 6]
+#>  $ noise_matrix : num [1:65536, 1:500]   (pixels x trials)
+#>  $ base_face    : num [1:256, 1:256]
+#>  $ params       : num [1:500, 1:4092]    (rcicr stimuli_params)
+#>  $ p            : list of 4               (rcicr noise basis)
+#>  $ signal       : num [1:65536]           (planted signal vector)
+#>  $ rdata_path   : chr "/tmp/.../rcisignal_sim_stimuli.Rdata"
+#>  $ meta         : list (seed, elapsed, etc.)
+```
+
+#### Defaults at a glance
+
+| Argument | Default | Notes |
+|----|----|----|
+| `n_per_condition` | `50` | participants per condition |
+| `conditions` | `c("target", "control")` | any character vector works |
+| `n_trials` | `500` | per participant; equals noise pool size for 2IFC |
+| `images_per_trial` (Brief-RC only) | `12` | = 6 oriented/inverted pairs |
+| `noise_pool_size` (Brief-RC only) | `n_trials * (images_per_trial / 2)` | shared across participants |
+| `img_size` | `256` | pixels; matches the bundled base face |
+| `base_image` | `inst/extdata/sim_base_face.png` | a 256x256 grayscale artificial face; pass a path or matrix to override |
+| `signal_strength` | `"weak"` | also `"none"` (true null), `"strong"`, or a numeric coefficient |
+| `signal_region` | `"eyes"` | any region accepted by `make_face_mask()` |
+| `rt_contamination_fast` / `_slow` | `0.02` / `0.02` | fraction of trials replaced by uniform-fast (50-200 ms) / uniform-slow (5000-20000 ms) responses |
+| `noise_type`, `nscales`, `sigma` | `"sinusoid"`, `5`, `25` | forwarded to `rcicr::generateNoisePattern()` |
+| `seed` | `NULL` | a random seed is drawn and stored on the result |
+| `progress` | `TRUE` | shows a `cli` progress bar during noise generation |
+
+#### Signal model
+
+Each trial's response is drawn from a logistic / softmax model whose
+location depends on a planted pixel-level signal `s` (the binary mask
+returned by `make_face_mask()` for the chosen `signal_region`).
+
+- **2IFC.** On each trial `t` the participant sees image_a = base +
+  noise[t] and image_b = base - noise[t] and chooses one. The
+  log-odds of choosing image_a (response = `+1`) are
+  `beta * (noise[, t] %*% s) / sqrt(sum(s))`. With
+  `signal_strength = "none"` (`beta = 0`), choices are uniform
+  random; with `"weak"` (`beta = 0.5`) the planted region biases
+  responses just enough that a 50 x 2 x 500 dataset yields a
+  recognisable cluster on the eyes region; `"strong"` (`beta = 2`)
+  produces a much sharper signal.
+- **Brief-RC.** Each trial shows `images_per_trial = 2k` images (the
+  oriented and inverted versions of `k` distinct noise patterns
+  drawn from the shared pool). Each image gets a Gumbel-perturbed
+  utility `±beta * (noise %*% s) / sqrt(sum(s)) + Gumbel(0,1)` and
+  the participant picks the argmax (multinomial-logit / softmax).
+  The recorded `stimulus` is the pool index of the chosen pair;
+  `response` is `+1` if the oriented version of that pair was
+  chosen, `-1` if the inverted version.
+
+A weak signal is the default rather than `"none"` so the worked
+example produces a recognisable CI on the planted region rather than
+a flat null result. Pass `signal_strength = "none"` to get truly
+bogus data — useful for testing the diagnostic side, calibrating
+null distributions, or stress-testing the reliability / cluster
+permutation code under no-signal conditions.
+
+#### Response-time model
+
+RTs follow a shifted lognormal (`rt = round(exp(rnorm(n, log(800),
+0.5)) + 150)`, in milliseconds) with two contaminant streams:
+
+- **Fast contaminants** at `rt_contamination_fast` (default 2%):
+  uniform `[50, 200]` ms, mimicking accidental clicks.
+- **Slow contaminants** at `rt_contamination_slow` (default 2%):
+  uniform `[5000, 20000]` ms, mimicking distraction or task pauses.
+
+These are deliberately tuned so that `check_rt()` finds something to
+flag — useful for sanity-checking the RT diagnostic without curating
+real outliers by hand.
+
+#### End-to-end demo (2IFC)
+
+Pasting the chunk below into a fresh R session takes you from no
+data at all to a within-condition reliability summary:
+
+```{r sim-demo, eval = FALSE}
+sim <- simulate_2ifc_data(
+  n_per_condition = 30,    # smaller for a quick demo
+  n_trials        = 200,
+  signal_strength = "weak",
+  seed            = 1
+)
+
+# Step 1: run the diagnostic battery on the simulated responses.
+print(run_diagnostics(sim$data, method = "2ifc", col_rt = "rt"))
+
+# Step 2: compute per-participant CIs using the bundled .Rdata.
+target_rows  <- sim$data[condition == "target"]
+control_rows <- sim$data[condition == "control"]
+cis_target   <- ci_from_responses_2ifc(target_rows,
+                                       rdata_path = sim$rdata_path)
+cis_control  <- ci_from_responses_2ifc(control_rows,
+                                       rdata_path = sim$rdata_path)
+
+# Step 3: within-condition reliability.
+print(run_reliability(cis_target$signal_matrix,  seed = 1))
+print(run_reliability(cis_control$signal_matrix, seed = 1))
+
+# Step 4: between-condition cluster test.
+print(run_discriminability(
+  signal_matrix_a = cis_target$signal_matrix,
+  signal_matrix_b = cis_control$signal_matrix,
+  seed            = 1
+))
+```
+
+For the Brief-RC pipeline the equivalent demo replaces
+`simulate_2ifc_data()` with `simulate_briefrc_data()`,
+`ci_from_responses_2ifc()` with `ci_from_responses_briefrc()`, and
+passes `noise_matrix = sim$noise_matrix` instead of an `rdata_path`.
+
+#### A note on speed
+
+Noise generation is the dominant cost (about 0.4-0.5 s per trial at
+256 pixels with default basis settings, in pure R). With default
+parameters expect roughly 1-3 minutes per call. A future release may
+provide an `Rcpp` accelerator; for now the function is intentionally
+single-shot ("generate once, reuse the `rcisignal_sim` object across
+many analyses"). For repeated runs with the same noise pool, save
+`sim` to disk via `saveRDS()` and reload — the cost only needs to be
+paid once.
+
 ## 3. Signal matrix
 
 Almost every analytical function in `rcisignal` operates on a
