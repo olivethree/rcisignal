@@ -94,7 +94,7 @@ walks through every exported function with worked examples, including a
 real-data example from a published 2IFC reverse- correlation study
 ([Oliveira et al., 2019](https://doi.org/10.1002/ejsp.2569)).
 
-## ⚠️ Validation status — please read before publishing
+## ⚠️ Validation status — please read!
 
 Several metrics in this package are not yet independently validated for
 use in the social-face evaluation reverse-correlation literature. In
@@ -112,7 +112,7 @@ at your own risk and consider reporting them as exploratory.** See *§1.2
 Validation status* in the [user
 guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html#validation-status-please-read-before-publishing-results)
 for the full list and references. If you know of validation studies I
-have missed, please open an issue.
+have missed, please let me know.
 
 ## Quick start
 
