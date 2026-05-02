@@ -170,13 +170,18 @@ for (i in seq_along(traits)) {
                 seed = 1L, progress = FALSE)
   iv_full$median_z[i]      <- median(iv$infoval)
   iv_full$n_above_1.96[i]  <- sum(iv$infoval >= 1.96)
-  # group-mean Frobenius norm vs same reference distribution
-  group_mask <- rowMeans(sm[[label]])
-  group_norm <- sqrt(sum(group_mask[oval_mask]^2))
-  ref_key    <- as.character(unique(tc)[1])  # all 300 in this design
-  ref_med    <- iv$ref_median[[ref_key]]
-  ref_mad    <- iv$ref_mad[[ref_key]]
-  iv_full$group_z[i] <- (group_norm - ref_med) / ref_mad
+  # Group-mean CI z, with a reference distribution matched to the
+  # group construction (N random producers averaged together, each
+  # at its real trial count). Uses the same internal helper that
+  # diagnose_infoval() relies on, so the two stay consistent.
+  # iter=500 here (not 1000) because each iteration is N=20x more
+  # expensive than per-producer infoval; 500 gives single-z stability
+  # of about +/- 0.07, which is fine for a publishable headline.
+  iv_full$group_z[i] <- rcisignal:::group_mean_z(
+    sm[[label]], noise_matrix, tc,
+    iter = 500L, mask = oval_mask,
+    seed = 1L, progress = FALSE
+  )
 }
 saveRDS(iv_full, file.path(cache_dir, "infoval_full.rds"))
 
