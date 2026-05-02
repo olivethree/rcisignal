@@ -1,8 +1,6 @@
 <!-- README.md (rendered at https://olivethree.github.io/rcisignal/) -->
 
-<img src="man/figures/logo.png" align="left" width="180" hspace="20"/>
-
-# rcisignal
+# rcisignal <img src="man/figures/logo.png" align="left" width="180" hspace="20"/>
 
 A toolkit for quality assessment of reverse correlation
 (RC) experiments end-to-end. Catches silent data-processing errors
