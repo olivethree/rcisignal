@@ -165,28 +165,6 @@ print(result)
 plot(result)   # cluster map of pixels where conditions differ
 ```
 
-### Starting from CI images already saved as PNG/JPEG
-
-If you have your CIs as image files on disk:
-
-``` r
-
-trustworthy   <- read_signal_matrix("data/cis_trustworthy/",   "data/base.jpg")
-untrustworthy <- read_signal_matrix("data/cis_untrustworthy/", "data/base.jpg")
-
-print(run_reliability(trustworthy,   seed = 1))
-print(run_reliability(untrustworthy, seed = 1))
-print(run_discriminability(trustworthy, untrustworthy, seed = 1))
-```
-
-> **Heads-up.** Results from PNG/JPEG inputs may differ slightly from
-> raw-response inputs because PNGs encode the *display-scaled* CI, not
-> the raw signal. The package warns you once per session when this
-> matters; see [the user
-> guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html)
-> for the full story. When possible, work from raw responses rather than
-> rendered images.
-
 For a function-by-function walkthrough — including how to interpret
 cluster maps, sample-size warnings, when to use ICC(3,1) vs ICC(3,k),
 and Brief-RC end-to-end — see the [**full user

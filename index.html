@@ -167,21 +167,6 @@
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>   <span class="co"># cluster map of pixels where conditions differ</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="starting-from-ci-images-already-saved-as-pngjpeg">Starting from CI images already saved as PNG/JPEG<a class="anchor" aria-label="anchor" href="#starting-from-ci-images-already-saved-as-pngjpeg"></a>
-</h3>
-<p>If you have your CIs as image files on disk:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trustworthy</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_signal_matrix.html">read_signal_matrix</a></span><span class="op">(</span><span class="st">"data/cis_trustworthy/"</span>,   <span class="st">"data/base.jpg"</span><span class="op">)</span></span>
-<span><span class="va">untrustworthy</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_signal_matrix.html">read_signal_matrix</a></span><span class="op">(</span><span class="st">"data/cis_untrustworthy/"</span>, <span class="st">"data/base.jpg"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">trustworthy</span>,   seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">untrustworthy</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_discriminability.html">run_discriminability</a></span><span class="op">(</span><span class="va">trustworthy</span>, <span class="va">untrustworthy</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<blockquote>
-<p><strong>Heads-up.</strong> Results from PNG/JPEG inputs may differ slightly from raw-response inputs because PNGs encode the <em>display-scaled</em> CI, not the raw signal. The package warns you once per session when this matters; see <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html">the user guide</a> for the full story. When possible, work from raw responses rather than rendered images.</p>
-</blockquote>
 <p>For a function-by-function walkthrough — including how to interpret cluster maps, sample-size warnings, when to use ICC(3,1) vs ICC(3,k), and Brief-RC end-to-end — see the <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html"><strong>full user guide</strong></a>.</p>
 </div>
 </div>
