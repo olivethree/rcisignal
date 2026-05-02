@@ -100,7 +100,7 @@ two cancel.
 
 - Passing the "expanded" 12-rows-per-trial response format. Brief-RC 12
   is one row per trial; `stimulus` is the chosen pool id and `response`
-  is `+1` (oriented) or `-1` (inverted). See Schmitz et al. (2024) sec.
+  is `+1` (original) or `-1` (inverted). See Schmitz et al. (2024) sec.
   3.1.2.
 
 - Using `$rendered_ci` for downstream stats; it exists only because the

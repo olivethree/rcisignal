@@ -2,7 +2,7 @@
 
 Some participants (or whole batches of exported data) may have their
 response codes flipped relative to the convention `rcicr` expects: `+1`
-means "inverted version chosen" when the analyst intended "oriented
+means "inverted version chosen" when the analyst intended "original
 chosen", or the CSV export inadvertently negated the response column. A
 straightforward way to detect this is to compute the infoVal twice per
 participant — once with the original codes and once with every response

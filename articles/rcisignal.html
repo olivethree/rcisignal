@@ -211,7 +211,7 @@ box.</li>
 <td>
 <code>images_per_trial</code> (Brief-RC only)</td>
 <td><code>12</code></td>
-<td>= 6 oriented/inverted pairs</td>
+<td>= 6 original/inverted pairs</td>
 </tr>
 <tr class="odd">
 <td>
@@ -297,13 +297,13 @@ dataset yields a recognisable cluster on the eyes region;
 signal.</li>
 <li>
 <strong>Brief-RC.</strong> Each trial shows
-<code>images_per_trial = 2k</code> images (the oriented and inverted
+<code>images_per_trial = 2k</code> images (the original and inverted
 versions of <code>k</code> distinct noise patterns drawn from the shared
 pool). Each image gets a Gumbel-perturbed utility
 <code>±beta * (noise %*% s) / sqrt(sum(s)) + Gumbel(0,1)</code> and the
 participant picks the argmax (multinomial-logit / softmax). The recorded
 <code>stimulus</code> is the pool index of the chosen pair;
-<code>response</code> is <code>+1</code> if the oriented version of that
+<code>response</code> is <code>+1</code> if the original version of that
 pair was chosen, <code>-1</code> if the inverted version.</li>
 </ul>
 <p>A weak signal is the default rather than <code>"none"</code> so the
@@ -638,7 +638,7 @@ Required columns:</p>
 <h4 id="ifc-response-coding">2IFC response coding<a class="anchor" aria-label="anchor" href="#ifc-response-coding"></a>
 </h4>
 <p>Each trial presents two faces drawn from a unique noise pair.
-<code>response = +1</code> if the producer picked the oriented variant
+<code>response = +1</code> if the producer picked the original variant
 (<code>base + noise</code>), and <code>-1</code> if they picked the
 inverted variant (<code>base - noise</code>). A common silent failure in
 2IFC pipelines is <code>{0, 1}</code> coding produced by experiment
@@ -647,7 +647,7 @@ software that records “left” / “right” as 0 / 1;
 the suggestion text.</p>
 <p>A 2IFC dataset with three participants and four trials each
 illustrates the format. On every trial the participant saw two stimuli
-(one oriented and one inverted noise pattern superimposed on the same
+(one original and one inverted noise pattern superimposed on the same
 base face) and chose one:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">responses_2ifc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -682,12 +682,12 @@ participant.</p>
 <div class="section level4">
 <h4 id="brief-rc-response-coding-schmitz-et-al--2024">Brief-RC response coding (Schmitz et al. 2024)<a class="anchor" aria-label="anchor" href="#brief-rc-response-coding-schmitz-et-al--2024"></a>
 </h4>
-<p>Each trial presents 12 noisy faces (6 oriented,
+<p>Each trial presents 12 noisy faces (6 original,
 <code>base + noise_i</code>, and 6 inverted,
 <code>base - noise_i</code>), drawn from 6 distinct pool noise patterns.
 The producer picks one. The data records <strong>one row per
 trial</strong>: <code>stimulus</code> = pool id of the chosen noise
-pattern; <code>response = +1</code> if oriented chosen, <code>-1</code>
+pattern; <code>response = +1</code> if original chosen, <code>-1</code>
 if inverted. Unselected faces are absent from the data; do not pad them
 as zero rows.</p>
 <p>A Brief-RC 12 dataset with the same three participants and four
@@ -728,7 +728,7 @@ trials each illustrates the format:</p>
 is the <strong>total number of distinct noise patterns generated for the
 experiment</strong>, i.e., the number of columns in the
 <code>noise_matrix</code> (§4.3). On every trial the software draws 6
-distinct pool patterns and presents each in both oriented and inverted
+distinct pool patterns and presents each in both original and inverted
 form, giving 12 alternatives. Across many trials, the same pool id can
 therefore re-appear (and a producer can pick the same pool id more than
 once). The exact re-use rate depends on the experimenter’s sampling
@@ -785,8 +785,8 @@ opposite signs, the two cancel and it contributes zero. The
 <tbody>
 <tr class="odd">
 <td>Alternatives shown per trial</td>
-<td>2 (one oriented + one inverted)</td>
-<td>12 (six oriented + six inverted, drawn from six pool patterns)</td>
+<td>2 (one original + one inverted)</td>
+<td>12 (six original + six inverted, drawn from six pool patterns)</td>
 </tr>
 <tr class="even">
 <td>Rows recorded per trial</td>
@@ -2868,7 +2868,7 @@ without an <code>rcicr</code> wrapper.</p>
 </h3>
 <p><code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> accepts
 <code>method = "briefrc12"</code> (12 alternatives per trial; 6
-oriented, 6 inverted). Other Brief-RC variants the literature describes
+original, 6 inverted). Other Brief-RC variants the literature describes
 (Brief-RC 6, Brief-RC 20, etc.) raise a clear error from the wrapper at
 the moment, with a message pointing at the roadmap.</p>
 <p>The mathematical reason is informative. Schmitz’s
@@ -2876,7 +2876,7 @@ the moment, with a message pointing at the roadmap.</p>
 are shown per trial: it always reduces to mean-by-stim of the chosen
 pool ids, divided by <code>length(unique(chosen_stim))</code>. The
 package’s random-responder reference simulator for
-<code><a href="../reference/infoval.html">infoval()</a></code> similarly relies on a 50/50 oriented/inverted
+<code><a href="../reference/infoval.html">infoval()</a></code> similarly relies on a 50/50 original/inverted
 marginal per trial, which holds for any symmetric Brief-RC split (6/6,
 10/10, …). So the gate in the wrapper is a guardrail pending validation
 fixtures rather than a math limitation.</p>

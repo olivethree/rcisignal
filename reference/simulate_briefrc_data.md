@@ -1,7 +1,7 @@
 # Simulate Brief-RC reverse-correlation data
 
 Generates a synthetic Brief-RC dataset (Schmitz, Rougier, & Yzerbyt,
-2024) where each trial shows several oriented/inverted noise pairs and
+2024) where each trial shows several original/inverted noise pairs and
 the participant picks one image. Output is shape-compatible with
 [`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md),
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md),
@@ -50,7 +50,7 @@ simulate_briefrc_data(
 
 - images_per_trial:
 
-  Integer (even). Number of images shown per trial; half are oriented
+  Integer (even). Number of images shown per trial; half are original
   and half are inverted versions of the same noise patterns. Default
   `12` (= 6 pairs).
 
@@ -71,12 +71,12 @@ for the structure. The `meta` list also carries `images_per_trial` and
 ## Signal model
 
 Per trial, with `images_per_trial = 2k`, the participant sees `k`
-oriented/inverted pairs. Each of the `2k` images has utility
+original/inverted pairs. Each of the `2k` images has utility
 `beta * (noise %*% s) / scale + Gumbel(0, 1)`, where `noise` is
-`+noise[, j]` for the oriented version and `-noise[, j]` for the
+`+noise[, j]` for the original version and `-noise[, j]` for the
 inverted version of pair `j`. The participant picks the image with the
 highest utility (multinomial logit / softmax). The recorded `stimulus`
-is the pool index of the chosen pair; `response` is `+1` if the oriented
+is the pool index of the chosen pair; `response` is `+1` if the original
 version was chosen and `-1` for the inverted version.
 
 ## RT model
