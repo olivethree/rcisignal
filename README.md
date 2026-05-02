@@ -8,7 +8,7 @@ A toolkit for quality assessment of reverse correlation
 quality *after*: magnitude, stability, and discriminability.
 
 <!-- badges: start -->
-[![DOI](https://zenodo.org/badge/1226504679.svg)](https://doi.org/10.5281/zenodo.19961180)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19961180.svg)](https://doi.org/10.5281/zenodo.19961180)
 [![R-CMD-check](https://github.com/olivethree/rcisignal/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/olivethree/rcisignal/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/olivethree/rcisignal/actions/workflows/pkgdown.yaml/badge.svg)](https://olivethree.github.io/rcisignal/)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
