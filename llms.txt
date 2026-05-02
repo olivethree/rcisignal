@@ -94,77 +94,174 @@ walks through every exported function with worked examples, including a
 real-data example from a published 2IFC reverse- correlation study
 ([Oliveira et al., 2019](https://doi.org/10.1002/ejsp.2569)).
 
+## ⚠️ Validation status — please read before publishing
+
+Several metrics in this package are not yet independently validated for
+use in the social-face evaluation reverse-correlation literature. In
+particular: the **group-mean infoVal** extension, the
+**between-condition discriminability** tests, the **pixel-wise agreement
+/ reliability** maps, and **infoVal applied to Brief-RC data** are
+package-level implementations whose statistical behaviour on social-face
+RC data has not, to my knowledge, been the subject of a dedicated
+validation study. The per-producer infoVal for 2IFC ([Brinkman et al.,
+2019](https://doi.org/10.3758/s13428-019-01232-2)) and the underlying
+pixel-test methodology ([Chauvin et al.,
+2005](https://doi.org/10.1167/5.9.1)) are validated in their respective
+domains. **If you use the unvalidated metrics in published work, do so
+at your own risk and consider reporting them as exploratory.** See *§1.2
+Validation status* in the [user
+guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html#validation-status-please-read-before-publishing-results)
+for the full list and references. If you know of validation studies I
+have missed, please open an issue.
+
 ## Quick start
 
-### 1. Diagnose the raw data first
+The four steps below take you from a CSV of raw responses to a
+between-condition cluster map. They use only base R for data handling
+(no `dplyr`, no `tidyr`), so you can paste them directly into a fresh R
+session and adapt the file paths.
 
-Before computing CIs, run the input-side diagnostics on your trial-level
-response data.
+### What you start with
+
+Two pieces of information from your study:
+
+1.  **A trial-level data frame** (e.g. a CSV). One row per trial, with
+    these columns (rename via the `col_*` arguments if yours differ):
+
+    | column | what it holds |
+    |----|----|
+    | `participant_id` | producer id |
+    | `stimulus` | integer index into the noise pool (which noise pattern they saw) |
+    | `response` | `-1` or `+1` (**not** `0`/`1` — that is the most common silent failure) |
+    | `rt` | reaction time, optional, used for RT checks |
+
+2.  **The stimulus pool that produced the noise patterns.** Either:
+
+    - an `.Rdata` file from
+      [`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html)
+      (2IFC), or
+    - a noise-matrix text file (`n_pixels` rows × `pool_size` columns)
+      **plus** a base-face image file (Brief-RC).
+
+### What is a `signal_matrix`?
+
+The central object of `rcisignal`. It is a numeric matrix where:
+
+- **rows** = pixels of the CI (e.g. 256 × 256 = 65 536 rows),
+- **columns** = participants (one column per producer),
+- **values** = that participant’s base-subtracted pixel-level CI (their
+  “noise mask”).
+
+Every `rel_*`, `run_reliability`, and `run_discriminability` function
+consumes a matrix of this shape. You build one with
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+or
+[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md),
+which return a list whose `$signal_matrix` element is the matrix you
+pass downstream. (The package’s `noise_matrix` argument is unrelated —
+that is the input pool of patterns, not the per-participant output.)
+
+### Step 1. Diagnose the raw data
+
+Before computing CIs, sanity-check the trial-level data.
 
 ``` r
 
 library(rcisignal)
 
-# 2IFC pipeline
-responses <- read.csv("path/to/responses.csv")
-report    <- run_diagnostics(
+# Read the trial-level CSV (one row per trial)
+responses <- read.csv("data/responses.csv")
+
+# --- 2IFC pipeline ---
+report <- run_diagnostics(
   responses,
   method = "2ifc",
-  rdata  = "path/to/rcicr_stimuli.RData",
+  rdata  = "data/rcicr_stimuli.Rdata",   # from rcicr::generateStimuli2IFC()
   col_rt = "rt"
 )
 print(report)
 
-# Brief-RC 12 pipeline (same shape, different aux file)
+# --- Brief-RC pipeline ---
+# Identical call. The only differences:
+#   - method = "briefrc"
+#   - noise_matrix replaces rdata
 report <- run_diagnostics(
   responses,
   method       = "briefrc",
-  noise_matrix = "path/to/noise_matrix.txt",
+  noise_matrix = "data/noise_matrix.txt",
   col_rt       = "rt"
 )
 print(report)
 ```
 
 A green report means the mechanics are in order. A `[FAIL]` means fix
-that issue before proceeding.
+that issue before continuing.
 
-### 2. Within-condition reliability
+### Step 2. Build the signal matrix (compute per-participant CIs)
 
-Once the data is clean and you have per-participant CIs, ask whether
-participants in each condition agreed with each other.
+Suppose you have two conditions, “trustworthy” and “untrustworthy”,
+identified by a `condition` column in `responses`. Split the data and
+compute one signal matrix per condition.
 
 ``` r
 
-# Starting from raw trial-level data, build per-participant CIs:
-trustworthy   <- ci_from_responses_2ifc(
-  responses  = trust_responses,
-  rdata_path = "data/rcicr_stimuli.RData",
+trust_rows   <- responses[responses$condition == "trustworthy",   ]
+untrust_rows <- responses[responses$condition == "untrustworthy", ]
+
+# --- 2IFC ---
+trustworthy <- ci_from_responses_2ifc(
+  responses  = trust_rows,
+  rdata_path = "data/rcicr_stimuli.Rdata",
   baseimage  = "base"
 )
 untrustworthy <- ci_from_responses_2ifc(
-  responses  = untrust_responses,
-  rdata_path = "data/rcicr_stimuli.RData",
+  responses  = untrust_rows,
+  rdata_path = "data/rcicr_stimuli.Rdata",
   baseimage  = "base"
 )
 
-# Did participants agree within each condition?
+# --- Brief-RC equivalent ---
+# Same call shape; differences:
+#   - function name ends in _briefrc
+#   - rdata_path may be replaced by noise_matrix = "data/noise_matrix.txt"
+#   - base_image_path (PNG/JPEG of the base face) is required
+#
+# trustworthy <- ci_from_responses_briefrc(
+#   responses       = trust_rows,
+#   rdata_path      = "data/rcicr_stimuli.Rdata",
+#   base_image_path = "data/base.jpg"
+# )
+
+# Inspect the result:
+dim(trustworthy$signal_matrix)
+#> [1] 65536    20      (pixels x participants)
+```
+
+`trustworthy$signal_matrix` is now a pixels × participants matrix —
+exactly the shape every step below expects.
+
+### Step 3. Within-condition reliability — do participants in each condition agree?
+
+``` r
+
 print(run_reliability(trustworthy$signal_matrix,   seed = 1))
 print(run_reliability(untrustworthy$signal_matrix, seed = 1))
 ```
 
-### 3. Between-condition discriminability
+This reports split-half reliability (with Spearman-Brown correction) and
+ICC(3,\*) for each condition.
 
-Are the two conditions actually distinguishable?
+### Step 4. Between-condition discriminability — are the two CIs actually different?
 
 ``` r
 
 result <- run_discriminability(
-  trustworthy$signal_matrix,
-  untrustworthy$signal_matrix,
-  seed = 1
+  signal_matrix_a = trustworthy$signal_matrix,
+  signal_matrix_b = untrustworthy$signal_matrix,
+  seed            = 1
 )
 print(result)
-plot(result)   # cluster map of pixels where conditions differ
+plot(result)   # cluster map of pixels where the two conditions differ
 ```
 
 For a function-by-function walkthrough — including how to interpret
