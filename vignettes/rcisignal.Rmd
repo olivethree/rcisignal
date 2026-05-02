@@ -128,7 +128,7 @@ social-face RC:**
 If you use the unvalidated metrics in published work, please
 report them as exploratory and indicate the package version. If
 you are aware of validation studies I have missed, I would be
-glad to update this section: m.j.barbosa.de.oliveira at tue.nl.
+glad to update this section (m.j.barbosa.de.oliveira@tue.nl).
 
 ## 2. Installation
 
