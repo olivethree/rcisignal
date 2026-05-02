@@ -129,25 +129,15 @@ walks through every exported function with worked examples, including a
 real-data example from a published 2IFC reverse- correlation study
 ([Oliveira et al., 2019](https://doi.org/10.1002/ejsp.2569)).
 
-## ⚠️ Validation status — please read!
+## Validation status
 
-Several metrics in this package are not yet independently validated for
-use in the social-face evaluation reverse-correlation literature. In
-particular: the **group-mean infoVal** extension, the
-**between-condition discriminability** tests, the **pixel-wise
-agreement / reliability** maps, and **infoVal applied to Brief-RC
-data** are package-level implementations whose statistical behaviour on
-social-face RC data has not, to my knowledge, been the subject of a
-dedicated validation study. The per-producer infoVal for 2IFC
-([Brinkman et al., 2019](https://doi.org/10.3758/s13428-019-01232-2))
-and the underlying pixel-test methodology
-([Chauvin et al., 2005](https://doi.org/10.1167/5.9.1)) are validated
-in their respective domains. **If you use the unvalidated metrics in
-published work, do so at your own risk and consider reporting them as
-exploratory.** See *§1.2 Validation status* in the [user
-guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html#validation-status-please-read-before-publishing-results)
-for the full list and references. If you know of validation studies I
-have missed, please let me know.
+Several metrics in this package are package-level extensions whose
+behaviour on social-face RC data has not been independently
+validated. See [*§1.2 Validation
+status*](https://olivethree.github.io/rcisignal/articles/rcisignal.html#validation-status)
+in the user guide for the breakdown of validated versus unvalidated
+metrics, and treat the unvalidated ones as exploratory in published
+work.
 
 ## Quick start
 

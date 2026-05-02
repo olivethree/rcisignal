@@ -68,6 +68,68 @@ the Schmitz et al. (2024) Brief-RC structure. No prior
 expertise in `data.table`, S3 classes, permutation testing, or
 psychometric variance decomposition is assumed.
 
+### 1.2 Validation status
+
+Worth flagging before any published use of this package: not all
+of the metrics it ships are independently validated for
+social-face RC data. The package is best treated as a toolbox
+that collects existing methods, plus a few natural extensions of
+those methods, into one place. Some of those extensions are
+mature and well-grounded in adjacent literatures; others are
+sensible-looking implementations that have not yet had a
+dedicated validation study on the kind of data this package
+targets. Reporting accordingly matters.
+
+**Validated in their respective domains:**
+
+-   **Per-producer infoVal for 2IFC** (Brinkman et al., 2019).
+    The z-score derivation, reference distribution, and the
+    `z >= 1.96` threshold all originate from the Brinkman et al.
+    paper, which validated the metric on social-face 2IFC data.
+-   **Pixel-test methodology** (Chauvin et al., 2005). The
+    Welch-style per-pixel t-statistic, plus its smoothing and
+    inferential framing, are well-established in the
+    classification-image and neuroimaging literatures.
+-   **Cluster-based permutation tests for FWER control**
+    (Maris & Oostenveld, 2007). Validated on EEG and MEG data,
+    with the underlying logic carrying over to any spatial
+    statistical map.
+-   **Threshold-free cluster enhancement (TFCE)** (Smith &
+    Nichols, 2009). Validated on neuroimaging data; same
+    transferability caveat as above.
+
+**Package-level extensions, not yet independently validated for
+social-face RC:**
+
+-   **Group-mean infoVal.** A natural extension of per-producer
+    infoVal to the group-average CI, with a trial-count-matched
+    reference. Brinkman et al. (2019) recommend reporting the
+    distribution of per-producer infoVals rather than a single
+    group z; the group-mean version is offered here as a
+    supplementary summary, not as a replacement for the per-
+    producer reporting.
+-   **Between-condition discriminability tests** (cluster-based
+    permutation and TFCE). The underlying machinery is borrowed
+    from neuroimaging where it is well-validated; its specific
+    behaviour on social-face CI maps (which differ from EEG/MEG
+    or fMRI in spatial structure, signal-to-noise, and base-image
+    artefacts) has not been the subject of a dedicated
+    validation study.
+-   **Pixel-wise agreement / reliability maps**
+    (`agreement_map_test()` and the related plot helpers). Same
+    machinery as above, applied within a single condition. Same
+    caveat.
+-   **infoVal applied to Brief-RC.** The Frobenius-norm logic
+    transfers, and the trial-count-matched reference closes the
+    most obvious calibration gap relative to a pool-keyed
+    reference. The threshold conventions inherited from 2IFC
+    have not been re-validated on Brief-RC.
+
+If you use the unvalidated metrics in published work, please
+report them as exploratory and indicate the package version. If
+you are aware of validation studies I have missed, I would be
+glad to update this section: m.j.barbosa.de.oliveira at tue.nl.
+
 ## 2. Installation
 
 ```{r install, eval = FALSE}
@@ -259,37 +321,39 @@ take a signal matrix as input, as do `rel_split_half()`,
 `agreement_map_test()`. Getting the signal matrix right
 suffices for everything downstream.
 
-### 3.0 Three pixel matrices that all sound similar — keep them apart
+### 3.0 Three pixel matrices that all sound similar: keep them apart
 
-Reverse-correlation work involves several pixel matrices that
-are easy to confuse, and `rcisignal`'s API uses argument names
-that look alike (`noise_matrix`, `signal_matrix`, `mask`). Each
-one has exactly one job:
+Reverse correlation work involves several types of pixel matrices that may be
+easy to confuse. In `rcisignal`, each one has exactly one job:
 
-| name                  | what it is                                                                                                                                          | shape                          | input or output? |
-|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|------------------|
-| **`noise_matrix`**    | the **input** pool of pre-generated noise patterns the experiment chose stimuli from. One column per pool pattern.                                  | `n_pixels` × `pool_size`       | input (you supply it; §4.3) |
-| **noise mask** (a.k.a. *raw mask*, *per-participant CI*) | **one participant's** classification image: a single vector of pixel values, base-subtracted. Conceptually the weighted average of the noise patterns that participant "selected" with their responses. The word *mask* here means *image-shaped overlay* — it is **not** a logical face-region mask (those are §4.5). | `n_pixels` × 1                 | intermediate     |
-| **`signal_matrix`**   | **all participants' noise masks stacked side by side**, one column per producer. The central object of `rcisignal`; every reliability/discriminability function consumes a matrix of this shape. | `n_pixels` × `n_participants`  | output (you pass it downstream) |
+| Data type                | What is it?                                                 | shape                       | input or output? |
+|-----------------------|------------------------------------------------------------|-----------------------------|------------------|
+| **`noise_matrix`**    |  **input** pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern. | `n_pixels` × `pool_size`    | input (you give it to the package) |
+| **noise mask** (a.k.a. "per-participant CI") | **one participant's** classification image: a single vector of pixel values, base-subtracted. Conceptually, the weighted average of the noise patterns they "selected" with their responses. | `n_pixels` × 1 (one column) | intermediate     |
+| **`signal_matrix`**   | **all participants' noise masks stacked side by side**, one column per producer. This is the central object of `rcisignal`. | `n_pixels` × `n_participants` | output (you pass it to every `rel_*`, `run_reliability`, `run_discriminability` call) |
 
-Plain-English summary:
+In sum:
 
--   The **`noise_matrix`** describes the *stimuli* (what the
-    experiment showed). It exists *before* any participant runs
-    the task. §4.3 covers how to read it.
--   A **noise mask** describes *one participant's* CI. It exists
-    *after* that participant has responded. You normally do not
-    handle it directly; it is one column of the `signal_matrix`.
--   The **`signal_matrix`** describes *the whole sample's* CIs.
-    It is the collection of all individual noise masks lined up
-    by participant — what every `rel_*`, `run_reliability()`,
-    `run_discriminability()`, `infoval()`, and
-    `agreement_map_test()` call consumes.
+-   **`noise_matrix`** describes the *stimuli* (what the
+    experiment showed), and exists *before* any participant runs the
+    task (see §4.3 for how to read it);
+-   **noise mask** describes *one participant's* CI, and exists
+    *after* that participant has responded;
+-   **`signal_matrix`** describes *the whole sample's* CIs. It is
+    the collection of all individual noise masks lined up by
+    participant (this is the matrix every reliability and discriminability
+    function in `rcisignal` uses).
 
 You don't build the noise mask or the `signal_matrix` by hand:
-`ci_from_responses_2ifc()` and `ci_from_responses_briefrc()` do
-it for you and return a list whose `$signal_matrix` element is
-the matrix you pass downstream.
+`ci_from_responses_2ifc()` and `ci_from_responses_briefrc()` do it
+for you and return a list whose `$signal_matrix` element is the
+matrix you pass downstream.
+
+A small terminology trap. The word *mask* above means
+*image-shaped overlay* (one number per pixel, defined over the
+whole image grid). It is not the same as a face-region mask
+(a logical 1/0 stencil that selects "eyes" or "mouth" pixels);
+those are covered separately in §4.5.
 
 A note on the *signal matrix* name. Other RC papers sometimes
 call this same per-producer object a *noise matrix*, because the
@@ -1120,12 +1184,55 @@ to hand-rolled `infoVal`.
 
 With the signal matrix in hand, the question is whether each
 condition's group-level CI is stable: would you obtain the same
-group pattern from a different half of the producers? Two
-non-redundant metrics address this question, alongside an
-influence-screening diagnostic that is sometimes confused with
-reliability.
+group pattern from a different half of the producers? "Reliable"
+in the psychometric sense is shorthand for *the producers' CIs
+agree with each other enough that averaging them recovers the
+same pattern in repeated samples*. Two complementary metrics
+address this question directly, alongside an influence-screening
+diagnostic that is sometimes confused with reliability.
+
+The two reliability metrics:
+
+- **`rel_split_half()`** asks how well one random half of the
+  producers reproduces the other half's group CI. Repeating the
+  split many times gives a sampling distribution for the
+  agreement.
+- **`rel_icc()`** asks how much of the pixel-by-producer signal
+  variance is attributable to consistent producer-level patterns
+  versus residual noise. It is the same intraclass correlation
+  used in measurement theory and inter-rater reliability work.
+
+The third metric (`rel_loo()`) is an influence screen: it flags
+individual producers whose removal noticeably shifts the group
+CI, useful for catching coding errors or outlier strategies but
+not itself a reliability number.
+
+A short note on what these metrics do not address. Reliability
+here is internal: would the same producers, if split differently,
+have produced the same CI? Whether the CI accurately captures
+the producer's mental representation of the trait is a separate
+validity question, typically addressed by an external rater
+study, and sits outside the package.
 
 ### 7.1 `rel_split_half()`
+
+*Background.* Split-half reliability is an old psychometric
+trick (Spearman, 1910; Brown, 1910): if a measurement is
+internally consistent, splitting it into two halves and
+correlating the halves should give a high correlation. In the
+RC setting, the "halves" are two random subsets of producers,
+and the quantities being correlated are the pixels of the
+group-mean CI computed from each half. The catch is that each
+half is built from `N/2` producers rather than `N`, so the
+half-half correlation underestimates the reliability of the
+full N-producer CI. The Spearman-Brown correction
+`r_sb = (2 r_hh) / (1 + r_hh)` projects the half-half
+correlation up to the reliability the full sample would have if
+the underlying signal really is shared. Repeating the split many
+times and averaging both quantities reduces the dependence on
+any single random partition.
+
+In code, the function does exactly this:
 
 Randomly partition the producers into two halves, compute the
 group-level CI for each half (`rowMeans()`), correlate them, and
@@ -1186,9 +1293,28 @@ producer count.
 
 ### 7.2 `rel_icc()`
 
-Two-way mixed model with pixels fixed (the image grid is not a
-random sample) and producers random. `rel_icc()` returns both
-single-rater and average-rater reliabilities:
+*Background.* The intraclass correlation coefficient (ICC) is a
+family of statistics for asking how much of the variability in
+repeated measurements is attributable to differences between the
+objects of measurement (here, producers) versus residual noise
+(McGraw & Wong, 1996; Koo & Li, 2016). Every producer has one
+CI vector with one entry per pixel, and the ICC asks how
+consistently the producers agree on that pixel-by-pixel pattern.
+A high ICC means producers' CIs are similar to each other
+relative to noise; a low ICC means they are not.
+
+The "(3,*)" label is McGraw & Wong's notation for a two-way
+mixed-effects model in which the column factor (pixels in our
+case) is fixed and the row factor (producers) is random. The
+fixed-pixels choice reflects the reality of an RC experiment:
+the image grid is not a random sample from a population of
+pixels; it is the same set of pixels across all producers. The
+"3,1 vs 3,k" distinction is whether you want the reliability of
+a single producer's CI (`3,1`) or of the group-averaged CI
+across `k` producers (`3,k`).
+
+`rel_icc()` returns both, computed from a two-way mixed model
+with pixels fixed and producers random:
 
 - **ICC(3,1)** answers "how informative is one producer's CI as
   a noisy estimate of the group pattern?".
@@ -1296,7 +1422,59 @@ When the design has two or more conditions, the question becomes
 whether their group CIs are distinguishable, both in overall
 magnitude and in spatial location.
 
+The hard part of doing this honestly is the *multiple
+comparisons problem*. A typical RC image has tens of thousands
+of pixels (a 256 x 256 grid has 65,536). If you compute one
+t-test per pixel and threshold each at the conventional
+`p < 0.05`, you should expect about 5% of pixels to come out
+"significant" by chance even when the two conditions are
+identical, which is over 3,000 false-positive pixels per image.
+The naive Bonferroni correction (divide alpha by the number of
+tests) overcorrects in the opposite direction because pixels are
+spatially correlated; CI signal lives in contiguous regions, not
+independent dots.
+
+The solution adopted here is borrowed from the neuroimaging
+literature: build a single test statistic that summarises the
+spatial extent of the effect (a *cluster*), and calibrate it
+against a null distribution generated by random label
+permutation. This controls the *family-wise error rate (FWER)*
+in the strong sense, that is, the probability of one or more
+false positives anywhere in the image is held below the chosen
+alpha (Nichols & Holmes, 2002; Maris & Oostenveld, 2007). Two
+test statistics are offered:
+
+-   A classical cluster-mass statistic with a user-set cluster-
+    forming threshold (`rel_cluster_test(method = "threshold")`).
+-   Threshold-free cluster enhancement, TFCE
+    (`rel_cluster_test(method = "tfce")`; Smith & Nichols, 2009),
+    which sidesteps the threshold choice by integrating the
+    cluster contribution to each pixel across many thresholds.
+
+A complementary question is the *overall magnitude* of the
+difference, independent of where in the image it sits.
+`rel_dissimilarity()` addresses that with a single distance
+number plus a bootstrap confidence interval.
+
 ### 8.1 `pixel_t_test()`
+
+*Background.* The pixel-wise t-test is the building block of
+everything in this section: at each pixel, compare the two
+conditions' producer-level signal values with a Welch's t (or
+a paired t when producers are matched). The output is one
+t-value per pixel, an image-shaped statistical map of where the
+conditions differ.
+
+This map is informative, but it is not a valid statistical test
+on its own. With tens of thousands of pixels and no
+multiplicity correction, raw per-pixel p-values overstate the
+strength of evidence (see the §8 intro above). For that reason
+`pixel_t_test()` returns the t-vector and stops there; turning
+it into inference is the job of `rel_cluster_test()` (§8.2),
+which feeds these per-pixel t-values into a permutation-based
+FWER procedure.
+
+In code:
 
 Vectorised Welch's t (independent groups) or paired t (matched
 producers) per pixel:
@@ -1316,7 +1494,49 @@ have identical `ncol` and matching column names.
 
 ### 8.2 `rel_cluster_test()`
 
-Pixel-level discriminability test with two methods.
+*Background.* The cluster-based permutation test
+(Maris & Oostenveld, 2007) treats the spatial coherence of CI
+signal as a feature, not a nuisance. The procedure is in three
+conceptual steps:
+
+1.  Compute the per-pixel t-statistic (as in §8.1), and
+    threshold its absolute value at some cutoff (e.g.,
+    `|t| > 2`). Each pixel is either supra-threshold or not.
+2.  Group the supra-threshold pixels into spatially contiguous
+    *clusters* using a neighbour rule. The default in
+    `rcisignal` is **4-connectivity**: a pixel's neighbours are
+    the four pixels sharing an edge with it (up, down, left,
+    right). 8-connectivity (which also counts diagonal
+    neighbours) tends to merge things that only touch at a
+    corner, producing larger and fewer clusters; 4-connectivity
+    is the conservative default and is the one used here.
+3.  Score each cluster by its **mass**: the sum of the t-values
+    inside the cluster. A small cluster of very high t-values
+    can have the same mass as a large cluster of moderate
+    t-values, and the mass statistic treats them as comparably
+    strong evidence.
+
+The hard part is calibration: how big a cluster mass would you
+expect *under the null* (the conditions are identical)? The
+permutation answer is to randomly relabel which producer is in
+which condition (preserving the per-condition `N`), recompute
+the per-pixel t and the maximum cluster mass, and repeat
+thousands of times. The resulting distribution of maximum
+cluster masses is the empirical null, calibrated to *your* data
+without distributional assumptions. A real cluster's p-value
+is the fraction of null max-masses that exceed it. Because every
+candidate cluster is tested against the *maximum* under the
+null, this controls the family-wise error rate in the strong
+sense (Nichols & Holmes, 2002).
+
+A note of self-criticism: the cluster-forming threshold is the
+one knob without a fully principled choice. Lower thresholds
+favour broad and diffuse effects; higher thresholds favour
+focal and intense ones (Smith & Nichols, 2009). When you do not
+have prior intuition about the spatial scale of your effect,
+TFCE (below) avoids having to choose.
+
+In code, `rel_cluster_test()` exposes both methods.
 
 **`method = "threshold"`** (default; Maris & Oostenveld 2007):
 threshold `|t| > cluster_threshold` (default 2.0), label
@@ -1351,10 +1571,16 @@ for plotting. Maximum-statistic permutation provides FWER control
 in the strong sense (Nichols & Holmes 2002).
 
 **`method = "tfce"`** (Smith & Nichols 2009): threshold-free
-cluster enhancement. Per-pixel TFCE value is the integral over
-thresholds of `size^E x h^H x dh`; positive and negative tails
-are enhanced separately and recombined with sign preserved. No
-free threshold parameter to choose. Per-pixel p-value =
+cluster enhancement. Instead of picking one cluster-forming
+threshold, TFCE walks across many possible thresholds and adds
+up, at each pixel, how much spatial support the surrounding
+cluster has at each threshold height. Pixels embedded in
+strongly-supported clusters end up with high TFCE scores;
+isolated pixels with no neighbour support end up with low
+scores. Per-pixel TFCE value is the integral over thresholds of
+`size^E x h^H x dh`; positive and negative tails are enhanced
+separately and recombined with sign preserved. No free threshold
+parameter to choose. Per-pixel p-value =
 `(sum(null_max_abs_tfce >= |observed_tfce|) + 1) / (n_perm + 1)`.
 
 ```{r tfce, eval = FALSE}
@@ -1379,6 +1605,29 @@ sign-flip on per-producer differences (exact under exchangeability
 of pair sign).
 
 ### 8.3 `rel_dissimilarity()`
+
+*Background.* The Euclidean distance between two CIs is the
+square root of the summed squared pixel differences (equivalently,
+the Frobenius norm of the difference matrix). It is a single-
+number summary of how far apart two group CIs sit in pixel
+space. It ignores *where* the difference lives and reports only
+its overall magnitude. The advantage is simplicity: one number
+per contrast, comparable across studies, with a percentile
+bootstrap CI (resample producers with replacement, recompute the
+distance, repeat) for uncertainty. The trade-off is loss of
+spatial detail, which is exactly what `rel_cluster_test()` (§8.2)
+is for. Reported together, the two metrics complement each
+other: the cluster test localises the difference, the
+dissimilarity quantifies its overall size.
+
+A self-critical note: Euclidean distance scales with image size
+and with whatever absolute units the CI carries. The
+`$euclidean_normalised` field divides by `sqrt(n_pixels)` to make
+distances comparable across resolutions, but cross-study
+comparison still requires care about scaling conventions and the
+underlying base image.
+
+In code:
 
 Pair the spatial cluster test with a single overall magnitude
 summary: Euclidean distance between the two group-mean CIs,
@@ -1458,6 +1707,44 @@ max-statistic FWER control from the underlying
 `p_min = 1.0`.
 
 ## 9. Step 5: per-producer informational value
+
+*Background.* Per-producer infoVal (Brinkman et al., 2019) asks
+a single question: is this producer's CI larger in magnitude
+than what a random responder would produce on the same task?
+The metric is a z-score. The numerator is the **Frobenius norm**
+of the CI mask (the square root of the summed squared pixel
+values, a scalar that summarises overall mask "size"). The
+reference distribution comes from simulating many random
+`(stimulus, ±1)` response sequences through the same CI formula,
+computing the Frobenius norm of each simulated mask, and
+recording the mean and standard deviation of those norms. A
+producer's infoVal of, say, 2.5 means their CI is 2.5 standard
+deviations larger than the random-responder mean; the
+conventional threshold for "more than chance" is `z >= 1.96`,
+the standard one-sided 0.05 cutoff.
+
+What infoVal does *not* tell you is whether the CI points at
+the *right* pattern. The Frobenius norm is a magnitude statistic
+only. A producer who clicked consistently but in a way that
+encodes an unrelated visual pattern (for example, their CI
+looks like an upper-left versus lower-right contrast rather
+than a trait-relevant face feature) can still score high on
+infoVal. Pair infoVal with the reliability metrics (§7) and the
+discriminability metrics (§8) when you want a fuller picture.
+
+A note on *group-mean infoVal*. The package also offers a
+group-mean version (`group_mean_z()`, called inside
+`diagnose_infoval()` as a supplementary statistic). It applies
+the same Frobenius-norm logic to the group-averaged CI, using a
+matched-N reference distribution so the calibration is fair (see
+§15 for what goes wrong when that reference is mismatched).
+Brinkman et al. (2019) recommend reporting the *distribution* of
+per-producer infoVals as the primary group-level summary, not a
+single group z. The group-mean version is offered here as a
+supplementary headline number and is not independently validated
+for social-face RC; treat it as exploratory (§1.2).
+
+In code:
 
 `infoval()` reports a per-producer Frobenius-norm z-score against
 a reference distribution matched to that producer's actual trial
@@ -2161,10 +2448,12 @@ restricted to pixels that fall inside a cluster significant at
 testing.
 
 The descriptive map answers "where do the two group CIs diverge,
-descriptively?". The FWER-controlled map answers "where can we
-publish a claim about that divergence with controlled Type I
-error?". Showing both side-by-side lets the reader see how much
-of the descriptive pattern survives the inferential filter.
+descriptively?". The FWER-controlled map answers "which of those
+divergences are large enough that we should believe they reflect
+a real between-condition difference rather than noise?". Showing
+both side-by-side lets the reader see how much of the descriptive
+pattern is supported by the data once a controlled Type I error
+filter is applied.
 
 For each contrast we (i) take the difference of the two group-
 mean CIs, (ii) render it on the base face (descriptive view),
@@ -2554,6 +2843,15 @@ correlation in social psychology. *European Review of Social
 Psychology*, 28(1), 333-361.
 <https://doi.org/10.1080/10463283.2017.1381469>
 
+Brown, W. (1910). Some experimental results in the correlation of
+mental abilities. *British Journal of Psychology*, 3(3), 296-322.
+<https://doi.org/10.1111/j.2044-8295.1910.tb00207.x>
+
+Chauvin, A., Worsley, K. J., Schyns, P. G., Arguin, M., & Gosselin,
+F. (2005). Accurate statistical tests for smooth classification
+images. *Journal of Vision*, 5(9), 1.
+<https://doi.org/10.1167/5.9.1>
+
 Cone, J., Brown-Iannuzzi, J. L., Lei, R., & Dotsch, R. (2021).
 Type I error is inflated in the two-phase reverse correlation
 procedure. *Social Psychological and Personality Science*,
@@ -2568,6 +2866,11 @@ DeBruine, L. (2022). webmorphR: Reproducible stimuli.
 
 Dotsch, R. (2016, 2023). rcicr: Reverse-Correlation Image-
 Classification Toolbox. <https://github.com/rdotsch/rcicr>
+
+Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and
+reporting intraclass correlation coefficients for reliability
+research. *Journal of Chiropractic Medicine*, 15(2), 155-163.
+<https://doi.org/10.1016/j.jcm.2016.02.012>
 
 Maris, E., & Oostenveld, R. (2007). Nonparametric statistical
 testing of EEG- and MEG-data. *Journal of Neuroscience Methods*,
@@ -2614,6 +2917,10 @@ Smith, S. M., & Nichols, T. E. (2009). Threshold-free cluster
 enhancement: addressing problems of smoothing, threshold
 dependence and localisation in cluster inference. *NeuroImage*,
 44(1), 83-98. <https://doi.org/10.1016/j.neuroimage.2008.03.061>
+
+Spearman, C. (1910). Correlation calculated from faulty data.
+*British Journal of Psychology*, 3(3), 271-295.
+<https://doi.org/10.1111/j.2044-8295.1910.tb00206.x>
 
 Tukey, J. W. (1958). Bias and confidence in not-quite large
 samples [Abstract]. *Annals of Mathematical Statistics*, 29(2),

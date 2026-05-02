@@ -77,6 +77,10 @@ and columns \code{participant_id}, \code{condition}, \code{trial},
 coefficients (the rcicr \code{stimuli_params}).
 \item \code{p} — the rcicr noise basis (\code{generateNoisePattern()}
 output); pair with \code{params} to regenerate any noise image.
+\item \code{rdata_path} — path to an rcicr-format \code{.Rdata} file written
+to a session tempdir, suitable for
+\code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}} / \code{\link[=compute_infoval_summary]{compute_infoval_summary()}}
+and other downstream functions that take an \code{rdata} argument.
 \item \code{signal} — pixel-level signal vector used to plant the
 response bias.
 \item \code{meta} — list of method, \code{n_per_condition}, \code{conditions},
