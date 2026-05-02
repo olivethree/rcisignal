@@ -176,28 +176,28 @@ Two pieces of information from your study:
     -   a noise-matrix text file **plus** a base-face image file
         (Brief-RC).
 
-### Three things that all sound similar — keep them apart
+### Clarification of types of visual noise data
 
-Reverse correlation work involves several pixel matrices that are
+Reverse correlation work involves several types of pixel matrices that may be
 easy to confuse. In `rcisignal`, each one has exactly one job:
 
-| name                  | what it is                                                 | shape                       | input or output? |
+| Data type                | What is it?                                                 | shape                       | input or output? |
 |-----------------------|------------------------------------------------------------|-----------------------------|------------------|
-| **`noise_matrix`**    | the **input** pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern. | `n_pixels` × `pool_size`    | input (you give it to the package) |
+| **`noise_matrix`**    |  **input** pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern. | `n_pixels` × `pool_size`    | input (you give it to the package) |
 | **noise mask** (a.k.a. "per-participant CI") | **one participant's** classification image: a single vector of pixel values, base-subtracted. Conceptually, the weighted average of the noise patterns they "selected" with their responses. | `n_pixels` × 1 (one column) | intermediate     |
 | **`signal_matrix`**   | **all participants' noise masks stacked side by side**, one column per producer. This is the central object of `rcisignal`. | `n_pixels` × `n_participants` | output (you pass it to every `rel_*`, `run_reliability`, `run_discriminability` call) |
 
-Plain-English summary:
+In sum:
 
--   The **`noise_matrix`** describes the *stimuli* (what the
-    experiment showed). It exists *before* any participant runs the
-    task.
--   A **noise mask** describes *one participant's* CI. It exists
-    *after* that participant has responded.
--   The **`signal_matrix`** describes *the whole sample's* CIs. It is
+-   **`noise_matrix`** describes the *stimuli* (what the
+    experiment showed), and exists *before* any participant runs the
+    task;
+-   **noise mask** describes *one participant's* CI, and exists
+    *after* that participant has responded;
+-   **`signal_matrix`** describes *the whole sample's* CIs. It is
     the collection of all individual noise masks lined up by
-    participant — the matrix every reliability and discriminability
-    function in the package consumes.
+    participant (this is the matrix every reliability and discriminability
+    function in rcisignal uses)
 
 You don't build the noise mask or the `signal_matrix` by hand:
 `ci_from_responses_2ifc()` and `ci_from_responses_briefrc()` do it
@@ -206,7 +206,7 @@ matrix you pass downstream.
 
 ### Step 1. Diagnose the raw data
 
-Before computing CIs, sanity-check the trial-level data.
+Before computing CIs, sanity-check the trial-level data:
 
 ``` r
 library(rcisignal)
@@ -245,11 +245,11 @@ Suppose you have two conditions, "trustworthy" and "untrustworthy",
 identified by a `condition` column in `responses`. Split the data and
 compute one signal matrix per condition. Inside each call, the
 function groups trials by `participant_id` (the default of the
-`participant_col` argument) and produces **one CI per participant** —
-not a single group-level CI. That is why each result has 20 columns
+`participant_col` argument) and produces **one CI per participant**. That is why each result has 20 columns
 when there are 20 producers in the condition.
 
 ``` r
+# base R style, but you can use other styles (dplyr, DT) if you prefer
 trust_rows   <- responses[responses$condition == "trustworthy",   ]
 untrust_rows <- responses[responses$condition == "untrustworthy", ]
 
@@ -269,7 +269,7 @@ untrustworthy <- ci_from_responses_2ifc(
 )
 
 # --- Brief-RC equivalent ---
-# Same call shape, same per-participant grouping behaviour; differences:
+# Same call shape and per-participant grouping behaviour, differences are:
 #   - function name ends in _briefrc
 #   - rdata_path may be replaced by noise_matrix = "data/noise_matrix.txt"
 #   - base_image_path (PNG/JPEG of the base face) is required
@@ -293,7 +293,7 @@ column is not literally named `participant_id`, the call will abort
 with a "missing column" error; pass `participant_col = "your_col_name"`
 to fix it.)
 
-### Step 3. Within-condition reliability — do participants in each condition agree?
+### Step 3. Within-condition reliability: do participants in each condition agree?
 
 ``` r
 print(run_reliability(trustworthy$signal_matrix,   seed = 1))
@@ -303,7 +303,7 @@ print(run_reliability(untrustworthy$signal_matrix, seed = 1))
 This reports split-half reliability (with Spearman-Brown correction)
 and ICC(3,*) for each condition.
 
-### Step 4. Between-condition discriminability — are the two CIs actually different?
+### Step 4. Between-condition discriminability: are the two CIs really different?
 
 ``` r
 result <- run_discriminability(
@@ -315,12 +315,12 @@ print(result)
 plot(result)   # cluster map of pixels where the two conditions differ
 ```
 
-For a function-by-function walkthrough — including how to interpret
+For a function-by-function walkthrough, including how to interpret
 cluster maps, sample-size warnings, when to use ICC(3,1) vs ICC(3,k),
-and Brief-RC end-to-end — see the [**full user
+and Brief-RC end-to-end, see the [**full user
 guide**](https://olivethree.github.io/rcisignal/articles/rcisignal.html).
 
-## Worked example: Oliveira et al. (2019)
+## Worked example with real data: Oliveira et al. (2019)
 
 To make the output concrete, here are two contrasts from the open data
 of [Oliveira, Garcia-Marques, Dotsch & Garcia-Marques
@@ -370,7 +370,7 @@ finer ability cues. Among the pixels that survive the FWER filter, the
 Dominant vs Competent map retains noticeably more spatial extent than
 the Trustworthy vs Friendly map.
 
-### Per-region informational value (preview)
+### Per-region infoVal 
 
 Magnitude per producer also varies by face region. The grid below runs
 `infoval()` separately on each (trait, region) cell using the [Schmitz
@@ -428,10 +428,6 @@ data and classification images (Version 0.1.0) [R package]. Zenodo.
 https://doi.org/10.5281/zenodo.19961180
 ```
 
-The DOI above is the **concept DOI** and always resolves to the
-latest release on Zenodo. For citations to a specific version,
-use the version DOI listed on the
-[Zenodo record page](https://doi.org/10.5281/zenodo.19961180).
 Run `citation("rcisignal")` in R for a BibTeX entry.
 
 Please also cite the methodological sources appropriate to your
