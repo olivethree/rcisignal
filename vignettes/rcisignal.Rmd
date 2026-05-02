@@ -1,5 +1,5 @@
 ---
-title: "rcisignal: a complete workflow for reverse-correlation data quality"
+title: "rcisignal: User's Guide"
 author: "Manuel Oliveira"
 date: "`r Sys.Date()`"
 output:
