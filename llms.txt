@@ -1,6 +1,13 @@
 # rcisignal
 
-[TABLE]
+![](reference/figures/logo.png)
+
+A toolkit for quality assessment of reverse correlation (RC) experiments
+end-to-end. Catches silent data-processing errors *before*
+classification image (CI) computation, then quantifies CI quality
+*after*: magnitude, stability, and discriminability.
+
+  
 
 > Package is not on CRAN, distribution is GitHub-only.
 
