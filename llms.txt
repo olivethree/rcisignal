@@ -86,6 +86,35 @@ remotes::install_github("rdotsch/rcicr")
 If you only run Brief-RC, you can skip `rcicr` — the Brief-RC code is
 fully native to `rcisignal`.
 
+## Try it without your own data
+
+Two helpers generate a complete simulated dataset (responses + noise
+pool) so you can exercise every step of the pipeline immediately. By
+default each simulates 50 producers per condition × 500 trials with a
+weak planted eyes-region signal; the noise pool is generated on the fly
+via `rcicr` (so installation of `rcicr` is required) and takes roughly
+1-3 minutes with a progress bar.
+
+``` r
+
+library(rcisignal)
+
+sim <- simulate_2ifc_data()        # 50 x 2 producers, 500 trials each
+# sim <- simulate_briefrc_data()   # Brief-RC equivalent (12 images/trial)
+
+run_diagnostics(sim$data, method = "2ifc", col_rt = "rt")
+
+cis <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
+run_reliability(cis$signal_matrix, seed = 1)
+```
+
+[`?simulate_2ifc_data`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
+and
+[`?simulate_briefrc_data`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md)
+document every parameter (sample sizes, image size, signal
+strength/region, RT contamination, noise basis, seed); pass
+`signal_strength = "none"` for true bogus data.
+
 ## User’s guide
 
 The [**full user
@@ -576,6 +605,12 @@ enthusiasts out there! :)
 
 - [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
   : Run every within-condition reliability metric
+
+- [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
+  : Simulate 2IFC reverse-correlation data
+
+- [`simulate_briefrc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md)
+  : Simulate Brief-RC reverse-correlation data
 
 - [`validate_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/validate_noise_matrix.md)
   : Validate a noise matrix

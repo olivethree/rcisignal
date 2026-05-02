@@ -133,5 +133,11 @@
 - [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
   : Run every within-condition reliability metric
 
+- [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
+  : Simulate 2IFC reverse-correlation data
+
+- [`simulate_briefrc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md)
+  : Simulate Brief-RC reverse-correlation data
+
 - [`validate_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/validate_noise_matrix.md)
   : Validate a noise matrix
