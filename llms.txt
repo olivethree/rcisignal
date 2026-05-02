@@ -246,8 +246,10 @@ friendliness flips the pattern, with the **mouth** carrying its
 strongest regional signal and the **eyes** the weakest. Trustworthy
 localises broadly across the eyes and mouth without a clear regional
 peak. The full per-region grid, the bootstrap dissimilarity intervals
-that accompany it, and the methods-section reporting templates are in
-vignette §12.
+that accompany it, and the methods-section reporting templates are
+walked through in the [**user
+guide**](https://olivethree.github.io/rcisignal/articles/rcisignal.html),
+in the *Worked example: Oliveira et al. (2019), Study 1* section.
 
 ## Behind the scenes
 

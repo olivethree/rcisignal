@@ -1733,13 +1733,40 @@ conditions, masked with the Schmitz oval, gives the table below
 | unintelligent | +0.63             |                    3 | -13.43       |
 | untrust       | +0.84             |                    7 | -11.32       |
 
-Group-mean z is the headline. Per-producer median z sits well below 1.96
-across all ten conditions, while the group-mean z typically clears it.
-This pattern is structural rather than a data problem: per-producer
-Frobenius norms aggregate over the whole image and dilute localised
-signal, so individual z values are systematically smaller than the
-group-mean equivalent on the same data. Brinkman et al. (2019) report
-the same general pattern for trait inferences.
+Two reporting conventions sit side-by-side here. Brinkman et al. (2019)
+define infoVal at the **individual producer** level and report the
+median per-producer z together with the proportion of producers above
+1.96 (their lab/online gender data: mean per-producer z of 3.9 / 2.9,
+with 68% / 54% of producers above 1.96; pp. 12 and 14). For group-level
+reporting they explicitly recommend “assess the distribution of weights
+of individual CIs to the group CI … the proportion of participants that
+contributed to the group CI” (p. 13) — i.e. inspect the per-producer
+distribution, not a single z on the averaged noise pattern. The first
+three columns of the table follow that convention directly.
+
+The “Group-mean z” column extends infoVal in a way Brinkman et al. do
+not discuss: a single Frobenius-norm z computed on the across-producer
+mean noise pattern, against a reference distribution built by averaging
+N random producers (each at its real trial count). It is included
+because it is the natural one-number summary for a publishable group CI,
+and because the matched reference makes it interpretable on the z-score
+scale, but it is not a Brinkman quantity and the literature does not
+establish a conventional threshold for it. We report it alongside, not
+in place of, the per-producer columns.
+
+Per-producer median z sits well below 1.96 across all ten conditions,
+with roughly two to seven of twenty producers individually clearing the
+threshold. This is consistent with Brinkman et al.’s practical caveat
+(p. 14) that constructs more subtle than perceived gender require more
+trials than the gender benchmark; this dataset uses 300 trials per
+producer per trait. The group-mean z is markedly larger than the
+per-producer median, which is the structural √N consequence of averaging
+twenty roughly-aligned producer masks rather than evidence that one
+quantity is more “true” than the other — they answer different questions
+(how informative is a typical individual CI, vs how informative is the
+condition’s average CI). The strong group-level signal in this dataset
+is independently corroborated by the FWER-controlled cluster maps in §13
+and the bootstrap discriminability intervals in §13.2.
 
 ### 12.5 Building one signal matrix, step by step
 
@@ -2398,8 +2425,16 @@ metrics, and renders to PNG only for visualisation.
 **Group-mean z and per-producer z carry different information.**
 Per-producer Frobenius norms aggregate over the whole image and dilute
 localised signal, so individual z values are systematically lower than
-group-mean z even when the group CI is highly informative (the §12.4
-pattern). Report both, framed as different-grain statistics.
+the group-mean z computed against a matched reference (the §12.4
+pattern). The Brinkman et al. (2019) reporting convention is
+per-producer (median z and proportion above 1.96); the matched-reference
+group-mean z is a useful supplementary one-number summary but not a
+Brinkman-defined quantity. Compute the group-mean z via
+[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md),
+never by feeding the group-mean mask to
+[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+with the per-producer reference — that comparison is to the wrong null
+and yields strongly negative z values.
 
 **FWER scope.**
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
@@ -2464,20 +2499,33 @@ data problem. Five reasons in roughly the order they tend to apply.
     concentrates the norm on signal-bearing pixels and typically lifts
     z-scores noticeably.
 
-5.  **Group-level CIs have much higher z than individual CIs.**
-    Averaging 20 producers’ masks reduces noise by sqrt(20) ~ 4.5x, so
-    the group-mean CI’s effective trial count is `300 x 20 = 6000` for a
-    20-producer condition. The infoVal of the group-mean CI is usually
-    5-10x the per-producer median; this is a structural sqrt(N)
-    consequence of averaging, not a defect of the per-producer metric.
+5.  **Group-level CIs have much higher z than individual CIs, when
+    computed against a matched reference.** Averaging N producers’ masks
+    reduces noise variance by ~1/N (so the norm shrinks by ~1/√N) but
+    preserves any aligned signal, so the group-mean CI’s z against a
+    *matched* reference distribution (N random producers averaged
+    together, each at its real trial count) is materially larger than
+    the per-producer median. **Critical caveat:** the matched reference
+    is essential. If you take the group-mean mask and feed it to
+    [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+    with the per-producer reference distribution (the one for a single
+    300-trial producer), the comparison is to a much noisier null and
+    produces strongly negative z values that mean nothing about signal.
+    [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
+    (and the §15.1 recipe below) builds the matched reference for you
+    via the internal `group_mean_z` helper.
+
     Brinkman et al. (2019) themselves only ever computed infoVal on
-    individual CIs (the paper reported mean per-producer infoVal of 3.9
-    in lab and 2.9 in online samples, with 68% / 54% of producers
-    individually exceeding 1.96). For group-level reporting they
-    recommended inspecting the distribution of per-producer infoVals
-    contributing to the group CI rather than computing one infoVal on
-    the group-mean CI. Either choice is defensible; the worked example
-    in §12.4 reports both alongside.
+    individual CIs (mean per-producer z of 3.9 in lab and 2.9 in online
+    samples, with 68% / 54% of producers individually exceeding 1.96;
+    pp. 12, 14). For group-level reporting they recommended inspecting
+    the *distribution* of per-producer infoVals contributing to the
+    group CI (p. 13). They do not define a single group-mean infoVal
+
+    26. The worked example in §12.4 reports both — Brinkman’s
+        per-producer convention as the primary statistic, the
+        matched-reference group-mean z as a supplementary one-number
+        summary.
 
 ### 15.1 Diagnostic recipe
 
@@ -2504,13 +2552,22 @@ iv_masked <- infoval(sm, noise_matrix, tc, mask = fm,
                      iter = 1000L, seed = 1L)
 median(iv_masked$infoval)
 
-# 3. Compute the group-mean CI's infoVal.
-group   <- matrix(rowMeans(sm), ncol = 1,
-                  dimnames = list(NULL, "group"))
-tc_grp  <- setNames(sum(tc), "group")
-iv_grp  <- infoval(group, noise_matrix, tc_grp,
-                   iter = 1000L, seed = 1L)
-iv_grp$infoval                 # typically large (e.g. > 5)
+# 3. Compute the group-mean CI's infoVal against a matched
+#    reference. diagnose_infoval() exposes this as
+#    $data$group_mean_z_unmasked / $data$group_mean_z_masked.
+#    The matched reference simulates N random producers
+#    (each at its real trial count) averaged together, which
+#    is the right null for a group-mean CI. Do NOT call
+#    infoval() with sum(tc) on a one-column group mask -- that
+#    compares the heavily-averaged group norm to a per-producer
+#    reference and yields strongly negative z values that do
+#    not reflect signal.
+diag <- diagnose_infoval(
+  responses, method = "2ifc",
+  rdata = "stimuli.RData", iter = 1000L, seed = 1L
+)
+diag$data$group_mean_z_unmasked
+diag$data$group_mean_z_masked  # masked is what to report
 
 # 4. Sanity-check the chance baseline. A random-mask producer
 #    should give z ~ 0 within MAD noise.
@@ -2538,19 +2595,23 @@ drawing conclusions.
 
 ### 15.3 What to report
 
-For a publishable summary we typically recommend two complementary
-statistics:
+For a publishable summary the primary statistic, following Brinkman et
+al. (2019), is the per-producer one:
 
 - The **median per-producer infoVal z** and the **proportion of
-  producers above z = 1.96**, mirroring Brinkman et al.’s (2019)
-  reporting choice.
-- The **group-mean CI’s infoVal z** as a single headline number. This is
-  structurally larger by sqrt(N) but useful as the publishable
-  group-level statistic.
+  producers above z = 1.96**. This is the convention Brinkman et
+  al. used and recommended (pp. 12-14). It answers: how informative is a
+  typical individual CI?
 
-The two numbers answer different questions. The median tells you how
-informative a *typical individual CI* is; the group-mean z tells you how
-informative the *condition’s average CI* is.
+A matched-reference **group-mean CI z** (from
+[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)’s
+`group_mean_z_*` fields, or the internal `group_mean_z` helper) can be
+reported alongside as a one-number summary of the condition-level CI. It
+is not a Brinkman-defined quantity and the literature does not establish
+a conventional threshold for it; report the per-producer numbers as
+well, not in place of them. The two answer different questions: the
+median tells you how informative a *typical individual CI* is; the
+group-mean z tells you how informative the *condition’s average CI* is.
 
 ## 16. Citation
 
