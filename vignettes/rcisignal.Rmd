@@ -510,13 +510,16 @@ pair, so an id never repeats across trials within a participant.
 
 #### Brief-RC response coding (Schmitz et al. 2024)
 
-Each trial presents 12 noisy faces (6 original, `base + noise_i`,
-and 6 inverted, `base - noise_i`), drawn from 6 distinct pool
-noise patterns. The producer picks one. The data records **one
-row per trial**: `stimulus` = pool id of the chosen noise
-pattern; `response = +1` if original chosen, `-1` if inverted.
-Unselected faces are absent from the data; do not pad them as
-zero rows.
+Each trial presents `2k` noisy faces (`k` original images,
+`base + noise_i`, and `k` inverted images, `base - noise_i`),
+drawn from `k` distinct pool noise patterns. The producer picks
+one. The data records **one row per trial**: `stimulus` = pool
+id of the chosen noise pattern; `response = +1` if original
+chosen, `-1` if inverted. Unselected faces are absent from the
+data; do not pad them as zero rows. The same row format applies
+to both validated Brief-RC variants (Brief-RC 12 with `k = 6`,
+Brief-RC 20 with `k = 10`); the analysis pipeline is identical
+(see §13.1 for the formula being symmetric in `k`).
 
 A Brief-RC 12 dataset with the same three participants and four
 trials each illustrates the format:
@@ -2550,41 +2553,46 @@ not run.
 
 The Brief-RC workflow follows the same diagnose, compute, and
 assess flow with two practical differences. First, the response
-data has 12 alternatives per trial (recorded as one row per
-trial carrying the chosen pool id and sign). Second, the noise
-matrix is consumed directly, without an `rcicr` wrapper.
+data has multiple alternatives per trial (12 or 20, recorded as
+one row per trial carrying the chosen pool id and sign). Second,
+the noise matrix is consumed directly, without an `rcicr`
+wrapper.
 
 ### 13.1 Brief-RC variants currently supported
 
-`ci_from_responses_briefrc()` accepts `method = "briefrc12"`
-(12 alternatives per trial; 6 original, 6 inverted). Other
-Brief-RC variants the literature describes (Brief-RC 6,
-Brief-RC 20, etc.) raise a clear error from the wrapper at the
-moment, with a message pointing at the roadmap.
+`ci_from_responses_briefrc()` accepts two `method` values, both
+matching the variants validated in Schmitz, Rougier, & Yzerbyt
+(2024):
 
-The mathematical reason is informative. Schmitz's `genMask()`
-formula does not depend on how many alternatives are shown per
-trial: it always reduces to mean-by-stim of the chosen pool
-ids, divided by `length(unique(chosen_stim))`. The package's
+-   `"briefrc12"` (default): 12 alternatives per trial, 6
+    original + 6 inverted, arranged in a 3 x 4 grid in the
+    Schmitz et al. study.
+-   `"briefrc20"`: 20 alternatives per trial, 10 original + 10
+    inverted, arranged in a 4 x 5 grid in the Schmitz et al.
+    study.
+
+The CI computation is identical for both variants. Schmitz's
+`genMask()` formula does not depend on how many alternatives are
+shown per trial; it always reduces to mean-by-stim of the chosen
+pool ids, divided by `length(unique(chosen_stim))`. The package's
 random-responder reference simulator for `infoval()` similarly
 relies on a 50/50 original/inverted marginal per trial, which
-holds for any symmetric Brief-RC split (6/6, 10/10, ...). So
-the gate in the wrapper is a guardrail pending validation
-fixtures rather than a math limitation.
+holds for any symmetric Brief-RC split. The `method` argument is
+therefore metadata: it is recorded in the result list (as
+`$method`) so that downstream code, reports, and citations can
+indicate which paradigm produced the data, but it does not branch
+the computation.
 
-The practical consequence is that **every other function in
-the package operates downstream of the wrapper and does not
-gate**. `infoval()`, `rel_*`, `agreement_map_test()`,
-`pixel_t_test()`, `rel_cluster_test()`, and
-`rel_dissimilarity()` all take a signal matrix and never ask
-how many alternatives the producer was shown per trial. If you
-have Brief-RC 20 data, you can build the signal matrix by hand
-using the same five-step recipe shown in §12.5 (the formula is
-unchanged), or by calling Schmitz's own `genMask()` adaptation
-on OSF, and then feed the resulting matrix to every downstream
-metric without further intervention.
+Other split sizes (Brief-RC 4, 6, 8, 10) are mentioned in the
+Schmitz et al. (2024) discussion as possible future variants
+worth investigating, but they have not been validated and are
+not exposed in `rcisignal`. If you genuinely need to compute
+masks for one of those configurations, the §12.5 hand-rolled
+five-step recipe applies unchanged (the formula is symmetric in
+the per-trial split), but the result should be reported as
+exploratory.
 
-### 13.2 End-to-end Brief-RC 12 example
+### 13.2 End-to-end Brief-RC example
 
 ```{r briefrc-end-to-end, eval = FALSE}
 library(rcisignal)
@@ -2699,13 +2707,15 @@ reasons in roughly the order they tend to apply.
 
 1. **Frobenius norm is a global energy statistic.** It sums
    squared pixel deviations across the *entire* image. Real
-   internal representations are usually spatially sparse (eyes,
-   mouth, jaw, perhaps 10-30% of pixels), so the 70-90% of
-   "background" pixels contribute noise of similar magnitude to
-   the chance reference and dilute the signal-bearing region. A
-   producer with strong, visually-obvious signal in the eyes can
-   have a Frobenius norm only marginally above the random
-   reference.
+   internal representations are usually spatially sparse,
+   concentrated in face features (eyes, mouth, jaw) rather than
+   spanning the whole image grid. Pixels outside that region
+   contribute noise of similar magnitude to the chance reference,
+   and that noise dilutes the signal-bearing region in the
+   global norm. A producer with strong, visually-obvious signal
+   in the eyes can therefore have a Frobenius norm only
+   marginally above the random reference. (See point 4 below for
+   the practical countermeasure.)
 
 2. **The reference is strict because it lives in the same
    subspace.** Both the observed mask and the reference are
@@ -2728,22 +2738,45 @@ reasons in roughly the order they tend to apply.
    concentrates the norm on signal-bearing pixels and typically
    lifts z-scores noticeably.
 
-5. **Group-level CIs have much higher z than individual CIs.**
-   Averaging 20 producers' masks reduces noise by sqrt(20) ~
-   4.5x, so the group-mean CI's effective trial count is
-   `300 x 20 = 6000` for a 20-producer condition. The infoVal of
-   the group-mean CI is usually 5-10x the per-producer median;
-   this is a structural sqrt(N) consequence of averaging, not a
-   defect of the per-producer metric. Brinkman et al. (2019)
-   themselves only ever computed infoVal on individual CIs (the
-   paper reported mean per-producer infoVal of 3.9 in lab and
-   2.9 in online samples, with 68% / 54% of producers
-   individually exceeding 1.96). For group-level reporting they
-   recommended inspecting the distribution of per-producer
-   infoVals contributing to the group CI rather than computing
-   one infoVal on the group-mean CI. Either choice is
-   defensible; the worked example in §12.4 reports both
-   alongside.
+5. **Group-level CIs can show higher z than individual CIs, but
+   the inflation is conditional, not structural.** Two pieces of
+   math feed into this, and both need stating. First, averaging
+   `N` producer masks under independent-noise assumptions reduces
+   noise variance by `1/N` and the noise norm by `1/sqrt(N)`. So
+   the group-mean CI of `N` producers each contributing `T` trials
+   has noise comparable to a single producer with `N x T` trials
+   (a 20-producer condition at 300 trials each gives an effective
+   `6000`-trial noise floor). Second, whether that noise reduction
+   actually translates into a sqrt(N)-style increase in group-mean
+   infoVal over the per-producer median depends on whether the
+   producers' signals are spatially aligned. If producers share a
+   common spatial template, signal survives the averaging and the
+   group-mean z grows roughly as sqrt(N) above the per-producer
+   floor. If producer templates are idiosyncratic, averaging
+   cancels signal as well as noise and the group-mean z stays
+   modest. The Oliveira et al. (2019) reanalysis in §12.4 shows
+   both regimes in the same dataset: friendly / unfriendly, where
+   per-producer signal is broadly shared, land at group-mean z of
+   roughly 15-18; incompetent / unintelligent, where alignment is
+   weaker, sit near z = 2. The ratio `group_z / per_producer_median`
+   is therefore not a fixed inflation factor; it is a joint
+   readout of `N`, `T`, and producer alignment.
+
+   Brinkman et al. (2019) only ever computed infoVal on
+   individual CIs. They reported a mean per-producer infoVal of
+   3.9 (lab) and 2.9 (online), with 68% / 54% of producers
+   individually exceeding 1.96 (their pp. 12, 14). For group-
+   level reporting they explicitly recommended inspecting the
+   *distribution* of per-producer infoVals contributing to the
+   group CI rather than computing a single infoVal on the
+   averaged noise pattern (their p. 13). The group-mean infoVal
+   this package offers (`group_mean_z()`, called inside
+   `diagnose_infoval()`) is a package-level extension of that
+   recipe and has not been independently validated for social-
+   face RC (see §1.2). The §12.4 worked example reports both
+   numbers alongside; treat the group-mean z as a supplementary
+   headline, not a replacement for the Brinkman-style per-
+   producer distribution.
 
 ### 15.1 Diagnostic recipe
 
@@ -2775,7 +2808,8 @@ group   <- matrix(rowMeans(sm), ncol = 1,
 tc_grp  <- setNames(sum(tc), "group")
 iv_grp  <- infoval(group, noise_matrix, tc_grp,
                    iter = 1000L, seed = 1L)
-iv_grp$infoval                 # typically large (e.g. > 5)
+iv_grp$infoval                 # value depends on signal alignment;
+                               # see paragraph 5 of §15
 
 # 4. Sanity-check the chance baseline. A random-mask producer
 #    should give z ~ 0 within MAD noise.
@@ -2808,9 +2842,14 @@ statistics:
 - The **median per-producer infoVal z** and the **proportion of
   producers above z = 1.96**, mirroring Brinkman et al.'s (2019)
   reporting choice.
-- The **group-mean CI's infoVal z** as a single headline number.
-  This is structurally larger by sqrt(N) but useful as the
-  publishable group-level statistic.
+- The **group-mean CI's infoVal z** as a supplementary headline
+  number. Under signal alignment this can be substantially larger
+  than the per-producer median, with a sqrt(N)-style upper
+  envelope; under weak alignment it stays close to per-producer
+  values (paragraph 5 of §15 spells out why). This metric is a
+  package-level extension and has not been independently
+  validated for social-face RC (§1.2), so report it as
+  exploratory rather than primary.
 
 The two numbers answer different questions. The median tells you
 how informative a *typical individual CI* is; the group-mean z

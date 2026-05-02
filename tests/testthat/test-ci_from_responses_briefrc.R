@@ -94,20 +94,70 @@ test_that("Brief-RC `{0,1}` miscoding gets a recoding hint in error", {
   expect_match(err, "Recode in one line")
 })
 
-test_that("briefrc20 method aborts with a clear message", {
+test_that("briefrc20 produces same signal matrix as briefrc12 on identical data", {
+  # Mathematically the formula is symmetric in the per-trial split
+  # (6/6 for briefrc12, 10/10 for briefrc20). The `method`
+  # argument is metadata: it should not branch the computation.
   skip_if_not_installed("png")
+  set.seed(11)
+  n_pix <- 16L * 16L
+  noise_matrix <- matrix(rnorm(n_pix * 50L), n_pix, 50L)
   base_path <- tempfile(fileext = ".png")
-  png::writePNG(matrix(0.5, 4L, 4L), base_path)
+  png::writePNG(matrix(0.5, 16L, 16L), base_path)
   responses <- data.frame(
-    participant_id = "p1", trial = 1L, stimulus = 1L, response = 1L
+    participant_id = rep(c("p1", "p2"), each = 30L),
+    trial          = rep(1:30, 2L),
+    stimulus       = sample.int(50L, 60L, replace = TRUE),
+    response       = sample(c(-1L, 1L), 60L, replace = TRUE)
   )
-  expect_error(
-    ci_from_responses_briefrc(
-      responses, noise_matrix = matrix(0, 16L, 2L),
-      base_image_path = base_path, method = "briefrc20"
-    ),
-    "not supported"
+
+  res12 <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix,
+    base_image_path = base_path, method = "briefrc12"
   )
+  res20 <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix,
+    base_image_path = base_path, method = "briefrc20"
+  )
+  expect_equal(res20$signal_matrix, res12$signal_matrix)
+  expect_identical(res20$method, "briefrc20")
+  expect_identical(res12$method, "briefrc12")
+})
+
+test_that("briefrc20 round-trips: hand-computed mask matches genMask", {
+  # Positive round-trip: feed a 20-image-per-trial-shaped dataset
+  # and verify per-producer mask equals the Schmitz formula
+  # applied by hand.
+  skip_if_not_installed("png")
+  set.seed(12)
+  n_pix <- 16L * 16L
+  n_pool <- 200L
+  noise_matrix <- matrix(rnorm(n_pix * n_pool), n_pix, n_pool)
+  base_path <- tempfile(fileext = ".png")
+  png::writePNG(matrix(0.5, 16L, 16L), base_path)
+
+  # Brief-RC 20: 50 trials per producer; on each trial the
+  # producer picks one stimulus from the 20-image set and labels
+  # it +1 (original) or -1 (inverted). Recorded as one row per
+  # trial with the chosen pool id.
+  responses <- data.frame(
+    participant_id = rep(c("p1", "p2"), each = 50L),
+    trial          = rep(1:50, 2L),
+    stimulus       = sample.int(n_pool, 100L, replace = TRUE),
+    response       = sample(c(-1L, 1L), 100L, replace = TRUE)
+  )
+
+  res <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix,
+    base_image_path = base_path, method = "briefrc20"
+  )
+  expect_equal(dim(res$signal_matrix), c(n_pix, 2L))
+
+  sub <- responses[responses$participant_id == "p1", ]
+  X <- data.table::data.table(response = sub$response, stim = sub$stimulus)
+  X <- X[, list(response = mean(response)), by = "stim"]
+  hand_mask <- as.numeric(noise_matrix[, X$stim] %*% X$response) / nrow(X)
+  expect_equal(res$signal_matrix[, "p1"], hand_mask, tolerance = 1e-10)
 })
 
 test_that("default scaling = 'none' returns no rendered_ci field", {

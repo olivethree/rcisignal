@@ -33,7 +33,13 @@ is not \code{"none"}) to render the visualisation-only
 
 \item{participant_col, stimulus_col, response_col}{Column names.}
 
-\item{method}{One of \code{"briefrc12"}. \code{"briefrc20"} is reserved.}
+\item{method}{Brief-RC variant: \code{"briefrc12"} (12 alternatives
+per trial, 6 original + 6 inverted; the default) or
+\code{"briefrc20"} (20 alternatives per trial, 10 original + 10
+inverted). Both variants are validated in Schmitz, Rougier,
+& Yzerbyt (2024). The CI computation is identical for both;
+the argument is kept as metadata so that downstream code and
+reports can record which paradigm produced the data.}
 
 \item{scaling}{Visualisation-only scaling for the optional
 \verb{$rendered_ci} field. One of \code{"none"} (default), \code{"matched"}
@@ -47,7 +53,8 @@ unscaled mask.}
 }
 \value{
 A list with \code{signal_matrix}, optionally \code{rendered_ci},
-\code{participants}, \code{img_dims}, \code{scaling}.
+\code{participants}, \code{img_dims}, \code{scaling}, and \code{method} (the
+Brief-RC variant the call was made with).
 }
 \description{
 Native implementation of Schmitz, Rougier & Yzerbyt (2024)'s
@@ -57,9 +64,9 @@ noise-pattern pool (the \code{stimuli} object inside an \code{.Rdata}
 from \code{generateStimuli2IFC()}) is reused; the mask is computed
 in pure R.
 
-Use this when you have Brief-RC 12 trial-level responses and
-want the package to produce per-producer noise masks ready for
-the reliability metrics.
+Use this when you have Brief-RC 12 or Brief-RC 20 trial-level
+responses and want the package to produce per-producer noise
+masks ready for the reliability metrics.
 }
 \details{
 Formula (Schmitz's \code{genMask()} exactly):
@@ -73,6 +80,12 @@ The \code{length(X$response)} denominator is the number of unique
 pool ids chosen by that participant, not the raw trial count.
 If a participant chooses the same stimulus on two trials with
 opposite responses, those two cancel.
+
+The formula is symmetric in the per-trial split (6/6 for
+Brief-RC 12, 10/10 for Brief-RC 20), so the same code path
+handles both variants. The \code{method} argument is recorded as
+provenance metadata and validated; it does not branch the
+computation.
 }
 \section{Reading the result}{
 
@@ -89,14 +102,12 @@ producer. \strong{Visualisation only.}
 \section{Common mistakes}{
 
 \itemize{
-\item Passing the "expanded" 12-rows-per-trial response format.
-Brief-RC 12 is one row per trial; \code{stimulus} is the chosen
-pool id and \code{response} is \code{+1} (original) or \code{-1} (inverted).
-See Schmitz et al. (2024) sec. 3.1.2.
+\item Passing the "expanded" multi-row-per-trial response format.
+Brief-RC data is \strong{one row per trial}; \code{stimulus} is the
+chosen pool id and \code{response} is \code{+1} (original) or \code{-1}
+(inverted). See Schmitz et al. (2024) sec. 3.1.2.
 \item Using \verb{$rendered_ci} for downstream stats; it exists only
 because the user often wants to save a PNG.
-\item Asking for \code{method = "briefrc20"}; reserved for a future
-release and aborts.
 }
 }
 

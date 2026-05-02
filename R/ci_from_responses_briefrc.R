@@ -8,9 +8,9 @@
 #' from `generateStimuli2IFC()`) is reused; the mask is computed
 #' in pure R.
 #'
-#' Use this when you have Brief-RC 12 trial-level responses and
-#' want the package to produce per-producer noise masks ready for
-#' the reliability metrics.
+#' Use this when you have Brief-RC 12 or Brief-RC 20 trial-level
+#' responses and want the package to produce per-producer noise
+#' masks ready for the reliability metrics.
 #'
 #' @details
 #' Formula (Schmitz's `genMask()` exactly):
@@ -24,6 +24,12 @@
 #' If a participant chooses the same stimulus on two trials with
 #' opposite responses, those two cancel.
 #'
+#' The formula is symmetric in the per-trial split (6/6 for
+#' Brief-RC 12, 10/10 for Brief-RC 20), so the same code path
+#' handles both variants. The `method` argument is recorded as
+#' provenance metadata and validated; it does not branch the
+#' computation.
+#'
 #' @section Reading the result:
 #' * `$signal_matrix` is the raw mask per producer; pass this and
 #'   only this to reliability metrics or any external infoVal
@@ -33,14 +39,12 @@
 #' * `$participants` and `$img_dims` are convenience metadata.
 #'
 #' @section Common mistakes:
-#' * Passing the "expanded" 12-rows-per-trial response format.
-#'   Brief-RC 12 is one row per trial; `stimulus` is the chosen
-#'   pool id and `response` is `+1` (original) or `-1` (inverted).
-#'   See Schmitz et al. (2024) sec. 3.1.2.
+#' * Passing the "expanded" multi-row-per-trial response format.
+#'   Brief-RC data is **one row per trial**; `stimulus` is the
+#'   chosen pool id and `response` is `+1` (original) or `-1`
+#'   (inverted). See Schmitz et al. (2024) sec. 3.1.2.
 #' * Using `$rendered_ci` for downstream stats; it exists only
 #'   because the user often wants to save a PNG.
-#' * Asking for `method = "briefrc20"`; reserved for a future
-#'   release and aborts.
 #'
 #' @param responses Data frame with one row per trial. Must contain
 #'   the columns named by `participant_col`, `stimulus_col`,
@@ -53,7 +57,13 @@
 #'   is not `"none"`) to render the visualisation-only
 #'   `$rendered_ci` field.
 #' @param participant_col,stimulus_col,response_col Column names.
-#' @param method One of `"briefrc12"`. `"briefrc20"` is reserved.
+#' @param method Brief-RC variant: `"briefrc12"` (12 alternatives
+#'   per trial, 6 original + 6 inverted; the default) or
+#'   `"briefrc20"` (20 alternatives per trial, 10 original + 10
+#'   inverted). Both variants are validated in Schmitz, Rougier,
+#'   & Yzerbyt (2024). The CI computation is identical for both;
+#'   the argument is kept as metadata so that downstream code and
+#'   reports can record which paradigm produced the data.
 #' @param scaling Visualisation-only scaling for the optional
 #'   `$rendered_ci` field. One of `"none"` (default), `"matched"`
 #'   (stretch mask to base range, then add to base) or
@@ -63,7 +73,8 @@
 #' @param scaling_constant Numeric multiplier used when
 #'   `scaling = "constant"`. Ignored otherwise.
 #' @return A list with `signal_matrix`, optionally `rendered_ci`,
-#'   `participants`, `img_dims`, `scaling`.
+#'   `participants`, `img_dims`, `scaling`, and `method` (the
+#'   Brief-RC variant the call was made with).
 #' @seealso [ci_from_responses_2ifc()], [run_reliability()],
 #'   [run_discriminability()]
 #' @references
@@ -96,13 +107,6 @@ ci_from_responses_briefrc <- function(responses,
                                       scaling_constant = NULL) {
   method  <- match.arg(method)
   scaling <- match.arg(scaling)
-  if (method == "briefrc20") {
-    cli::cli_abort(c(
-      "Brief-RC 20 is not supported in this release.",
-      "i" = "rcisignal currently supports {.val briefrc12} only; \\
-             Brief-RC 20 is on the roadmap."
-    ))
-  }
   if (scaling == "constant") {
     if (is.null(scaling_constant) ||
           !is.numeric(scaling_constant) ||
@@ -226,7 +230,8 @@ ci_from_responses_briefrc <- function(responses,
     signal_matrix = signal_matrix,
     participants  = participants,
     img_dims      = img_dims,
-    scaling       = scaling
+    scaling       = scaling,
+    method        = method
   )
 
   if (scaling != "none") {
