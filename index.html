@@ -152,27 +152,67 @@
 </table>
 </li>
 <li>
-<p><strong>The stimulus pool that produced the noise patterns.</strong> Either:</p>
+<p><strong>The stimulus pool that produced the noise patterns shown to participants.</strong> Either:</p>
 <ul>
 <li>an <code>.Rdata</code> file from <code><a href="https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html" class="external-link">rcicr::generateStimuli2IFC()</a></code> (2IFC), or</li>
-<li>a noise-matrix text file (<code>n_pixels</code> rows × <code>pool_size</code> columns) <strong>plus</strong> a base-face image file (Brief-RC).</li>
+<li>a noise-matrix text file <strong>plus</strong> a base-face image file (Brief-RC).</li>
 </ul>
 </li>
 </ol>
 </div>
 <div class="section level3">
-<h3 id="what-is-a-signal_matrix">What is a <code>signal_matrix</code>?<a class="anchor" aria-label="anchor" href="#what-is-a-signal_matrix"></a>
+<h3 id="three-things-that-all-sound-similar--keep-them-apart">Three things that all sound similar — keep them apart<a class="anchor" aria-label="anchor" href="#three-things-that-all-sound-similar--keep-them-apart"></a>
 </h3>
-<p>The central object of <code>rcisignal</code>. It is a numeric matrix where:</p>
+<p>Reverse correlation work involves several pixel matrices that are easy to confuse. In <code>rcisignal</code>, each one has exactly one job:</p>
+<table class="table">
+<colgroup>
+<col width="17%">
+<col width="46%">
+<col width="22%">
+<col width="13%">
+</colgroup>
+<thead><tr>
+<th>name</th>
+<th>what it is</th>
+<th>shape</th>
+<th>input or output?</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong><code>noise_matrix</code></strong></td>
+<td>the <strong>input</strong> pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern.</td>
+<td>
+<code>n_pixels</code> × <code>pool_size</code>
+</td>
+<td>input (you give it to the package)</td>
+</tr>
+<tr>
+<td>
+<strong>noise mask</strong> (a.k.a. “per-participant CI”)</td>
+<td>
+<strong>one participant’s</strong> classification image: a single vector of pixel values, base-subtracted. Conceptually, the weighted average of the noise patterns they “selected” with their responses.</td>
+<td>
+<code>n_pixels</code> × 1 (one column)</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><strong><code>signal_matrix</code></strong></td>
+<td>
+<strong>all participants’ noise masks stacked side by side</strong>, one column per producer. This is the central object of <code>rcisignal</code>.</td>
+<td>
+<code>n_pixels</code> × <code>n_participants</code>
+</td>
+<td>output (you pass it to every <code>rel_*</code>, <code>run_reliability</code>, <code>run_discriminability</code> call)</td>
+</tr>
+</tbody>
+</table>
+<p>Plain-English summary:</p>
 <ul>
-<li>
-<strong>rows</strong> = pixels of the CI (e.g. 256 × 256 = 65 536 rows),</li>
-<li>
-<strong>columns</strong> = participants (one column per producer),</li>
-<li>
-<strong>values</strong> = that participant’s base-subtracted pixel-level CI (their “noise mask”).</li>
+<li>The <strong><code>noise_matrix</code></strong> describes the <em>stimuli</em> (what the experiment showed). It exists <em>before</em> any participant runs the task.</li>
+<li>A <strong>noise mask</strong> describes <em>one participant’s</em> CI. It exists <em>after</em> that participant has responded.</li>
+<li>The <strong><code>signal_matrix</code></strong> describes <em>the whole sample’s</em> CIs. It is the collection of all individual noise masks lined up by participant — the matrix every reliability and discriminability function in the package consumes.</li>
 </ul>
-<p>Every <code>rel_*</code>, <code>run_reliability</code>, and <code>run_discriminability</code> function consumes a matrix of this shape. You build one with <code><a href="reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> or <code><a href="reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>, which return a list whose <code>$signal_matrix</code> element is the matrix you pass downstream. (The package’s <code>noise_matrix</code> argument is unrelated — that is the input pool of patterns, not the per-participant output.)</p>
+<p>You don’t build the noise mask or the <code>signal_matrix</code> by hand: <code><a href="reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> and <code><a href="reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> do it for you and return a list whose <code>$signal_matrix</code> element is the matrix you pass downstream.</p>
 </div>
 <div class="section level3">
 <h3 id="step-1-diagnose-the-raw-data">Step 1. Diagnose the raw data<a class="anchor" aria-label="anchor" href="#step-1-diagnose-the-raw-data"></a>
