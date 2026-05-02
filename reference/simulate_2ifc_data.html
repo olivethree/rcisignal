@@ -173,6 +173,10 @@ and columns <code>participant_id</code>, <code>condition</code>, <code>trial</co
 coefficients (the rcicr <code>stimuli_params</code>).</p></li>
 <li><p><code>p</code> — the rcicr noise basis (<code>generateNoisePattern()</code>
 output); pair with <code>params</code> to regenerate any noise image.</p></li>
+<li><p><code>rdata_path</code> — path to an rcicr-format <code>.Rdata</code> file written
+to a session tempdir, suitable for
+<code><a href="ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> / <code><a href="compute_infoval_summary.html">compute_infoval_summary()</a></code>
+and other downstream functions that take an <code>rdata</code> argument.</p></li>
 <li><p><code>signal</code> — pixel-level signal vector used to plant the
 response bias.</p></li>
 <li><p><code>meta</code> — list of method, <code>n_per_condition</code>, <code>conditions</code>,

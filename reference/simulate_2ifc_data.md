@@ -122,6 +122,13 @@ An object of class `"rcisignal_sim"` with elements:
 - `p` — the rcicr noise basis (`generateNoisePattern()` output); pair
   with `params` to regenerate any noise image.
 
+- `rdata_path` — path to an rcicr-format `.Rdata` file written to a
+  session tempdir, suitable for
+  [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+  /
+  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md)
+  and other downstream functions that take an `rdata` argument.
+
 - `signal` — pixel-level signal vector used to plant the response bias.
 
 - `meta` — list of method, `n_per_condition`, `conditions`, `n_trials`,
