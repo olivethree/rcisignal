@@ -552,6 +552,87 @@ square base, face filling most of the frame). Pass `centre`,
 `half_width`, and `half_height` to `make_face_mask()` if your
 base image has different framing.
 
+#### Tuning a sub-region for a non-default base face
+
+The default sub-region geometry (eyes, nose, mouth) is calibrated
+for a centred, frontal base face that fills most of the frame,
+following Schmitz et al. (2024). When the base image violates that
+assumption, the parametric overlay drifts off the intended feature
+and the metrics computed against it no longer mean what their name
+implies.
+
+If every feature is offset in the same direction, pass the global
+`centre` (and optionally `half_width`, `half_height`) to
+`make_face_mask()`:
+
+```{r mask-tune-global, eval = FALSE}
+# Whole-face shift: eyes, nose, and mouth move together.
+make_face_mask(c(256L, 256L), region = "eyes",
+               centre = c(0.55, 0.50))   # 5% down
+```
+
+For independent per-region tuning (a common need with non-portrait
+or AI-generated bases), the simplest recipe is: take the default
+mask returned by `make_face_mask()`, reshape it back into a
+`nrow x ncol` logical matrix (so you can think of it as a grid of
+pixels), and slide that grid by a few pixels in any direction. A
+small helper does the slide; pixels shifted off the image are
+dropped, and the new edges are filled with `FALSE`.
+
+```{r mask-tune-eyes, eval = FALSE}
+# Default eye mask, reshaped from a column-major logical vector
+# back into a 256 x 256 grid.
+eye_mask_default <- matrix(
+  make_face_mask(c(256L, 256L), region = "eyes"),
+  nrow = 256, ncol = 256
+)
+
+# Shift a logical mask by `down` and `right` pixels. Positive
+# values move the mask down / right; negative values move it up /
+# left.
+shift_mask <- function(mask, down = 0, right = 0) {
+  out <- matrix(FALSE, nrow(mask), ncol(mask))
+  src_rows <- seq_len(nrow(mask)) - down
+  src_cols <- seq_len(ncol(mask)) - right
+  keep_r   <- src_rows >= 1 & src_rows <= nrow(mask)
+  keep_c   <- src_cols >= 1 & src_cols <= ncol(mask)
+  out[keep_r, keep_c] <- mask[src_rows[keep_r], src_cols[keep_c]]
+  out
+}
+
+# Tune. On a 256-pixel image, 20 pixels is about 8 % of the height
+# and 8 pixels is about 3 % of the width.
+eye_mask_v  <- shift_mask(eye_mask_default, down = 20)
+eye_mask_vh <- shift_mask(eye_mask_default, down = 20, right = 8)
+```
+
+`shift_mask()` accepts both `down` and `right` and combines them in
+a single call, so vertical-only and vertical-plus-horizontal tuning
+share the same idiom. Both `infoval()` and the `rel_*()` family
+accept a logical matrix as the `mask` argument, so the tuned grid
+can be passed in directly without flattening.
+
+Rendered over the same `artif_base.png` shown earlier (where the
+eye line sits noticeably below the Schmitz default), the default
+mask and the two tuned variants look as follows:
+
+```{r mask-tune-fig, eval = TRUE, echo = FALSE, fig.show = "hold", out.width = "32%", fig.cap = "Eye-region mask before and after tuning on a base face whose eye line sits below the Schmitz default. Left: default geometry, where the eye ovals sit on the eyebrows. Middle: shifted down by ~20 pixels (about 8 percent of image height), which drops the ovals onto the eyes. Right: same vertical shift plus an ~8-pixel rightward shift, illustrating the second knob. Each panel renders one of the matrices produced by `shift_mask()` above."}
+imgs <- file.path("figures/face_masks",
+                  c("artificial_eyes_demo_default.png",
+                    "artificial_eyes_demo_shift_v.png",
+                    "artificial_eyes_demo_shift_vh.png"))
+imgs <- imgs[file.exists(imgs)]
+if (length(imgs)) knitr::include_graphics(imgs)
+```
+
+Iterate with `plot_face_mask()` until the overlay sits where you
+want, then pass the tuned mask to `infoval()` or any `rel_*()`
+function exactly as you would a parametric mask. Useful shift
+magnitudes are typically a few pixels to a few dozen on a 256-pixel
+image; if you find yourself needing more than that, the whole face
+is probably misaligned and `centre` should be retuned at the global
+level via `make_face_mask()` instead.
+
 ## 5. Step 1: diagnose the inputs
 
 Before computing CIs, run the diagnostic battery. The single
