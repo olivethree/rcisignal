@@ -1,11 +1,6 @@
 <!-- README.md (rendered at https://olivethree.github.io/rcisignal/) -->
 
-<table border="0">
-<tr>
-<td width="200" valign="middle">
-<img src="man/figures/logo.png" width="180"/>
-</td>
-<td valign="middle">
+<img src="man/figures/logo.png" align="left" width="180" hspace="20"/>
 
 # rcisignal
 
@@ -14,9 +9,7 @@ A toolkit for quality assessment of reverse correlation
 *before* classification image (CI) computation, then quantifies CI
 quality *after*: magnitude, stability, and discriminability.
 
-</td>
-</tr>
-</table>
+<br clear="left"/>
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19961180.svg)](https://doi.org/10.5281/zenodo.19961180)
