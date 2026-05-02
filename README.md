@@ -322,8 +322,7 @@ Released under the [MIT License](LICENSE.md).
 
 ## Credits
 
-Designed by [Manuel Oliveira](https://manueloliveira.nl/)
-<a href="https://orcid.org/0000-0002-6220-0695"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" alt="ORCID iD" width="16" height="16"/></a>
+Designed by [Manuel Oliveira](https://manueloliveira.nl/) <a href="https://orcid.org/0000-0002-6220-0695"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" alt="ORCID iD" width="16" height="16" style="vertical-align: middle;"/></a>
 
 Code and documentation were co-built with Claude (Opus 4.6, Anthropic;
 April-May 2026).
