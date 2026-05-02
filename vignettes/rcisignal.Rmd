@@ -101,27 +101,51 @@ take a signal matrix as input, as do `rel_split_half()`,
 `agreement_map_test()`. Getting the signal matrix right
 suffices for everything downstream.
 
-A note on terminology. We call this object a *signal matrix*
-because that is where any signal a producer's responses introduce
-will sit (if any signal is present at all). Other RC papers call
-the same object a *noise matrix*, because the underlying pixel
-values are visual noise patterns. Both names are reasonable: the
-data really do contain a mixture of noise (the per-trial random
-patterns the experiment showed) and signal (the producer's
-sign-weighted aggregation of those patterns). The metrics in this
-package are specifically designed to test how much of that
-mixture is signal rather than noise. Whatever you call the
-object, the shape and interpretation are the same.
+### 3.0 Three pixel matrices that all sound similar — keep them apart
 
-To avoid ambiguity, `rcisignal`'s code reserves the name
-`noise_matrix` for a *different* object: the `n_pixels x
-pool_size` matrix of trial-level noise patterns produced at
-stimulus generation. That matrix is an *input* to CI computation
-and to `infoval()`'s reference simulation; the *signal matrix*
-is the per-producer *output* (one column per producer, each
-column the producer's mean noise pattern weighted by their
-trial-level responses). §4.3 covers `noise_matrix`; the rest of
-this section is about the signal matrix.
+Reverse-correlation work involves several pixel matrices that
+are easy to confuse, and `rcisignal`'s API uses argument names
+that look alike (`noise_matrix`, `signal_matrix`, `mask`). Each
+one has exactly one job:
+
+| name                  | what it is                                                                                                                                          | shape                          | input or output? |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|------------------|
+| **`noise_matrix`**    | the **input** pool of pre-generated noise patterns the experiment chose stimuli from. One column per pool pattern.                                  | `n_pixels` × `pool_size`       | input (you supply it; §4.3) |
+| **noise mask** (a.k.a. *raw mask*, *per-participant CI*) | **one participant's** classification image: a single vector of pixel values, base-subtracted. Conceptually the weighted average of the noise patterns that participant "selected" with their responses. The word *mask* here means *image-shaped overlay* — it is **not** a logical face-region mask (those are §4.5). | `n_pixels` × 1                 | intermediate     |
+| **`signal_matrix`**   | **all participants' noise masks stacked side by side**, one column per producer. The central object of `rcisignal`; every reliability/discriminability function consumes a matrix of this shape. | `n_pixels` × `n_participants`  | output (you pass it downstream) |
+
+Plain-English summary:
+
+-   The **`noise_matrix`** describes the *stimuli* (what the
+    experiment showed). It exists *before* any participant runs
+    the task. §4.3 covers how to read it.
+-   A **noise mask** describes *one participant's* CI. It exists
+    *after* that participant has responded. You normally do not
+    handle it directly; it is one column of the `signal_matrix`.
+-   The **`signal_matrix`** describes *the whole sample's* CIs.
+    It is the collection of all individual noise masks lined up
+    by participant — what every `rel_*`, `run_reliability()`,
+    `run_discriminability()`, `infoval()`, and
+    `agreement_map_test()` call consumes.
+
+You don't build the noise mask or the `signal_matrix` by hand:
+`ci_from_responses_2ifc()` and `ci_from_responses_briefrc()` do
+it for you and return a list whose `$signal_matrix` element is
+the matrix you pass downstream.
+
+A note on the *signal matrix* name. Other RC papers sometimes
+call this same per-producer object a *noise matrix*, because the
+underlying pixel values are visual noise patterns. Both names
+are reasonable: the data really do contain a mixture of noise
+(the per-trial random patterns the experiment showed) and signal
+(the producer's sign-weighted aggregation of those patterns).
+The metrics in this package are designed to test how much of
+that mixture is signal rather than noise, hence *signal matrix*.
+To avoid the name collision, `rcisignal`'s code reserves
+`noise_matrix` strictly for the input pool above (the row of the
+table) and `signal_matrix` strictly for the per-producer output
+(the third row). Whatever you call the object in your own
+writing, the shape and interpretation are the same.
 
 Two paths lead to a signal matrix, with different downstream
 consequences.
