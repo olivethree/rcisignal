@@ -1,11 +1,22 @@
 <!-- README.md (rendered at https://olivethree.github.io/rcisignal/) -->
 
-# rcisignal <img src="man/figures/logo.png" align="right" height="139"/>
+<table border="0">
+<tr>
+<td width="200" valign="middle">
+<img src="man/figures/logo.png" width="180"/>
+</td>
+<td valign="middle">
+
+# rcisignal
 
 A toolkit for quality assessment of reverse correlation
 (RC) experiments end-to-end. Catches silent data-processing errors
 *before* classification image (CI) computation, then quantifies CI
 quality *after*: magnitude, stability, and discriminability.
+
+</td>
+</tr>
+</table>
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19961180.svg)](https://doi.org/10.5281/zenodo.19961180)
