@@ -153,8 +153,8 @@ untrustworthy <- ci_from_responses_2ifc(
 )
 
 # Did participants agree within each condition?
-print(run_within(trustworthy$signal_matrix,   seed = 1))
-print(run_within(untrustworthy$signal_matrix, seed = 1))
+print(run_reliability(trustworthy$signal_matrix,   seed = 1))
+print(run_reliability(untrustworthy$signal_matrix, seed = 1))
 ```
 
 ### 3. Between-condition discriminability
@@ -162,7 +162,7 @@ print(run_within(untrustworthy$signal_matrix, seed = 1))
 Are the two conditions actually distinguishable?
 
 ``` r
-result <- run_between(
+result <- run_discriminability(
   trustworthy$signal_matrix,
   untrustworthy$signal_matrix,
   seed = 1
@@ -176,12 +176,12 @@ plot(result)   # cluster map of pixels where conditions differ
 If you have your CIs as image files on disk:
 
 ``` r
-trustworthy   <- load_signal_matrix("data/cis_trustworthy/",   "data/base.jpg")
-untrustworthy <- load_signal_matrix("data/cis_untrustworthy/", "data/base.jpg")
+trustworthy   <- read_signal_matrix("data/cis_trustworthy/",   "data/base.jpg")
+untrustworthy <- read_signal_matrix("data/cis_untrustworthy/", "data/base.jpg")
 
-print(run_within(trustworthy,   seed = 1))
-print(run_within(untrustworthy, seed = 1))
-print(run_between(trustworthy, untrustworthy, seed = 1))
+print(run_reliability(trustworthy,   seed = 1))
+print(run_reliability(untrustworthy, seed = 1))
+print(run_discriminability(trustworthy, untrustworthy, seed = 1))
 ```
 
 > **Heads-up.** Results from PNG/JPEG inputs may differ slightly from
@@ -224,7 +224,7 @@ second condition stronger.
 |  |  |
 |----|----|
 | **Trustworthy − Friendly** | **Dominant − Competent** |
-| ![Descriptive map: trust minus friendly](vignettes/figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png){alt="Descriptive map: trust minus friendly"} | ![Descriptive map: dominant minus competent](vignettes/figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png){alt="Descriptive map: dominant minus competent"} |
+| ![Descriptive map: trust minus friendly](vignettes/figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png) | ![Descriptive map: dominant minus competent](vignettes/figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png) |
 
 ### FWER-controlled cluster-agreement maps
 
@@ -235,7 +235,7 @@ stratified label permutations; max-mass null).
 |  |  |
 |----|----|
 | **Trustworthy − Friendly** | **Dominant − Competent** |
-| ![FWER map: trust minus friendly](vignettes/figures/oliveira_2019/pairwise_trust_vs_friendly.png){alt="FWER map: trust minus friendly"} | ![FWER map: dominant minus competent](vignettes/figures/oliveira_2019/pairwise_dominant_vs_competent.png){alt="FWER map: dominant minus competent"} |
+| ![FWER map: trust minus friendly](vignettes/figures/oliveira_2019/pairwise_trust_vs_friendly.png) | ![FWER map: dominant minus competent](vignettes/figures/oliveira_2019/pairwise_dominant_vs_competent.png) |
 
 The two contrasts pick out qualitatively different spatial signatures,
 broadly consistent with the prediction. Trustworthy versus Friendly
@@ -330,7 +330,7 @@ April-May 2026).
 
 ### Acknowledgements to the community
 
-This package builds on the excellent and thorough foundational work by
+This package builds on the excellent foundational work by
 Ron Dotsch, Loek Brinkman, Alex Todorov, Mathias Schmitz, Marine
 Rougier, Vincent Yzerbyt, and their many collaborators across the
 years. Reverse correlation is no longer a central part of my research,
@@ -340,4 +340,4 @@ occasional collaborations with my PhD supervisors (Teresa
 Garcia-Marques, Leonel Garcia-Marques) and all the warm and competent
 colleagues from the research groups in Lisbon (Goncalo Oliveira, Rui
 Costa-Lopes and their teams) with whom I have been greatly enjoying
-working together on this stuff. Hopefully this toolkit will come in handy to the RC research enthusiasts out there! :)
+working together on this stuff. Hopefully this toolkit will come in handy to all the RC research enthusiasts out there! :)
