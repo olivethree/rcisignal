@@ -1,4 +1,4 @@
-# rcisignal: a complete workflow for reverse-correlation data quality
+# rcisignal: User's Guide
 
 ## 1. Overview
 
