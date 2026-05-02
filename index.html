@@ -152,15 +152,15 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Did participants agree within each condition?</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">run_within</span><span class="op">(</span><span class="va">trustworthy</span><span class="op">$</span><span class="va">signal_matrix</span>,   seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">run_within</span><span class="op">(</span><span class="va">untrustworthy</span><span class="op">$</span><span class="va">signal_matrix</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">trustworthy</span><span class="op">$</span><span class="va">signal_matrix</span>,   seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">untrustworthy</span><span class="op">$</span><span class="va">signal_matrix</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="id_3-between-condition-discriminability">3. Between-condition discriminability<a class="anchor" aria-label="anchor" href="#id_3-between-condition-discriminability"></a>
 </h3>
 <p>Are the two conditions actually distinguishable?</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">run_between</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_discriminability.html">run_discriminability</a></span><span class="op">(</span></span>
 <span>  <span class="va">trustworthy</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
 <span>  <span class="va">untrustworthy</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
@@ -173,12 +173,12 @@
 </h3>
 <p>If you have your CIs as image files on disk:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trustworthy</span>   <span class="op">&lt;-</span> <span class="fu">load_signal_matrix</span><span class="op">(</span><span class="st">"data/cis_trustworthy/"</span>,   <span class="st">"data/base.jpg"</span><span class="op">)</span></span>
-<span><span class="va">untrustworthy</span> <span class="op">&lt;-</span> <span class="fu">load_signal_matrix</span><span class="op">(</span><span class="st">"data/cis_untrustworthy/"</span>, <span class="st">"data/base.jpg"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">trustworthy</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_signal_matrix.html">read_signal_matrix</a></span><span class="op">(</span><span class="st">"data/cis_trustworthy/"</span>,   <span class="st">"data/base.jpg"</span><span class="op">)</span></span>
+<span><span class="va">untrustworthy</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_signal_matrix.html">read_signal_matrix</a></span><span class="op">(</span><span class="st">"data/cis_untrustworthy/"</span>, <span class="st">"data/base.jpg"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">run_within</span><span class="op">(</span><span class="va">trustworthy</span>,   seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">run_within</span><span class="op">(</span><span class="va">untrustworthy</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">run_between</span><span class="op">(</span><span class="va">trustworthy</span>, <span class="va">untrustworthy</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">trustworthy</span>,   seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">untrustworthy</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_discriminability.html">run_discriminability</a></span><span class="op">(</span><span class="va">trustworthy</span>, <span class="va">untrustworthy</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <blockquote>
 <p><strong>Heads-up.</strong> Results from PNG/JPEG inputs may differ slightly from raw-response inputs because PNGs encode the <em>display-scaled</em> CI, not the raw signal. The package warns you once per session when this matters; see <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html">the user guide</a> for the full story. When possible, work from raw responses rather than rendered images.</p>
 </blockquote>
@@ -330,7 +330,7 @@ https://doi.org/10.5281/zenodo.19961180</code></pre>
 <div class="section level3">
 <h3 id="acknowledgements-to-the-community">Acknowledgements to the community<a class="anchor" aria-label="anchor" href="#acknowledgements-to-the-community"></a>
 </h3>
-<p>This package builds on the excellent and thorough foundational work by Ron Dotsch, Loek Brinkman, Alex Todorov, Mathias Schmitz, Marine Rougier, Vincent Yzerbyt, and their many collaborators across the years. Reverse correlation is no longer a central part of my research, but I still find a lot of enjoyment in working in these side projects. The inspiration to build these tools and tutorials comes mostly from occasional collaborations with my PhD supervisors (Teresa Garcia-Marques, Leonel Garcia-Marques) and all the warm and competent colleagues from the research groups in Lisbon (Goncalo Oliveira, Rui Costa-Lopes and their teams) with whom I have been greatly enjoying working together on this stuff. Hopefully this toolkit will come in handy to the RC research enthusiasts out there! :)</p>
+<p>This package builds on the excellent foundational work by Ron Dotsch, Loek Brinkman, Alex Todorov, Mathias Schmitz, Marine Rougier, Vincent Yzerbyt, and their many collaborators across the years. Reverse correlation is no longer a central part of my research, but I still find a lot of enjoyment in working in these side projects. The inspiration to build these tools and tutorials comes mostly from occasional collaborations with my PhD supervisors (Teresa Garcia-Marques, Leonel Garcia-Marques) and all the warm and competent colleagues from the research groups in Lisbon (Goncalo Oliveira, Rui Costa-Lopes and their teams) with whom I have been greatly enjoying working together on this stuff. Hopefully this toolkit will come in handy to all the RC research enthusiasts out there! :)</p>
 </div>
 </div>
 </div>
