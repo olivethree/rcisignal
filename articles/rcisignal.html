@@ -140,27 +140,103 @@ do <code><a href="../reference/rel_split_half.html">rel_split_half()</a></code>,
 <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code>, <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code>,
 <code><a href="../reference/infoval.html">infoval()</a></code>, and <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>. Getting
 the signal matrix right suffices for everything downstream.</p>
-<p>A note on terminology. We call this object a <em>signal matrix</em>
-because that is where any signal a producer’s responses introduce will
-sit (if any signal is present at all). Other RC papers call the same
-object a <em>noise matrix</em>, because the underlying pixel values are
-visual noise patterns. Both names are reasonable: the data really do
-contain a mixture of noise (the per-trial random patterns the experiment
-showed) and signal (the producer’s sign-weighted aggregation of those
-patterns). The metrics in this package are specifically designed to test
-how much of that mixture is signal rather than noise. Whatever you call
-the object, the shape and interpretation are the same.</p>
-<p>To avoid ambiguity, <code>rcisignal</code>’s code reserves the name
-<code>noise_matrix</code> for a <em>different</em> object: the
-<code>n_pixels x pool_size</code> matrix of trial-level noise patterns
-produced at stimulus generation. That matrix is an <em>input</em> to CI
-computation and to <code><a href="../reference/infoval.html">infoval()</a></code>’s reference simulation; the
-<em>signal matrix</em> is the per-producer <em>output</em> (one column
-per producer, each column the producer’s mean noise pattern weighted by
-their trial-level responses). §4.3 covers <code>noise_matrix</code>; the
-rest of this section is about the signal matrix.</p>
+<div class="section level3">
+<h3 id="three-pixel-matrices-that-all-sound-similar-keep-them-apart">3.0 Three pixel matrices that all sound similar — keep them
+apart<a class="anchor" aria-label="anchor" href="#three-pixel-matrices-that-all-sound-similar-keep-them-apart"></a>
+</h3>
+<p>Reverse-correlation work involves several pixel matrices that are
+easy to confuse, and <code>rcisignal</code>’s API uses argument names
+that look alike (<code>noise_matrix</code>, <code>signal_matrix</code>,
+<code>mask</code>). Each one has exactly one job:</p>
+<table class="table">
+<colgroup>
+<col width="10%">
+<col width="67%">
+<col width="14%">
+<col width="8%">
+</colgroup>
+<thead><tr class="header">
+<th>name</th>
+<th>what it is</th>
+<th>shape</th>
+<th>input or output?</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>noise_matrix</code></strong></td>
+<td>the <strong>input</strong> pool of pre-generated noise patterns the
+experiment chose stimuli from. One column per pool pattern.</td>
+<td>
+<code>n_pixels</code> × <code>pool_size</code>
+</td>
+<td>input (you supply it; §4.3)</td>
+</tr>
+<tr class="even">
+<td>
+<strong>noise mask</strong> (a.k.a. <em>raw mask</em>,
+<em>per-participant CI</em>)</td>
+<td>
+<strong>one participant’s</strong> classification image: a single
+vector of pixel values, base-subtracted. Conceptually the weighted
+average of the noise patterns that participant “selected” with their
+responses. The word <em>mask</em> here means <em>image-shaped
+overlay</em> — it is <strong>not</strong> a logical face-region mask
+(those are §4.5).</td>
+<td>
+<code>n_pixels</code> × 1</td>
+<td>intermediate</td>
+</tr>
+<tr class="odd">
+<td><strong><code>signal_matrix</code></strong></td>
+<td>
+<strong>all participants’ noise masks stacked side by side</strong>,
+one column per producer. The central object of <code>rcisignal</code>;
+every reliability/discriminability function consumes a matrix of this
+shape.</td>
+<td>
+<code>n_pixels</code> × <code>n_participants</code>
+</td>
+<td>output (you pass it downstream)</td>
+</tr>
+</tbody>
+</table>
+<p>Plain-English summary:</p>
+<ul>
+<li>The <strong><code>noise_matrix</code></strong> describes the
+<em>stimuli</em> (what the experiment showed). It exists <em>before</em>
+any participant runs the task. §4.3 covers how to read it.</li>
+<li>A <strong>noise mask</strong> describes <em>one participant’s</em>
+CI. It exists <em>after</em> that participant has responded. You
+normally do not handle it directly; it is one column of the
+<code>signal_matrix</code>.</li>
+<li>The <strong><code>signal_matrix</code></strong> describes <em>the
+whole sample’s</em> CIs. It is the collection of all individual noise
+masks lined up by participant — what every <code>rel_*</code>,
+<code><a href="../reference/run_reliability.html">run_reliability()</a></code>, <code><a href="../reference/run_discriminability.html">run_discriminability()</a></code>,
+<code><a href="../reference/infoval.html">infoval()</a></code>, and <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code> call
+consumes.</li>
+</ul>
+<p>You don’t build the noise mask or the <code>signal_matrix</code> by
+hand: <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> and
+<code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> do it for you and return a list
+whose <code>$signal_matrix</code> element is the matrix you pass
+downstream.</p>
+<p>A note on the <em>signal matrix</em> name. Other RC papers sometimes
+call this same per-producer object a <em>noise matrix</em>, because the
+underlying pixel values are visual noise patterns. Both names are
+reasonable: the data really do contain a mixture of noise (the per-trial
+random patterns the experiment showed) and signal (the producer’s
+sign-weighted aggregation of those patterns). The metrics in this
+package are designed to test how much of that mixture is signal rather
+than noise, hence <em>signal matrix</em>. To avoid the name collision,
+<code>rcisignal</code>’s code reserves <code>noise_matrix</code>
+strictly for the input pool above (the row of the table) and
+<code>signal_matrix</code> strictly for the per-producer output (the
+third row). Whatever you call the object in your own writing, the shape
+and interpretation are the same.</p>
 <p>Two paths lead to a signal matrix, with different downstream
 consequences.</p>
+</div>
 <div class="section level3">
 <h3 id="two-paths-to-the-signal-matrix">3.1 Two paths to the signal matrix<a class="anchor" aria-label="anchor" href="#two-paths-to-the-signal-matrix"></a>
 </h3>
