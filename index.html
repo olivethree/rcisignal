@@ -177,9 +177,9 @@
 </ol>
 </div>
 <div class="section level3">
-<h3 id="three-things-that-all-sound-similar--keep-them-apart">Three things that all sound similar — keep them apart<a class="anchor" aria-label="anchor" href="#three-things-that-all-sound-similar--keep-them-apart"></a>
+<h3 id="clarification-of-types-of-visual-noise-data">Clarification of types of visual noise data<a class="anchor" aria-label="anchor" href="#clarification-of-types-of-visual-noise-data"></a>
 </h3>
-<p>Reverse correlation work involves several pixel matrices that are easy to confuse. In <code>rcisignal</code>, each one has exactly one job:</p>
+<p>Reverse correlation work involves several types of pixel matrices that may be easy to confuse. In <code>rcisignal</code>, each one has exactly one job:</p>
 <table class="table">
 <colgroup>
 <col width="17%">
@@ -188,15 +188,16 @@
 <col width="13%">
 </colgroup>
 <thead><tr>
-<th>name</th>
-<th>what it is</th>
+<th>Data type</th>
+<th>What is it?</th>
 <th>shape</th>
 <th>input or output?</th>
 </tr></thead>
 <tbody>
 <tr>
 <td><strong><code>noise_matrix</code></strong></td>
-<td>the <strong>input</strong> pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern.</td>
+<td>
+<strong>input</strong> pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern.</td>
 <td>
 <code>n_pixels</code> × <code>pool_size</code>
 </td>
@@ -222,18 +223,21 @@
 </tr>
 </tbody>
 </table>
-<p>Plain-English summary:</p>
+<p>In sum:</p>
 <ul>
-<li>The <strong><code>noise_matrix</code></strong> describes the <em>stimuli</em> (what the experiment showed). It exists <em>before</em> any participant runs the task.</li>
-<li>A <strong>noise mask</strong> describes <em>one participant’s</em> CI. It exists <em>after</em> that participant has responded.</li>
-<li>The <strong><code>signal_matrix</code></strong> describes <em>the whole sample’s</em> CIs. It is the collection of all individual noise masks lined up by participant — the matrix every reliability and discriminability function in the package consumes.</li>
+<li>
+<strong><code>noise_matrix</code></strong> describes the <em>stimuli</em> (what the experiment showed), and exists <em>before</em> any participant runs the task;</li>
+<li>
+<strong>noise mask</strong> describes <em>one participant’s</em> CI, and exists <em>after</em> that participant has responded;</li>
+<li>
+<strong><code>signal_matrix</code></strong> describes <em>the whole sample’s</em> CIs. It is the collection of all individual noise masks lined up by participant (this is the matrix every reliability and discriminability function in rcisignal uses)</li>
 </ul>
 <p>You don’t build the noise mask or the <code>signal_matrix</code> by hand: <code><a href="reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> and <code><a href="reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> do it for you and return a list whose <code>$signal_matrix</code> element is the matrix you pass downstream.</p>
 </div>
 <div class="section level3">
 <h3 id="step-1-diagnose-the-raw-data">Step 1. Diagnose the raw data<a class="anchor" aria-label="anchor" href="#step-1-diagnose-the-raw-data"></a>
 </h3>
-<p>Before computing CIs, sanity-check the trial-level data.</p>
+<p>Before computing CIs, sanity-check the trial-level data:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
 <span></span>
@@ -265,9 +269,10 @@
 <div class="section level3">
 <h3 id="step-2-build-the-signal-matrix-compute-per-participant-cis">Step 2. Build the signal matrix (compute per-participant CIs)<a class="anchor" aria-label="anchor" href="#step-2-build-the-signal-matrix-compute-per-participant-cis"></a>
 </h3>
-<p>Suppose you have two conditions, “trustworthy” and “untrustworthy”, identified by a <code>condition</code> column in <code>responses</code>. Split the data and compute one signal matrix per condition. Inside each call, the function groups trials by <code>participant_id</code> (the default of the <code>participant_col</code> argument) and produces <strong>one CI per participant</strong> — not a single group-level CI. That is why each result has 20 columns when there are 20 producers in the condition.</p>
+<p>Suppose you have two conditions, “trustworthy” and “untrustworthy”, identified by a <code>condition</code> column in <code>responses</code>. Split the data and compute one signal matrix per condition. Inside each call, the function groups trials by <code>participant_id</code> (the default of the <code>participant_col</code> argument) and produces <strong>one CI per participant</strong>. That is why each result has 20 columns when there are 20 producers in the condition.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trust_rows</span>   <span class="op">&lt;-</span> <span class="va">responses</span><span class="op">[</span><span class="va">responses</span><span class="op">$</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"trustworthy"</span>,   <span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="co"># base R style, but you can use other styles (dplyr, DT) if you prefer</span></span>
+<span><span class="va">trust_rows</span>   <span class="op">&lt;-</span> <span class="va">responses</span><span class="op">[</span><span class="va">responses</span><span class="op">$</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"trustworthy"</span>,   <span class="op">]</span></span>
 <span><span class="va">untrust_rows</span> <span class="op">&lt;-</span> <span class="va">responses</span><span class="op">[</span><span class="va">responses</span><span class="op">$</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"untrustworthy"</span>, <span class="op">]</span></span>
 <span></span>
 <span><span class="co"># --- 2IFC ---</span></span>
@@ -286,7 +291,7 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># --- Brief-RC equivalent ---</span></span>
-<span><span class="co"># Same call shape, same per-participant grouping behaviour; differences:</span></span>
+<span><span class="co"># Same call shape and per-participant grouping behaviour, differences are:</span></span>
 <span><span class="co">#   - function name ends in _briefrc</span></span>
 <span><span class="co">#   - rdata_path may be replaced by noise_matrix = "data/noise_matrix.txt"</span></span>
 <span><span class="co">#   - base_image_path (PNG/JPEG of the base face) is required</span></span>
@@ -305,7 +310,7 @@
 <p><code>trustworthy$signal_matrix</code> is now a pixels × participants matrix — exactly the shape every step below expects. (If your participant column is not literally named <code>participant_id</code>, the call will abort with a “missing column” error; pass <code>participant_col = "your_col_name"</code> to fix it.)</p>
 </div>
 <div class="section level3">
-<h3 id="step-3-within-condition-reliability--do-participants-in-each-condition-agree">Step 3. Within-condition reliability — do participants in each condition agree?<a class="anchor" aria-label="anchor" href="#step-3-within-condition-reliability--do-participants-in-each-condition-agree"></a>
+<h3 id="step-3-within-condition-reliability-do-participants-in-each-condition-agree">Step 3. Within-condition reliability: do participants in each condition agree?<a class="anchor" aria-label="anchor" href="#step-3-within-condition-reliability-do-participants-in-each-condition-agree"></a>
 </h3>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">trustworthy</span><span class="op">$</span><span class="va">signal_matrix</span>,   seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
@@ -313,7 +318,7 @@
 <p>This reports split-half reliability (with Spearman-Brown correction) and ICC(3,*) for each condition.</p>
 </div>
 <div class="section level3">
-<h3 id="step-4-between-condition-discriminability--are-the-two-cis-actually-different">Step 4. Between-condition discriminability — are the two CIs actually different?<a class="anchor" aria-label="anchor" href="#step-4-between-condition-discriminability--are-the-two-cis-actually-different"></a>
+<h3 id="step-4-between-condition-discriminability-are-the-two-cis-really-different">Step 4. Between-condition discriminability: are the two CIs really different?<a class="anchor" aria-label="anchor" href="#step-4-between-condition-discriminability-are-the-two-cis-really-different"></a>
 </h3>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_discriminability.html">run_discriminability</a></span><span class="op">(</span></span>
@@ -323,11 +328,11 @@
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>   <span class="co"># cluster map of pixels where the two conditions differ</span></span></code></pre></div>
-<p>For a function-by-function walkthrough — including how to interpret cluster maps, sample-size warnings, when to use ICC(3,1) vs ICC(3,k), and Brief-RC end-to-end — see the <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html"><strong>full user guide</strong></a>.</p>
+<p>For a function-by-function walkthrough, including how to interpret cluster maps, sample-size warnings, when to use ICC(3,1) vs ICC(3,k), and Brief-RC end-to-end, see the <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html"><strong>full user guide</strong></a>.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="worked-example-oliveira-et-al-2019">Worked example: Oliveira et al. (2019)<a class="anchor" aria-label="anchor" href="#worked-example-oliveira-et-al-2019"></a>
+<h2 id="worked-example-with-real-data-oliveira-et-al-2019">Worked example with real data: Oliveira et al. (2019)<a class="anchor" aria-label="anchor" href="#worked-example-with-real-data-oliveira-et-al-2019"></a>
 </h2>
 <p>To make the output concrete, here are two contrasts from the open data of <a href="https://doi.org/10.1002/ejsp.2569" class="external-link">Oliveira, Garcia-Marques, Dotsch &amp; Garcia-Marques (2019)</a>. In Study 1, 200 participants completed a 2IFC reverse-correlation task on a 256 x 256 grayscale male base face across 10 trait conditions (20 producers per trait, 300 trials each). The four traits highlighted here are <strong>Trustworthy</strong>, <strong>Friendly</strong>, <strong>Competent</strong>, and <strong>Dominant</strong>.</p>
 <p>The motivating prediction was that the <strong>Dominant vs Competent</strong> contrast would yield broader pixel-level differences than the <strong>Trustworthy vs Friendly</strong> contrast. Trustworthy and friendly both load on the warmth dimension and share much of their facial encoding; dominant and competent are usually thought of as agency- related but have been argued to dissociate, with dominance reading off coarser whole-face features and competence reading off subtler ability cues.</p>
@@ -375,7 +380,7 @@
 <p>The two contrasts pick out qualitatively different spatial signatures, broadly consistent with the prediction. Trustworthy versus Friendly localises around the eyes and mid-face — exactly the kind of socially-relevant feature region the warmth dimension is read off. Dominant versus Competent spreads more widely across the face, consistent with a contrast that draws on both whole-face agency cues and finer ability cues. Among the pixels that survive the FWER filter, the Dominant vs Competent map retains noticeably more spatial extent than the Trustworthy vs Friendly map.</p>
 </div>
 <div class="section level3">
-<h3 id="per-region-informational-value-preview">Per-region informational value (preview)<a class="anchor" aria-label="anchor" href="#per-region-informational-value-preview"></a>
+<h3 id="per-region-infoval">Per-region infoVal<a class="anchor" aria-label="anchor" href="#per-region-infoval"></a>
 </h3>
 <p>Magnitude per producer also varies by face region. The grid below runs <code><a href="reference/infoval.html">infoval()</a></code> separately on each (trait, region) cell using the <a href="https://doi.org/10.1002/ejsp.3100" class="external-link">Schmitz et al. (2024)</a> face masks and the trial-count-matched reference distribution. Cells report <strong>median producer z-score</strong> and (in parentheses) <strong>how many of 20 producers cleared the conventional <code>z &gt;= 1.96</code> threshold</strong>.</p>
 <table class="table">
@@ -449,7 +454,7 @@
 <pre><code>Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
 data and classification images (Version 0.1.0) [R package]. Zenodo.
 https://doi.org/10.5281/zenodo.19961180</code></pre>
-<p>The DOI above is the <strong>concept DOI</strong> and always resolves to the latest release on Zenodo. For citations to a specific version, use the version DOI listed on the <a href="https://doi.org/10.5281/zenodo.19961180" class="external-link">Zenodo record page</a>. Run <code>citation("rcisignal")</code> in R for a BibTeX entry.</p>
+<p>Run <code>citation("rcisignal")</code> in R for a BibTeX entry.</p>
 <p>Please also cite the methodological sources appropriate to your pipeline:</p>
 <ul>
 <li>
