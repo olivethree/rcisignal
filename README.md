@@ -144,26 +144,39 @@ Two pieces of information from your study:
     | `response`       | `-1` or `+1` (**not** `0`/`1` — that is the most common silent failure) |
     | `rt`             | reaction time, optional, used for RT checks                    |
 
-2.  **The stimulus pool that produced the noise patterns.** Either:
+2.  **The stimulus pool that produced the noise patterns shown to
+    participants.** Either:
     -   an `.Rdata` file from `rcicr::generateStimuli2IFC()` (2IFC), or
-    -   a noise-matrix text file (`n_pixels` rows × `pool_size`
-        columns) **plus** a base-face image file (Brief-RC).
+    -   a noise-matrix text file **plus** a base-face image file
+        (Brief-RC).
 
-### What is a `signal_matrix`?
+### Three things that all sound similar — keep them apart
 
-The central object of `rcisignal`. It is a numeric matrix where:
+Reverse correlation work involves several pixel matrices that are
+easy to confuse. In `rcisignal`, each one has exactly one job:
 
--   **rows** = pixels of the CI (e.g. 256 × 256 = 65 536 rows),
--   **columns** = participants (one column per producer),
--   **values** = that participant's base-subtracted pixel-level CI
-    (their "noise mask").
+| name                  | what it is                                                 | shape                       | input or output? |
+|-----------------------|------------------------------------------------------------|-----------------------------|------------------|
+| **`noise_matrix`**    | the **input** pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern. | `n_pixels` × `pool_size`    | input (you give it to the package) |
+| **noise mask** (a.k.a. "per-participant CI") | **one participant's** classification image: a single vector of pixel values, base-subtracted. Conceptually, the weighted average of the noise patterns they "selected" with their responses. | `n_pixels` × 1 (one column) | intermediate     |
+| **`signal_matrix`**   | **all participants' noise masks stacked side by side**, one column per producer. This is the central object of `rcisignal`. | `n_pixels` × `n_participants` | output (you pass it to every `rel_*`, `run_reliability`, `run_discriminability` call) |
 
-Every `rel_*`, `run_reliability`, and `run_discriminability` function
-consumes a matrix of this shape. You build one with
-`ci_from_responses_2ifc()` or `ci_from_responses_briefrc()`, which
-return a list whose `$signal_matrix` element is the matrix you pass
-downstream. (The package's `noise_matrix` argument is unrelated —
-that is the input pool of patterns, not the per-participant output.)
+Plain-English summary:
+
+-   The **`noise_matrix`** describes the *stimuli* (what the
+    experiment showed). It exists *before* any participant runs the
+    task.
+-   A **noise mask** describes *one participant's* CI. It exists
+    *after* that participant has responded.
+-   The **`signal_matrix`** describes *the whole sample's* CIs. It is
+    the collection of all individual noise masks lined up by
+    participant — the matrix every reliability and discriminability
+    function in the package consumes.
+
+You don't build the noise mask or the `signal_matrix` by hand:
+`ci_from_responses_2ifc()` and `ci_from_responses_briefrc()` do it
+for you and return a list whose `$signal_matrix` element is the
+matrix you pass downstream.
 
 ### Step 1. Diagnose the raw data
 
