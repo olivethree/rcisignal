@@ -204,13 +204,20 @@ that issue before continuing.
 
 Suppose you have two conditions, "trustworthy" and "untrustworthy",
 identified by a `condition` column in `responses`. Split the data and
-compute one signal matrix per condition.
+compute one signal matrix per condition. Inside each call, the
+function groups trials by `participant_id` (the default of the
+`participant_col` argument) and produces **one CI per participant** —
+not a single group-level CI. That is why each result has 20 columns
+when there are 20 producers in the condition.
 
 ``` r
 trust_rows   <- responses[responses$condition == "trustworthy",   ]
 untrust_rows <- responses[responses$condition == "untrustworthy", ]
 
 # --- 2IFC ---
+# Trials are grouped per participant via participant_col (default
+# "participant_id"). Override only if your column has a different name,
+# e.g. participant_col = "subject".
 trustworthy <- ci_from_responses_2ifc(
   responses  = trust_rows,
   rdata_path = "data/rcicr_stimuli.Rdata",
@@ -223,7 +230,7 @@ untrustworthy <- ci_from_responses_2ifc(
 )
 
 # --- Brief-RC equivalent ---
-# Same call shape; differences:
+# Same call shape, same per-participant grouping behaviour; differences:
 #   - function name ends in _briefrc
 #   - rdata_path may be replaced by noise_matrix = "data/noise_matrix.txt"
 #   - base_image_path (PNG/JPEG of the base face) is required
@@ -234,13 +241,18 @@ untrustworthy <- ci_from_responses_2ifc(
 #   base_image_path = "data/base.jpg"
 # )
 
-# Inspect the result:
+# Inspect the result: one column per participant.
 dim(trustworthy$signal_matrix)
 #> [1] 65536    20      (pixels x participants)
+head(colnames(trustworthy$signal_matrix))
+#> [1] "p01" "p02" "p03" "p04" "p05" "p06"   (the participant_id values)
 ```
 
 `trustworthy$signal_matrix` is now a pixels × participants matrix —
-exactly the shape every step below expects.
+exactly the shape every step below expects. (If your participant
+column is not literally named `participant_id`, the call will abort
+with a "missing column" error; pass `participant_col = "your_col_name"`
+to fix it.)
 
 ### Step 3. Within-condition reliability — do participants in each condition agree?
 
