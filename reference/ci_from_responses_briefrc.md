@@ -6,9 +6,9 @@ upstream rcicr v1.0.1. Only rcicr's noise-pattern pool (the `stimuli`
 object inside an `.Rdata` from `generateStimuli2IFC()`) is reused; the
 mask is computed in pure R.
 
-Use this when you have Brief-RC 12 trial-level responses and want the
-package to produce per-producer noise masks ready for the reliability
-metrics.
+Use this when you have Brief-RC 12 or Brief-RC 20 trial-level responses
+and want the package to produce per-producer noise masks ready for the
+reliability metrics.
 
 ## Usage
 
@@ -53,7 +53,12 @@ ci_from_responses_briefrc(
 
 - method:
 
-  One of `"briefrc12"`. `"briefrc20"` is reserved.
+  Brief-RC variant: `"briefrc12"` (12 alternatives per trial, 6
+  original + 6 inverted; the default) or `"briefrc20"` (20 alternatives
+  per trial, 10 original + 10 inverted). Both variants are validated in
+  Schmitz, Rougier, & Yzerbyt (2024). The CI computation is identical
+  for both; the argument is kept as metadata so that downstream code and
+  reports can record which paradigm produced the data.
 
 - scaling:
 
@@ -71,7 +76,8 @@ ci_from_responses_briefrc(
 ## Value
 
 A list with `signal_matrix`, optionally `rendered_ci`, `participants`,
-`img_dims`, `scaling`.
+`img_dims`, `scaling`, and `method` (the Brief-RC variant the call was
+made with).
 
 ## Details
 
@@ -86,6 +92,11 @@ chosen by that participant, not the raw trial count. If a participant
 chooses the same stimulus on two trials with opposite responses, those
 two cancel.
 
+The formula is symmetric in the per-trial split (6/6 for Brief-RC 12,
+10/10 for Brief-RC 20), so the same code path handles both variants. The
+`method` argument is recorded as provenance metadata and validated; it
+does not branch the computation.
+
 ## Reading the result
 
 - `$signal_matrix` is the raw mask per producer; pass this and only this
@@ -98,16 +109,13 @@ two cancel.
 
 ## Common mistakes
 
-- Passing the "expanded" 12-rows-per-trial response format. Brief-RC 12
-  is one row per trial; `stimulus` is the chosen pool id and `response`
-  is `+1` (original) or `-1` (inverted). See Schmitz et al. (2024) sec.
-  3.1.2.
+- Passing the "expanded" multi-row-per-trial response format. Brief-RC
+  data is **one row per trial**; `stimulus` is the chosen pool id and
+  `response` is `+1` (original) or `-1` (inverted). See Schmitz et
+  al. (2024) sec. 3.1.2.
 
 - Using `$rendered_ci` for downstream stats; it exists only because the
   user often wants to save a PNG.
-
-- Asking for `method = "briefrc20"`; reserved for a future release and
-  aborts.
 
 ## References
 

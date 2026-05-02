@@ -32,8 +32,8 @@ inheriting the Type I error inflation of that two-phase design (Cone,
 Brown-Iannuzzi, Lei, & Dotsch, 2021).
 
 It works whether you ran a standard **2IFC** task (the classic
-reverse-correlation paradigm) or a **Brief-RC 12** task (Schmitz,
-Rougier & Yzerbyt, 2024 — 12 noisy faces per trial instead of 2).
+reverse-correlation paradigm) or a **Brief-RC** task (Schmitz, Rougier &
+Yzerbyt, 2024 — 12 or 20 noisy faces per trial instead of 2).
 
 ## What it does
 

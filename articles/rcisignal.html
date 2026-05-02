@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -749,14 +749,18 @@ participant.</p>
 <div class="section level4">
 <h4 id="brief-rc-response-coding-schmitz-et-al--2024">Brief-RC response coding (Schmitz et al. 2024)<a class="anchor" aria-label="anchor" href="#brief-rc-response-coding-schmitz-et-al--2024"></a>
 </h4>
-<p>Each trial presents 12 noisy faces (6 original,
-<code>base + noise_i</code>, and 6 inverted,
-<code>base - noise_i</code>), drawn from 6 distinct pool noise patterns.
-The producer picks one. The data records <strong>one row per
-trial</strong>: <code>stimulus</code> = pool id of the chosen noise
-pattern; <code>response = +1</code> if original chosen, <code>-1</code>
-if inverted. Unselected faces are absent from the data; do not pad them
-as zero rows.</p>
+<p>Each trial presents <code>2k</code> noisy faces (<code>k</code>
+original images, <code>base + noise_i</code>, and <code>k</code>
+inverted images, <code>base - noise_i</code>), drawn from <code>k</code>
+distinct pool noise patterns. The producer picks one. The data records
+<strong>one row per trial</strong>: <code>stimulus</code> = pool id of
+the chosen noise pattern; <code>response = +1</code> if original chosen,
+<code>-1</code> if inverted. Unselected faces are absent from the data;
+do not pad them as zero rows. The same row format applies to both
+validated Brief-RC variants (Brief-RC 12 with <code>k = 6</code>,
+Brief-RC 20 with <code>k = 10</code>); the analysis pipeline is
+identical (see §13.1 for the formula being symmetric in
+<code>k</code>).</p>
 <p>A Brief-RC 12 dataset with the same three participants and four
 trials each illustrates the format:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -3125,41 +3129,46 @@ between-condition inferential filter the original paper did not run.</p>
 <h2 id="brief-rc-end-to-end">13. Brief-RC end-to-end<a class="anchor" aria-label="anchor" href="#brief-rc-end-to-end"></a>
 </h2>
 <p>The Brief-RC workflow follows the same diagnose, compute, and assess
-flow with two practical differences. First, the response data has 12
-alternatives per trial (recorded as one row per trial carrying the
-chosen pool id and sign). Second, the noise matrix is consumed directly,
-without an <code>rcicr</code> wrapper.</p>
+flow with two practical differences. First, the response data has
+multiple alternatives per trial (12 or 20, recorded as one row per trial
+carrying the chosen pool id and sign). Second, the noise matrix is
+consumed directly, without an <code>rcicr</code> wrapper.</p>
 <div class="section level3">
 <h3 id="brief-rc-variants-currently-supported">13.1 Brief-RC variants currently supported<a class="anchor" aria-label="anchor" href="#brief-rc-variants-currently-supported"></a>
 </h3>
-<p><code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> accepts
-<code>method = "briefrc12"</code> (12 alternatives per trial; 6
-original, 6 inverted). Other Brief-RC variants the literature describes
-(Brief-RC 6, Brief-RC 20, etc.) raise a clear error from the wrapper at
-the moment, with a message pointing at the roadmap.</p>
-<p>The mathematical reason is informative. Schmitz’s
+<p><code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> accepts two
+<code>method</code> values, both matching the variants validated in
+Schmitz, Rougier, &amp; Yzerbyt (2024):</p>
+<ul>
+<li>
+<code>"briefrc12"</code> (default): 12 alternatives per trial, 6
+original + 6 inverted, arranged in a 3 x 4 grid in the Schmitz et
+al. study.</li>
+<li>
+<code>"briefrc20"</code>: 20 alternatives per trial, 10 original +
+10 inverted, arranged in a 4 x 5 grid in the Schmitz et al. study.</li>
+</ul>
+<p>The CI computation is identical for both variants. Schmitz’s
 <code>genMask()</code> formula does not depend on how many alternatives
-are shown per trial: it always reduces to mean-by-stim of the chosen
+are shown per trial; it always reduces to mean-by-stim of the chosen
 pool ids, divided by <code>length(unique(chosen_stim))</code>. The
 package’s random-responder reference simulator for
 <code><a href="../reference/infoval.html">infoval()</a></code> similarly relies on a 50/50 original/inverted
-marginal per trial, which holds for any symmetric Brief-RC split (6/6,
-10/10, …). So the gate in the wrapper is a guardrail pending validation
-fixtures rather than a math limitation.</p>
-<p>The practical consequence is that <strong>every other function in the
-package operates downstream of the wrapper and does not gate</strong>.
-<code><a href="../reference/infoval.html">infoval()</a></code>, <code>rel_*</code>,
-<code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>, <code><a href="../reference/pixel_t_test.html">pixel_t_test()</a></code>,
-<code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code>, and <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code>
-all take a signal matrix and never ask how many alternatives the
-producer was shown per trial. If you have Brief-RC 20 data, you can
-build the signal matrix by hand using the same five-step recipe shown in
-§12.5 (the formula is unchanged), or by calling Schmitz’s own
-<code>genMask()</code> adaptation on OSF, and then feed the resulting
-matrix to every downstream metric without further intervention.</p>
+marginal per trial, which holds for any symmetric Brief-RC split. The
+<code>method</code> argument is therefore metadata: it is recorded in
+the result list (as <code>$method</code>) so that downstream code,
+reports, and citations can indicate which paradigm produced the data,
+but it does not branch the computation.</p>
+<p>Other split sizes (Brief-RC 4, 6, 8, 10) are mentioned in the Schmitz
+et al. (2024) discussion as possible future variants worth
+investigating, but they have not been validated and are not exposed in
+<code>rcisignal</code>. If you genuinely need to compute masks for one
+of those configurations, the §12.5 hand-rolled five-step recipe applies
+unchanged (the formula is symmetric in the per-trial split), but the
+result should be reported as exploratory.</p>
 </div>
 <div class="section level3">
-<h3 id="end-to-end-brief-rc-12-example">13.2 End-to-end Brief-RC 12 example<a class="anchor" aria-label="anchor" href="#end-to-end-brief-rc-12-example"></a>
+<h3 id="end-to-end-brief-rc-example">13.2 End-to-end Brief-RC example<a class="anchor" aria-label="anchor" href="#end-to-end-brief-rc-example"></a>
 </h3>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
@@ -3270,12 +3279,14 @@ problem. Five reasons in roughly the order they tend to apply.</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Frobenius norm is a global energy statistic.</strong> It
 sums squared pixel deviations across the <em>entire</em> image. Real
-internal representations are usually spatially sparse (eyes, mouth, jaw,
-perhaps 10-30% of pixels), so the 70-90% of “background” pixels
-contribute noise of similar magnitude to the chance reference and dilute
-the signal-bearing region. A producer with strong, visually-obvious
-signal in the eyes can have a Frobenius norm only marginally above the
-random reference.</p></li>
+internal representations are usually spatially sparse, concentrated in
+face features (eyes, mouth, jaw) rather than spanning the whole image
+grid. Pixels outside that region contribute noise of similar magnitude
+to the chance reference, and that noise dilutes the signal-bearing
+region in the global norm. A producer with strong, visually-obvious
+signal in the eyes can therefore have a Frobenius norm only marginally
+above the random reference. (See point 4 below for the practical
+countermeasure.)</p></li>
 <li><p><strong>The reference is strict because it lives in the same
 subspace.</strong> Both the observed mask and the reference are
 projections onto the same low-dimensional sinusoidal noise basis. The
@@ -3294,20 +3305,44 @@ Schmitz (2024) face region. Applying it
 (<code>infoval(..., mask = make_face_mask(c(256, 256)))</code>)
 concentrates the norm on signal-bearing pixels and typically lifts
 z-scores noticeably.</p></li>
-<li><p><strong>Group-level CIs have much higher z than individual
-CIs.</strong> Averaging 20 producers’ masks reduces noise by sqrt(20) ~
-4.5x, so the group-mean CI’s effective trial count is
-<code>300 x 20 = 6000</code> for a 20-producer condition. The infoVal of
-the group-mean CI is usually 5-10x the per-producer median; this is a
-structural sqrt(N) consequence of averaging, not a defect of the
-per-producer metric. Brinkman et al. (2019) themselves only ever
-computed infoVal on individual CIs (the paper reported mean per-producer
-infoVal of 3.9 in lab and 2.9 in online samples, with 68% / 54% of
-producers individually exceeding 1.96). For group-level reporting they
-recommended inspecting the distribution of per-producer infoVals
-contributing to the group CI rather than computing one infoVal on the
-group-mean CI. Either choice is defensible; the worked example in §12.4
-reports both alongside.</p></li>
+<li>
+<p><strong>Group-level CIs can show higher z than individual CIs,
+but the inflation is conditional, not structural.</strong> Two pieces of
+math feed into this, and both need stating. First, averaging
+<code>N</code> producer masks under independent-noise assumptions
+reduces noise variance by <code>1/N</code> and the noise norm by
+<code>1/sqrt(N)</code>. So the group-mean CI of <code>N</code> producers
+each contributing <code>T</code> trials has noise comparable to a single
+producer with <code>N x T</code> trials (a 20-producer condition at 300
+trials each gives an effective <code>6000</code>-trial noise floor).
+Second, whether that noise reduction actually translates into a
+sqrt(N)-style increase in group-mean infoVal over the per-producer
+median depends on whether the producers’ signals are spatially aligned.
+If producers share a common spatial template, signal survives the
+averaging and the group-mean z grows roughly as sqrt(N) above the
+per-producer floor. If producer templates are idiosyncratic, averaging
+cancels signal as well as noise and the group-mean z stays modest. The
+Oliveira et al. (2019) reanalysis in §12.4 shows both regimes in the
+same dataset: friendly / unfriendly, where per-producer signal is
+broadly shared, land at group-mean z of roughly 15-18; incompetent /
+unintelligent, where alignment is weaker, sit near z = 2. The ratio
+<code>group_z / per_producer_median</code> is therefore not a fixed
+inflation factor; it is a joint readout of <code>N</code>,
+<code>T</code>, and producer alignment.</p>
+<p>Brinkman et al. (2019) only ever computed infoVal on individual CIs.
+They reported a mean per-producer infoVal of 3.9 (lab) and 2.9 (online),
+with 68% / 54% of producers individually exceeding 1.96 (their pp. 12,
+14). For group- level reporting they explicitly recommended inspecting
+the <em>distribution</em> of per-producer infoVals contributing to the
+group CI rather than computing a single infoVal on the averaged noise
+pattern (their p. 13). The group-mean infoVal this package offers
+(<code>group_mean_z()</code>, called inside
+<code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code>) is a package-level extension of that
+recipe and has not been independently validated for social- face RC (see
+§1.2). The §12.4 worked example reports both numbers alongside; treat
+the group-mean z as a supplementary headline, not a replacement for the
+Brinkman-style per- producer distribution.</p>
+</li>
 </ol>
 <div class="section level3">
 <h3 id="diagnostic-recipe">15.1 Diagnostic recipe<a class="anchor" aria-label="anchor" href="#diagnostic-recipe"></a>
@@ -3339,7 +3374,8 @@ these steps before reporting it:</p>
 <span><span class="va">tc_grp</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">tc</span><span class="op">)</span>, <span class="st">"group"</span><span class="op">)</span></span>
 <span><span class="va">iv_grp</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/infoval.html">infoval</a></span><span class="op">(</span><span class="va">group</span>, <span class="va">noise_matrix</span>, <span class="va">tc_grp</span>,</span>
 <span>                   iter <span class="op">=</span> <span class="fl">1000L</span>, seed <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
-<span><span class="va">iv_grp</span><span class="op">$</span><span class="va">infoval</span>                 <span class="co"># typically large (e.g. &gt; 5)</span></span>
+<span><span class="va">iv_grp</span><span class="op">$</span><span class="va">infoval</span>                 <span class="co"># value depends on signal alignment;</span></span>
+<span>                               <span class="co"># see paragraph 5 of §15</span></span>
 <span></span>
 <span><span class="co"># 4. Sanity-check the chance baseline. A random-mask producer</span></span>
 <span><span class="co">#    should give z ~ 0 within MAD noise.</span></span>
@@ -3373,9 +3409,13 @@ statistics:</p>
 <li>The <strong>median per-producer infoVal z</strong> and the
 <strong>proportion of producers above z = 1.96</strong>, mirroring
 Brinkman et al.’s (2019) reporting choice.</li>
-<li>The <strong>group-mean CI’s infoVal z</strong> as a single headline
-number. This is structurally larger by sqrt(N) but useful as the
-publishable group-level statistic.</li>
+<li>The <strong>group-mean CI’s infoVal z</strong> as a supplementary
+headline number. Under signal alignment this can be substantially larger
+than the per-producer median, with a sqrt(N)-style upper envelope; under
+weak alignment it stays close to per-producer values (paragraph 5 of §15
+spells out why). This metric is a package-level extension and has not
+been independently validated for social-face RC (§1.2), so report it as
+exploratory rather than primary.</li>
 </ul>
 <p>The two numbers answer different questions. The median tells you how
 informative a <em>typical individual CI</em> is; the group-mean z tells
@@ -3398,7 +3438,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt; To cite package 'rcisignal' in publications use:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation</span></span>
-<span><span class="co">#&gt;   Data and Classification Images_. R package version 0.1.0,</span></span>
+<span><span class="co">#&gt;   Data and Classification Images_. R package version 0.1.1,</span></span>
 <span><span class="co">#&gt;   &lt;https://github.com/olivethree/rcisignal&gt;.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
@@ -3408,7 +3448,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt; Images},</span></span>
 <span><span class="co">#&gt;     author = {Manuel Oliveira},</span></span>
 <span><span class="co">#&gt;     year = {2026},</span></span>
-<span><span class="co">#&gt;     note = {R package version 0.1.0},</span></span>
+<span><span class="co">#&gt;     note = {R package version 0.1.1},</span></span>
 <span><span class="co">#&gt;     url = {https://github.com/olivethree/rcisignal},</span></span>
 <span><span class="co">#&gt;   }</span></span></code></pre></div>
 </div>

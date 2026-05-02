@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,10 +33,27 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.1" id="rcisignal-011">rcisignal 0.1.1<a class="anchor" aria-label="anchor" href="#rcisignal-011"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-1-1">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-1"></a></h3>
+<ul><li>
+<code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> now accepts <code>method = "briefrc20"</code> in addition to <code>"briefrc12"</code>. Both Brief-RC variants are validated in Schmitz, Rougier, &amp; Yzerbyt (2024). The CI computation is identical for both (the <code>genMask()</code> formula is symmetric in the per-trial split); the <code>method</code> argument is recorded as <code>$method</code> in the result list as provenance metadata.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-1"></a></h3>
+<ul><li>Vignette §13.1 rewritten to document Brief-RC 12 and Brief-RC 20 as the two validated variants. Removed the inaccurate reference to a Brief-RC 6 variant (Schmitz et al. mention 4 / 6 / 8 / 10 only as future research directions, not as published variants).</li>
+<li>Vignette §15 paragraph 5 (group-mean infoVal interpretation) rewritten to remove an unsourced “5-10x per-producer median” claim and to flag that the sqrt(N)-style inflation of group-mean z is conditional on producer-level signal alignment, not structural. Brinkman et al. (2019) numerical claims and recommendations are retained with explicit page citations.</li>
+<li>Vignette §15 paragraph 1 reframed to drop unsourced “10-30% / 70-90%” pixel-fraction figures while keeping the Frobenius-norm dilution mechanism.</li>
+<li>README validation section trimmed to a brief pointer; full validated-vs-unvalidated breakdown now lives in vignette §1.2.</li>
+<li>New educational background paragraphs added to §7 (split-half / Spearman-Brown, ICC), §8 (multiple-comparisons problem, cluster permutation, k-connectivity, TFCE, Frobenius/Euclidean dissimilarity), and §9 (per-producer and group-mean infoVal).</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="rcisignal-010">rcisignal 0.1.0<a class="anchor" aria-label="anchor" href="#rcisignal-010"></a></h2>
 <p>First release of the package. Provides a consolidated toolkit for quality assessment of reverse-correlation data and classification images: input-side diagnostics (response coding, RT, alignment, balance) and output-side reliability (pixel-level reliability, cluster inference, per-producer infoVal).</p>
 </div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

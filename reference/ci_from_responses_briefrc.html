@@ -5,17 +5,17 @@ those do not exist in upstream rcicr v1.0.1. Only rcicr's
 noise-pattern pool (the stimuli object inside an .Rdata
 from generateStimuli2IFC()) is reused; the mask is computed
 in pure R.
-Use this when you have Brief-RC 12 trial-level responses and
-want the package to produce per-producer noise masks ready for
-the reliability metrics."><meta property="og:description" content="Native implementation of Schmitz, Rougier &amp;amp; Yzerbyt (2024)'s
+Use this when you have Brief-RC 12 or Brief-RC 20 trial-level
+responses and want the package to produce per-producer noise
+masks ready for the reliability metrics."><meta property="og:description" content="Native implementation of Schmitz, Rougier &amp;amp; Yzerbyt (2024)'s
 Brief-RC mask. Does not call any rcicr::*_brief function;
 those do not exist in upstream rcicr v1.0.1. Only rcicr's
 noise-pattern pool (the stimuli object inside an .Rdata
 from generateStimuli2IFC()) is reused; the mask is computed
 in pure R.
-Use this when you have Brief-RC 12 trial-level responses and
-want the package to produce per-producer noise masks ready for
-the reliability metrics."><meta property="og:image" content="https://olivethree.github.io/rcisignal/logo.svg"></head><body>
+Use this when you have Brief-RC 12 or Brief-RC 20 trial-level
+responses and want the package to produce per-producer noise
+masks ready for the reliability metrics."><meta property="og:image" content="https://olivethree.github.io/rcisignal/logo.svg"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -23,7 +23,7 @@ the reliability metrics."><meta property="og:image" content="https://olivethree.
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,9 +56,9 @@ those do not exist in upstream rcicr v1.0.1. Only rcicr's
 noise-pattern pool (the <code>stimuli</code> object inside an <code>.Rdata</code>
 from <code>generateStimuli2IFC()</code>) is reused; the mask is computed
 in pure R.</p>
-<p>Use this when you have Brief-RC 12 trial-level responses and
-want the package to produce per-producer noise masks ready for
-the reliability metrics.</p>
+<p>Use this when you have Brief-RC 12 or Brief-RC 20 trial-level
+responses and want the package to produce per-producer noise
+masks ready for the reliability metrics.</p>
     </div>
 
     <div class="section level2">
@@ -105,7 +105,13 @@ is not <code>"none"</code>) to render the visualisation-only
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>One of <code>"briefrc12"</code>. <code>"briefrc20"</code> is reserved.</p></dd>
+<dd><p>Brief-RC variant: <code>"briefrc12"</code> (12 alternatives
+per trial, 6 original + 6 inverted; the default) or
+<code>"briefrc20"</code> (20 alternatives per trial, 10 original + 10
+inverted). Both variants are validated in Schmitz, Rougier,
+&amp; Yzerbyt (2024). The CI computation is identical for both;
+the argument is kept as metadata so that downstream code and
+reports can record which paradigm produced the data.</p></dd>
 
 
 <dt id="arg-scaling">scaling<a class="anchor" aria-label="anchor" href="#arg-scaling"></a></dt>
@@ -125,7 +131,8 @@ unscaled mask.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with <code>signal_matrix</code>, optionally <code>rendered_ci</code>,
-<code>participants</code>, <code>img_dims</code>, <code>scaling</code>.</p>
+<code>participants</code>, <code>img_dims</code>, <code>scaling</code>, and <code>method</code> (the
+Brief-RC variant the call was made with).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -137,6 +144,11 @@ unscaled mask.</p></dd>
 pool ids chosen by that participant, not the raw trial count.
 If a participant chooses the same stimulus on two trials with
 opposite responses, those two cancel.</p>
+<p>The formula is symmetric in the per-trial split (6/6 for
+Brief-RC 12, 10/10 for Brief-RC 20), so the same code path
+handles both variants. The <code>method</code> argument is recorded as
+provenance metadata and validated; it does not branch the
+computation.</p>
     </div>
     <div class="section level2">
     <h2 id="reading-the-result">Reading the result<a class="anchor" aria-label="anchor" href="#reading-the-result"></a></h2>
@@ -153,14 +165,12 @@ producer. <strong>Visualisation only.</strong></p></li>
     <h2 id="common-mistakes">Common mistakes<a class="anchor" aria-label="anchor" href="#common-mistakes"></a></h2>
 
 
-<ul><li><p>Passing the "expanded" 12-rows-per-trial response format.
-Brief-RC 12 is one row per trial; <code>stimulus</code> is the chosen
-pool id and <code>response</code> is <code>+1</code> (original) or <code>-1</code> (inverted).
-See Schmitz et al. (2024) sec. 3.1.2.</p></li>
+<ul><li><p>Passing the "expanded" multi-row-per-trial response format.
+Brief-RC data is <strong>one row per trial</strong>; <code>stimulus</code> is the
+chosen pool id and <code>response</code> is <code>+1</code> (original) or <code>-1</code>
+(inverted). See Schmitz et al. (2024) sec. 3.1.2.</p></li>
 <li><p>Using <code>$rendered_ci</code> for downstream stats; it exists only
 because the user often wants to save a PNG.</p></li>
-<li><p>Asking for <code>method = "briefrc20"</code>; reserved for a future
-release and aborts.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
