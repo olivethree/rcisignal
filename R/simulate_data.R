@@ -195,7 +195,7 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
 #'
 #' @description
 #' Generates a synthetic Brief-RC dataset (Schmitz, Rougier, &
-#' Yzerbyt, 2024) where each trial shows several oriented/inverted
+#' Yzerbyt, 2024) where each trial shows several original/inverted
 #' noise pairs and the participant picks one image. Output is
 #' shape-compatible with [run_diagnostics()],
 #' [ci_from_responses_briefrc()], and the reliability /
@@ -208,13 +208,13 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
 #'
 #' @section Signal model:
 #' Per trial, with `images_per_trial = 2k`, the participant sees `k`
-#' oriented/inverted pairs. Each of the `2k` images has utility
+#' original/inverted pairs. Each of the `2k` images has utility
 #' `beta * (noise %*% s) / scale + Gumbel(0, 1)`, where `noise` is
-#' `+noise[, j]` for the oriented version and `-noise[, j]` for the
+#' `+noise[, j]` for the original version and `-noise[, j]` for the
 #' inverted version of pair `j`. The participant picks the image
 #' with the highest utility (multinomial logit / softmax). The
 #' recorded `stimulus` is the pool index of the chosen pair;
-#' `response` is `+1` if the oriented version was chosen and `-1`
+#' `response` is `+1` if the original version was chosen and `-1`
 #' for the inverted version.
 #'
 #' @inheritSection simulate_2ifc_data RT model
@@ -224,7 +224,7 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
 #'   number of Brief-RC trials per participant, not the noise pool
 #'   size. Default `n_trials = 500`.
 #' @param images_per_trial Integer (even). Number of images shown
-#'   per trial; half are oriented and half are inverted versions of
+#'   per trial; half are original and half are inverted versions of
 #'   the same noise patterns. Default `12` (= 6 pairs).
 #' @param noise_pool_size Integer. Total number of noise patterns to
 #'   pre-generate. Default `n_trials * (images_per_trial / 2)`,

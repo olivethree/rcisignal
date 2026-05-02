@@ -91,7 +91,7 @@ producer. \strong{Visualisation only.}
 \itemize{
 \item Passing the "expanded" 12-rows-per-trial response format.
 Brief-RC 12 is one row per trial; \code{stimulus} is the chosen
-pool id and \code{response} is \code{+1} (oriented) or \code{-1} (inverted).
+pool id and \code{response} is \code{+1} (original) or \code{-1} (inverted).
 See Schmitz et al. (2024) sec. 3.1.2.
 \item Using \verb{$rendered_ci} for downstream stats; it exists only
 because the user often wants to save a PNG.

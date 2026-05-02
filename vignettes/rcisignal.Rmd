@@ -139,7 +139,7 @@ str(sim, max.level = 1)
 | `n_per_condition` | `50` | participants per condition |
 | `conditions` | `c("target", "control")` | any character vector works |
 | `n_trials` | `500` | per participant; equals noise pool size for 2IFC |
-| `images_per_trial` (Brief-RC only) | `12` | = 6 oriented/inverted pairs |
+| `images_per_trial` (Brief-RC only) | `12` | = 6 original/inverted pairs |
 | `noise_pool_size` (Brief-RC only) | `n_trials * (images_per_trial / 2)` | shared across participants |
 | `img_size` | `256` | pixels; matches the bundled base face |
 | `base_image` | `inst/extdata/sim_base_face.png` | a 256x256 grayscale artificial face; pass a path or matrix to override |
@@ -166,12 +166,12 @@ returned by `make_face_mask()` for the chosen `signal_region`).
   recognisable cluster on the eyes region; `"strong"` (`beta = 2`)
   produces a much sharper signal.
 - **Brief-RC.** Each trial shows `images_per_trial = 2k` images (the
-  oriented and inverted versions of `k` distinct noise patterns
+  original and inverted versions of `k` distinct noise patterns
   drawn from the shared pool). Each image gets a Gumbel-perturbed
   utility `±beta * (noise %*% s) / sqrt(sum(s)) + Gumbel(0,1)` and
   the participant picks the argmax (multinomial-logit / softmax).
   The recorded `stimulus` is the pool index of the chosen pair;
-  `response` is `+1` if the oriented version of that pair was
+  `response` is `+1` if the original version of that pair was
   chosen, `-1` if the inverted version.
 
 A weak signal is the default rather than `"none"` so the worked
@@ -414,7 +414,7 @@ Trial-level data, one row per trial, in any tabular shape
 #### 2IFC response coding
 
 Each trial presents two faces drawn from a unique noise pair.
-`response = +1` if the producer picked the oriented variant
+`response = +1` if the producer picked the original variant
 (`base + noise`), and `-1` if they picked the inverted variant
 (`base - noise`). A common silent failure in 2IFC pipelines is
 `{0, 1}` coding produced by experiment software that records
@@ -423,7 +423,7 @@ with a recode formula in the suggestion text.
 
 A 2IFC dataset with three participants and four trials each
 illustrates the format. On every trial the participant saw two
-stimuli (one oriented and one inverted noise pattern superimposed
+stimuli (one original and one inverted noise pattern superimposed
 on the same base face) and chose one:
 
 ```{r example-2ifc-data, eval = TRUE}
@@ -446,11 +446,11 @@ pair, so an id never repeats across trials within a participant.
 
 #### Brief-RC response coding (Schmitz et al. 2024)
 
-Each trial presents 12 noisy faces (6 oriented, `base + noise_i`,
+Each trial presents 12 noisy faces (6 original, `base + noise_i`,
 and 6 inverted, `base - noise_i`), drawn from 6 distinct pool
 noise patterns. The producer picks one. The data records **one
 row per trial**: `stimulus` = pool id of the chosen noise
-pattern; `response = +1` if oriented chosen, `-1` if inverted.
+pattern; `response = +1` if original chosen, `-1` if inverted.
 Unselected faces are absent from the data; do not pad them as
 zero rows.
 
@@ -480,7 +480,7 @@ where `pool_size` is the **total number of distinct noise
 patterns generated for the experiment**, i.e., the number of
 columns in the `noise_matrix` (§4.3). On every trial the
 software draws 6 distinct pool patterns and presents each in
-both oriented and inverted form, giving 12 alternatives. Across
+both original and inverted form, giving 12 alternatives. Across
 many trials, the same pool id can therefore re-appear (and a
 producer can pick the same pool id more than once). The exact
 re-use rate depends on the experimenter's sampling design, of
@@ -518,7 +518,7 @@ divisor is `length(unique(chosen_stimuli))`, not `n_trials`.
 
 | Aspect                                | 2IFC                              | Brief-RC 12                                                                |
 | ------------------------------------- | --------------------------------- | -------------------------------------------------------------------------- |
-| Alternatives shown per trial          | 2 (one oriented + one inverted)   | 12 (six oriented + six inverted, drawn from six pool patterns)             |
+| Alternatives shown per trial          | 2 (one original + one inverted)   | 12 (six original + six inverted, drawn from six pool patterns)             |
 | Rows recorded per trial               | 1                                 | 1                                                                          |
 | What `stimulus` indexes               | The trial's stimulus pair         | The chosen pool item only                                                  |
 | Range of `stimulus`                   | 1 to `n_trials`                   | 1 to `pool_size`                                                           |
@@ -2268,7 +2268,7 @@ matrix is consumed directly, without an `rcicr` wrapper.
 ### 13.1 Brief-RC variants currently supported
 
 `ci_from_responses_briefrc()` accepts `method = "briefrc12"`
-(12 alternatives per trial; 6 oriented, 6 inverted). Other
+(12 alternatives per trial; 6 original, 6 inverted). Other
 Brief-RC variants the literature describes (Brief-RC 6,
 Brief-RC 20, etc.) raise a clear error from the wrapper at the
 moment, with a message pointing at the roadmap.
@@ -2278,7 +2278,7 @@ formula does not depend on how many alternatives are shown per
 trial: it always reduces to mean-by-stim of the chosen pool
 ids, divided by `length(unique(chosen_stim))`. The package's
 random-responder reference simulator for `infoval()` similarly
-relies on a 50/50 oriented/inverted marginal per trial, which
+relies on a 50/50 original/inverted marginal per trial, which
 holds for any symmetric Brief-RC split (6/6, 10/10, ...). So
 the gate in the wrapper is a guardrail pending validation
 fixtures rather than a math limitation.

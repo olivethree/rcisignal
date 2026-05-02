@@ -29,7 +29,7 @@ number of Brief-RC trials per participant, not the noise pool
 size. Default \code{n_trials = 500}.}
 
 \item{images_per_trial}{Integer (even). Number of images shown
-per trial; half are oriented and half are inverted versions of
+per trial; half are original and half are inverted versions of
 the same noise patterns. Default \code{12} (= 6 pairs).}
 
 \item{noise_pool_size}{Integer. Total number of noise patterns to
@@ -44,7 +44,7 @@ carries \code{images_per_trial} and \code{noise_pool_size}.
 }
 \description{
 Generates a synthetic Brief-RC dataset (Schmitz, Rougier, &
-Yzerbyt, 2024) where each trial shows several oriented/inverted
+Yzerbyt, 2024) where each trial shows several original/inverted
 noise pairs and the participant picks one image. Output is
 shape-compatible with \code{\link[=run_diagnostics]{run_diagnostics()}},
 \code{\link[=ci_from_responses_briefrc]{ci_from_responses_briefrc()}}, and the reliability /
@@ -58,13 +58,13 @@ shared across participants).
 \section{Signal model}{
 
 Per trial, with \verb{images_per_trial = 2k}, the participant sees \code{k}
-oriented/inverted pairs. Each of the \verb{2k} images has utility
+original/inverted pairs. Each of the \verb{2k} images has utility
 \code{beta * (noise \%*\% s) / scale + Gumbel(0, 1)}, where \code{noise} is
-\code{+noise[, j]} for the oriented version and \code{-noise[, j]} for the
+\code{+noise[, j]} for the original version and \code{-noise[, j]} for the
 inverted version of pair \code{j}. The participant picks the image
 with the highest utility (multinomial logit / softmax). The
 recorded \code{stimulus} is the pool index of the chosen pair;
-\code{response} is \code{+1} if the oriented version was chosen and \code{-1}
+\code{response} is \code{+1} if the original version was chosen and \code{-1}
 for the inverted version.
 }
 
