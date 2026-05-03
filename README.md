@@ -415,7 +415,7 @@ If `rcisignal` helps your research, please cite it:
 
 ```
 Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
-data and classification images (Version 0.1.0) [R package]. Zenodo.
+data and classification images (Version 0.1.1) [R package]. Zenodo.
 https://doi.org/10.5281/zenodo.19961180
 ```
 
