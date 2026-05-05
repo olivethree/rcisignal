@@ -129,9 +129,13 @@ diagnose_infoval <- function(responses,
   iter <- as.integer(iter)
   label <- "InfoVal diagnostic"
 
+  if (isTRUE(progress)) {
+    cli::cli_h2("Preparing inputs")
+  }
   built <- build_diagnose_inputs(
     responses, method, rdata, noise_matrix, baseimage,
-    col_participant, col_stimulus, col_response
+    col_participant, col_stimulus, col_response,
+    progress = progress
   )
   signal_matrix <- built$signal_matrix
   noise_mat     <- built$noise_matrix
@@ -140,6 +144,9 @@ diagnose_infoval <- function(responses,
 
   mask_vec <- resolve_face_mask(face_mask, img_dims, nrow(signal_matrix))
 
+  if (isTRUE(progress)) {
+    cli::cli_h2("Per-producer reference (unmasked)")
+  }
   # Step 1+3: per-producer z, unmasked.
   iv_unmasked <- infoval(
     signal_matrix    = signal_matrix,
@@ -155,6 +162,9 @@ diagnose_infoval <- function(responses,
   # Step 4: per-producer z, masked (optional).
   iv_masked <- NULL
   if (!is.null(mask_vec)) {
+    if (isTRUE(progress)) {
+      cli::cli_h2("Per-producer reference (masked)")
+    }
     iv_masked <- infoval(
       signal_matrix    = signal_matrix,
       noise_matrix     = noise_mat,
@@ -189,12 +199,18 @@ diagnose_infoval <- function(responses,
   )
 
   # Step 5: group-mean CI z, unmasked and masked.
+  if (isTRUE(progress)) {
+    cli::cli_h2("Group-mean reference (unmasked)")
+  }
   grp_z_unmasked <- group_mean_z(
     signal_matrix, noise_mat, trial_counts, iter,
     mask = NULL, with_replacement = with_replacement,
     seed = seed, progress = progress
   )
   grp_z_masked <- if (!is.null(mask_vec)) {
+    if (isTRUE(progress)) {
+      cli::cli_h2("Group-mean reference (masked)")
+    }
     group_mean_z(
       signal_matrix, noise_mat, trial_counts, iter,
       mask = mask_vec, with_replacement = with_replacement,
@@ -257,7 +273,8 @@ diagnose_infoval <- function(responses,
 # Build per-producer signal matrix, noise matrix, trial counts, img dims.
 build_diagnose_inputs <- function(responses, method, rdata, noise_matrix,
                                   baseimage, col_participant,
-                                  col_stimulus, col_response) {
+                                  col_stimulus, col_response,
+                                  progress = TRUE) {
   if (method == "2ifc") {
     if (is.null(rdata)) {
       cli::cli_abort("{.arg rdata} is required for {.arg method = \"2ifc\"}.")
@@ -265,7 +282,8 @@ build_diagnose_inputs <- function(responses, method, rdata, noise_matrix,
     validate_path(rdata, "rdata")
     return(build_inputs_2ifc(
       responses, rdata, baseimage,
-      col_participant, col_stimulus, col_response
+      col_participant, col_stimulus, col_response,
+      progress = progress
     ))
   }
 
@@ -281,7 +299,8 @@ build_diagnose_inputs <- function(responses, method, rdata, noise_matrix,
 }
 
 build_inputs_2ifc <- function(responses, rdata, baseimage,
-                              col_participant, col_stimulus, col_response) {
+                              col_participant, col_stimulus, col_response,
+                              progress = TRUE) {
   if (!requireNamespace("rcicr", quietly = TRUE)) {
     cli::cli_abort(c(
       "Package {.pkg rcicr} is required for the 2IFC path.",
@@ -319,29 +338,52 @@ build_inputs_2ifc <- function(responses, rdata, baseimage,
   }
   n_pool <- nrow(params_mat)
 
+  if (isTRUE(progress)) {
+    cli::cli_alert_info(
+      "Reconstructing {n_pool} per-trial noise pattern{?s} from rdata."
+    )
+  }
   # Reconstruct the per-trial noise patterns from the basis (p) and the
   # per-trial contrast weights (stimuli_params). rcicr does not store the
   # 3D stimulus array in the .RData; it recomputes on demand.
   noise_mat <- matrix(NA_real_, nrow = n_pix, ncol = n_pool)
+  pid_noise <- progress_start(n_pool, "noise reconstruction",
+                              show = progress)
   for (i in seq_len(n_pool)) {
     noise_mat[, i] <- as.vector(
       rcicr::generateNoiseImage(params_mat[i, ], env$p)
     )
+    progress_tick(pid_noise)
   }
+  progress_done(pid_noise)
 
+  if (isTRUE(progress)) {
+    cli::cli_alert_info(
+      "Building per-producer CIs via {.fn rcicr::batchGenerateCI2IFC}."
+    )
+  }
   # CIs via rcicr.
   responses_df <- as.data.frame(responses)
   tmp_out <- tempfile()
   dir.create(tmp_out, showWarnings = FALSE, recursive = TRUE)
-  cis <- rcicr::batchGenerateCI2IFC(
-    data        = responses_df,
-    by          = col_participant,
-    stimuli     = col_stimulus,
-    responses   = col_response,
-    baseimage   = baseimage,
-    rdata       = rdata,
-    save_as_png = FALSE,
-    targetpath  = tmp_out
+  cis <- withCallingHandlers(
+    rcicr::batchGenerateCI2IFC(
+      data        = responses_df,
+      by          = col_participant,
+      stimuli     = col_stimulus,
+      responses   = col_response,
+      baseimage   = baseimage,
+      rdata       = rdata,
+      save_as_png = FALSE,
+      targetpath  = tmp_out
+    ),
+    warning = function(w) {
+      if (inherits(w, "lifecycle_warning_deprecated") ||
+            grepl("progress_estimated", conditionMessage(w),
+                  fixed = TRUE)) {
+        invokeRestart("muffleWarning")
+      }
+    }
   )
 
   ids <- extract_participant_ids(names(cis), baseimage, col_participant)
