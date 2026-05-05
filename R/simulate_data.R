@@ -169,7 +169,8 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
 
   rdata_path <- write_sim_rdata_2ifc(
     base_face = base_face, p = pool$p, params = pool$params,
-    img_size = img_size, n_trials = n_trials, seed = used_seed
+    img_size = img_size, n_trials = n_trials, seed = used_seed,
+    noise_type = noise_type, nscales = nscales, sigma = sigma
   )
 
   elapsed <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
@@ -648,7 +649,9 @@ simulate_rts <- function(n, frac_fast, frac_slow) {
 #' @noRd
 write_sim_rdata_2ifc <- function(base_face, p, params, img_size,
                                  n_trials, seed,
-                                 base_label = "sim_base") {
+                                 noise_type = "sinusoid",
+                                 nscales = 5L, sigma = 25,
+                                 base_label = "base") {
   dir <- tempfile("rcisignal_sim_")
   dir.create(dir, recursive = TRUE)
   png_path <- file.path(dir, paste0(base_label, ".png"))
@@ -675,6 +678,9 @@ write_sim_rdata_2ifc <- function(base_face, p, params, img_size,
   )
   env$use_same_parameters <- TRUE
   env$p                   <- p
+  env$noise_type          <- as.character(noise_type)
+  env$nscales             <- as.integer(nscales)
+  env$sigma               <- as.numeric(sigma)
   rdata_file <- file.path(dir, "rcisignal_sim_stimuli.Rdata")
   save(list = ls(env), envir = env, file = rdata_file)
   rdata_file
