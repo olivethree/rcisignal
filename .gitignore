@@ -13,6 +13,8 @@ CLAUDE.md
 # Build outputs
 docs/
 inst/doc/
+*.Rcheck/
+*.tar.gz
 
 # OS
 .DS_Store
