@@ -78,6 +78,19 @@
 #' Type I error is inflated in the two-phase reverse correlation
 #' procedure. *Social Psychological and Personality Science*,
 #' 12(5), 760-768. \doi{10.1177/1948550620938616}
+#' @examples
+#' \dontrun{
+#' # In a real pipeline, signal_matrix comes from earlier steps:
+#' #   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+#' # For a self-contained demo we fabricate a small synthetic input:
+#' n_pix  <- 32L * 32L
+#' n_prod <- 20L
+#' set.seed(1)
+#' signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+#'
+#' r <- rel_icc(signal_matrix)
+#' print(r)
+#' }
 #' @export
 rel_icc <- function(signal_matrix,
                     variants            = c("3_1", "3_k"),

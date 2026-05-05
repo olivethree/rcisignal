@@ -34,6 +34,20 @@
 #' * `$alpha`, `$n_permutations`, `$n_participants`, `$mask`.
 #' @seealso [plot_ci_overlay()], [plot_agreement_map()],
 #'   [rel_cluster_test()]
+#' @examples
+#' \dontrun{
+#' # In a real pipeline, signal_matrix comes from earlier steps:
+#' #   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+#' # For a self-contained demo we fabricate a small synthetic input:
+#' n_pix  <- 32L * 32L
+#' n_prod <- 20L
+#' set.seed(1)
+#' signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+#'
+#' res <- agreement_map_test(signal_matrix,
+#'                           n_permutations = 500L, seed = 1)
+#' print(res)
+#' }
 #' @export
 agreement_map_test <- function(signal_matrix,
                                n_permutations      = 5000L,

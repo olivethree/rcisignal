@@ -60,6 +60,22 @@ automatically by Mode 1 readers like \code{\link[=extract_signal]{extract_signal
 unless \code{acknowledge_scaling = TRUE}.
 }
 
+\examples{
+\dontrun{
+# In a real pipeline, the two matrices come from earlier steps:
+#   sig_a <- ci_from_responses_briefrc(responses_cond_a, ...)$signal_matrix
+#   sig_b <- ci_from_responses_briefrc(responses_cond_b, ...)$signal_matrix
+# For a self-contained demo we fabricate two small synthetic inputs:
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+signal_matrix_a <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+signal_matrix_b <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+t_vec <- pixel_t_test(signal_matrix_a, signal_matrix_b)
+summary(t_vec)
+}
+}
 \seealso{
 \code{\link[=rel_cluster_test]{rel_cluster_test()}}
 }

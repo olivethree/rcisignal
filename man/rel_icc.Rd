@@ -94,6 +94,20 @@ automatically by Mode 1 readers like \code{\link[=extract_signal]{extract_signal
 unless \code{acknowledge_scaling = TRUE}.
 }
 
+\examples{
+\dontrun{
+# In a real pipeline, signal_matrix comes from earlier steps:
+#   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+# For a self-contained demo we fabricate a small synthetic input:
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+r <- rel_icc(signal_matrix)
+print(r)
+}
+}
 \references{
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations:
 uses in assessing rater reliability. \emph{Psychological Bulletin},

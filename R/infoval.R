@@ -110,6 +110,24 @@
 #' brief reverse correlation: an improved tool to assess visual
 #' representations. *European Journal of Social Psychology*.
 #' \doi{10.1002/ejsp.3100}
+#' @examples
+#' \dontrun{
+#' # In a real pipeline these three inputs come from earlier steps:
+#' #   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+#' #   noise_matrix  <- read_noise_matrix("stimuli.RData")
+#' #   trial_counts  <- as.integer(table(responses$participant_id))
+#' # For a self-contained demo we fabricate small synthetic inputs:
+#' n_pix  <- 32L * 32L
+#' n_prod <- 20L
+#' set.seed(1)
+#' signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+#' noise_matrix  <- matrix(rnorm(n_pix * 4096L),  n_pix, 4096L)
+#' trial_counts  <- rep(300L, n_prod)
+#'
+#' iv <- infoval(signal_matrix, noise_matrix, trial_counts,
+#'               iter = 200L, seed = 1)
+#' print(iv)
+#' }
 #' @export
 infoval <- function(signal_matrix,
                     noise_matrix,

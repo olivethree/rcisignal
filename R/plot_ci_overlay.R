@@ -45,6 +45,22 @@
 #' @return Invisibly the composed `nrow x ncol x 3` raster. The
 #'   plot is drawn on the active device as a side effect.
 #' @seealso [agreement_map_test()], [make_face_mask()]
+#' @examples
+#' \dontrun{
+#' # In a real pipeline:
+#' #   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+#' #   base_image    <- "path/to/base_face.png"
+#' # For a self-contained demo we fabricate small synthetic inputs:
+#' n_side <- 32L
+#' n_pix  <- n_side * n_side
+#' n_prod <- 20L
+#' set.seed(1)
+#' signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+#' base_image    <- matrix(0.5, n_side, n_side)
+#'
+#' plot_ci_overlay(signal_matrix, base_image,
+#'                 img_dims = c(n_side, n_side))
+#' }
 #' @export
 plot_ci_overlay <- function(signal_matrix,
                             base_image,

@@ -58,6 +58,21 @@ descriptive agreement-map plot, typically paired with
 \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} so the significance contours are rendered
 on top of the observed group CI.
 }
+\examples{
+\dontrun{
+# In a real pipeline, signal_matrix comes from earlier steps:
+#   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+# For a self-contained demo we fabricate a small synthetic input:
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+res <- agreement_map_test(signal_matrix,
+                          n_permutations = 500L, seed = 1)
+print(res)
+}
+}
 \seealso{
 \code{\link[=plot_ci_overlay]{plot_ci_overlay()}}, \code{\link[=plot_agreement_map]{plot_agreement_map()}},
 \code{\link[=rel_cluster_test]{rel_cluster_test()}}
