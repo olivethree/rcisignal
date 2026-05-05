@@ -1340,7 +1340,8 @@ random) treats pixels as a random sample from a pixel population,
 which the image grid is not, even when ICC(2,*) and ICC(3,*)
 give similar numbers at high pixel counts. Use
 `variants = c("3_1", "3_k", "2_1", "2_k")` to report ICC(2,*)
-side-by-side for reviewer requests.
+side-by-side when comparability with reports that use the
+two-way-random model is needed.
 
 ICC is variance-based, so it errors on a `"rendered"` source
 matrix unless `acknowledge_scaling = TRUE` is passed. Rendered

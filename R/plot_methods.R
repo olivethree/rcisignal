@@ -283,14 +283,14 @@ print.rcisignal_rel_icc <- function(x, ...) {
   shown_2 <- FALSE
   if ("2_1" %in% x$variants) {
     if (!shown_2) {
-      cat("\n  Two-way-random variants (for reviewer comparability only):\n")
+      cat("\n  Two-way-random variants (mis-specified for fixed pixel grids; reported for cross-paper comparability):\n")
       shown_2 <- TRUE
     }
     cat(pad("ICC(2,1):", x$icc_2_1))
   }
   if ("2_k" %in% x$variants) {
     if (!shown_2) {
-      cat("\n  Two-way-random variants (for reviewer comparability only):\n")
+      cat("\n  Two-way-random variants (mis-specified for fixed pixel grids; reported for cross-paper comparability):\n")
       shown_2 <- TRUE
     }
     cat(pad("ICC(2,k):", x$icc_2_k))

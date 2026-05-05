@@ -43,8 +43,8 @@ Reports \strong{ICC(3,1)} and \strong{ICC(3,k)}, two-way mixed model with
 pixels fixed and participants random. Pixels are a fixed
 \verb{img_size x img_size} grid (not a random sample), so ICC(2,*) is
 mis-specified even when numerically similar. ICC(2,1) and
-ICC(2,k) are available via \code{variants} for users whose reviewers
-explicitly ask.
+ICC(2,k) are available via \code{variants} for comparability with
+reports that use the two-way-random model.
 
 Computed directly from ANOVA mean squares (never via
 \code{psych::ICC()}, which allocates intermediates that blow memory
@@ -77,10 +77,15 @@ squares.
 \section{Common mistakes}{
 
 \itemize{
-\item Asking for ICC(2,\emph{) because a reviewer expects it. ICC(2,})
-treats pixels as a random sample from a pixel population, which
-they aren't. Numbers are usually close to ICC(3,*) at high
-pixel counts but the model is mis-specified.
+\item Reporting ICC(2,\emph{) as the headline. ICC(2,}) assumes targets
+are a random sample from a target population (the right model
+when raters score a random subset of stimuli drawn from a
+larger pool). Here the "targets" are the same fixed
+\verb{img_size x img_size} pixel grid in every CI, not a sample, so
+the random-targets assumption does not hold. Numerically close
+to ICC(3,*) at high pixel counts because the bias from
+mis-specification shrinks with target count, but the model is
+wrong for this object.
 \item Comparing this ICC to a phase-2 trait-rating ICC from a
 different paper. Different statistical objects.
 }
