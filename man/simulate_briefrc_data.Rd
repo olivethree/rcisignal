@@ -7,7 +7,7 @@
 simulate_briefrc_data(
   n_per_condition = 50L,
   conditions = c("target", "control"),
-  n_trials = 500L,
+  n_trials = NULL,
   images_per_trial = 12L,
   noise_pool_size = NULL,
   img_size = 256L,
@@ -24,18 +24,29 @@ simulate_briefrc_data(
 )
 }
 \arguments{
-\item{n_per_condition, conditions, n_trials, img_size, base_image, signal_strength, signal_region, rt_contamination_fast, rt_contamination_slow, noise_type, nscales, sigma, seed, progress}{See \code{\link[=simulate_2ifc_data]{simulate_2ifc_data()}}. Note: \code{n_trials} here means the
-number of Brief-RC trials per participant, not the noise pool
-size. Default \code{n_trials = 500}.}
+\item{n_per_condition, conditions, img_size, base_image, signal_strength, signal_region, rt_contamination_fast, rt_contamination_slow, noise_type, nscales, sigma, seed, progress}{See \code{\link[=simulate_2ifc_data]{simulate_2ifc_data()}}.}
+
+\item{n_trials}{Integer or \code{NULL}. Brief-RC trials per
+participant. When \code{NULL} (default), it is derived from the
+pair budget as \code{noise_pool_size \%/\% (images_per_trial / 2)},
+so the simulation matches \code{simulate_2ifc_data()} on number of
+unique noise pairs rather than on trial count. With the
+defaults (\code{noise_pool_size = 500}, \code{images_per_trial = 12})
+this resolves to \code{n_trials = 83}; with \code{images_per_trial = 20} it resolves to \code{50}. Supplying \code{n_trials} directly
+overrides this and (if \code{noise_pool_size} is also \code{NULL})
+restores the older "pool grows with trials" behaviour.}
 
 \item{images_per_trial}{Integer (even). Number of images shown
 per trial; half are original and half are inverted versions of
 the same noise patterns. Default \code{12} (= 6 pairs).}
 
-\item{noise_pool_size}{Integer. Total number of noise patterns to
-pre-generate. Default \code{n_trials * (images_per_trial / 2)},
-i.e. enough so each participant samples without replacement.
-Pass a larger value to study sub-sampling.}
+\item{noise_pool_size}{Integer or \code{NULL}. Total number of noise
+patterns to pre-generate. When \code{NULL} and \code{n_trials} is also
+\code{NULL}, defaults to \code{500} (matched image-pair budget against
+the 2IFC default of 500 trials x 1 pair). When \code{NULL} but
+\code{n_trials} is supplied, defaults to \code{n_trials * (images_per_trial / 2)} so within-participant sampling stays
+without replacement. Pass a larger value than that to study
+sub-sampling.}
 }
 \value{
 An object of class \code{"rcisignal_sim"}. See
