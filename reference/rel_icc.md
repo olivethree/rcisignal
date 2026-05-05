@@ -117,3 +117,20 @@ error is inflated in the two-phase reverse correlation procedure.
 [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md),
 [`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md),
 [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# In a real pipeline, signal_matrix comes from earlier steps:
+#   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+# For a self-contained demo we fabricate a small synthetic input:
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+r <- rel_icc(signal_matrix)
+print(r)
+} # }
+```

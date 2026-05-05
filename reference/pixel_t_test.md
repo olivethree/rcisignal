@@ -71,3 +71,22 @@ error unless `acknowledge_scaling = TRUE`.
 ## See also
 
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# In a real pipeline, the two matrices come from earlier steps:
+#   sig_a <- ci_from_responses_briefrc(responses_cond_a, ...)$signal_matrix
+#   sig_b <- ci_from_responses_briefrc(responses_cond_b, ...)$signal_matrix
+# For a self-contained demo we fabricate two small synthetic inputs:
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+signal_matrix_a <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+signal_matrix_b <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+t_vec <- pixel_t_test(signal_matrix_a, signal_matrix_b)
+summary(t_vec)
+} # }
+```

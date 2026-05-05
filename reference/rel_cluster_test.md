@@ -186,3 +186,25 @@ localisation in cluster inference. *NeuroImage*, 44(1), 83-98.
 
 [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
 [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# In a real pipeline, the two matrices come from earlier steps:
+#   sig_a <- ci_from_responses_briefrc(responses_cond_a, ...)$signal_matrix
+#   sig_b <- ci_from_responses_briefrc(responses_cond_b, ...)$signal_matrix
+# For a self-contained demo we fabricate two small synthetic inputs:
+n_side <- 32L
+n_pix  <- n_side * n_side
+n_prod <- 20L
+set.seed(1)
+signal_matrix_a <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+signal_matrix_b <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+res <- rel_cluster_test(signal_matrix_a, signal_matrix_b,
+                        img_dims = c(n_side, n_side),
+                        n_permutations = 200L, seed = 1)
+print(res)
+} # }
+```

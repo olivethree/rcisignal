@@ -78,3 +78,21 @@ Object of class `rcisignal_rel_agreement_map_test` with:
 [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md),
 [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md),
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# In a real pipeline, signal_matrix comes from earlier steps:
+#   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+# For a self-contained demo we fabricate a small synthetic input:
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+res <- agreement_map_test(signal_matrix,
+                          n_permutations = 500L, seed = 1)
+print(res)
+} # }
+```

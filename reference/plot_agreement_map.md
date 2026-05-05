@@ -102,16 +102,14 @@ for inferential between-condition tests.
 
 ``` r
 if (FALSE) { # \dontrun{
-# Synthetic example
-set.seed(1)
+# In a real pipeline, signal_matrix comes from earlier steps:
+#   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+# For a self-contained demo we fabricate a small synthetic input:
 n_side <- 32L
 n_pix  <- n_side * n_side
-rr <- row(matrix(0, n_side, n_side)) / n_side - 0.5
-cc <- col(matrix(0, n_side, n_side)) / n_side - 0.5
-d  <- sqrt(rr^2 + cc^2)
-mask_vec <- as.vector(pmax(0, 1 - d / 0.2))
-signal <- 0.5 * outer(mask_vec, runif(20L, 0.7, 1.3)) +
-          matrix(rnorm(n_pix * 20L), n_pix, 20L)
-plot_agreement_map(signal, img_dims = c(n_side, n_side))
+set.seed(1)
+signal_matrix <- matrix(rnorm(n_pix * 20L), n_pix, 20L)
+
+plot_agreement_map(signal_matrix, img_dims = c(n_side, n_side))
 } # }
 ```
