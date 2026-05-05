@@ -8,7 +8,11 @@
 #' The orchestrator auto-detects the method when only `rdata` or only
 #' `noise_matrix` is supplied; otherwise pass `method` explicitly.
 #'
-#' @param responses A data frame of trial-level responses.
+#' @param responses Data frame with one row per trial. Required
+#'   columns: `participant_id`, `stimulus`, `response` (values in
+#'   `{-1, +1}`); optional `rt` for the RT diagnostics. Load yours
+#'   from CSV via [read_responses()] or [utils::read.csv()]; column
+#'   names are configurable via the `col_*` arguments.
 #' @param method `"2ifc"` or `"briefrc"`, or `NULL` to auto-detect.
 #' @param rdata Optional. Path to an rcicr `.RData` file. Enables
 #'   [check_stimulus_alignment()], [check_version_compat()] (2IFC),

@@ -8,7 +8,11 @@
 #' For the Brief-RC pipeline, responses may be binary `{-1, 1}` or
 #' continuous weights. Anything numeric and finite is accepted.
 #'
-#' @param responses A data frame of trial-level responses.
+#' @param responses Data frame with one row per trial. Required
+#'   columns: `participant_id`, `stimulus`, `response` (values in
+#'   `{-1, +1}`). Load yours from CSV via [read_responses()] or
+#'   [utils::read.csv()]; column names are configurable via the
+#'   `col_*` arguments.
 #' @param method Either `"2ifc"` or `"briefrc"`.
 #' @param col_response Name of the column holding response values.
 #'   Defaults to `"response"`.

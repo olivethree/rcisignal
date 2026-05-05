@@ -18,7 +18,11 @@ check_response_inversion(
 )
 }
 \arguments{
-\item{responses}{A data frame of trial-level responses.}
+\item{responses}{Data frame with one row per trial. Required
+columns: \code{participant_id}, \code{stimulus}, \code{response} (values in
+\verb{\{-1, +1\}}). Load yours from CSV via \code{\link[=read_responses]{read_responses()}} or
+\code{\link[utils:read.table]{utils::read.csv()}}; column names are configurable via the
+\verb{col_*} arguments.}
 
 \item{method}{\code{"2ifc"} or \code{"briefrc"}.}
 
@@ -62,10 +66,9 @@ infoVal sweeps, so it takes roughly twice as long.
 }
 \examples{
 \dontrun{
-check_response_inversion(
-  responses, method = "2ifc",
-  rdata = "stimuli.RData"
-)
+sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+check_response_inversion(sim$data, method = "2ifc",
+                         rdata = sim$rdata_path)
 }
 
 }

@@ -43,6 +43,19 @@
 #'   `dissimilarity`) and `$method = "discriminability"`.
 #' @seealso [rel_cluster_test()], [rel_dissimilarity()],
 #'   [run_reliability()], [run_discriminability_pairwise()].
+#' @examples
+#' \dontrun{
+#' # Two-condition pipeline: simulate -> per-condition CIs -> contrast.
+#' sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60,
+#'                              conditions = c("target", "control"),
+#'                              seed = 1)
+#' a <- subset(sim$data, condition == "target")
+#' b <- subset(sim$data, condition == "control")
+#' sig_a <- ci_from_responses_briefrc(a, noise_matrix = sim$noise_matrix)$signal_matrix
+#' sig_b <- ci_from_responses_briefrc(b, noise_matrix = sim$noise_matrix)$signal_matrix
+#' run_discriminability(sig_a, sig_b,
+#'                      n_permutations = 200L, n_boot = 200L, seed = 1)
+#' }
 #' @export
 run_discriminability <- function(signal_matrix_a,
                                  signal_matrix_b,

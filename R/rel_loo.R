@@ -203,6 +203,15 @@ rel_loo <- function(signal_matrix,
 #'   `correlation`, `z_score`, `flag`, sorted by `z_score`
 #'   ascending.
 #' @seealso [rel_loo()]
+#' @examples
+#' \dontrun{
+#' n_pix  <- 32L * 32L
+#' n_prod <- 20L
+#' set.seed(1)
+#' signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+#' rel_loo_z(signal_matrix)              # accept matrix directly
+#' rel_loo_z(rel_loo(signal_matrix))     # or chain from a result
+#' }
 #' @export
 rel_loo_z <- function(x, ...) {
   if (inherits(x, "rcisignal_rel_loo")) {

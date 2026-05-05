@@ -6,7 +6,11 @@
 #' supplied, participants whose trial count is not in the allowed set are
 #' flagged.
 #'
-#' @param responses A data frame of trial-level responses.
+#' @param responses Data frame with one row per trial. Required
+#'   columns: `participant_id`, `stimulus`, `response` (values in
+#'   `{-1, +1}`). Load yours from CSV via [read_responses()] or
+#'   [utils::read.csv()]; column names are configurable via the
+#'   `col_*` arguments.
 #' @param expected_n Optional. A single integer (all participants should
 #'   have this many trials) or a vector of allowed counts (useful for
 #'   designs with multiple trial-count conditions, e.g. `c(300, 500, 1000)`).

@@ -125,9 +125,13 @@ diagnostic functions (\code{\link[=check_rt]{check_rt()}}) have something to fla
 
 \examples{
 \dontrun{
-sim <- simulate_2ifc_data(n_per_condition = 5, n_trials = 50)
-report <- run_diagnostics(sim$data, method = "2ifc", col_rt = "rt")
-print(report)
+# `sim$data` is a plain data frame (columns: participant_id, stimulus,
+# response, condition, rt) — same shape ci_from_responses_2ifc() and
+# the check_*() functions expect from your own CSV.
+sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+run_diagnostics(sim$data, method = "2ifc", col_rt = "rt")
+cis <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
+run_reliability(cis$signal_matrix, n_permutations = 200L, seed = 1)
 }
 }
 \seealso{

@@ -31,7 +31,11 @@
 #' the supplied `rdata` file on the first call. Subsequent calls reuse
 #' it. Copy your `rdata` beforehand if you want the original untouched.
 #'
-#' @param responses A data frame of trial-level responses.
+#' @param responses Data frame with one row per trial. Required
+#'   columns: `participant_id`, `stimulus`, `response` (values in
+#'   `{-1, +1}`). Load yours from CSV via [read_responses()] or
+#'   [utils::read.csv()]; column names are configurable via the
+#'   `col_*` arguments.
 #' @param method `"2ifc"` (supported) or `"briefrc"` (returns `"skip"`).
 #' @param rdata Path to the rcicr `.RData` file that produced the
 #'   stimuli. Required for 2IFC.
@@ -60,11 +64,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' compute_infoval_summary(
-#'   responses, method = "2ifc",
-#'   rdata = "stimuli.RData",
-#'   iter = 10000
-#' )
+#' sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+#' compute_infoval_summary(sim$data, method = "2ifc",
+#'                         rdata = sim$rdata_path, iter = 200L)
 #' }
 #'
 #' @export

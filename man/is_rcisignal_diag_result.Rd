@@ -16,3 +16,8 @@ else \code{FALSE}.
 \description{
 Test whether an object is an \code{rcisignal_diag_result}
 }
+\examples{
+r <- rcisignal_diag_result("pass", "Demo check", "Looks fine.")
+is_rcisignal_diag_result(r)   # TRUE
+is_rcisignal_diag_result(42)  # FALSE
+}

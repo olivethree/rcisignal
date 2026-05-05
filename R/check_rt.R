@@ -11,7 +11,11 @@
 #'   variation below `min_cv`, default 0.10). A near-constant RT is a hint
 #'   that the participant is responding mechanically.
 #'
-#' @param responses A data frame of trial-level responses.
+#' @param responses Data frame with one row per trial. Required
+#'   columns: `participant_id`, `stimulus`, `response` (values in
+#'   `{-1, +1}`), and `rt` (response time, milliseconds). Load yours
+#'   from CSV via [read_responses()] or [utils::read.csv()]; column
+#'   names are configurable via the `col_*` arguments.
 #' @param method Either `"2ifc"` or `"briefrc"`. Currently informational.
 #' @param col_participant Participant id column.
 #' @param col_rt RT column (required; the check aborts if `NULL`).

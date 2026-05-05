@@ -113,12 +113,17 @@ because the user often wants to save a PNG.
 
 \examples{
 \dontrun{
-res <- ci_from_responses_briefrc(
-  responses       = my_responses,
-  rdata_path      = "data/rcicr_stimuli.Rdata",
-  base_image_path = "data/base.jpg"
-)
-rel_split_half(res$signal_matrix, seed = 1L)
+# In your study, you replace the simulated inputs with your own:
+#   - `sim$data` -> your responses data frame (CSV via read_responses())
+#   - `sim$noise_matrix` -> a numeric matrix `n_pixels x pool_size`
+#     (load via read_noise_matrix() from the OSF txt that came with
+#     your Brief-RC stimuli).
+# The `simulate_briefrc_data()` helper just produces the same shapes so
+# the example below is runnable end-to-end.
+sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+res <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+dim(res$signal_matrix)   # n_pixels x n_producers
+rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
 }
 }
 \references{

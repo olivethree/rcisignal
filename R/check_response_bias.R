@@ -16,7 +16,11 @@
 #' detection when the group is small, because MAD collapses when most
 #' participants respond similarly.
 #'
-#' @param responses A data frame of trial-level responses.
+#' @param responses Data frame with one row per trial. Required
+#'   columns: `participant_id`, `stimulus`, `response` (values in
+#'   `{-1, +1}`). Load yours from CSV via [read_responses()] or
+#'   [utils::read.csv()]; column names are configurable via the
+#'   `col_*` arguments.
 #' @param method Either `"2ifc"` or `"briefrc"`.
 #' @param col_participant,col_response Column names.
 #' @param bias_threshold Numeric. Participants with absolute mean response

@@ -29,6 +29,12 @@
 #'   once-per-session warning. See [read_cis()].
 #' @return A numeric matrix the same shape as `cis`, base-subtracted.
 #' @seealso [read_cis()], [read_signal_matrix()]
+#' @examples
+#' \dontrun{
+#' cis    <- read_cis("data/cis_condition_A/")
+#' signal <- extract_signal(cis, base_image_path = "data/base.jpg")
+#' rel_split_half(signal, n_permutations = 200L, seed = 1)
+#' }
 #' @export
 extract_signal <- function(cis,
                            base_image_path,

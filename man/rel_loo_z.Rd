@@ -25,6 +25,16 @@ and their z-scored LOO influence, ordered from most-influential
 signal matrix (runs \code{\link[=rel_loo]{rel_loo()}} under the hood) or an existing
 \code{rcisignal_rel_loo} result object (cheap, no recomputation).
 }
+\examples{
+\dontrun{
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+rel_loo_z(signal_matrix)              # accept matrix directly
+rel_loo_z(rel_loo(signal_matrix))     # or chain from a result
+}
+}
 \seealso{
 \code{\link[=rel_loo]{rel_loo()}}
 }

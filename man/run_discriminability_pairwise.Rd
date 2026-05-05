@@ -88,6 +88,20 @@ remain the max-statistic FWER-controlled values from
 \code{p_min = 1.0} so the Holm ordering is well-defined.
 }
 
+\examples{
+\dontrun{
+# Three-condition comparison: simulate -> per-condition CIs -> all pairs.
+sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60,
+                             conditions = c("happy", "angry", "neutral"),
+                             seed = 1)
+sigs <- lapply(split(sim$data, sim$data$condition), function(d) {
+  ci_from_responses_briefrc(d, noise_matrix = sim$noise_matrix)$signal_matrix
+})
+run_discriminability_pairwise(sigs,
+                              n_permutations = 200L, n_boot = 200L,
+                              seed = 1)
+}
+}
 \seealso{
 \code{\link[=run_discriminability]{run_discriminability()}}, \code{\link[=rel_cluster_test]{rel_cluster_test()}},
 \code{\link[=rel_dissimilarity]{rel_dissimilarity()}}

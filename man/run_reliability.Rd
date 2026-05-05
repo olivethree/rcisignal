@@ -83,6 +83,16 @@ readers like \code{\link[=extract_signal]{extract_signal()}}) error in \code{\li
 \code{acknowledge_scaling = TRUE}.
 }
 
+\examples{
+\dontrun{
+# End-to-end demo: simulate -> compute CIs -> assess reliability.
+sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+rel <- run_reliability(cis$signal_matrix,
+                       n_permutations = 200L, seed = 1)
+print(rel)
+}
+}
 \seealso{
 \code{\link[=rel_split_half]{rel_split_half()}}, \code{\link[=rel_icc]{rel_icc()}}, \code{\link[=rel_loo]{rel_loo()}} for
 the influence diagnostic; \code{\link[=run_discriminability]{run_discriminability()}}.

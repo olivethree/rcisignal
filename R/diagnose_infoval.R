@@ -45,7 +45,11 @@
 #' (seconds) but does require `rcicr` to be installed. The Brief-RC
 #' path needs no `rcicr` dependency.
 #'
-#' @param responses A data frame of trial-level responses.
+#' @param responses Data frame with one row per trial. Required
+#'   columns: `participant_id`, `stimulus`, `response` (values in
+#'   `{-1, +1}`). Load yours from CSV via [read_responses()] or
+#'   [utils::read.csv()]; column names are configurable via the
+#'   `col_*` arguments.
 #' @param method `"2ifc"` or `"briefrc"`. If `NULL`, inferred from
 #'   whichever of `rdata` / `noise_matrix` is supplied.
 #' @param rdata Path to an rcicr `.RData` file (2IFC).
@@ -100,11 +104,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' diagnose_infoval(
-#'   responses, method = "2ifc",
-#'   rdata = "stimuli.RData",
-#'   iter  = 1000
-#' )
+#' sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+#' diagnose_infoval(sim$data, method = "2ifc",
+#'                  rdata = sim$rdata_path, iter = 200L)
 #' }
 #'
 #' @export

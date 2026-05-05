@@ -18,7 +18,11 @@ check_rt_infoval_consistency(
 )
 }
 \arguments{
-\item{responses}{A data frame of trial-level responses.}
+\item{responses}{Data frame with one row per trial. Required
+columns: \code{participant_id}, \code{stimulus}, \code{response} (values in
+\verb{\{-1, +1\}}), and \code{rt} (response time, milliseconds). Load yours
+from CSV via \code{\link[=read_responses]{read_responses()}} or \code{\link[utils:read.table]{utils::read.csv()}}; column
+names are configurable via the \verb{col_*} arguments.}
 
 \item{method}{\code{"2ifc"} or \code{"briefrc"}.}
 
@@ -64,11 +68,9 @@ Requires \code{rcicr} via \code{\link[=compute_infoval_summary]{compute_infoval_
 }
 \examples{
 \dontrun{
-check_rt_infoval_consistency(
-  responses, method = "2ifc",
-  rdata = "stimuli.RData",
-  col_rt = "rt"
-)
+sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+check_rt_infoval_consistency(sim$data, method = "2ifc",
+                             rdata = sim$rdata_path, col_rt = "rt")
 }
 
 }

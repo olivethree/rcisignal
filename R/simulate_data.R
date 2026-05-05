@@ -92,9 +92,13 @@
 #'
 #' @examples
 #' \dontrun{
-#' sim <- simulate_2ifc_data(n_per_condition = 5, n_trials = 50)
-#' report <- run_diagnostics(sim$data, method = "2ifc", col_rt = "rt")
-#' print(report)
+#' # `sim$data` is a plain data frame (columns: participant_id, stimulus,
+#' # response, condition, rt) — same shape ci_from_responses_2ifc() and
+#' # the check_*() functions expect from your own CSV.
+#' sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+#' run_diagnostics(sim$data, method = "2ifc", col_rt = "rt")
+#' cis <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
+#' run_reliability(cis$signal_matrix, n_permutations = 200L, seed = 1)
 #' }
 #' @export
 simulate_2ifc_data <- function(n_per_condition       = 50L,
@@ -246,11 +250,17 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
 #'
 #' @examples
 #' \dontrun{
-#' sim <- simulate_briefrc_data(n_per_condition = 5, n_trials = 30)
-#' report <- run_diagnostics(sim$data, method = "briefrc",
-#'                           noise_matrix = sim$noise_matrix,
-#'                           col_rt = "rt")
-#' print(report)
+#' # `sim$data` is a plain data frame (columns: participant_id, stimulus,
+#' # response, condition, rt) — same shape ci_from_responses_briefrc() and
+#' # the check_*() functions expect from your own CSV.
+#' # `sim$noise_matrix` is a numeric matrix `n_pixels x pool_size` — same
+#' # shape read_noise_matrix() returns from your Brief-RC OSF txt file.
+#' sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+#' run_diagnostics(sim$data, method = "briefrc",
+#'                 noise_matrix = sim$noise_matrix, col_rt = "rt")
+#' cis <- ci_from_responses_briefrc(sim$data,
+#'                                  noise_matrix = sim$noise_matrix)
+#' run_reliability(cis$signal_matrix, n_permutations = 200L, seed = 1)
 #' }
 #' @export
 simulate_briefrc_data <- function(n_per_condition       = 50L,

@@ -252,6 +252,10 @@ rcisignal_diag_result <- function(status, label, detail, data = list()) {
 #' @param x Any R object.
 #' @return `TRUE` if `x` inherits from `"rcisignal_diag_result"`,
 #'   else `FALSE`.
+#' @examples
+#' r <- rcisignal_diag_result("pass", "Demo check", "Looks fine.")
+#' is_rcisignal_diag_result(r)   # TRUE
+#' is_rcisignal_diag_result(42)  # FALSE
 #' @export
 is_rcisignal_diag_result <- function(x) {
   inherits(x, "rcisignal_diag_result")

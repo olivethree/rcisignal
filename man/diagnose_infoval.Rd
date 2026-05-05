@@ -22,7 +22,11 @@ diagnose_infoval(
 )
 }
 \arguments{
-\item{responses}{A data frame of trial-level responses.}
+\item{responses}{Data frame with one row per trial. Required
+columns: \code{participant_id}, \code{stimulus}, \code{response} (values in
+\verb{\{-1, +1\}}). Load yours from CSV via \code{\link[=read_responses]{read_responses()}} or
+\code{\link[utils:read.table]{utils::read.csv()}}; column names are configurable via the
+\verb{col_*} arguments.}
 
 \item{method}{\code{"2ifc"} or \code{"briefrc"}. If \code{NULL}, inferred from
 whichever of \code{rdata} / \code{noise_matrix} is supplied.}
@@ -129,11 +133,9 @@ path needs no \code{rcicr} dependency.
 }
 \examples{
 \dontrun{
-diagnose_infoval(
-  responses, method = "2ifc",
-  rdata = "stimuli.RData",
-  iter  = 1000
-)
+sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+diagnose_infoval(sim$data, method = "2ifc",
+                 rdata = sim$rdata_path, iter = 200L)
 }
 
 }

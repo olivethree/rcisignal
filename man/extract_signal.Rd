@@ -63,6 +63,13 @@ should be fed the raw mask. Prefer \code{\link[=ci_from_responses_2ifc]{ci_from_
 both return the raw mask.
 }
 
+\examples{
+\dontrun{
+cis    <- read_cis("data/cis_condition_A/")
+signal <- extract_signal(cis, base_image_path = "data/base.jpg")
+rel_split_half(signal, n_permutations = 200L, seed = 1)
+}
+}
 \seealso{
 \code{\link[=read_cis]{read_cis()}}, \code{\link[=read_signal_matrix]{read_signal_matrix()}}
 }
