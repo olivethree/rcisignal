@@ -126,15 +126,31 @@ is well-defined.
 
 ``` r
 if (FALSE) { # \dontrun{
-# Three-condition comparison: simulate -> per-condition CIs -> all pairs.
-sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60,
-                             conditions = c("happy", "angry", "neutral"),
-                             seed = 1)
-sigs <- lapply(split(sim$data, sim$data$condition), function(d) {
-  ci_from_responses_briefrc(d, noise_matrix = sim$noise_matrix)$signal_matrix
-})
+# Three conditions, each with signal planted in a different face region
+# (eyes / mouth / nose). All three pairwise contrasts should detect a
+# difference; the FWER correction is applied across the three pairs.
+sim_eyes  <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "x",
+  signal_region = "eyes",  signal_strength = "strong", seed = 1
+)
+sim_mouth <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "x",
+  signal_region = "mouth", signal_strength = "strong", seed = 2
+)
+sim_nose  <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "x",
+  signal_region = "nose",  signal_strength = "strong", seed = 3
+)
+sigs <- list(
+  eyes  = ci_from_responses_briefrc(
+    sim_eyes$data,  noise_matrix = sim_eyes$noise_matrix)$signal_matrix,
+  mouth = ci_from_responses_briefrc(
+    sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix,
+  nose  = ci_from_responses_briefrc(
+    sim_nose$data,  noise_matrix = sim_nose$noise_matrix)$signal_matrix
+)
 run_discriminability_pairwise(sigs,
-                              n_permutations = 200L, n_boot = 200L,
+                              n_permutations = 500L, n_boot = 500L,
                               seed = 1)
 } # }
 ```

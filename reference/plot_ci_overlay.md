@@ -107,18 +107,26 @@ the active device as a side effect.
 
 ``` r
 if (FALSE) { # \dontrun{
-# In a real pipeline:
-#   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
-#   base_image    <- "path/to/base_face.png"
-# For a self-contained demo we fabricate small synthetic inputs:
+# Minimal call-signature demo with synthetic inputs and a flat base.
 n_side <- 32L
 n_pix  <- n_side * n_side
 n_prod <- 20L
 set.seed(1)
 signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
 base_image    <- matrix(0.5, n_side, n_side)
-
 plot_ci_overlay(signal_matrix, base_image,
                 img_dims = c(n_side, n_side))
+} # }
+
+if (FALSE) { # \dontrun{
+# Same function, richer input: plant a signal in the eye region and
+# overlay it on the simulator's base face. The eye region should
+# light up against the anatomical context.
+sim <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "target",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+cis  <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+plot_ci_overlay(cis$signal_matrix, sim$base_face)
 } # }
 ```

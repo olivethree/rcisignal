@@ -83,16 +83,24 @@ Object of class `rcisignal_rel_agreement_map_test` with:
 
 ``` r
 if (FALSE) { # \dontrun{
-# In a real pipeline, signal_matrix comes from earlier steps:
-#   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
-# For a self-contained demo we fabricate a small synthetic input:
+# Minimal call-signature demo with a synthetic input.
 n_pix  <- 32L * 32L
 n_prod <- 20L
 set.seed(1)
 signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
-
 res <- agreement_map_test(signal_matrix,
                           n_permutations = 500L, seed = 1)
 print(res)
+} # }
+
+if (FALSE) { # \dontrun{
+# Same function, richer input: plant a strong signal in the eye region
+# so the FWER-controlled test has something to detect.
+sim <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "target",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+agreement_map_test(cis$signal_matrix, n_permutations = 500L, seed = 1)
 } # }
 ```

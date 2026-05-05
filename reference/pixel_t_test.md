@@ -76,17 +76,32 @@ error unless `acknowledge_scaling = TRUE`.
 
 ``` r
 if (FALSE) { # \dontrun{
-# In a real pipeline, the two matrices come from earlier steps:
-#   sig_a <- ci_from_responses_briefrc(responses_cond_a, ...)$signal_matrix
-#   sig_b <- ci_from_responses_briefrc(responses_cond_b, ...)$signal_matrix
-# For a self-contained demo we fabricate two small synthetic inputs:
+# Minimal call-signature demo with two synthetic inputs.
 n_pix  <- 32L * 32L
 n_prod <- 20L
 set.seed(1)
 signal_matrix_a <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
 signal_matrix_b <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+summary(pixel_t_test(signal_matrix_a, signal_matrix_b))
+} # }
 
-t_vec <- pixel_t_test(signal_matrix_a, signal_matrix_b)
-summary(t_vec)
+if (FALSE) { # \dontrun{
+# Same function, richer input: simulate two conditions with signal
+# planted in different face regions (eyes vs mouth). The pixel-wise
+# t-map should be large-positive around the eyes and large-negative
+# around the mouth — pixels where the conditions disagree.
+sim_eyes  <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "x",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+sim_mouth <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "x",
+  signal_region = "mouth", signal_strength = "strong", seed = 2
+)
+sig_eyes  <- ci_from_responses_briefrc(
+  sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
+sig_mouth <- ci_from_responses_briefrc(
+  sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
+summary(pixel_t_test(sig_eyes, sig_mouth))
 } # }
 ```

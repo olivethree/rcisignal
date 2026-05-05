@@ -234,21 +234,36 @@ dependence and localisation in cluster inference. <em>NeuroImage</em>,
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># In a real pipeline, the two matrices come from earlier steps:</span></span></span>
-<span class="r-in"><span><span class="co">#   sig_a &lt;- ci_from_responses_briefrc(responses_cond_a, ...)$signal_matrix</span></span></span>
-<span class="r-in"><span><span class="co">#   sig_b &lt;- ci_from_responses_briefrc(responses_cond_b, ...)$signal_matrix</span></span></span>
-<span class="r-in"><span><span class="co"># For a self-contained demo we fabricate two small synthetic inputs:</span></span></span>
+<span class="r-in"><span><span class="co"># Minimal call-signature demo with two synthetic inputs.</span></span></span>
 <span class="r-in"><span><span class="va">n_side</span> <span class="op">&lt;-</span> <span class="fl">32L</span></span></span>
 <span class="r-in"><span><span class="va">n_pix</span>  <span class="op">&lt;-</span> <span class="va">n_side</span> <span class="op">*</span> <span class="va">n_side</span></span></span>
 <span class="r-in"><span><span class="va">n_prod</span> <span class="op">&lt;-</span> <span class="fl">20L</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">signal_matrix_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_pix</span> <span class="op">*</span> <span class="va">n_prod</span><span class="op">)</span>, <span class="va">n_pix</span>, <span class="va">n_prod</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">signal_matrix_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_pix</span> <span class="op">*</span> <span class="va">n_prod</span><span class="op">)</span>, <span class="va">n_pix</span>, <span class="va">n_prod</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rel_cluster_test</span><span class="op">(</span><span class="va">signal_matrix_a</span>, <span class="va">signal_matrix_b</span>,</span></span>
+<span class="r-in"><span>                 img_dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">n_side</span>, <span class="va">n_side</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                 n_permutations <span class="op">=</span> <span class="fl">200L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">rel_cluster_test</span><span class="op">(</span><span class="va">signal_matrix_a</span>, <span class="va">signal_matrix_b</span>,</span></span>
-<span class="r-in"><span>                        img_dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">n_side</span>, <span class="va">n_side</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                        n_permutations <span class="op">=</span> <span class="fl">200L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># Same function, richer input: signal planted in different face regions</span></span></span>
+<span class="r-in"><span><span class="co"># (eyes vs mouth). The cluster test should find significant clusters</span></span></span>
+<span class="r-in"><span><span class="co"># at both regions, with opposite signs.</span></span></span>
+<span class="r-in"><span><span class="va">sim_eyes</span>  <span class="op">&lt;-</span> <span class="fu"><a href="simulate_briefrc_data.html">simulate_briefrc_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_per_condition <span class="op">=</span> <span class="fl">20</span>, n_trials <span class="op">=</span> <span class="fl">60</span>, conditions <span class="op">=</span> <span class="st">"x"</span>,</span></span>
+<span class="r-in"><span>  signal_region <span class="op">=</span> <span class="st">"eyes"</span>, signal_strength <span class="op">=</span> <span class="st">"strong"</span>, seed <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sim_mouth</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_briefrc_data.html">simulate_briefrc_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_per_condition <span class="op">=</span> <span class="fl">20</span>, n_trials <span class="op">=</span> <span class="fl">60</span>, conditions <span class="op">=</span> <span class="st">"x"</span>,</span></span>
+<span class="r-in"><span>  signal_region <span class="op">=</span> <span class="st">"mouth"</span>, signal_strength <span class="op">=</span> <span class="st">"strong"</span>, seed <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sig_eyes</span>  <span class="op">&lt;-</span> <span class="fu"><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">sim_eyes</span><span class="op">$</span><span class="va">data</span>, noise_matrix <span class="op">=</span> <span class="va">sim_eyes</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span><span class="op">$</span><span class="va">signal_matrix</span></span></span>
+<span class="r-in"><span><span class="va">sig_mouth</span> <span class="op">&lt;-</span> <span class="fu"><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">sim_mouth</span><span class="op">$</span><span class="va">data</span>, noise_matrix <span class="op">=</span> <span class="va">sim_mouth</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span><span class="op">$</span><span class="va">signal_matrix</span></span></span>
+<span class="r-in"><span><span class="fu">rel_cluster_test</span><span class="op">(</span><span class="va">sig_eyes</span>, <span class="va">sig_mouth</span>,</span></span>
+<span class="r-in"><span>                 n_permutations <span class="op">=</span> <span class="fl">500L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
