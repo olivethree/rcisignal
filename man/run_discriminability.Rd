@@ -80,16 +80,24 @@ uses variance-based Welch t, and Euclidean distance in
 
 \examples{
 \dontrun{
-# Two-condition pipeline: simulate -> per-condition CIs -> contrast.
-sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60,
-                             conditions = c("target", "control"),
-                             seed = 1)
-a <- subset(sim$data, condition == "target")
-b <- subset(sim$data, condition == "control")
-sig_a <- ci_from_responses_briefrc(a, noise_matrix = sim$noise_matrix)$signal_matrix
-sig_b <- ci_from_responses_briefrc(b, noise_matrix = sim$noise_matrix)$signal_matrix
-run_discriminability(sig_a, sig_b,
-                     n_permutations = 200L, n_boot = 200L, seed = 1)
+# Two-condition pipeline with signal planted in different face regions
+# (eyes vs mouth). The orchestrator runs the cluster test and the
+# bootstrap dissimilarity in one call; significant pixels should
+# localise around the eye and mouth regions.
+sim_eyes  <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "x",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+sim_mouth <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "x",
+  signal_region = "mouth", signal_strength = "strong", seed = 2
+)
+sig_eyes  <- ci_from_responses_briefrc(
+  sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
+sig_mouth <- ci_from_responses_briefrc(
+  sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
+run_discriminability(sig_eyes, sig_mouth,
+                     n_permutations = 500L, n_boot = 500L, seed = 1)
 }
 }
 \seealso{

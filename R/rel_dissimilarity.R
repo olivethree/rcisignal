@@ -80,19 +80,33 @@
 #' bootstrap*. Chapman & Hall / CRC.
 #' @examples
 #' \dontrun{
-#' # In a real pipeline, the two matrices come from earlier steps:
-#' #   sig_a <- ci_from_responses_briefrc(responses_cond_a, ...)$signal_matrix
-#' #   sig_b <- ci_from_responses_briefrc(responses_cond_b, ...)$signal_matrix
-#' # For a self-contained demo we fabricate two small synthetic inputs:
+#' # Minimal call-signature demo with two synthetic inputs.
 #' n_pix  <- 32L * 32L
 #' n_prod <- 20L
 #' set.seed(1)
 #' signal_matrix_a <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
 #' signal_matrix_b <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+#' rel_dissimilarity(signal_matrix_a, signal_matrix_b,
+#'                   n_boot = 200L, seed = 1)
+#' }
 #'
-#' d <- rel_dissimilarity(signal_matrix_a, signal_matrix_b,
-#'                        n_boot = 200L, seed = 1)
-#' print(d)
+#' \dontrun{
+#' # Same function, richer input: signal planted in different face regions
+#' # (eyes vs mouth). The Euclidean distance and its bootstrap CI should
+#' # be well above zero, reflecting genuine spatial divergence.
+#' sim_eyes  <- simulate_briefrc_data(
+#'   n_per_condition = 20, n_trials = 60, conditions = "x",
+#'   signal_region = "eyes", signal_strength = "strong", seed = 1
+#' )
+#' sim_mouth <- simulate_briefrc_data(
+#'   n_per_condition = 20, n_trials = 60, conditions = "x",
+#'   signal_region = "mouth", signal_strength = "strong", seed = 2
+#' )
+#' sig_eyes  <- ci_from_responses_briefrc(
+#'   sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
+#' sig_mouth <- ci_from_responses_briefrc(
+#'   sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
+#' rel_dissimilarity(sig_eyes, sig_mouth, n_boot = 500L, seed = 1)
 #' }
 #' @export
 rel_dissimilarity <- function(signal_matrix_a,

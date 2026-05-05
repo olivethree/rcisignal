@@ -112,21 +112,29 @@
 #' \doi{10.1002/ejsp.3100}
 #' @examples
 #' \dontrun{
-#' # In a real pipeline these three inputs come from earlier steps:
-#' #   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
-#' #   noise_matrix  <- read_noise_matrix("stimuli.RData")
-#' #   trial_counts  <- as.integer(table(responses$participant_id))
-#' # For a self-contained demo we fabricate small synthetic inputs:
+#' # Minimal call-signature demo with three synthetic inputs.
 #' n_pix  <- 32L * 32L
 #' n_prod <- 20L
 #' set.seed(1)
 #' signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
 #' noise_matrix  <- matrix(rnorm(n_pix * 4096L),  n_pix, 4096L)
 #' trial_counts  <- rep(300L, n_prod)
-#'
 #' iv <- infoval(signal_matrix, noise_matrix, trial_counts,
 #'               iter = 200L, seed = 1)
 #' print(iv)
+#' }
+#'
+#' \dontrun{
+#' # Same function, richer input: plant a strong signal in the eye region
+#' # so per-producer infoVal z values mostly clear the 1.96 threshold.
+#' sim <- simulate_briefrc_data(
+#'   n_per_condition = 20, n_trials = 60, conditions = "target",
+#'   signal_region = "eyes", signal_strength = "strong", seed = 1
+#' )
+#' cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+#' trial_counts <- as.integer(table(sim$data$participant_id))
+#' infoval(cis$signal_matrix, sim$noise_matrix, trial_counts,
+#'         iter = 500L, seed = 1)
 #' }
 #' @export
 infoval <- function(signal_matrix,

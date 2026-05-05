@@ -52,15 +52,25 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' # In a real pipeline, signal_matrix comes from earlier steps:
-#' #   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
-#' # For a self-contained demo we fabricate a small synthetic input:
+#' # Minimal call-signature demo with a synthetic input. The agreement
+#' # map will look flat because the input is pure noise.
 #' n_side <- 32L
 #' n_pix  <- n_side * n_side
 #' set.seed(1)
 #' signal_matrix <- matrix(rnorm(n_pix * 20L), n_pix, 20L)
-#'
 #' plot_agreement_map(signal_matrix, img_dims = c(n_side, n_side))
+#' }
+#'
+#' \dontrun{
+#' # Same function, richer input: simulate Brief-RC responses with a
+#' # signal planted in the eye region, then look at the agreement map.
+#' # Producers should consistently agree on the planted region.
+#' sim <- simulate_briefrc_data(
+#'   n_per_condition = 20, n_trials = 60, conditions = "target",
+#'   signal_region = "eyes", signal_strength = "strong", seed = 1
+#' )
+#' cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+#' plot_agreement_map(cis$signal_matrix)
 #' }
 plot_agreement_map <- function(signal_matrix,
                                img_dims  = NULL,
