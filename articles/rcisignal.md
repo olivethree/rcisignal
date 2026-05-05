@@ -21,9 +21,9 @@ reliability and discriminability metrics
 [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
 [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
-together with the underlying `rel_*` and
-[`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md)
-primitives) cover the second and third.
+together with the lower-level building blocks `rel_*()` and
+[`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md))
+cover the second and third.
 
 ### 1.1 Scope
 
@@ -31,11 +31,11 @@ For 2IFC stimulus generation and CI computation, `rcisignal` delegates
 to the upstream [`rcicr`](https://github.com/rdotsch/rcicr) package
 (Dotsch, 2016, 2023).
 [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
-is a thin wrapper around
+is a small convenience function around
 [`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html)
-that handles the integration gotchas. Brief-RC (Schmitz, Rougier, &
-Yzerbyt, 2024) is implemented natively because upstream `rcicr` does not
-ship Brief-RC machinery.
+that takes care of the integration quirks. Brief-RC support (Schmitz,
+Rougier, & Yzerbyt, 2024) is built into rcisignal directly, because
+rcicr does not yet provide it.
 
 The metrics in this package quantify whether a CI is stable
 (within-condition) and separable (between-condition). Whether the CI
@@ -49,9 +49,8 @@ pitfall.
 
 The intended audience is RC researchers at an intermediate R level with
 basic familiarity with the `rcicr` package or with the Schmitz et
-al. (2024) Brief-RC structure. No prior expertise in `data.table`, S3
-classes, permutation testing, or psychometric variance decomposition is
-assumed.
+al. (2024) Brief-RC structure. No prior expertise in `data.table`,
+permutation testing, or intraclass correlation is assumed.
 
 ### 1.2 Validation status
 
@@ -164,8 +163,8 @@ reliability and discriminability metrics, sensitivity to contamination).
   writes, so
   [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
   [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md),
-  and every other downstream function that asks for an `rdata` argument
-  works out of the box.
+  and every other function that asks for an `rdata` argument works out
+  of the box.
 
 The return value is an `rcisignal_sim` S3 object:
 
@@ -269,8 +268,8 @@ sim <- simulate_2ifc_data(
 print(run_diagnostics(sim$data, method = "2ifc", col_rt = "rt"))
 
 # Step 2: compute per-participant CIs using the bundled .Rdata.
-target_rows  <- sim$data[condition == "target"]
-control_rows <- sim$data[condition == "control"]
+target_rows  <- subset(sim$data, condition == "target")
+control_rows <- subset(sim$data, condition == "control")
 cis_target   <- ci_from_responses_2ifc(target_rows,
                                        rdata_path = sim$rdata_path)
 cis_control  <- ci_from_responses_2ifc(control_rows,
@@ -312,10 +311,11 @@ the cost only needs to be paid once.
 
 Almost every analytical function in `rcisignal` operates on a single
 data structure: a **signal matrix** with one row per pixel and one
-column per producer (participant). The orchestrators
-([`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
-[`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md))
-take a signal matrix as input, as do
+column per producer (participant). The two top-level functions
+[`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
+and
+[`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
+take a signal matrix as input, and so do the lower-level
 [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md),
 [`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md),
 [`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md),
@@ -325,14 +325,15 @@ take a signal matrix as input, as do
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
 and
 [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md).
-Getting the signal matrix right suffices for everything downstream.
+Once you have the signal matrix in the right shape, the rest of the
+analysis follows.
 
 ### 3.0 Three pixel matrices that all sound similar: keep them apart
 
 Reverse correlation work involves several types of pixel matrices that
 may be easy to confuse. In `rcisignal`, each one has exactly one job:
 
-| Data type | What is it? | shape | input or output? |
+| Data type | What is it? | shape | Where it comes from |
 |----|----|----|----|
 | **`noise_matrix`** | **input** pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern. | `n_pixels` × `pool_size` | input (you give it to the package) |
 | **noise mask** (a.k.a. “per-participant CI”) | **one participant’s** classification image: a single vector of pixel values, base-subtracted. Conceptually, the weighted average of the noise patterns they “selected” with their responses. | `n_pixels` × 1 (one column) | intermediate |
@@ -355,7 +356,7 @@ You don’t build the noise mask or the `signal_matrix` by hand:
 and
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
 do it for you and return a list whose `$signal_matrix` element is the
-matrix you pass downstream.
+matrix you pass to the metrics in §7-§9.
 
 A small terminology trap. The word *mask* above means *image-shaped
 overlay* (one number per pixel, defined over the whole image grid). It
@@ -375,8 +376,8 @@ strictly for the input pool above (the row of the table) and
 Whatever you call the object in your own writing, the shape and
 interpretation are the same.
 
-Two paths lead to a signal matrix, with different downstream
-consequences.
+Two paths lead to a signal matrix, with different consequences for the
+metrics that follow.
 
 ### 3.1 Two paths to the signal matrix
 
@@ -386,7 +387,7 @@ for 2IFC pipelines or
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
 for Brief-RC. Both return a list with `$signal_matrix` already in the
 right shape, base-subtracted, and unscaled (i.e. carrying the raw mask).
-This is the safe path for downstream reliability metrics.
+This is the safe path for the reliability metrics later on.
 
 ``` r
 
@@ -432,21 +433,23 @@ scaling distorts the numbers. The `"matched"` (per-CI) scaling option,
 where each producer’s mask is stretched to the base’s dynamic range,
 breaks correlation-based metrics as well.
 
-`rcisignal` enforces this distinction at runtime via a `source`
-attribute attached to every signal matrix:
+`rcisignal` keeps track of which kind of matrix you have by labelling
+each signal matrix with a `source` tag (either `"raw"` or `"rendered"`).
+The variance-based functions check this tag before they run, and stop
+with an informative error if you pass a rendered matrix:
 
 - Functions that build raw masks
   ([`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
   [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md))
-  tag the matrix with `attr(., "source") = "raw"`.
+  label the resulting matrix as `"raw"`.
 - Functions that read PNGs
   ([`read_cis()`](https://olivethree.github.io/rcisignal/reference/read_cis.md),
   [`extract_signal()`](https://olivethree.github.io/rcisignal/reference/extract_signal.md),
   [`read_signal_matrix()`](https://olivethree.github.io/rcisignal/reference/read_signal_matrix.md))
-  tag with `attr(., "source") = "rendered"`.
-- Variance-based metrics call an internal `assert_raw_signal()` helper
-  that errors when given a `"rendered"` matrix unless the caller passes
-  `acknowledge_scaling = TRUE`.
+  label it as `"rendered"`.
+- Variance-based metrics check this label internally and stop with an
+  informative error when given a `"rendered"` matrix, unless you pass
+  `acknowledge_scaling = TRUE` to confirm you have read the caveat.
 
 ``` r
 
@@ -462,10 +465,10 @@ rel_icc(read_signal_matrix("cis/", "base.jpg"),
         acknowledge_scaling = TRUE)
 ```
 
-A heuristic backstop (`looks_scaled()`) catches hand-built signal
-matrices that have no `source` attribute but whose dynamic range
-suggests scaling. The backstop emits a once-per-session warning rather
-than erroring; silence with
+A safety check (`looks_scaled()`) also flags hand-built signal matrices
+that don’t carry the `source` label but whose value range looks
+rescaled. This check emits a once-per-session warning rather than
+stopping the analysis; silence it with
 `options(rcisignal.silence_scaling_warning = TRUE)`.
 
 One important exception:
@@ -651,11 +654,11 @@ responses <- read_responses("study1data.csv", method = "2ifc")
 
 The 2IFC pipeline uses an `.RData` file produced by
 [`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html).
-The load-bearing objects for analysis are:
+The objects in this file that the analysis actually uses are:
 
 - `base_faces`: the loaded base-face matrices, grayscale in `[0, 1]`.
-  List names (e.g. `"base"`) become the `baseimage` argument downstream.
-  `base_face_files` carries the matching source paths.
+  List names (e.g. `"base"`) become the `baseimage` argument used by
+  later functions. `base_face_files` carries the matching source paths.
 - `img_size`: side length of the (square) image in pixels.
 - `p`: the noise basis (with `$patches` and `$patchIdx`), the sinusoidal
   dictionary used to assemble each trial’s noise.
@@ -687,9 +690,9 @@ serves as input to CI computation, distinct from the *signal matrix*,
 which is an output.
 
 [`read_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/read_noise_matrix.md)
-is a single entry point that auto-detects the source format from the
-file extension and transparently caches slow-to-parse formats to a
-sibling `.rds`:
+is a single entry point that detects the file format automatically. For
+formats that are slow to parse, it saves a faster `.rds` copy next to
+the original and re-uses it on subsequent calls:
 
 ``` r
 
@@ -706,10 +709,10 @@ nm <- read_noise_matrix("data/rcicr_stimuli.Rdata",
                         baseimage = "base")
 ```
 
-Cache invalidation is automatic: each `.rds` records the source file’s
-size and modification time, and the next call reparses if either
-differs. A once-per-session `cli` line announces “cache built” or “cache
-reused”; silence with
+The `.rds` is rebuilt automatically if you change the source file (each
+cached file records the source’s size and modification time, and is
+rebuilt when either changes). A once-per-session `cli` line announces
+“cache built” or “cache reused”; silence it with
 `options(rcisignal.silence_cache_messages = TRUE)`.
 
 For the rcicr `.Rdata` reconstruction path, the upstream `rcicr` package
@@ -742,7 +745,10 @@ The base face used at stimulus generation. Must be:
 
 For a research-quality base, the
 [webmorphR](https://github.com/debruine/webmorphR) package by DeBruine
-(2022) is the current best-in-class tool:
+(2022) is the current best-in-class tool. The example below uses R’s
+native pipe (`|>`, available since R 4.1) because that is the idiom the
+webmorphR documentation uses; the rest of this vignette sticks to base R
+for consistency.
 
 ``` r
 
@@ -793,9 +799,10 @@ fm <- read_face_mask("masks/oval_256.png",
 fm <- as.vector(custom_mask_matrix > 0.5)
 ```
 
-Either a logical vector (column-major, length `prod(img_dims)`) or a
-logical matrix `nrow x ncol` is accepted by every `mask` argument in the
-package.
+A mask can be supplied as either a logical vector of length `n_pixels`
+(with pixels in the same order R uses when it flattens a matrix into a
+vector, i.e. column by column) or as a logical matrix with the image
+dimensions. Every `mask` argument in the package accepts both forms.
 
 [`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md)
 renders any of those forms over the base face, so you can verify
@@ -931,8 +938,8 @@ are dropped, and the new edges are filled with `FALSE`.
 
 ``` r
 
-# Default eye mask, reshaped from a column-major logical vector
-# back into a 256 x 256 grid.
+# Default eye mask, reshaped from a flat logical vector (pixels
+# in column-by-column order) back into a 256 x 256 grid.
 eye_mask_default <- matrix(
   make_face_mask(c(256L, 256L), region = "eyes"),
   nrow = 256, ncol = 256
@@ -940,7 +947,10 @@ eye_mask_default <- matrix(
 
 # Shift a logical mask by `down` and `right` pixels. Positive
 # values move the mask down / right; negative values move it up /
-# left.
+# left. The idea is to start from a destination matrix of FALSE
+# the same size as the input, then copy the source pixels into
+# the shifted positions; pixels that land off the image are
+# dropped.
 shift_mask <- function(mask, down = 0, right = 0) {
   out <- matrix(FALSE, nrow(mask), ncol(mask))
   src_rows <- seq_len(nrow(mask)) - down
@@ -1168,7 +1178,7 @@ The status logic:
 
 ### 5.5 `compute_infoval_summary()`
 
-A thin wrapper around
+A small convenience function around
 [`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
 for the legacy 2IFC path. It returns a per-participant z table plus a
 pass/warn summary, useful for direct comparison with previously
@@ -1247,14 +1257,16 @@ dim(res$signal_matrix)   # n_pixels x n_participants
 attr(res$signal_matrix, "source")    # "raw"
 ```
 
-The wrapper handles the rcicr integration gotchas internally: attaches
-`foreach` / `tibble` / `dplyr` at runtime (rcicr uses them without
-namespace prefixes), validates response coding, defaults `ncores = 1L`,
-and matches the `.Rdata` extension case-insensitively.
+Behind the scenes the function takes care of the steps that are easy to
+get wrong when calling rcicr directly: it loads the helper packages
+rcicr expects (`foreach`, `tibble`, `dplyr`), checks that responses are
+coded `{-1, +1}`, runs single-threaded by default, and matches the
+`.Rdata` filename in a case- insensitive way.
 
-The Brief-RC path is implemented natively (rcicr v1.0.1 has no Brief-RC
-functions). It implements Schmitz’s `genMask()` exactly, including the
-duplicate-stim collapse rule:
+Brief-RC support is built into rcisignal directly (rcicr v1.0.1 does not
+include Brief-RC). The implementation follows Schmitz’s `genMask()`
+formula step for step, including the rule that collapses repeated
+stimulus ids by averaging their responses:
 
 ``` r
 
@@ -1288,9 +1300,9 @@ attr(signal, "source")   # "rendered"
 [`read_cis()`](https://olivethree.github.io/rcisignal/reference/read_cis.md)
 and
 [`extract_signal()`](https://olivethree.github.io/rcisignal/reference/extract_signal.md)
-are exposed separately for power users who want to intervene between the
-read and the base subtraction (e.g. masking pixels, cropping, swapping
-the base).
+are also available on their own, for cases where you want to do
+something between reading the PNGs and subtracting the base
+(e.g. masking, cropping, or swapping the base image).
 
 The first call to any Mode-1 reader emits the once-per-session warning
 that PNG-derived signals are scaled. Silence with
@@ -1468,18 +1480,18 @@ ic <- rel_icc(signal_matrix)
 ic   # prints ICC(3,1), ICC(3,k), MS rows / cols / error
 ```
 
-The function computes both quantities directly from ANOVA mean squares
-(rather than [`psych::ICC()`](https://rdrr.io/pkg/psych/man/ICC.html),
-which allocates intermediates that exhaust memory on a 65,536 x 30
-matrix). Cross-validated against
-[`psych::ICC()`](https://rdrr.io/pkg/psych/man/ICC.html) on small
-matrices in `tests/testthat/test-rel_icc.R`.
+The function computes both quantities directly from ANOVA mean squares,
+which scales to large image grids that would otherwise run out of
+memory. Results agree with
+[`psych::ICC()`](https://rdrr.io/pkg/psych/man/ICC.html) on smaller
+matrices where both can be run.
 
 ICC(3,*) is appropriate when pixels are fixed. ICC(2,*) (two-way random)
 treats pixels as a random sample from a pixel population, which the
 image grid is not, even when ICC(2,*) and ICC(3,*) give similar numbers
 at high pixel counts. Use `variants = c("3_1", "3_k", "2_1", "2_k")` to
-report ICC(2,\*) side-by-side for reviewer requests.
+report ICC(2,\*) side-by-side when comparability with reports that use
+the two-way-random model is needed.
 
 ICC is variance-based, so it errors on a `"rendered"` source matrix
 unless `acknowledge_scaling = TRUE` is passed. Rendered scaling corrupts
@@ -1526,8 +1538,8 @@ near 1 by construction even on noisy data (typically in the
 carries the diagnostic information, so the function reports `$z_scores`
 as the recommended quantity.
 
-Two flagging rules are available: `"mad"` (default) and `"sd"` (retained
-for back-compat, deprecated, slated for removal in v0.2.0). MAD is
+Two flagging rules are available: `"mad"` (default) and `"sd"` (kept for
+compatibility with earlier versions; will be removed in v0.2.0). MAD is
 robust to the influential producers the test is meant to flag; SD’s mean
 and standard deviation are themselves pulled by the outlier. Default
 `flag_threshold = 2.5` so that a 30-producer dataset flags ~0.3
@@ -1540,11 +1552,11 @@ to rule out coding errors before excluding any producer.
 
 ### 7.4 `run_reliability()`
 
-Convenience orchestrator that runs
+Top-level convenience function that runs
 [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md)
 and
 [`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md)
-on a single signal matrix and wraps both into one
+on a single signal matrix and bundles both results into one
 `rcisignal_rel_report`:
 
 ``` r
@@ -1557,7 +1569,9 @@ plot(rep)
 ```
 
 `rep$results$split_half` and `rep$results$icc` are the standalone result
-objects. The orchestrator deliberately omits
+objects.
+[`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
+deliberately omits
 [`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md),
 since LOO is an influence-screening diagnostic and bundling it into a
 reliability report invites misreading `r_loo`’s near-1 values as
@@ -1791,11 +1805,12 @@ plot(dr)
 `$boot_se_dist` are the standard summaries.
 
 The Pearson correlation fields (`$correlation`, `$boot_cor`, `$ci_cor`,
-`$boot_se_cor`) are retained for back-compat but deprecated. Two
-base-subtracted CIs share image-domain spatial structure (face shape,
-oval signal support) that pushes their correlation above zero even when
-the underlying mental representations are unrelated; absolute
-correlation values do not cleanly mean “these conditions are similar”.
+`$boot_se_cor`) are kept for compatibility with earlier versions but are
+no longer recommended. Two base-subtracted CIs share image-domain
+spatial structure (face shape, oval signal support) that pushes their
+correlation above zero even when the underlying mental representations
+are unrelated; absolute correlation values do not cleanly mean “these
+conditions are similar”.
 
 A `null = "permutation"` argument adds a chance baseline for the
 Euclidean distance: stratified condition-label permutation
@@ -1914,8 +1929,9 @@ The only difference between paradigms is what you pass as
 `noise_matrix`. The reference distribution is built per unique trial
 count by simulating random `(stim, ±1)` pairs through Schmitz’s
 `genMask()` formula and computing Frobenius norms of the resulting
-masks. Producers sharing a trial count share a reference (typical 30x
-speedup on a 30-producer dataset).
+masks. Producers sharing a trial count share a reference, so the
+simulation cost is paid once per distinct trial count rather than once
+per producer.
 
 **Trial-count matching closes a calibration gap.** The original
 [`rcicr::generateReferenceDistribution2IFC()`](https://rdrr.io/pkg/rcicr/man/generateReferenceDistribution2IFC.html)
@@ -1959,10 +1975,12 @@ Brief-RC convention (without replacement when the producer’s trial count
 fits in the pool). Set explicitly only when your design departs from
 this convention.
 
-The `cache_path` mechanism stores reference norms (only) in an `.rds`
-file keyed on `iter`, `n_pool`, mask signature, and `with_replacement`.
-Subsequent calls with matching configuration load from the cache;
-otherwise the reference is recomputed.
+The `cache_path` mechanism stores the reference norms in an `.rds` file,
+indexed by the simulation settings (`iter`, pool size, mask, and
+`with_replacement`). If you call
+[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+again with the same settings, it loads the cached reference; otherwise
+it recomputes.
 
 ## 10. Step 6: agreement maps and paper figures
 
@@ -2262,12 +2280,21 @@ length(trust_ids)
 **Step 3.** Compute one producer’s mask. Take the noise patterns that
 producer saw (`noise_matrix[, p$stimulus]`), multiply each by their
 response (`+1` or `-1`) and divide by the trial count. The result is a
-column-major numeric vector of length 65,536.
+numeric vector of length 65,536 (the pixels in column-major order,
+i.e. column by column).
 
 ``` r
 
 p1 <- trust_trials[trust_trials$participant_id == trust_ids[1], ]
-mask_1 <- (noise_matrix[, p1$stimulus] %*% p1$response) / nrow(p1)
+
+# One column of `noise_matrix` per trial that producer saw,
+# in trial order:
+selected_noise <- noise_matrix[, p1$stimulus]
+
+# Sum each pixel across trials weighted by the +/- 1 response,
+# then divide by the trial count. The result is the producer's
+# mean noise pattern, sign-weighted by their responses.
+mask_1 <- (selected_noise %*% p1$response) / nrow(p1)
 length(mask_1)
 #> 65536
 ```
@@ -2279,16 +2306,20 @@ accept it without complaint.
 
 ``` r
 
+# Empty 65,536 x 20 matrix; one column per producer.
 sm_trust <- matrix(NA_real_, nrow = nrow(noise_matrix),
                    ncol = length(trust_ids),
                    dimnames = list(NULL, trust_ids))
 
+# Fill in one column per producer using the same recipe as Step 3.
 for (i in seq_along(trust_ids)) {
   p_i <- trust_trials[trust_trials$participant_id == trust_ids[i], ]
-  sm_trust[, i] <- (noise_matrix[, p_i$stimulus] %*% p_i$response) /
-                     nrow(p_i)
+  selected_noise <- noise_matrix[, p_i$stimulus]
+  sm_trust[, i]  <- (selected_noise %*% p_i$response) / nrow(p_i)
 }
 
+# Tag image dimensions (so plot helpers know it is 256 x 256) and
+# mark the matrix as a raw mask (so variance-based metrics accept it).
 attr(sm_trust, "img_dims") <- c(256L, 256L)
 attr(sm_trust, "source")   <- "raw"
 
@@ -2311,8 +2342,8 @@ build_signal_matrix <- function(raw, label, noise_matrix) {
               dimnames = list(NULL, ids))
   for (i in seq_along(ids)) {
     p_i <- trials[trials$participant_id == ids[i], ]
-    m[, i] <- (noise_matrix[, p_i$stimulus] %*% p_i$response) /
-                nrow(p_i)
+    selected_noise <- noise_matrix[, p_i$stimulus]
+    m[, i] <- (selected_noise %*% p_i$response) / nrow(p_i)
   }
   attr(m, "img_dims") <- c(256L, 256L)
   attr(m, "source")   <- "raw"
@@ -2334,7 +2365,8 @@ In a real pipeline,
 [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
 performs the same work and additionally handles the `rcicr` integration.
 Doing it by hand once makes the mask formula concrete; you can switch to
-the wrapper afterwards.
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+afterwards.
 
 ### 12.6 Within-condition reliability per trait
 
@@ -2539,11 +2571,14 @@ per region per condition:
 
 ``` r
 
+# Helper: for one trait label, return a named integer vector
+# giving the trial count per producer.
 trial_counts_for <- function(label) {
-  trials <- raw |> dplyr::filter(trait == label)
+  trials <- raw[raw$trait == label, ]
   ids    <- unique(trials$participant_id)
-  out    <- as.integer(table(trials$participant_id)[ids])
-  stats::setNames(out, ids)
+  counts <- as.integer(table(trials$participant_id)[ids])
+  names(counts) <- ids
+  counts
 }
 
 iv_grid <- expand.grid(
@@ -2676,12 +2711,17 @@ ct_tf <- rel_cluster_test(
   seed              = 1L
 )
 
-# Build a logical mask of pixels that fall inside any
-# significant cluster (positive or negative direction).
+# Pull out the cluster ids of the significant clusters in each
+# direction (Trust > Friendly = "pos", Friendly > Trust = "neg").
 sig_pos <- ct_tf$clusters$cluster_id[ct_tf$clusters$direction == "pos" &
                                      ct_tf$clusters$significant]
 sig_neg <- ct_tf$clusters$cluster_id[ct_tf$clusters$direction == "neg" &
                                      ct_tf$clusters$significant]
+
+# Build a logical mask marking pixels that fall inside any
+# significant cluster (in either direction). `pos_labels` and
+# `neg_labels` are integer matrices of cluster ids; %in% checks
+# membership pixel by pixel.
 sig_mask <- (ct_tf$pos_labels %in% sig_pos) |
             (ct_tf$neg_labels %in% sig_neg)
 
@@ -2904,9 +2944,10 @@ vice versa) yields a number with no defensible interpretation.
 below N approximately 30 per condition. The package warns at N \< 30 and
 aborts at N \< 4. Aim for N \>= 60 per condition for stable assessment.
 
-**Pre-1.0 API.** The package is not yet at 1.0; argument names and
-defaults may change between minor versions when doing so removes a
-footgun. NEWS.md documents every breaking change.
+**Pre-1.0 status.** The package is not yet at version 1.0; argument
+names and defaults may change between minor versions, particularly when
+the change makes a sharp edge less easy to cut yourself on. NEWS.md
+documents every breaking change.
 
 ## 15. Appendix: troubleshooting low or negative infoVal
 

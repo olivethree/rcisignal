@@ -80,18 +80,18 @@ input-side diagnostics (<code><a href="../reference/run_diagnostics.html">run_di
 reliability and discriminability metrics
 (<code><a href="../reference/run_reliability.html">run_reliability()</a></code>, <code><a href="../reference/run_discriminability.html">run_discriminability()</a></code>,
 <code><a href="../reference/infoval.html">infoval()</a></code>, <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>, together with
-the underlying <code>rel_*</code> and <code><a href="../reference/pixel_t_test.html">pixel_t_test()</a></code>
-primitives) cover the second and third.</p>
+the lower-level building blocks <code>rel_*()</code> and
+<code><a href="../reference/pixel_t_test.html">pixel_t_test()</a></code>) cover the second and third.</p>
 <div class="section level3">
 <h3 id="scope">1.1 Scope<a class="anchor" aria-label="anchor" href="#scope"></a>
 </h3>
 <p>For 2IFC stimulus generation and CI computation,
 <code>rcisignal</code> delegates to the upstream <a href="https://github.com/rdotsch/rcicr" class="external-link"><code>rcicr</code></a> package
-(Dotsch, 2016, 2023). <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> is a thin
-wrapper around <code><a href="https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html" class="external-link">rcicr::batchGenerateCI2IFC()</a></code> that handles
-the integration gotchas. Brief-RC (Schmitz, Rougier, &amp; Yzerbyt,
-2024) is implemented natively because upstream <code>rcicr</code> does
-not ship Brief-RC machinery.</p>
+(Dotsch, 2016, 2023). <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> is a small
+convenience function around <code><a href="https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html" class="external-link">rcicr::batchGenerateCI2IFC()</a></code>
+that takes care of the integration quirks. Brief-RC support (Schmitz,
+Rougier, &amp; Yzerbyt, 2024) is built into rcisignal directly, because
+rcicr does not yet provide it.</p>
 <p>The metrics in this package quantify whether a CI is stable
 (within-condition) and separable (between-condition). Whether the CI
 accurately reflects the producer’s mental representation of the target
@@ -104,8 +104,8 @@ that pitfall.</p>
 <p>The intended audience is RC researchers at an intermediate R level
 with basic familiarity with the <code>rcicr</code> package or with the
 Schmitz et al. (2024) Brief-RC structure. No prior expertise in
-<code>data.table</code>, S3 classes, permutation testing, or
-psychometric variance decomposition is assumed.</p>
+<code>data.table</code>, permutation testing, or intraclass correlation
+is assumed.</p>
 </div>
 <div class="section level3">
 <h3 id="validation-status">1.2 Validation status<a class="anchor" aria-label="anchor" href="#validation-status"></a>
@@ -224,9 +224,8 @@ bar.)</li>
 <strong>For 2IFC</strong>, an <code>.Rdata</code> file in the format
 that <code><a href="https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html" class="external-link">rcicr::generateStimuli2IFC()</a></code> writes, so
 <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>,
-<code><a href="../reference/compute_infoval_summary.html">compute_infoval_summary()</a></code>, and every other downstream
-function that asks for an <code>rdata</code> argument works out of the
-box.</li>
+<code><a href="../reference/compute_infoval_summary.html">compute_infoval_summary()</a></code>, and every other function that
+asks for an <code>rdata</code> argument works out of the box.</li>
 </ul>
 <p>The return value is an <code>rcisignal_sim</code> S3 object:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -416,8 +415,8 @@ at all to a within-condition reliability summary:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/run_diagnostics.html">run_diagnostics</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, method <span class="op">=</span> <span class="st">"2ifc"</span>, col_rt <span class="op">=</span> <span class="st">"rt"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Step 2: compute per-participant CIs using the bundled .Rdata.</span></span>
-<span><span class="va">target_rows</span>  <span class="op">&lt;-</span> <span class="va">sim</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"target"</span><span class="op">]</span></span>
-<span><span class="va">control_rows</span> <span class="op">&lt;-</span> <span class="va">sim</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"control"</span><span class="op">]</span></span>
+<span><span class="va">target_rows</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, <span class="va">condition</span> <span class="op">==</span> <span class="st">"target"</span><span class="op">)</span></span>
+<span><span class="va">control_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, <span class="va">condition</span> <span class="op">==</span> <span class="st">"control"</span><span class="op">)</span></span>
 <span><span class="va">cis_target</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc</a></span><span class="op">(</span><span class="va">target_rows</span>,</span>
 <span>                                       rdata_path <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">rdata_path</span><span class="op">)</span></span>
 <span><span class="va">cis_control</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc</a></span><span class="op">(</span><span class="va">control_rows</span>,</span>
@@ -461,14 +460,15 @@ once.</p>
 </h2>
 <p>Almost every analytical function in <code>rcisignal</code> operates
 on a single data structure: a <strong>signal matrix</strong> with one
-row per pixel and one column per producer (participant). The
-orchestrators (<code><a href="../reference/run_reliability.html">run_reliability()</a></code>,
-<code><a href="../reference/run_discriminability.html">run_discriminability()</a></code>) take a signal matrix as input, as
-do <code><a href="../reference/rel_split_half.html">rel_split_half()</a></code>, <code><a href="../reference/rel_icc.html">rel_icc()</a></code>,
-<code><a href="../reference/rel_loo.html">rel_loo()</a></code>, <code><a href="../reference/pixel_t_test.html">pixel_t_test()</a></code>,
-<code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code>, <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code>,
-<code><a href="../reference/infoval.html">infoval()</a></code>, and <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>. Getting
-the signal matrix right suffices for everything downstream.</p>
+row per pixel and one column per producer (participant). The two
+top-level functions <code><a href="../reference/run_reliability.html">run_reliability()</a></code> and
+<code><a href="../reference/run_discriminability.html">run_discriminability()</a></code> take a signal matrix as input, and
+so do the lower-level <code><a href="../reference/rel_split_half.html">rel_split_half()</a></code>,
+<code><a href="../reference/rel_icc.html">rel_icc()</a></code>, <code><a href="../reference/rel_loo.html">rel_loo()</a></code>,
+<code><a href="../reference/pixel_t_test.html">pixel_t_test()</a></code>, <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code>,
+<code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code>, <code><a href="../reference/infoval.html">infoval()</a></code>, and
+<code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>. Once you have the signal matrix in
+the right shape, the rest of the analysis follows.</p>
 <div class="section level3">
 <h3 id="three-pixel-matrices-that-all-sound-similar-keep-them-apart">3.0 Three pixel matrices that all sound similar: keep them
 apart<a class="anchor" aria-label="anchor" href="#three-pixel-matrices-that-all-sound-similar-keep-them-apart"></a>
@@ -487,7 +487,7 @@ exactly one job:</p>
 <th>Data type</th>
 <th>What is it?</th>
 <th>shape</th>
-<th>input or output?</th>
+<th>Where it comes from</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -545,8 +545,8 @@ discriminability function in <code>rcisignal</code> uses).</li>
 <p>You don’t build the noise mask or the <code>signal_matrix</code> by
 hand: <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> and
 <code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> do it for you and return a list
-whose <code>$signal_matrix</code> element is the matrix you pass
-downstream.</p>
+whose <code>$signal_matrix</code> element is the matrix you pass to the
+metrics in §7-§9.</p>
 <p>A small terminology trap. The word <em>mask</em> above means
 <em>image-shaped overlay</em> (one number per pixel, defined over the
 whole image grid). It is not the same as a face-region mask (a logical
@@ -565,8 +565,8 @@ strictly for the input pool above (the row of the table) and
 <code>signal_matrix</code> strictly for the per-producer output (the
 third row). Whatever you call the object in your own writing, the shape
 and interpretation are the same.</p>
-<p>Two paths lead to a signal matrix, with different downstream
-consequences.</p>
+<p>Two paths lead to a signal matrix, with different consequences for
+the metrics that follow.</p>
 </div>
 <div class="section level3">
 <h3 id="two-paths-to-the-signal-matrix">3.1 Two paths to the signal matrix<a class="anchor" aria-label="anchor" href="#two-paths-to-the-signal-matrix"></a>
@@ -576,7 +576,7 @@ consequences.</p>
 2IFC pipelines or <code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> for Brief-RC.
 Both return a list with <code>$signal_matrix</code> already in the right
 shape, base-subtracted, and unscaled (i.e. carrying the raw mask). This
-is the safe path for downstream reliability metrics.</p>
+is the safe path for the reliability metrics later on.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc</a></span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
@@ -610,20 +610,23 @@ variance-based metrics (<code><a href="../reference/rel_icc.html">rel_icc()</a><
 <code>"matched"</code> (per-CI) scaling option, where each producer’s
 mask is stretched to the base’s dynamic range, breaks correlation-based
 metrics as well.</p>
-<p><code>rcisignal</code> enforces this distinction at runtime via a
-<code>source</code> attribute attached to every signal matrix:</p>
+<p><code>rcisignal</code> keeps track of which kind of matrix you have
+by labelling each signal matrix with a <code>source</code> tag (either
+<code>"raw"</code> or <code>"rendered"</code>). The variance-based
+functions check this tag before they run, and stop with an informative
+error if you pass a rendered matrix:</p>
 <ul>
 <li>Functions that build raw masks
 (<code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>,
-<code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>) tag the matrix with
-<code>attr(., "source") = "raw"</code>.</li>
+<code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>) label the resulting matrix as
+<code>"raw"</code>.</li>
 <li>Functions that read PNGs (<code><a href="../reference/read_cis.html">read_cis()</a></code>,
-<code><a href="../reference/extract_signal.html">extract_signal()</a></code>, <code><a href="../reference/read_signal_matrix.html">read_signal_matrix()</a></code>) tag
-with <code>attr(., "source") = "rendered"</code>.</li>
-<li>Variance-based metrics call an internal
-<code>assert_raw_signal()</code> helper that errors when given a
-<code>"rendered"</code> matrix unless the caller passes
-<code>acknowledge_scaling = TRUE</code>.</li>
+<code><a href="../reference/extract_signal.html">extract_signal()</a></code>, <code><a href="../reference/read_signal_matrix.html">read_signal_matrix()</a></code>) label
+it as <code>"rendered"</code>.</li>
+<li>Variance-based metrics check this label internally and stop with an
+informative error when given a <code>"rendered"</code> matrix, unless
+you pass <code>acknowledge_scaling = TRUE</code> to confirm you have
+read the caveat.</li>
 </ul>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># This works:</span></span>
@@ -636,10 +639,10 @@ with <code>attr(., "source") = "rendered"</code>.</li>
 <span><span class="co"># Override after reading the explanation:</span></span>
 <span><span class="fu"><a href="../reference/rel_icc.html">rel_icc</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_signal_matrix.html">read_signal_matrix</a></span><span class="op">(</span><span class="st">"cis/"</span>, <span class="st">"base.jpg"</span><span class="op">)</span>,</span>
 <span>        acknowledge_scaling <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>A heuristic backstop (<code>looks_scaled()</code>) catches hand-built
-signal matrices that have no <code>source</code> attribute but whose
-dynamic range suggests scaling. The backstop emits a once-per-session
-warning rather than erroring; silence with
+<p>A safety check (<code>looks_scaled()</code>) also flags hand-built
+signal matrices that don’t carry the <code>source</code> label but whose
+value range looks rescaled. This check emits a once-per-session warning
+rather than stopping the analysis; silence it with
 <code>options(rcisignal.silence_scaling_warning = TRUE)</code>.</p>
 <p>One important exception: <code><a href="https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html" class="external-link">rcicr::computeInfoVal2IFC()</a></code> is
 unaffected by display scaling. It reads the raw <code>$ci</code> element
@@ -901,14 +904,14 @@ columns:</p>
 <code>rcicr::generateStimuli2IFC()</code><a class="anchor" aria-label="anchor" href="#the--rdata-from-rcicrgeneratestimuli2ifc"></a>
 </h3>
 <p>The 2IFC pipeline uses an <code>.RData</code> file produced by
-<code><a href="https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html" class="external-link">rcicr::generateStimuli2IFC()</a></code>. The load-bearing objects for
-analysis are:</p>
+<code><a href="https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html" class="external-link">rcicr::generateStimuli2IFC()</a></code>. The objects in this file that
+the analysis actually uses are:</p>
 <ul>
 <li>
 <code>base_faces</code>: the loaded base-face matrices, grayscale in
 <code>[0, 1]</code>. List names (e.g. <code>"base"</code>) become the
-<code>baseimage</code> argument downstream. <code>base_face_files</code>
-carries the matching source paths.</li>
+<code>baseimage</code> argument used by later functions.
+<code>base_face_files</code> carries the matching source paths.</li>
 <li>
 <code>img_size</code>: side length of the (square) image in
 pixels.</li>
@@ -946,9 +949,10 @@ case-sensitive by default and will miss it. Use
 matrix where each column is the noise pattern shown for one trial (or
 pool item). It serves as input to CI computation, distinct from the
 <em>signal matrix</em>, which is an output.</p>
-<p><code><a href="../reference/read_noise_matrix.html">read_noise_matrix()</a></code> is a single entry point that
-auto-detects the source format from the file extension and transparently
-caches slow-to-parse formats to a sibling <code>.rds</code>:</p>
+<p><code><a href="../reference/read_noise_matrix.html">read_noise_matrix()</a></code> is a single entry point that detects
+the file format automatically. For formats that are slow to parse, it
+saves a faster <code>.rds</code> copy next to the original and re-uses
+it on subsequent calls:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plain text matrix (Schmitz et al. 2024 OSF format).</span></span>
 <span><span class="co"># First call parses + writes data/noise_matrix.rds.</span></span>
@@ -961,10 +965,11 @@ caches slow-to-parse formats to a sibling <code>.rds</code>:</p>
 <span><span class="co"># rcicr::generateNoiseImage() and caches the result.</span></span>
 <span><span class="va">nm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_noise_matrix.html">read_noise_matrix</a></span><span class="op">(</span><span class="st">"data/rcicr_stimuli.Rdata"</span>,</span>
 <span>                        baseimage <span class="op">=</span> <span class="st">"base"</span><span class="op">)</span></span></code></pre></div>
-<p>Cache invalidation is automatic: each <code>.rds</code> records the
-source file’s size and modification time, and the next call reparses if
-either differs. A once-per-session <code>cli</code> line announces
-“cache built” or “cache reused”; silence with
+<p>The <code>.rds</code> is rebuilt automatically if you change the
+source file (each cached file records the source’s size and modification
+time, and is rebuilt when either changes). A once-per-session
+<code>cli</code> line announces “cache built” or “cache reused”; silence
+it with
 <code>options(rcisignal.silence_cache_messages = TRUE)</code>.</p>
 <p>For the rcicr <code>.Rdata</code> reconstruction path, the upstream
 <code>rcicr</code> package must be installed (it’s a Suggests).
@@ -994,7 +999,10 @@ assumed by the default oval mask (eyes upper third, mouth lower
 third).</li>
 </ul>
 <p>For a research-quality base, the <a href="https://github.com/debruine/webmorphR" class="external-link">webmorphR</a> package by
-DeBruine (2022) is the current best-in-class tool:</p>
+DeBruine (2022) is the current best-in-class tool. The example below
+uses R’s native pipe (<code>|&gt;</code>, available since R 4.1) because
+that is the idiom the webmorphR documentation uses; the rest of this
+vignette sticks to base R for consistency.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">webmorphR</span><span class="op">)</span></span>
 <span></span>
@@ -1038,10 +1046,11 @@ area added.</p>
 <span></span>
 <span><span class="co"># 3. From a numeric matrix in code:</span></span>
 <span><span class="va">fm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">custom_mask_matrix</span> <span class="op">&gt;</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<p>Either a logical vector (column-major, length
-<code>prod(img_dims)</code>) or a logical matrix
-<code>nrow x ncol</code> is accepted by every <code>mask</code> argument
-in the package.</p>
+<p>A mask can be supplied as either a logical vector of length
+<code>n_pixels</code> (with pixels in the same order R uses when it
+flattens a matrix into a vector, i.e. column by column) or as a logical
+matrix with the image dimensions. Every <code>mask</code> argument in
+the package accepts both forms.</p>
 <p><code><a href="../reference/plot_face_mask.html">plot_face_mask()</a></code> renders any of those forms over the
 base face, so you can verify alignment before passing the mask to a
 metric:</p>
@@ -1122,8 +1131,8 @@ grid of pixels), and slide that grid by a few pixels in any direction. A
 small helper does the slide; pixels shifted off the image are dropped,
 and the new edges are filled with <code>FALSE</code>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Default eye mask, reshaped from a column-major logical vector</span></span>
-<span><span class="co"># back into a 256 x 256 grid.</span></span>
+<code class="sourceCode R"><span><span class="co"># Default eye mask, reshaped from a flat logical vector (pixels</span></span>
+<span><span class="co"># in column-by-column order) back into a 256 x 256 grid.</span></span>
 <span><span class="va">eye_mask_default</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/make_face_mask.html">make_face_mask</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>, region <span class="op">=</span> <span class="st">"eyes"</span><span class="op">)</span>,</span>
 <span>  nrow <span class="op">=</span> <span class="fl">256</span>, ncol <span class="op">=</span> <span class="fl">256</span></span>
@@ -1131,7 +1140,10 @@ and the new edges are filled with <code>FALSE</code>.</p>
 <span></span>
 <span><span class="co"># Shift a logical mask by `down` and `right` pixels. Positive</span></span>
 <span><span class="co"># values move the mask down / right; negative values move it up /</span></span>
-<span><span class="co"># left.</span></span>
+<span><span class="co"># left. The idea is to start from a destination matrix of FALSE</span></span>
+<span><span class="co"># the same size as the input, then copy the source pixels into</span></span>
+<span><span class="co"># the shifted positions; pixels that land off the image are</span></span>
+<span><span class="co"># dropped.</span></span>
 <span><span class="va">shift_mask</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mask</span>, <span class="va">down</span> <span class="op">=</span> <span class="fl">0</span>, <span class="va">right</span> <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="va">src_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span> <span class="va">down</span></span>
@@ -1352,12 +1364,12 @@ per-producer signal is genuinely modest but the group CI is informative
 <div class="section level3">
 <h3 id="compute_infoval_summary">5.5 <code>compute_infoval_summary()</code><a class="anchor" aria-label="anchor" href="#compute_infoval_summary"></a>
 </h3>
-<p>A thin wrapper around <code><a href="https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html" class="external-link">rcicr::computeInfoVal2IFC()</a></code> for
-the legacy 2IFC path. It returns a per-participant z table plus a
-pass/warn summary, useful for direct comparison with previously
-published <code>rcicr</code> numbers. For the Brief-RC path or for the
-trial-count-matched reference, prefer <code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code> or
-<code><a href="../reference/infoval.html">infoval()</a></code> directly.</p>
+<p>A small convenience function around
+<code><a href="https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html" class="external-link">rcicr::computeInfoVal2IFC()</a></code> for the legacy 2IFC path. It
+returns a per-participant z table plus a pass/warn summary, useful for
+direct comparison with previously published <code>rcicr</code> numbers.
+For the Brief-RC path or for the trial-count-matched reference, prefer
+<code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code> or <code><a href="../reference/infoval.html">infoval()</a></code> directly.</p>
 </div>
 <div class="section level3">
 <h3 id="check_rt_infoval_consistency">5.6 <code>check_rt_infoval_consistency()</code><a class="anchor" aria-label="anchor" href="#check_rt_infoval_consistency"></a>
@@ -1459,14 +1471,16 @@ visualisation, plus metadata.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span><span class="op">)</span>   <span class="co"># n_pixels x n_participants</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span>, <span class="st">"source"</span><span class="op">)</span>    <span class="co"># "raw"</span></span></code></pre></div>
-<p>The wrapper handles the rcicr integration gotchas internally:
-attaches <code>foreach</code> / <code>tibble</code> / <code>dplyr</code>
-at runtime (rcicr uses them without namespace prefixes), validates
-response coding, defaults <code>ncores = 1L</code>, and matches the
-<code>.Rdata</code> extension case-insensitively.</p>
-<p>The Brief-RC path is implemented natively (rcicr v1.0.1 has no
-Brief-RC functions). It implements Schmitz’s <code>genMask()</code>
-exactly, including the duplicate-stim collapse rule:</p>
+<p>Behind the scenes the function takes care of the steps that are easy
+to get wrong when calling rcicr directly: it loads the helper packages
+rcicr expects (<code>foreach</code>, <code>tibble</code>,
+<code>dplyr</code>), checks that responses are coded
+<code>{-1, +1}</code>, runs single-threaded by default, and matches the
+<code>.Rdata</code> filename in a case- insensitive way.</p>
+<p>Brief-RC support is built into rcisignal directly (rcicr v1.0.1 does
+not include Brief-RC). The implementation follows Schmitz’s
+<code>genMask()</code> formula step for step, including the rule that
+collapses repeated stimulus ids by averaging their responses:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
@@ -1490,10 +1504,10 @@ base image in one call:</p>
 <span>  base_image_path <span class="op">=</span> <span class="st">"data/base.jpg"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">signal</span>, <span class="st">"source"</span><span class="op">)</span>   <span class="co"># "rendered"</span></span></code></pre></div>
-<p><code><a href="../reference/read_cis.html">read_cis()</a></code> and <code><a href="../reference/extract_signal.html">extract_signal()</a></code> are exposed
-separately for power users who want to intervene between the read and
-the base subtraction (e.g. masking pixels, cropping, swapping the
-base).</p>
+<p><code><a href="../reference/read_cis.html">read_cis()</a></code> and <code><a href="../reference/extract_signal.html">extract_signal()</a></code> are also
+available on their own, for cases where you want to do something between
+reading the PNGs and subtracting the base (e.g. masking, cropping, or
+swapping the base image).</p>
 <p>The first call to any Mode-1 reader emits the once-per-session
 warning that PNG-derived signals are scaled. Silence with
 <code>options(rcisignal.silence_scaling_warning = TRUE)</code> or pass
@@ -1674,16 +1688,16 @@ across <code>k</code> producers?”. Usually the headline.</li>
 <code class="sourceCode R"><span><span class="va">ic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_icc.html">rel_icc</a></span><span class="op">(</span><span class="va">signal_matrix</span><span class="op">)</span></span>
 <span><span class="va">ic</span>   <span class="co"># prints ICC(3,1), ICC(3,k), MS rows / cols / error</span></span></code></pre></div>
 <p>The function computes both quantities directly from ANOVA mean
-squares (rather than <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC()</a></code>, which allocates
-intermediates that exhaust memory on a 65,536 x 30 matrix).
-Cross-validated against <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC()</a></code> on small matrices in
-<code>tests/testthat/test-rel_icc.R</code>.</p>
+squares, which scales to large image grids that would otherwise run out
+of memory. Results agree with <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC()</a></code> on smaller
+matrices where both can be run.</p>
 <p>ICC(3,<em>) is appropriate when pixels are fixed. ICC(2,</em>)
 (two-way random) treats pixels as a random sample from a pixel
 population, which the image grid is not, even when ICC(2,<em>) and
 ICC(3,</em>) give similar numbers at high pixel counts. Use
 <code>variants = c("3_1", "3_k", "2_1", "2_k")</code> to report ICC(2,*)
-side-by-side for reviewer requests.</p>
+side-by-side when comparability with reports that use the two-way-random
+model is needed.</p>
 <p>ICC is variance-based, so it errors on a <code>"rendered"</code>
 source matrix unless <code>acknowledge_scaling = TRUE</code> is passed.
 Rendered scaling corrupts ICC values in non-recoverable ways, so the
@@ -1726,8 +1740,8 @@ relative ordering across producers carries the diagnostic information,
 so the function reports <code>$z_scores</code> as the recommended
 quantity.</p>
 <p>Two flagging rules are available: <code>"mad"</code> (default) and
-<code>"sd"</code> (retained for back-compat, deprecated, slated for
-removal in v0.2.0). MAD is robust to the influential producers the test
+<code>"sd"</code> (kept for compatibility with earlier versions; will be
+removed in v0.2.0). MAD is robust to the influential producers the test
 is meant to flag; SD’s mean and standard deviation are themselves pulled
 by the outlier. Default <code>flag_threshold = 2.5</code> so that a
 30-producer dataset flags ~0.3 producers by chance.</p>
@@ -1739,8 +1753,9 @@ excluding any producer.</p>
 <div class="section level3">
 <h3 id="run_reliability">7.4 <code>run_reliability()</code><a class="anchor" aria-label="anchor" href="#run_reliability"></a>
 </h3>
-<p>Convenience orchestrator that runs <code><a href="../reference/rel_split_half.html">rel_split_half()</a></code> and
-<code><a href="../reference/rel_icc.html">rel_icc()</a></code> on a single signal matrix and wraps both into one
+<p>Top-level convenience function that runs
+<code><a href="../reference/rel_split_half.html">rel_split_half()</a></code> and <code><a href="../reference/rel_icc.html">rel_icc()</a></code> on a single
+signal matrix and bundles both results into one
 <code>rcisignal_rel_report</code>:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">signal_matrix</span>,</span>
@@ -1749,10 +1764,11 @@ excluding any producer.</p>
 <span><span class="va">rep</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rep</span><span class="op">)</span></span></code></pre></div>
 <p><code>rep$results$split_half</code> and <code>rep$results$icc</code>
-are the standalone result objects. The orchestrator deliberately omits
-<code><a href="../reference/rel_loo.html">rel_loo()</a></code>, since LOO is an influence-screening diagnostic
-and bundling it into a reliability report invites misreading
-<code>r_loo</code>’s near-1 values as reliability.</p>
+are the standalone result objects. <code><a href="../reference/run_reliability.html">run_reliability()</a></code>
+deliberately omits <code><a href="../reference/rel_loo.html">rel_loo()</a></code>, since LOO is an
+influence-screening diagnostic and bundling it into a reliability report
+invites misreading <code>r_loo</code>’s near-1 values as
+reliability.</p>
 </div>
 </div>
 <div class="section level2">
@@ -1964,11 +1980,12 @@ comparisons. <code>$boot_dist</code> is the full bootstrap distribution;
 summaries.</p>
 <p>The Pearson correlation fields (<code>$correlation</code>,
 <code>$boot_cor</code>, <code>$ci_cor</code>, <code>$boot_se_cor</code>)
-are retained for back-compat but deprecated. Two base-subtracted CIs
-share image-domain spatial structure (face shape, oval signal support)
-that pushes their correlation above zero even when the underlying mental
-representations are unrelated; absolute correlation values do not
-cleanly mean “these conditions are similar”.</p>
+are kept for compatibility with earlier versions but are no longer
+recommended. Two base-subtracted CIs share image-domain spatial
+structure (face shape, oval signal support) that pushes their
+correlation above zero even when the underlying mental representations
+are unrelated; absolute correlation values do not cleanly mean “these
+conditions are similar”.</p>
 <p>A <code>null = "permutation"</code> argument adds a chance baseline
 for the Euclidean distance: stratified condition-label permutation
 (between-subjects) or sign-flip on per-producer differences (paired).
@@ -2073,7 +2090,8 @@ as <code>noise_matrix</code>. The reference distribution is built per
 unique trial count by simulating random <code>(stim, ±1)</code> pairs
 through Schmitz’s <code>genMask()</code> formula and computing Frobenius
 norms of the resulting masks. Producers sharing a trial count share a
-reference (typical 30x speedup on a 30-producer dataset).</p>
+reference, so the simulation cost is paid once per distinct trial count
+rather than once per producer.</p>
 <p><strong>Trial-count matching closes a calibration gap.</strong> The
 original <code><a href="https://rdrr.io/pkg/rcicr/man/generateReferenceDistribution2IFC.html" class="external-link">rcicr::generateReferenceDistribution2IFC()</a></code> keys
 its reference on the full pool size. For 2IFC this is appropriate (every
@@ -2107,11 +2125,11 @@ are drawn when simulating a random producer. <code>"auto"</code>
 (default) matches the standard Brief-RC convention (without replacement
 when the producer’s trial count fits in the pool). Set explicitly only
 when your design departs from this convention.</p>
-<p>The <code>cache_path</code> mechanism stores reference norms (only)
-in an <code>.rds</code> file keyed on <code>iter</code>,
-<code>n_pool</code>, mask signature, and <code>with_replacement</code>.
-Subsequent calls with matching configuration load from the cache;
-otherwise the reference is recomputed.</p>
+<p>The <code>cache_path</code> mechanism stores the reference norms in
+an <code>.rds</code> file, indexed by the simulation settings
+(<code>iter</code>, pool size, mask, and <code>with_replacement</code>).
+If you call <code><a href="../reference/infoval.html">infoval()</a></code> again with the same settings, it
+loads the cached reference; otherwise it recomputes.</p>
 </div>
 <div class="section level2">
 <h2 id="step-6-agreement-maps-and-paper-figures">10. Step 6: agreement maps and paper figures<a class="anchor" aria-label="anchor" href="#step-6-agreement-maps-and-paper-figures"></a>
@@ -2465,11 +2483,19 @@ ids.</p>
 <p><strong>Step 3.</strong> Compute one producer’s mask. Take the noise
 patterns that producer saw (<code>noise_matrix[, p$stimulus]</code>),
 multiply each by their response (<code>+1</code> or <code>-1</code>) and
-divide by the trial count. The result is a column-major numeric vector
-of length 65,536.</p>
+divide by the trial count. The result is a numeric vector of length
+65,536 (the pixels in column-major order, i.e. column by column).</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="va">trust_trials</span><span class="op">[</span><span class="va">trust_trials</span><span class="op">$</span><span class="va">participant_id</span> <span class="op">==</span> <span class="va">trust_ids</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="op">]</span></span>
-<span><span class="va">mask_1</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">noise_matrix</span><span class="op">[</span>, <span class="va">p1</span><span class="op">$</span><span class="va">stimulus</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">p1</span><span class="op">$</span><span class="va">response</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">p1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># One column of `noise_matrix` per trial that producer saw,</span></span>
+<span><span class="co"># in trial order:</span></span>
+<span><span class="va">selected_noise</span> <span class="op">&lt;-</span> <span class="va">noise_matrix</span><span class="op">[</span>, <span class="va">p1</span><span class="op">$</span><span class="va">stimulus</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Sum each pixel across trials weighted by the +/- 1 response,</span></span>
+<span><span class="co"># then divide by the trial count. The result is the producer's</span></span>
+<span><span class="co"># mean noise pattern, sign-weighted by their responses.</span></span>
+<span><span class="va">mask_1</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">selected_noise</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">p1</span><span class="op">$</span><span class="va">response</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">p1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mask_1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 65536</span></span></code></pre></div>
 <p><strong>Step 4.</strong> Repeat across all 20 Trust producers and
@@ -2478,16 +2504,20 @@ so plot helpers know it is 256 x 256, and with
 <code>source = "raw"</code> so variance-based metrics will accept it
 without complaint.</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sm_trust</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA_real_</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">noise_matrix</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Empty 65,536 x 20 matrix; one column per producer.</span></span>
+<span><span class="va">sm_trust</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA_real_</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">noise_matrix</span><span class="op">)</span>,</span>
 <span>                   ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">trust_ids</span><span class="op">)</span>,</span>
 <span>                   dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="va">trust_ids</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Fill in one column per producer using the same recipe as Step 3.</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">trust_ids</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">p_i</span> <span class="op">&lt;-</span> <span class="va">trust_trials</span><span class="op">[</span><span class="va">trust_trials</span><span class="op">$</span><span class="va">participant_id</span> <span class="op">==</span> <span class="va">trust_ids</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="op">]</span></span>
-<span>  <span class="va">sm_trust</span><span class="op">[</span>, <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">noise_matrix</span><span class="op">[</span>, <span class="va">p_i</span><span class="op">$</span><span class="va">stimulus</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">p_i</span><span class="op">$</span><span class="va">response</span><span class="op">)</span> <span class="op">/</span></span>
-<span>                     <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">p_i</span><span class="op">)</span></span>
+<span>  <span class="va">selected_noise</span> <span class="op">&lt;-</span> <span class="va">noise_matrix</span><span class="op">[</span>, <span class="va">p_i</span><span class="op">$</span><span class="va">stimulus</span><span class="op">]</span></span>
+<span>  <span class="va">sm_trust</span><span class="op">[</span>, <span class="va">i</span><span class="op">]</span>  <span class="op">&lt;-</span> <span class="op">(</span><span class="va">selected_noise</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">p_i</span><span class="op">$</span><span class="va">response</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">p_i</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
+<span><span class="co"># Tag image dimensions (so plot helpers know it is 256 x 256) and</span></span>
+<span><span class="co"># mark the matrix as a raw mask (so variance-based metrics accept it).</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sm_trust</span>, <span class="st">"img_dims"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sm_trust</span>, <span class="st">"source"</span><span class="op">)</span>   <span class="op">&lt;-</span> <span class="st">"raw"</span></span>
 <span></span>
@@ -2507,8 +2537,8 @@ trait labels:</p>
 <span>              dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="va">ids</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">ids</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">p_i</span> <span class="op">&lt;-</span> <span class="va">trials</span><span class="op">[</span><span class="va">trials</span><span class="op">$</span><span class="va">participant_id</span> <span class="op">==</span> <span class="va">ids</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="op">]</span></span>
-<span>    <span class="va">m</span><span class="op">[</span>, <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">noise_matrix</span><span class="op">[</span>, <span class="va">p_i</span><span class="op">$</span><span class="va">stimulus</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">p_i</span><span class="op">$</span><span class="va">response</span><span class="op">)</span> <span class="op">/</span></span>
-<span>                <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">p_i</span><span class="op">)</span></span>
+<span>    <span class="va">selected_noise</span> <span class="op">&lt;-</span> <span class="va">noise_matrix</span><span class="op">[</span>, <span class="va">p_i</span><span class="op">$</span><span class="va">stimulus</span><span class="op">]</span></span>
+<span>    <span class="va">m</span><span class="op">[</span>, <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">selected_noise</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">p_i</span><span class="op">$</span><span class="va">response</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">p_i</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"img_dims"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"source"</span><span class="op">)</span>   <span class="op">&lt;-</span> <span class="st">"raw"</span></span>
@@ -2527,7 +2557,7 @@ trait labels:</p>
 <p>In a real pipeline, <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> performs
 the same work and additionally handles the <code>rcicr</code>
 integration. Doing it by hand once makes the mask formula concrete; you
-can switch to the wrapper afterwards.</p>
+can switch to <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> afterwards.</p>
 </div>
 <div class="section level3">
 <h3 id="within-condition-reliability-per-trait">12.6 Within-condition reliability per trait<a class="anchor" aria-label="anchor" href="#within-condition-reliability-per-trait"></a>
@@ -2849,11 +2879,14 @@ group CI looks weak overall may carry stronger signal in one specific
 region, and vice versa. Run <code><a href="../reference/infoval.html">infoval()</a></code> per region per
 condition:</p>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trial_counts_for</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">trials</span> <span class="op">&lt;-</span> <span class="va">raw</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">trait</span> <span class="op">==</span> <span class="va">label</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Helper: for one trait label, return a named integer vector</span></span>
+<span><span class="co"># giving the trial count per producer.</span></span>
+<span><span class="va">trial_counts_for</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">trials</span> <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span> <span class="op">==</span> <span class="va">label</span>, <span class="op">]</span></span>
 <span>  <span class="va">ids</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">participant_id</span><span class="op">)</span></span>
-<span>  <span class="va">out</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">participant_id</span><span class="op">)</span><span class="op">[</span><span class="va">ids</span><span class="op">]</span><span class="op">)</span></span>
-<span>  <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">ids</span><span class="op">)</span></span>
+<span>  <span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">participant_id</span><span class="op">)</span><span class="op">[</span><span class="va">ids</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">ids</span></span>
+<span>  <span class="va">counts</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">iv_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
@@ -3066,12 +3099,17 @@ max-mass null, cluster threshold |t| &gt; 2.0).</p>
 <span>  seed              <span class="op">=</span> <span class="fl">1L</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Build a logical mask of pixels that fall inside any</span></span>
-<span><span class="co"># significant cluster (positive or negative direction).</span></span>
+<span><span class="co"># Pull out the cluster ids of the significant clusters in each</span></span>
+<span><span class="co"># direction (Trust &gt; Friendly = "pos", Friendly &gt; Trust = "neg").</span></span>
 <span><span class="va">sig_pos</span> <span class="op">&lt;-</span> <span class="va">ct_tf</span><span class="op">$</span><span class="va">clusters</span><span class="op">$</span><span class="va">cluster_id</span><span class="op">[</span><span class="va">ct_tf</span><span class="op">$</span><span class="va">clusters</span><span class="op">$</span><span class="va">direction</span> <span class="op">==</span> <span class="st">"pos"</span> <span class="op">&amp;</span></span>
 <span>                                     <span class="va">ct_tf</span><span class="op">$</span><span class="va">clusters</span><span class="op">$</span><span class="va">significant</span><span class="op">]</span></span>
 <span><span class="va">sig_neg</span> <span class="op">&lt;-</span> <span class="va">ct_tf</span><span class="op">$</span><span class="va">clusters</span><span class="op">$</span><span class="va">cluster_id</span><span class="op">[</span><span class="va">ct_tf</span><span class="op">$</span><span class="va">clusters</span><span class="op">$</span><span class="va">direction</span> <span class="op">==</span> <span class="st">"neg"</span> <span class="op">&amp;</span></span>
 <span>                                     <span class="va">ct_tf</span><span class="op">$</span><span class="va">clusters</span><span class="op">$</span><span class="va">significant</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Build a logical mask marking pixels that fall inside any</span></span>
+<span><span class="co"># significant cluster (in either direction). `pos_labels` and</span></span>
+<span><span class="co"># `neg_labels` are integer matrices of cluster ids; %in% checks</span></span>
+<span><span class="co"># membership pixel by pixel.</span></span>
 <span><span class="va">sig_mask</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">ct_tf</span><span class="op">$</span><span class="va">pos_labels</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">sig_pos</span><span class="op">)</span> <span class="op">|</span></span>
 <span>            <span class="op">(</span><span class="va">ct_tf</span><span class="op">$</span><span class="va">neg_labels</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">sig_neg</span><span class="op">)</span></span>
 <span></span>
@@ -3263,9 +3301,10 @@ interpretation.</p>
 unreliable below N approximately 30 per condition. The package warns at
 N &lt; 30 and aborts at N &lt; 4. Aim for N &gt;= 60 per condition for
 stable assessment.</p>
-<p><strong>Pre-1.0 API.</strong> The package is not yet at 1.0; argument
-names and defaults may change between minor versions when doing so
-removes a footgun. NEWS.md documents every breaking change.</p>
+<p><strong>Pre-1.0 status.</strong> The package is not yet at version
+1.0; argument names and defaults may change between minor versions,
+particularly when the change makes a sharp edge less easy to cut
+yourself on. NEWS.md documents every breaking change.</p>
 </div>
 <div class="section level2">
 <h2 id="appendix-troubleshooting-low-or-negative-infoval">15. Appendix: troubleshooting low or negative infoVal<a class="anchor" aria-label="anchor" href="#appendix-troubleshooting-low-or-negative-infoval"></a>
