@@ -1707,6 +1707,13 @@ default behaviour is conservative.</p>
 that ICC(3,k) tends toward 1 at large image sizes (it is not
 resolution-comparable). Report ICC(3,1) as the primary statistic for
 cross-resolution comparisons.</p>
+<p>Empirically, ICC(3,k) and the group-mean infoVal z (see §9) track
+each other very closely on real data: both quantify how aligned the
+producers are on the pixel-level signal, ICC(3,k) as a variance ratio
+and group-mean z as the magnitude of the surviving group-mean signal
+against a matched reference. §12.6 shows the empirical relationship
+across ten trait conditions on the Oliveira et al. (2019) data (Pearson
+<em>r</em> ≈ 0.97).</p>
 </div>
 <div class="section level3">
 <h3 id="rel_loo">7.3 <code>rel_loo()</code><a class="anchor" aria-label="anchor" href="#rel_loo"></a>
@@ -2252,10 +2259,10 @@ Intelligent, Unintelligent, Competent, Incompetent.</p>
 <p>The R code chunks below are shown for reading and adaptation; they
 are marked <code>eval = FALSE</code> to keep the vignette quick to
 render. The numbers and figures shown alongside each chunk were
-precomputed by <code>data-raw/oliveira_2019/precompute.R</code> on the
-open OSF data and are loaded into the vignette via
+precomputed by the <code>data-raw/oliveira_2019/precompute*.R</code>
+scripts on the open OSF data and are loaded into the vignette via
 <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code> and <code><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">knitr::include_graphics()</a></code>.
-Re-run the precompute script to refresh after package changes.</p>
+Re-run the precompute scripts to refresh after package changes.</p>
 <div class="section level3">
 <h3 id="loading-the-data">12.1 Loading the data<a class="anchor" aria-label="anchor" href="#loading-the-data"></a>
 </h3>
@@ -2650,6 +2657,48 @@ it on each per-trait signal matrix:</p>
 <p>Spearman-Brown projected reliabilities and ICC(3,k) values are high
 throughout, indicating that the group-level CIs are stable across
 producer halves.</p>
+<div class="section level4">
+<h4 id="cross-trait-ci-correlations">Cross-trait CI correlations<a class="anchor" aria-label="anchor" href="#cross-trait-ci-correlations"></a>
+</h4>
+<p>Restricted to the four traits used in the example contrasts (trust,
+friendly, competent, dominant), pairwise Pearson correlations between
+the group-mean CIs follow the expected valence structure: prosocial
+pairs correlate positively (trust–friendly +0.68, friendly–competent
++0.45, trust–competent +0.39), and pairs that cross into dominance
+correlate negatively (friendly–dominant −0.48, trust–dominant −0.34).
+Competent–dominant is weakly negative (−0.17).</p>
+<div class="figure">
+<img src="figures/oliveira_2019/trait_ci_correlogram.png" class="r-plt" alt="Pairwise Pearson correlations between the four group-mean CIs (trust, friendly, competent, dominant) in the Oliveira et al. (2019) Study 1 data. Diverging palette; blue = positive, red = negative; saturation indicates magnitude. Lower triangle and diagonal omitted because they are redundant." width="70%"><p class="caption">
+Pairwise Pearson correlations between the four group-mean CIs (trust,
+friendly, competent, dominant) in the Oliveira et al. (2019) Study 1
+data. Diverging palette; blue = positive, red = negative; saturation
+indicates magnitude. Lower triangle and diagonal omitted because they
+are redundant.
+</p>
+</div>
+</div>
+<div class="section level4">
+<h4 id="icc-and-group-mean-infoval-z-track-each-other-across-traits">ICC and group-mean infoVal z track each other across traits<a class="anchor" aria-label="anchor" href="#icc-and-group-mean-infoval-z-track-each-other-across-traits"></a>
+</h4>
+<p>Per-trait reliability and per-trait group-mean infoVal z (see §9) are
+tightly coupled across the ten conditions in this dataset: Pearson
+<em>r</em> = 0.97, 95% CI [0.88, 0.99], <em>t</em>(8) = 11.41,
+<em>p</em> &lt; 0.001. Both quantify producer alignment on the
+pixel-level signal: ICC(3,k) as a variance ratio, group-mean z as the
+magnitude of the surviving group-mean signal against a matched
+reference. Conditions where producers converge on a common spatial
+template (friendly, unfriendly, trust) sit in the upper right;
+conditions where producer templates are largely idiosyncratic
+(incompetent, unintelligent) sit in the lower left.</p>
+<div class="figure">
+<img src="figures/oliveira_2019/icc_vs_groupz.png" class="r-plt" alt="Per-trait ICC(3,k) versus per-trait group-mean infoVal z on the Oliveira et al. (2019) Study 1 data. Each point is one of the ten trait conditions; the line is the OLS fit and the band is its 95% confidence band. The dotted reference line marks group-mean z = 1.96." width="85%"><p class="caption">
+Per-trait ICC(3,k) versus per-trait group-mean infoVal z on the Oliveira
+et al. (2019) Study 1 data. Each point is one of the ten trait
+conditions; the line is the OLS fit and the band is its 95% confidence
+band. The dotted reference line marks group-mean z = 1.96.
+</p>
+</div>
+</div>
 </div>
 <div class="section level3">
 <h3 id="multi-contrast-discriminability-full-face">12.7 Multi-contrast discriminability (full face)<a class="anchor" aria-label="anchor" href="#multi-contrast-discriminability-full-face"></a>

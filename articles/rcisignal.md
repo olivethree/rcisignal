@@ -1503,6 +1503,14 @@ is requested, flagging that ICC(3,k) tends toward 1 at large image sizes
 (it is not resolution-comparable). Report ICC(3,1) as the primary
 statistic for cross-resolution comparisons.
 
+Empirically, ICC(3,k) and the group-mean infoVal z (see §9) track each
+other very closely on real data: both quantify how aligned the producers
+are on the pixel-level signal, ICC(3,k) as a variance ratio and
+group-mean z as the magnitude of the surviving group-mean signal against
+a matched reference. §12.6 shows the empirical relationship across ten
+trait conditions on the Oliveira et al. (2019) data (Pearson *r* ≈
+0.97).
+
 ### 7.3 `rel_loo()`
 
 *Background.* Leave-one-out (LOO) is a jackknife-style influence
@@ -2112,12 +2120,12 @@ Unintelligent, Competent, Incompetent.
 
 The R code chunks below are shown for reading and adaptation; they are
 marked `eval = FALSE` to keep the vignette quick to render. The numbers
-and figures shown alongside each chunk were precomputed by
-`data-raw/oliveira_2019/precompute.R` on the open OSF data and are
-loaded into the vignette via
+and figures shown alongside each chunk were precomputed by the
+`data-raw/oliveira_2019/precompute*.R` scripts on the open OSF data and
+are loaded into the vignette via
 [`readRDS()`](https://rdrr.io/r/base/readRDS.html) and
 [`knitr::include_graphics()`](https://rdrr.io/pkg/knitr/man/include_graphics.html).
-Re-run the precompute script to refresh after package changes.
+Re-run the precompute scripts to refresh after package changes.
 
 ### 12.1 Loading the data
 
@@ -2406,6 +2414,51 @@ Loaded from cache, the resulting table on this dataset:
 Spearman-Brown projected reliabilities and ICC(3,k) values are high
 throughout, indicating that the group-level CIs are stable across
 producer halves.
+
+#### Cross-trait CI correlations
+
+Restricted to the four traits used in the example contrasts (trust,
+friendly, competent, dominant), pairwise Pearson correlations between
+the group-mean CIs follow the expected valence structure: prosocial
+pairs correlate positively (trust–friendly +0.68, friendly–competent
++0.45, trust–competent +0.39), and pairs that cross into dominance
+correlate negatively (friendly–dominant −0.48, trust–dominant −0.34).
+Competent–dominant is weakly negative (−0.17).
+
+![Pairwise Pearson correlations between the four group-mean CIs (trust,
+friendly, competent, dominant) in the Oliveira et al. (2019) Study 1
+data. Diverging palette; blue = positive, red = negative; saturation
+indicates magnitude. Lower triangle and diagonal omitted because they
+are redundant.](figures/oliveira_2019/trait_ci_correlogram.png)
+
+Pairwise Pearson correlations between the four group-mean CIs (trust,
+friendly, competent, dominant) in the Oliveira et al. (2019) Study 1
+data. Diverging palette; blue = positive, red = negative; saturation
+indicates magnitude. Lower triangle and diagonal omitted because they
+are redundant.
+
+#### ICC and group-mean infoVal z track each other across traits
+
+Per-trait reliability and per-trait group-mean infoVal z (see §9) are
+tightly coupled across the ten conditions in this dataset: Pearson *r* =
+0.97, 95% CI \[0.88, 0.99\], *t*(8) = 11.41, *p* \< 0.001. Both quantify
+producer alignment on the pixel-level signal: ICC(3,k) as a variance
+ratio, group-mean z as the magnitude of the surviving group-mean signal
+against a matched reference. Conditions where producers converge on a
+common spatial template (friendly, unfriendly, trust) sit in the upper
+right; conditions where producer templates are largely idiosyncratic
+(incompetent, unintelligent) sit in the lower left.
+
+![Per-trait ICC(3,k) versus per-trait group-mean infoVal z on the
+Oliveira et al. (2019) Study 1 data. Each point is one of the ten trait
+conditions; the line is the OLS fit and the band is its 95% confidence
+band. The dotted reference line marks group-mean z =
+1.96.](figures/oliveira_2019/icc_vs_groupz.png)
+
+Per-trait ICC(3,k) versus per-trait group-mean infoVal z on the Oliveira
+et al. (2019) Study 1 data. Each point is one of the ten trait
+conditions; the line is the OLS fit and the band is its 95% confidence
+band. The dotted reference line marks group-mean z = 1.96.
 
 ### 12.7 Multi-contrast discriminability (full face)
 
