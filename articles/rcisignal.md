@@ -2425,6 +2425,13 @@ pairs correlate positively (trust–friendly +0.68, friendly–competent
 correlate negatively (friendly–dominant −0.48, trust–dominant −0.34).
 Competent–dominant is weakly negative (−0.17).
 
+|           | trust | friendly | competent | dominant |
+|:----------|------:|---------:|----------:|---------:|
+| trust     |       |    +0.68 |     +0.39 |    -0.34 |
+| friendly  |       |          |     +0.45 |    -0.48 |
+| competent |       |          |           |    -0.17 |
+| dominant  |       |          |           |          |
+
 ![Pairwise Pearson correlations between the four group-mean CIs (trust,
 friendly, competent, dominant) in the Oliveira et al. (2019) Study 1
 data. Diverging palette; blue = positive, red = negative; saturation
