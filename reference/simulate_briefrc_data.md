@@ -20,7 +20,7 @@ the same pool is shared across participants).
 simulate_briefrc_data(
   n_per_condition = 50L,
   conditions = c("target", "control"),
-  n_trials = 500L,
+  n_trials = NULL,
   images_per_trial = 12L,
   noise_pool_size = NULL,
   img_size = 256L,
@@ -39,14 +39,26 @@ simulate_briefrc_data(
 
 ## Arguments
 
-- n_per_condition, conditions, n_trials, img_size, base_image,
-  signal_strength, signal_region, rt_contamination_fast,
-  rt_contamination_slow, noise_type, nscales, sigma, seed, progress:
+- n_per_condition, conditions, img_size, base_image, signal_strength,
+  signal_region, rt_contamination_fast, rt_contamination_slow,
+  noise_type, nscales, sigma, seed, progress:
 
   See
   [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md).
-  Note: `n_trials` here means the number of Brief-RC trials per
-  participant, not the noise pool size. Default `n_trials = 500`.
+
+- n_trials:
+
+  Integer or `NULL`. Brief-RC trials per participant. When `NULL`
+  (default), it is derived from the pair budget as
+  `noise_pool_size %/% (images_per_trial / 2)`, so the simulation
+  matches
+  [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
+  on number of unique noise pairs rather than on trial count. With the
+  defaults (`noise_pool_size = 500`, `images_per_trial = 12`) this
+  resolves to `n_trials = 83`; with `images_per_trial = 20` it resolves
+  to `50`. Supplying `n_trials` directly overrides this and (if
+  `noise_pool_size` is also `NULL`) restores the older "pool grows with
+  trials" behaviour.
 
 - images_per_trial:
 
@@ -56,9 +68,12 @@ simulate_briefrc_data(
 
 - noise_pool_size:
 
-  Integer. Total number of noise patterns to pre-generate. Default
-  `n_trials * (images_per_trial / 2)`, i.e. enough so each participant
-  samples without replacement. Pass a larger value to study
+  Integer or `NULL`. Total number of noise patterns to pre-generate.
+  When `NULL` and `n_trials` is also `NULL`, defaults to `500` (matched
+  image-pair budget against the 2IFC default of 500 trials x 1 pair).
+  When `NULL` but `n_trials` is supplied, defaults to
+  `n_trials * (images_per_trial / 2)` so within-participant sampling
+  stays without replacement. Pass a larger value than that to study
   sub-sampling.
 
 ## Value
