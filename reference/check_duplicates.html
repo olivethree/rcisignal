@@ -56,7 +56,11 @@ an accidental double-write. This check flags two distinct cases:</p>
 
 
 <dl><dt id="arg-responses">responses<a class="anchor" aria-label="anchor" href="#arg-responses"></a></dt>
-<dd><p>A data frame of trial-level responses.</p></dd>
+<dd><p>Data frame with one row per trial. Required
+columns: <code>participant_id</code>, <code>stimulus</code>, <code>response</code> (values in
+<code>{-1, +1}</code>). Load yours from CSV via <code><a href="read_responses.html">read_responses()</a></code> or
+<code><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">utils::read.csv()</a></code>; column names are configurable via the
+<code>col_*</code> arguments.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>

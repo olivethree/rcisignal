@@ -30,7 +30,11 @@ compute_infoval_summary(
 
 - responses:
 
-  A data frame of trial-level responses.
+  Data frame with one row per trial. Required columns: `participant_id`,
+  `stimulus`, `response` (values in `{-1, +1}`). Load yours from CSV via
+  [`read_responses()`](https://olivethree.github.io/rcisignal/reference/read_responses.md)
+  or [`utils::read.csv()`](https://rdrr.io/r/utils/read.table.html);
+  column names are configurable via the `col_*` arguments.
 
 - method:
 
@@ -118,10 +122,8 @@ toolbox* \[R package\]. <https://github.com/rdotsch/rcicr>
 
 ``` r
 if (FALSE) { # \dontrun{
-compute_infoval_summary(
-  responses, method = "2ifc",
-  rdata = "stimuli.RData",
-  iter = 10000
-)
+sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+compute_infoval_summary(sim$data, method = "2ifc",
+                        rdata = sim$rdata_path, iter = 200L)
 } # }
 ```

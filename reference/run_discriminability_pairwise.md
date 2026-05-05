@@ -121,3 +121,20 @@ is well-defined.
 [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
 [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# Three-condition comparison: simulate -> per-condition CIs -> all pairs.
+sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60,
+                             conditions = c("happy", "angry", "neutral"),
+                             seed = 1)
+sigs <- lapply(split(sim$data, sim$data$condition), function(d) {
+  ci_from_responses_briefrc(d, noise_matrix = sim$noise_matrix)$signal_matrix
+})
+run_discriminability_pairwise(sigs,
+                              n_permutations = 200L, n_boot = 200L,
+                              seed = 1)
+} # }
+```

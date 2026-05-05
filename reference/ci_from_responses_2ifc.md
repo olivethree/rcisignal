@@ -129,11 +129,15 @@ What the wrapper does for you:
 
 ``` r
 if (FALSE) { # \dontrun{
-res <- ci_from_responses_2ifc(
-  responses  = my_responses,
-  rdata_path = "data/rcicr_stimuli.Rdata",
-  baseimage  = "base"
-)
-dim(res$signal_matrix)
+# In your study, you replace the simulated inputs with your own:
+#   - `sim$data` -> your responses data frame (CSV via read_responses())
+#   - `sim$rdata_path` -> path to the rcicr stimuli .Rdata file used to
+#     generate your stimuli.
+# The `simulate_2ifc_data()` helper just produces the same shapes so the
+# example below is runnable end-to-end.
+sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+res <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
+dim(res$signal_matrix)   # n_pixels x n_producers
+rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
 } # }
 ```

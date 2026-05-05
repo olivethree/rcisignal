@@ -25,7 +25,12 @@ check_rt_infoval_consistency(
 
 - responses:
 
-  A data frame of trial-level responses.
+  Data frame with one row per trial. Required columns: `participant_id`,
+  `stimulus`, `response` (values in `{-1, +1}`), and `rt` (response
+  time, milliseconds). Load yours from CSV via
+  [`read_responses()`](https://olivethree.github.io/rcisignal/reference/read_responses.md)
+  or [`utils::read.csv()`](https://rdrr.io/r/utils/read.table.html);
+  column names are configurable via the `col_*` arguments.
 
 - method:
 
@@ -83,10 +88,8 @@ Requires `rcicr` via
 
 ``` r
 if (FALSE) { # \dontrun{
-check_rt_infoval_consistency(
-  responses, method = "2ifc",
-  rdata = "stimuli.RData",
-  col_rt = "rt"
-)
+sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+check_rt_infoval_consistency(sim$data, method = "2ifc",
+                             rdata = sim$rdata_path, col_rt = "rt")
 } # }
 ```

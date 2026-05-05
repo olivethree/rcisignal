@@ -46,8 +46,15 @@ use.
 
 ``` r
 if (FALSE) { # \dontrun{
-d_AB <- rel_dissimilarity(sig_A, sig_B, n_boot = 500L, seed = 1L)
-d_AC <- rel_dissimilarity(sig_A, sig_C, n_boot = 500L, seed = 1L)
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+sig_a <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+sig_b <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+sig_c <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+d_AB <- rel_dissimilarity(sig_a, sig_b, n_boot = 200L, seed = 1)
+d_AC <- rel_dissimilarity(sig_a, sig_c, n_boot = 200L, seed = 1)
 plot_dissimilarity_grid("A vs B" = d_AB, "A vs C" = d_AC)
 } # }
 ```

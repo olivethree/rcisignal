@@ -17,3 +17,13 @@ is_rcisignal_diag_result(x)
 ## Value
 
 `TRUE` if `x` inherits from `"rcisignal_diag_result"`, else `FALSE`.
+
+## Examples
+
+``` r
+r <- rcisignal_diag_result("pass", "Demo check", "Looks fine.")
+is_rcisignal_diag_result(r)   # TRUE
+#> [1] TRUE
+is_rcisignal_diag_result(42)  # FALSE
+#> [1] FALSE
+```

@@ -157,6 +157,18 @@ readers like <code><a href="extract_signal.html">extract_signal()</a></code>) er
 the influence diagnostic; <code><a href="run_discriminability.html">run_discriminability()</a></code>.</p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># End-to-end demo: simulate -&gt; compute CIs -&gt; assess reliability.</span></span></span>
+<span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_briefrc_data.html">simulate_briefrc_data</a></span><span class="op">(</span>n_per_condition <span class="op">=</span> <span class="fl">10</span>, n_trials <span class="op">=</span> <span class="fl">60</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">cis</span> <span class="op">&lt;-</span> <span class="fu"><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, noise_matrix <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rel</span> <span class="op">&lt;-</span> <span class="fu">run_reliability</span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span></span>
+<span class="r-in"><span>                       n_permutations <span class="op">=</span> <span class="fl">200L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rel</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

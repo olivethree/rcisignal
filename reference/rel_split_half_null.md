@@ -52,3 +52,18 @@ rel_split_half_null(
 ## Value
 
 Numeric vector of length `n_permutations`.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+null_dist <- rel_split_half_null(
+  n_participants = 20L,
+  n_pixels       = 32L * 32L,
+  null           = "permutation",
+  n_permutations = 200L,
+  seed           = 1
+)
+quantile(null_dist, c(0.025, 0.975))
+} # }
+```

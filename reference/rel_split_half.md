@@ -146,7 +146,15 @@ assessing rater reliability. *Psychological Bulletin*, 86(2), 420-428.
 
 ``` r
 if (FALSE) { # \dontrun{
-r <- rel_split_half(signal_matrix, n_permutations = 2000, seed = 1)
-print(r); plot(r)
+# In a real pipeline, signal_matrix comes from earlier steps:
+#   signal_matrix <- ci_from_responses_briefrc(...)$signal_matrix
+# For a self-contained demo we fabricate a small synthetic input:
+n_pix  <- 32L * 32L
+n_prod <- 20L
+set.seed(1)
+signal_matrix <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+
+r <- rel_split_half(signal_matrix, n_permutations = 200L, seed = 1)
+print(r)
 } # }
 ```

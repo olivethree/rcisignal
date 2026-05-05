@@ -172,12 +172,16 @@ later read <code>$rendered_ci</code> back from PNG instead of using
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">ci_from_responses_2ifc</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  responses  <span class="op">=</span> <span class="va">my_responses</span>,</span></span>
-<span class="r-in"><span>  rdata_path <span class="op">=</span> <span class="st">"data/rcicr_stimuli.Rdata"</span>,</span></span>
-<span class="r-in"><span>  baseimage  <span class="op">=</span> <span class="st">"base"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># In your study, you replace the simulated inputs with your own:</span></span></span>
+<span class="r-in"><span><span class="co">#   - `sim$data` -&gt; your responses data frame (CSV via read_responses())</span></span></span>
+<span class="r-in"><span><span class="co">#   - `sim$rdata_path` -&gt; path to the rcicr stimuli .Rdata file used to</span></span></span>
+<span class="r-in"><span><span class="co">#     generate your stimuli.</span></span></span>
+<span class="r-in"><span><span class="co"># The `simulate_2ifc_data()` helper just produces the same shapes so the</span></span></span>
+<span class="r-in"><span><span class="co"># example below is runnable end-to-end.</span></span></span>
+<span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_2ifc_data.html">simulate_2ifc_data</a></span><span class="op">(</span>n_per_condition <span class="op">=</span> <span class="fl">10</span>, n_trials <span class="op">=</span> <span class="fl">60</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">ci_from_responses_2ifc</span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, rdata_path <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">rdata_path</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span><span class="op">)</span>   <span class="co"># n_pixels x n_producers</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="rel_split_half.html">rel_split_half</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span>, n_permutations <span class="op">=</span> <span class="fl">200L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

@@ -113,3 +113,16 @@ unless `acknowledge_scaling = TRUE`.
 [`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md)
 for the influence diagnostic;
 [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md).
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# End-to-end demo: simulate -> compute CIs -> assess reliability.
+sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60, seed = 1)
+cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+rel <- run_reliability(cis$signal_matrix,
+                       n_permutations = 200L, seed = 1)
+print(rel)
+} # }
+```

@@ -80,3 +80,13 @@ when raw responses are available; both return the raw mask.
 
 [`read_cis()`](https://olivethree.github.io/rcisignal/reference/read_cis.md),
 [`read_signal_matrix()`](https://olivethree.github.io/rcisignal/reference/read_signal_matrix.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+cis    <- read_cis("data/cis_condition_A/")
+signal <- extract_signal(cis, base_image_path = "data/base.jpg")
+rel_split_half(signal, n_permutations = 200L, seed = 1)
+} # }
+```
