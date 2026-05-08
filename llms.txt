@@ -9,6 +9,11 @@ classification image (CI) computation, then quantifies CI quality
 
 > Package is not on CRAN, distribution is GitHub-only.
 
+**[User
+guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html) ·
+[Installation](#installation) · [Quick start](#quick-start) ·
+[Citation](#citation)**
+
 ## Why this package?
 
 You ran a reverse correlation study, generated classification images,
@@ -159,38 +164,22 @@ Two pieces of information from your study:
 
     - an `.Rdata` file from
       [`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html)
-      (2IFC), or
+      (2IFC). It stores the sinusoidal basis and per-trial contrast
+      weights; `rcisignal` reconstructs the actual
+      `n_pixels × pool_size` noise matrix on demand.
     - a noise-matrix text file **plus** a base-face image file
-      (Brief-RC).
+      (Brief-RC). The text file is the same `n_pixels × pool_size`
+      matrix the 2IFC `.Rdata` reconstructs to, but stored directly as
+      plain text (one column per pre-generated noise pattern). This is
+      the format the Schmitz et al. (2024) Brief-RC OSF materials ship
+      in;
+      [`read_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/read_noise_matrix.md)
+      reads it as-is and caches a fast `.rds` copy on first use.
 
-### Clarification of types of visual noise data
-
-Reverse correlation work involves several types of pixel matrices that
-may be easy to confuse. In `rcisignal`, each one has exactly one job:
-
-| Data type | What is it? | shape | input or output? |
-|----|----|----|----|
-| **`noise_matrix`** | **input** pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern. | `n_pixels` × `pool_size` | input (you give it to the package) |
-| **noise mask** (a.k.a. “per-participant CI”) | **one participant’s** classification image: a single vector of pixel values, base-subtracted. Conceptually, the weighted average of the noise patterns they “selected” with their responses. | `n_pixels` × 1 (one column) | intermediate |
-| **`signal_matrix`** | **all participants’ noise masks stacked side by side**, one column per producer. This is the central object of `rcisignal`. | `n_pixels` × `n_participants` | output (you pass it to every `rel_*`, `run_reliability`, `run_discriminability` call) |
-
-In sum:
-
-- **`noise_matrix`** describes the *stimuli* (what the experiment
-  showed), and exists *before* any participant runs the task;
-- **noise mask** describes *one participant’s* CI, and exists *after*
-  that participant has responded;
-- **`signal_matrix`** describes *the whole sample’s* CIs. It is the
-  collection of all individual noise masks lined up by participant (this
-  is the matrix every reliability and discriminability function in
-  rcisignal uses)
-
-You don’t build the noise mask or the `signal_matrix` by hand:
-[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
-and
-[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
-do it for you and return a list whose `$signal_matrix` element is the
-matrix you pass downstream.
+For a side-by-side reference of the three pixel matrices the package
+distinguishes (input `noise_matrix`, per-participant noise mask, output
+`signal_matrix`), see [§3.0 of the user
+guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html#three-pixel-matrices-that-all-sound-similar-keep-them-apart).
 
 ### Step 1. Diagnose the raw data
 
