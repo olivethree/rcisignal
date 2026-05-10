@@ -23,6 +23,20 @@
   gain a `stimuli =` argument as an in-memory alternative to
   `rdata_path =` / `rdata =`. When both are supplied `stimuli` takes
   precedence and a warning is emitted.
+- [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+  argument `base_image_path` is renamed `base_image` and now accepts
+  either a numeric matrix in `[0, 1]` (e.g. `sim$base_face`) or a file
+  path. The argument is now optional when `scaling = "none"` (the
+  default), since the base face only feeds the visualisation-only
+  `$rendered_ci` field. The old `base_image_path` keeps working for one
+  release with a deprecation warning.
+- [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
+  and
+  [`simulate_briefrc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md)
+  now also write the base face as a standalone PNG alongside the stimuli
+  `.Rdata` (`rcisignal_sim_2ifc_base_face.png` /
+  `rcisignal_sim_briefrc_base_face.png` under `rdata_dir`) and expose
+  its path on `$base_image_path`.
 
 ### Fixes
 

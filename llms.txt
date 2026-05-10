@@ -111,6 +111,14 @@ run_diagnostics(sim$data, method = "2ifc", col_rt = "rt")
 
 cis <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
 run_reliability(cis$signal_matrix, seed = 1)
+
+# --- Brief-RC equivalent ---
+# sim       <- simulate_briefrc_data()
+# cis       <- ci_from_responses_briefrc(
+#   sim$data,
+#   noise_matrix = sim$noise_matrix,
+#   base_image   = sim$base_face        # matrix; a path is also accepted
+# )
 ```
 
 [`?simulate_2ifc_data`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
@@ -264,12 +272,14 @@ untrustworthy <- ci_from_responses_2ifc(
 # Same call shape and per-participant grouping behaviour, differences are:
 #   - function name ends in _briefrc
 #   - rdata_path may be replaced by noise_matrix = "data/noise_matrix.txt"
-#   - base_image_path (PNG/JPEG of the base face) is required
+#   - base_image is optional unless you want a rendered visualisation
+#     (scaling != "none"); accepts either a path or a numeric matrix
 #
 # trustworthy <- ci_from_responses_briefrc(
-#   responses       = trust_rows,
-#   rdata_path      = "data/rcicr_stimuli.Rdata",
-#   base_image_path = "data/base.jpg"
+#   responses    = trust_rows,
+#   rdata_path   = "data/rcicr_stimuli.Rdata",
+#   base_image   = "data/base.jpg",   # or a numeric matrix in [0, 1]
+#   scaling      = "matched"
 # )
 
 # Inspect the result: one column per participant.

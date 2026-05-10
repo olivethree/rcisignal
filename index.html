@@ -114,7 +114,15 @@
 <span><span class="fu"><a href="reference/run_diagnostics.html">run_diagnostics</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, method <span class="op">=</span> <span class="st">"2ifc"</span>, col_rt <span class="op">=</span> <span class="st">"rt"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cis</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, rdata_path <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">rdata_path</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># --- Brief-RC equivalent ---</span></span>
+<span><span class="co"># sim       &lt;- simulate_briefrc_data()</span></span>
+<span><span class="co"># cis       &lt;- ci_from_responses_briefrc(</span></span>
+<span><span class="co">#   sim$data,</span></span>
+<span><span class="co">#   noise_matrix = sim$noise_matrix,</span></span>
+<span><span class="co">#   base_image   = sim$base_face        # matrix; a path is also accepted</span></span>
+<span><span class="co"># )</span></span></code></pre></div>
 <p><code><a href="reference/simulate_2ifc_data.html">?simulate_2ifc_data</a></code> and <code><a href="reference/simulate_briefrc_data.html">?simulate_briefrc_data</a></code> document every parameter (sample sizes, image size, signal strength/region, RT contamination, noise basis, seed); pass <code>signal_strength = "none"</code> for true bogus data.</p>
 <p>To cache the simulation across R sessions (e.g. via <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code>, knitr <code>cache = TRUE</code>, or sharing with a collaborator), either pass an explicit <code>rdata_dir</code> to keep the stimuli <code>.Rdata</code> at a stable path, or hand the in-memory <code>$stimuli</code> list to the consumer in place of <code>rdata_path</code> — both routes survive a session restart:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -242,12 +250,14 @@
 <span><span class="co"># Same call shape and per-participant grouping behaviour, differences are:</span></span>
 <span><span class="co">#   - function name ends in _briefrc</span></span>
 <span><span class="co">#   - rdata_path may be replaced by noise_matrix = "data/noise_matrix.txt"</span></span>
-<span><span class="co">#   - base_image_path (PNG/JPEG of the base face) is required</span></span>
+<span><span class="co">#   - base_image is optional unless you want a rendered visualisation</span></span>
+<span><span class="co">#     (scaling != "none"); accepts either a path or a numeric matrix</span></span>
 <span><span class="co">#</span></span>
 <span><span class="co"># trustworthy &lt;- ci_from_responses_briefrc(</span></span>
-<span><span class="co">#   responses       = trust_rows,</span></span>
-<span><span class="co">#   rdata_path      = "data/rcicr_stimuli.Rdata",</span></span>
-<span><span class="co">#   base_image_path = "data/base.jpg"</span></span>
+<span><span class="co">#   responses    = trust_rows,</span></span>
+<span><span class="co">#   rdata_path   = "data/rcicr_stimuli.Rdata",</span></span>
+<span><span class="co">#   base_image   = "data/base.jpg",   # or a numeric matrix in [0, 1]</span></span>
+<span><span class="co">#   scaling      = "matched"</span></span>
 <span><span class="co"># )</span></span>
 <span></span>
 <span><span class="co"># Inspect the result: one column per participant.</span></span>

@@ -141,6 +141,14 @@ An object of class `"rcisignal_sim"` with elements:
   and other downstream functions that take an `rdata` argument. **Not
   portable across R sessions** when `rdata_dir = NULL`.
 
+- `base_image_path` — path to a standalone PNG of `base_face` written
+  next to the `.Rdata` (`rcisignal_sim_2ifc_base_face.png` for 2IFC,
+  `rcisignal_sim_briefrc_base_face.png` for Brief-RC). Same persistence
+  story as `rdata_path`: persists when `rdata_dir` is supplied, lives in
+  a session tempdir otherwise. Most users prefer the matrix form
+  `base_face` directly; the path is provided for symmetry with rcicr's
+  standard workflow.
+
 - `stimuli` — a self-contained list (`base_face`, `params`, `p`, etc.)
   that downstream consumers accept via their `stimuli =` argument as a
   portable alternative to `rdata_path`. Round-trips through

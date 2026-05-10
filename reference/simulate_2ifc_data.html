@@ -191,6 +191,15 @@ Suitable for <code><a href="ci_from_responses_2ifc.html">ci_from_responses_2ifc(
 <code><a href="compute_infoval_summary.html">compute_infoval_summary()</a></code> and other downstream functions
 that take an <code>rdata</code> argument. <strong>Not portable across R
 sessions</strong> when <code>rdata_dir = NULL</code>.</p></li>
+<li><p><code>base_image_path</code> — path to a standalone PNG of <code>base_face</code>
+written next to the <code>.Rdata</code>
+(<code>rcisignal_sim_2ifc_base_face.png</code> for 2IFC,
+<code>rcisignal_sim_briefrc_base_face.png</code> for Brief-RC). Same
+persistence story as <code>rdata_path</code>: persists when
+<code>rdata_dir</code> is supplied, lives in a session tempdir
+otherwise. Most users prefer the matrix form <code>base_face</code>
+directly; the path is provided for symmetry with rcicr's
+standard workflow.</p></li>
 <li><p><code>stimuli</code> — a self-contained list (<code>base_face</code>, <code>params</code>,
 <code>p</code>, etc.) that downstream consumers accept via their
 <code>stimuli =</code> argument as a portable alternative to

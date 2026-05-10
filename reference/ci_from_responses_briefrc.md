@@ -17,13 +17,14 @@ ci_from_responses_briefrc(
   responses,
   rdata_path = NULL,
   noise_matrix = NULL,
-  base_image_path,
+  base_image = NULL,
   participant_col = "participant_id",
   stimulus_col = "stimulus",
   response_col = "response",
   method = c("briefrc12", "briefrc20"),
   scaling = c("none", "matched", "constant"),
-  scaling_constant = NULL
+  scaling_constant = NULL,
+  base_image_path = NULL
 )
 ```
 
@@ -41,11 +42,16 @@ ci_from_responses_briefrc(
   matrix from an rcicr `.Rdata`, or pass a pre-loaded `noise_matrix`
   directly.
 
-- base_image_path:
+- base_image:
 
-  Path to the base face image (PNG / JPEG). Used to validate the noise
-  matrix shape and (when `scaling` is not `"none"`) to render the
-  visualisation-only `$rendered_ci` field.
+  Base face image. Either a numeric matrix in `[0, 1]` (e.g.
+  `sim$base_face` from
+  [`simulate_briefrc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md),
+  or a hand-built mask) or a single string path to a PNG / JPEG.
+  Optional when `scaling = "none"` (default), in which case the image is
+  not needed for the mathematical mask. Required for the
+  visualisation-only `$rendered_ci` field when `scaling` is `"matched"`
+  or `"constant"`.
 
 - participant_col, stimulus_col, response_col:
 
@@ -72,6 +78,12 @@ ci_from_responses_briefrc(
 
   Numeric multiplier used when `scaling = "constant"`. Ignored
   otherwise.
+
+- base_image_path:
+
+  **Deprecated.** Use `base_image` (which accepts both a numeric matrix
+  and a path). The old name still works for one release with a
+  deprecation warning.
 
 ## Value
 
@@ -142,7 +154,11 @@ if (FALSE) { # \dontrun{
 # The `simulate_briefrc_data()` helper just produces the same shapes so
 # the example below is runnable end-to-end.
 sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60, seed = 1)
-res <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+res <- ci_from_responses_briefrc(
+  sim$data,
+  noise_matrix = sim$noise_matrix,
+  base_image   = sim$base_face
+)
 dim(res$signal_matrix)   # n_pixels x n_producers
 rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
 } # }
