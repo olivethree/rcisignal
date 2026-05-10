@@ -8,13 +8,14 @@ ci_from_responses_briefrc(
   responses,
   rdata_path = NULL,
   noise_matrix = NULL,
-  base_image_path,
+  base_image = NULL,
   participant_col = "participant_id",
   stimulus_col = "stimulus",
   response_col = "response",
   method = c("briefrc12", "briefrc20"),
   scaling = c("none", "matched", "constant"),
-  scaling_constant = NULL
+  scaling_constant = NULL,
+  base_image_path = NULL
 )
 }
 \arguments{
@@ -26,10 +27,14 @@ the columns named by \code{participant_col}, \code{stimulus_col},
 Provide \code{rdata_path} to read the noise matrix from an rcicr
 \code{.Rdata}, or pass a pre-loaded \code{noise_matrix} directly.}
 
-\item{base_image_path}{Path to the base face image (PNG / JPEG).
-Used to validate the noise matrix shape and (when \code{scaling}
-is not \code{"none"}) to render the visualisation-only
-\verb{$rendered_ci} field.}
+\item{base_image}{Base face image. Either a numeric matrix in
+\verb{[0, 1]} (e.g. \code{sim$base_face} from
+\code{\link[=simulate_briefrc_data]{simulate_briefrc_data()}}, or a hand-built mask) or a single
+string path to a PNG / JPEG. Optional when \code{scaling = "none"}
+(default), in which case the image is not needed for the
+mathematical mask. Required for the visualisation-only
+\verb{$rendered_ci} field when \code{scaling} is \code{"matched"} or
+\code{"constant"}.}
 
 \item{participant_col, stimulus_col, response_col}{Column names.}
 
@@ -50,6 +55,10 @@ unscaled mask.}
 
 \item{scaling_constant}{Numeric multiplier used when
 \code{scaling = "constant"}. Ignored otherwise.}
+
+\item{base_image_path}{\strong{Deprecated.} Use \code{base_image} (which
+accepts both a numeric matrix and a path). The old name still
+works for one release with a deprecation warning.}
 }
 \value{
 A list with \code{signal_matrix}, optionally \code{rendered_ci},
@@ -121,7 +130,11 @@ because the user often wants to save a PNG.
 # The `simulate_briefrc_data()` helper just produces the same shapes so
 # the example below is runnable end-to-end.
 sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60, seed = 1)
-res <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+res <- ci_from_responses_briefrc(
+  sim$data,
+  noise_matrix = sim$noise_matrix,
+  base_image   = sim$base_face
+)
 dim(res$signal_matrix)   # n_pixels x n_producers
 rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
 }

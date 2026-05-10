@@ -52,10 +52,17 @@
 #' @param rdata_path,noise_matrix Exactly one must be supplied.
 #'   Provide `rdata_path` to read the noise matrix from an rcicr
 #'   `.Rdata`, or pass a pre-loaded `noise_matrix` directly.
-#' @param base_image_path Path to the base face image (PNG / JPEG).
-#'   Used to validate the noise matrix shape and (when `scaling`
-#'   is not `"none"`) to render the visualisation-only
-#'   `$rendered_ci` field.
+#' @param base_image Base face image. Either a numeric matrix in
+#'   `[0, 1]` (e.g. `sim$base_face` from
+#'   [simulate_briefrc_data()], or a hand-built mask) or a single
+#'   string path to a PNG / JPEG. Optional when `scaling = "none"`
+#'   (default), in which case the image is not needed for the
+#'   mathematical mask. Required for the visualisation-only
+#'   `$rendered_ci` field when `scaling` is `"matched"` or
+#'   `"constant"`.
+#' @param base_image_path **Deprecated.** Use `base_image` (which
+#'   accepts both a numeric matrix and a path). The old name still
+#'   works for one release with a deprecation warning.
 #' @param participant_col,stimulus_col,response_col Column names.
 #' @param method Brief-RC variant: `"briefrc12"` (12 alternatives
 #'   per trial, 6 original + 6 inverted; the default) or
@@ -93,14 +100,18 @@
 #' # The `simulate_briefrc_data()` helper just produces the same shapes so
 #' # the example below is runnable end-to-end.
 #' sim <- simulate_briefrc_data(n_per_condition = 10, n_trials = 60, seed = 1)
-#' res <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+#' res <- ci_from_responses_briefrc(
+#'   sim$data,
+#'   noise_matrix = sim$noise_matrix,
+#'   base_image   = sim$base_face
+#' )
 #' dim(res$signal_matrix)   # n_pixels x n_producers
 #' rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
 #' }
 ci_from_responses_briefrc <- function(responses,
                                       rdata_path       = NULL,
                                       noise_matrix     = NULL,
-                                      base_image_path,
+                                      base_image       = NULL,
                                       participant_col  = "participant_id",
                                       stimulus_col     = "stimulus",
                                       response_col     = "response",
@@ -109,9 +120,20 @@ ci_from_responses_briefrc <- function(responses,
                                       scaling          = c("none",
                                                            "matched",
                                                            "constant"),
-                                      scaling_constant = NULL) {
+                                      scaling_constant = NULL,
+                                      base_image_path  = NULL) {
   method  <- match.arg(method)
   scaling <- match.arg(scaling)
+  if (!is.null(base_image_path)) {
+    cli::cli_warn(c(
+      "{.arg base_image_path} is deprecated; use {.arg base_image}.",
+      "i" = "{.arg base_image} accepts either a numeric matrix in \\
+             {.code [0, 1]} or a path to a PNG / JPEG."
+    ))
+    if (is.null(base_image)) {
+      base_image <- base_image_path
+    }
+  }
   if (scaling == "constant") {
     if (is.null(scaling_constant) ||
           !is.numeric(scaling_constant) ||
@@ -183,18 +205,11 @@ ci_from_responses_briefrc <- function(responses,
     storage.mode(noise_matrix) <- "double"
   }
 
-  base_img <- read_image_as_gray(base_image_path)
-  img_dims <- as.integer(dim(base_img))
-  base_vec <- as.vector(base_img)
-  if (prod(img_dims) != nrow(noise_matrix)) {
-    cli::cli_abort(c(
-      "Base image and noise matrix pixel counts disagree.",
-      "*" = "Base: {img_dims[1]} x {img_dims[2]} = \\
-             {prod(img_dims)}",
-      "*" = "Noise matrix: {nrow(noise_matrix)} rows"
-    ))
-  }
-  n_pool <- ncol(noise_matrix)
+  base_resolved <- resolve_base_image(base_image, nrow(noise_matrix),
+                                     scaling)
+  img_dims <- base_resolved$img_dims
+  base_vec <- base_resolved$base_vec
+  n_pool   <- ncol(noise_matrix)
 
   participants <- unique(as.character(responses[[participant_col]]))
   signal_matrix <- matrix(
@@ -251,6 +266,86 @@ ci_from_responses_briefrc <- function(responses,
   }
 
   out
+}
+
+#' Resolve the `base_image` argument to a usable matrix and dims
+#'
+#' Accepts either a numeric matrix in `[0, 1]` (used directly) or a
+#' single string path (read via the internal `read_image_as_gray()`).
+#' Optional
+#' (returns `base_vec = NULL`) when `scaling = "none"`, since the
+#' base face only feeds the visualisation-only `$rendered_ci`. Image
+#' dimensions are taken from the matrix / file when supplied; when
+#' the base is omitted, dims are inferred as a square grid from
+#' `nrow(noise_matrix)` and the function aborts if the pixel count
+#' is not a perfect square.
+#'
+#' @keywords internal
+#' @noRd
+resolve_base_image <- function(base_image, n_pixels, scaling) {
+  if (is.null(base_image)) {
+    if (scaling != "none") {
+      cli::cli_abort(c(
+        "{.arg base_image} is required when {.code scaling != \"none\"}.",
+        "i" = "Pass either a numeric matrix in {.code [0, 1]} (e.g. \\
+               {.code sim$base_face}) or a file path (PNG / JPEG)."
+      ))
+    }
+    side <- sqrt(n_pixels)
+    if (side != as.integer(side)) {
+      cli::cli_abort(c(
+        "Cannot infer image dimensions from the noise matrix.",
+        "*" = "Noise matrix has {n_pixels} pixel rows; not a square \\
+               image side length.",
+        "i" = "Pass {.arg base_image} so the image dims can be \\
+               read directly."
+      ))
+    }
+    side <- as.integer(side)
+    return(list(img_dims = c(side, side), base_vec = NULL))
+  }
+  if (is.matrix(base_image) && is.numeric(base_image)) {
+    if (any(!is.finite(base_image) & !is.na(base_image))) {
+      cli::cli_abort("{.arg base_image} matrix contains non-finite values.")
+    }
+    rng_ok <- all(base_image >= 0 & base_image <= 1, na.rm = TRUE)
+    if (!rng_ok) {
+      cli::cli_abort(c(
+        "{.arg base_image} matrix values must lie in {.code [0, 1]}.",
+        "*" = "Range observed: \\
+               [{min(base_image, na.rm = TRUE)}, \\
+               {max(base_image, na.rm = TRUE)}]"
+      ))
+    }
+    img_dims <- as.integer(dim(base_image))
+    if (prod(img_dims) != n_pixels) {
+      cli::cli_abort(c(
+        "{.arg base_image} and {.arg noise_matrix} pixel counts disagree.",
+        "*" = "Base: {img_dims[1]} x {img_dims[2]} = {prod(img_dims)}",
+        "*" = "Noise matrix: {n_pixels} rows"
+      ))
+    }
+    return(list(img_dims = img_dims,
+                base_vec = as.vector(base_image)))
+  }
+  if (is.character(base_image) && length(base_image) == 1L) {
+    base_img <- read_image_as_gray(base_image)
+    img_dims <- as.integer(dim(base_img))
+    if (prod(img_dims) != n_pixels) {
+      cli::cli_abort(c(
+        "{.arg base_image} and {.arg noise_matrix} pixel counts disagree.",
+        "*" = "Base: {img_dims[1]} x {img_dims[2]} = {prod(img_dims)}",
+        "*" = "Noise matrix: {n_pixels} rows"
+      ))
+    }
+    return(list(img_dims = img_dims,
+                base_vec = as.vector(base_img)))
+  }
+  cli::cli_abort(c(
+    "{.arg base_image} must be one of:",
+    "*" = "a numeric matrix in {.code [0, 1]}, or",
+    "*" = "a single string path to a PNG / JPEG."
+  ))
 }
 
 #' Render a raw mask matrix into base+scaling(mask) for visualisation

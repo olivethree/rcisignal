@@ -18,7 +18,7 @@ test_that("Brief-RC mask equals Schmitz genMask by hand", {
   res <- ci_from_responses_briefrc(
     responses       = responses,
     noise_matrix    = noise_matrix,
-    base_image_path = base_path
+    base_image      = base_path
   )
   expect_equal(dim(res$signal_matrix), c(n_pix, 2L))
 
@@ -51,7 +51,7 @@ test_that("duplicate-stimulus responses average (genMask rule)", {
   res <- ci_from_responses_briefrc(
     responses       = responses,
     noise_matrix    = noise_matrix,
-    base_image_path = base_path
+    base_image      = base_path
   )
   expected <- (noise_matrix[, 1] * 0 + noise_matrix[, 2] * 1) / 2
   expect_equal(as.numeric(res$signal_matrix[, "p1"]), expected,
@@ -70,7 +70,7 @@ test_that("Brief-RC rejects bad response coding", {
   )
   expect_error(
     ci_from_responses_briefrc(responses, noise_matrix = noise_matrix,
-                              base_image_path = base_path),
+                              base_image      = base_path),
     "must contain only values"
   )
 })
@@ -87,7 +87,7 @@ test_that("Brief-RC `{0,1}` miscoding gets a recoding hint in error", {
   )
   err <- tryCatch(
     ci_from_responses_briefrc(responses, noise_matrix = noise_matrix,
-                              base_image_path = base_path),
+                              base_image      = base_path),
     error = function(e) conditionMessage(e)
   )
   expect_match(err, "Did you mean")
@@ -113,11 +113,11 @@ test_that("briefrc20 produces same signal matrix as briefrc12 on identical data"
 
   res12 <- ci_from_responses_briefrc(
     responses, noise_matrix = noise_matrix,
-    base_image_path = base_path, method = "briefrc12"
+    base_image      = base_path, method = "briefrc12"
   )
   res20 <- ci_from_responses_briefrc(
     responses, noise_matrix = noise_matrix,
-    base_image_path = base_path, method = "briefrc20"
+    base_image      = base_path, method = "briefrc20"
   )
   expect_equal(res20$signal_matrix, res12$signal_matrix)
   expect_identical(res20$method, "briefrc20")
@@ -149,7 +149,7 @@ test_that("briefrc20 round-trips: hand-computed mask matches genMask", {
 
   res <- ci_from_responses_briefrc(
     responses, noise_matrix = noise_matrix,
-    base_image_path = base_path, method = "briefrc20"
+    base_image      = base_path, method = "briefrc20"
   )
   expect_equal(dim(res$signal_matrix), c(n_pix, 2L))
 
@@ -176,7 +176,7 @@ test_that("default scaling = 'none' returns no rendered_ci field", {
   res <- ci_from_responses_briefrc(
     responses       = responses,
     noise_matrix    = noise_matrix,
-    base_image_path = base_path
+    base_image      = base_path
   )
   expect_null(res$rendered_ci)
   expect_equal(res$scaling, "none")
@@ -199,11 +199,11 @@ test_that("scaling = 'matched' adds rendered_ci, signal_matrix unchanged", {
   )
   res_none <- ci_from_responses_briefrc(
     responses, noise_matrix = noise_matrix,
-    base_image_path = base_path, scaling = "none"
+    base_image      = base_path, scaling = "none"
   )
   res_match <- ci_from_responses_briefrc(
     responses, noise_matrix = noise_matrix,
-    base_image_path = base_path, scaling = "matched"
+    base_image      = base_path, scaling = "matched"
   )
   expect_equal(res_match$signal_matrix, res_none$signal_matrix)
   expect_false(is.null(res_match$rendered_ci))
@@ -237,7 +237,7 @@ test_that("scaling = 'constant' applies the requested multiplier", {
   )
   res <- ci_from_responses_briefrc(
     responses, noise_matrix = noise_matrix,
-    base_image_path  = base_path,
+    base_image       = base_path,
     scaling          = "constant",
     scaling_constant = 3
   )
@@ -258,9 +258,135 @@ test_that("scaling = 'constant' without scaling_constant aborts", {
   expect_error(
     ci_from_responses_briefrc(
       responses, noise_matrix = matrix(0, 16L, 2L),
-      base_image_path = base_path,
+      base_image      = base_path,
       scaling = "constant"
     ),
     "scaling_constant"
   )
+})
+
+test_that("base_image accepts a numeric matrix", {
+  set.seed(21)
+  n_pix <- 16L * 16L
+  noise_matrix <- matrix(rnorm(n_pix * 50L), n_pix, 50L)
+  base_mat <- matrix(seq(0, 1, length.out = n_pix), 16L, 16L)
+  responses <- data.frame(
+    participant_id = rep(c("p1", "p2"), each = 30L),
+    trial          = rep(1:30, 2L),
+    stimulus       = sample.int(50L, 60L, replace = TRUE),
+    response       = sample(c(-1L, 1L), 60L, replace = TRUE)
+  )
+  res <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix,
+    base_image = base_mat, scaling = "matched"
+  )
+  expect_equal(dim(res$signal_matrix), c(n_pix, 2L))
+  expect_equal(res$img_dims, c(16L, 16L))
+  expect_false(is.null(res$rendered_ci))
+})
+
+test_that("base_image matrix and equivalent PNG path agree", {
+  skip_if_not_installed("png")
+  set.seed(22)
+  n_pix <- 16L * 16L
+  noise_matrix <- matrix(rnorm(n_pix * 50L), n_pix, 50L)
+  base_mat <- matrix(127 / 255, 16L, 16L)
+  base_path <- tempfile(fileext = ".png")
+  png::writePNG(base_mat, base_path)
+  responses <- data.frame(
+    participant_id = rep("p1", 20L),
+    trial          = 1:20,
+    stimulus       = sample.int(50L, 20L),
+    response       = sample(c(-1L, 1L), 20L, replace = TRUE)
+  )
+  res_mat  <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix, base_image = base_mat
+  )
+  res_path <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix, base_image = base_path
+  )
+  expect_equal(res_mat$signal_matrix, res_path$signal_matrix,
+               tolerance = 1e-10)
+})
+
+test_that("base_image is optional when scaling = 'none'", {
+  set.seed(23)
+  n_pix <- 16L * 16L
+  noise_matrix <- matrix(rnorm(n_pix * 30L), n_pix, 30L)
+  responses <- data.frame(
+    participant_id = rep("p1", 10L),
+    trial          = 1:10,
+    stimulus       = sample.int(30L, 10L),
+    response       = sample(c(-1L, 1L), 10L, replace = TRUE)
+  )
+  res <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix
+  )
+  expect_equal(res$img_dims, c(16L, 16L))
+  expect_null(res$rendered_ci)
+})
+
+test_that("missing base_image with scaling != 'none' aborts", {
+  noise_matrix <- matrix(0, nrow = 16L, ncol = 5L)
+  responses <- data.frame(
+    participant_id = "p1",
+    trial          = 1:2,
+    stimulus       = c(1L, 2L),
+    response       = c(1L, -1L)
+  )
+  expect_error(
+    ci_from_responses_briefrc(
+      responses, noise_matrix = noise_matrix, scaling = "matched"
+    ),
+    "base_image"
+  )
+})
+
+test_that("base_image rejects out-of-range matrix values", {
+  noise_matrix <- matrix(0, nrow = 16L, ncol = 5L)
+  responses <- data.frame(
+    participant_id = "p1",
+    trial          = 1:2,
+    stimulus       = c(1L, 2L),
+    response       = c(1L, -1L)
+  )
+  bad_base <- matrix(2, 4L, 4L)
+  expect_error(
+    ci_from_responses_briefrc(
+      responses, noise_matrix = noise_matrix, base_image = bad_base
+    ),
+    "\\[0, 1\\]"
+  )
+})
+
+test_that("base_image_path is a deprecated alias for base_image", {
+  skip_if_not_installed("png")
+  set.seed(24)
+  n_pix <- 16L * 16L
+  noise_matrix <- matrix(rnorm(n_pix * 30L), n_pix, 30L)
+  base_path <- tempfile(fileext = ".png")
+  png::writePNG(matrix(0.5, 16L, 16L), base_path)
+  responses <- data.frame(
+    participant_id = rep("p1", 10L),
+    trial          = 1:10,
+    stimulus       = sample.int(30L, 10L),
+    response       = sample(c(-1L, 1L), 10L, replace = TRUE)
+  )
+  res_old <- suppressWarnings(
+    ci_from_responses_briefrc(
+      responses, noise_matrix = noise_matrix,
+      base_image_path = base_path
+    )
+  )
+  expect_warning(
+    ci_from_responses_briefrc(
+      responses, noise_matrix = noise_matrix,
+      base_image_path = base_path
+    ),
+    "deprecated"
+  )
+  res_new <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix, base_image = base_path
+  )
+  expect_equal(res_old$signal_matrix, res_new$signal_matrix)
 })
