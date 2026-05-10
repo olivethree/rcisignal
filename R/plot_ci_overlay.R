@@ -14,6 +14,24 @@
 #' can be saved to disk via [png::writePNG()] / [jpeg::writeJPEG()]
 #' if needed.
 #'
+#' @section Reading the plot:
+#' * **Colour** encodes the sign of the producer-mean signal at each
+#'   pixel. Blue = positive (producers' average mask is brighter than
+#'   the base at that pixel); red = negative (darker than the base);
+#'   pixels rendered as the bare base = at or near zero.
+#' * **Opacity** encodes the magnitude of the signal, scaled to
+#'   `alpha_max` at the global peak `|signal|`. Faint colour means
+#'   weak agreement; saturated colour means a strong, consistent
+#'   producer-mean deflection.
+#' * **Black contours** (only drawn when `test` is supplied) trace
+#'   the boundary of the FWE-significant pixel set returned by
+#'   [agreement_map_test()] at its `alpha`. Pixels inside the
+#'   contour are individually significant under the max-|t| null;
+#'   pixels outside are not.
+#' * Colour convention matches [plot_agreement_map()] and the
+#'   cluster-test plots so the same group CI reads consistently
+#'   across the package.
+#'
 #' @param signal_matrix Pixels x participants; the producer mean is
 #'   computed and rendered as the heatmap layer. Alternatively, a
 #'   numeric vector of length `prod(img_dims)` (e.g.
@@ -29,9 +47,13 @@
 #' @param test Optional [agreement_map_test()] result. When
 #'   supplied, significance contours (around `significant_mask`)
 #'   are drawn on top of the heatmap.
-#' @param mask Optional logical vector restricting the visible
-#'   overlay region; pixels outside the mask render as the bare
-#'   base image.
+#' @param mask Optional logical vector of length
+#'   `prod(img_dims)` restricting the visible overlay region.
+#'   Pixels outside the mask render as the bare base image.
+#'   Build with [make_face_mask()] (parametric oval and
+#'   sub-regions) or [read_face_mask()] (PNG/JPEG mask file). The
+#'   mask is column-major to match the package's image
+#'   vectorisation convention.
 #' @param threshold Optional numeric. Pixels with `|signal| <
 #'   threshold` are rendered as fully transparent (only the base
 #'   shows through). Default `NULL` (no threshold).
@@ -68,6 +90,22 @@
 #' )
 #' cis  <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 #' plot_ci_overlay(cis$signal_matrix, sim$base_face)
+#' }
+#'
+#' \dontrun{
+#' # Same overlay with FWE-significant pixels outlined: feed an
+#' # agreement_map_test() result via `test = `. Black contours trace
+#' # the boundary of pixels significant at the test's alpha.
+#' sim   <- simulate_briefrc_data(
+#'   n_per_condition = 20, n_trials = 60, conditions = "target",
+#'   signal_region = "eyes", signal_strength = "strong", seed = 1
+#' )
+#' cis   <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+#' agree <- agreement_map_test(cis$signal_matrix,
+#'                             n_permutations = 500L, seed = 1)
+#' plot_ci_overlay(cis$signal_matrix, sim$base_face,
+#'                 test = agree,
+#'                 main = "CI overlay + significant pixels")
 #' }
 #' @export
 plot_ci_overlay <- function(signal_matrix,
@@ -141,19 +179,20 @@ plot_ci_overlay <- function(signal_matrix,
     norm_vec[!mask] <- 0
   }
 
-  # ---- diverging palette: red (positive), blue (negative) -------------
-  # Output: nrow x ncol x 3 numeric raster in [0, 1]
+  # ---- diverging palette: blue (positive), red (negative) -------------
+  # Convention matches plot_agreement_map() and the cluster-test plots:
+  # positive = blue, negative = red, neutral = bare base. Output is a
+  # nrow x ncol x 3 numeric raster in [0, 1].
   base_layer <- array(rep(as.vector(base_mat), 3L),
                       dim = c(img_dims[1], img_dims[2], 3L))
   norm_mat <- matrix(norm_vec, nrow = img_dims[1], ncol = img_dims[2])
   alpha    <- abs(norm_mat) * alpha_max
 
-  # color: r, g, b at full opacity
   pos <- norm_mat > 0
   neg <- norm_mat < 0
-  fg_r <- ifelse(pos, 0.85, ifelse(neg, 0.10, 0))
-  fg_g <- ifelse(pos, 0.10, ifelse(neg, 0.20, 0))
-  fg_b <- ifelse(pos, 0.10, ifelse(neg, 0.85, 0))
+  fg_r <- ifelse(pos, 0.10, ifelse(neg, 0.85, 0))
+  fg_g <- ifelse(pos, 0.20, ifelse(neg, 0.10, 0))
+  fg_b <- ifelse(pos, 0.85, ifelse(neg, 0.10, 0))
 
   composed <- array(0, dim = c(img_dims[1], img_dims[2], 3L))
   composed[, , 1] <- (1 - alpha) * base_layer[, , 1] + alpha * fg_r

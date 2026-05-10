@@ -52,9 +52,11 @@
 #'   integration grid. Default 100.
 #' @param alpha Significance level. Default 0.05.
 #' @param mask Optional logical vector of length `n_pixels`
-#'   restricting cluster / TFCE inference to a region. The
-#'   implementation uses a zero-out pattern (not row-subsetting)
-#'   so the 2D image structure is preserved for 4-connectivity.
+#'   (column-major) restricting cluster / TFCE inference to a
+#'   region. The implementation uses a zero-out pattern (not
+#'   row-subsetting) so the 2D image structure is preserved for
+#'   4-connectivity. Build with [make_face_mask()] (parametric
+#'   oval and sub-regions) or [read_face_mask()] (PNG/JPEG mask).
 #' @param seed Optional integer; RNG state restored on exit.
 #' @param progress Show a `cli` progress bar.
 #' @param acknowledge_scaling Logical. When `FALSE` (default), the
@@ -80,6 +82,29 @@
 #' * `$tfce_H`, `$tfce_E`, `$tfce_n_steps`, `$alpha`,
 #'   `$n_permutations`, `$n_participants_a`, `$n_participants_b`,
 #'   `$method = "tfce"`.
+#'
+#' @section Reading the plot:
+#' `plot()` on the returned object renders the per-pixel observed
+#' Welch t (or signed TFCE values for `method = "tfce"`) as a
+#' raster image with FWE-significant cluster boundaries traced on
+#' top.
+#' * **Colour** encodes the sign and magnitude of the per-pixel
+#'   statistic. Blue = condition A larger than B at that pixel
+#'   (positive Welch t); red = condition B larger than A
+#'   (negative Welch t); white = near zero. The colourbar reads
+#'   in `Welch t` units (or signed `TFCE value` for TFCE).
+#' * **Black contours** trace the boundary of clusters that are
+#'   significant at the chosen `alpha` under the max-mass null
+#'   (threshold method) or the boundary of pixels with FWE-
+#'   corrected `p < alpha` (TFCE method). Pixels inside the
+#'   contour survive the FWE correction; pixels outside do not.
+#' * The colour scale is symmetric around zero by default so the
+#'   neutral colour aligns with `t = 0`. The displayed t-map is
+#'   the *observed* statistic before any thresholding; the
+#'   contours encode the inferential decision.
+#' * Colour convention matches [plot_agreement_map()] and
+#'   [plot_ci_overlay()] so the same data reads consistently
+#'   across the package.
 #'
 #' @section Reliability metrics expect raw masks:
 #' Welch t and cluster mass / TFCE are variance-based and
@@ -135,8 +160,12 @@
 #'   sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
 #' sig_mouth <- ci_from_responses_briefrc(
 #'   sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
-#' rel_cluster_test(sig_eyes, sig_mouth,
-#'                  n_permutations = 500L, seed = 1)
+#' ct <- rel_cluster_test(sig_eyes, sig_mouth,
+#'                        n_permutations = 500L, seed = 1)
+#' # Plot the t-map with significant cluster boundaries: blue = eyes
+#' # condition larger; red = mouth condition larger; black contours =
+#' # FWE-significant clusters at alpha.
+#' plot(ct, main = "Eyes vs Mouth (cluster-FWE)")
 #' }
 #' @export
 rel_cluster_test <- function(signal_matrix_a,

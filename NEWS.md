@@ -37,6 +37,40 @@
   `$noise_matrix` directly so the file is informational rather
   than required.
 
+## Behavioural change
+
+* `plot_ci_overlay()` now uses positive = blue, negative = red
+  (matching `plot_agreement_map()` and the cluster-test plots).
+  Previously it rendered positive = red, negative = blue, which
+  flipped the colour reading between the package's three diverging
+  plots. Saved overlay PNGs from prior versions will look mirrored
+  if regenerated. The four worked-example pairwise figures in
+  `vignettes/figures/oliveira_2019/` and the README captions were
+  refreshed to match.
+
+## Documentation
+
+* Added `Reading the plot:` sections to `plot_ci_overlay()`,
+  `plot_agreement_map()`, `agreement_map_test()`,
+  `rel_cluster_test()`, `rel_dissimilarity()`,
+  `run_discriminability()`, and `run_discriminability_pairwise()`
+  describing colour semantics, contour meaning, and
+  significance/observed-statistic distinctions.
+* Standardised the `mask` `@param` description across
+  `agreement_map_test()`, `agreement_map()`, `infoval()`,
+  `pixel_t_test()`, `plot_ci_overlay()`, `rel_cluster_test()`,
+  `rel_dissimilarity()`, `rel_loo()`, `run_reliability()`,
+  `run_discriminability()`, and `run_discriminability_pairwise()`
+  to point at `make_face_mask()` / `read_face_mask()` and call
+  out the column-major convention.
+* Added chained `\dontrun{}` plot examples to `plot_ci_overlay()`
+  (with `test = `), `agreement_map_test()` (canonical pairing
+  with `plot_ci_overlay()`), `rel_cluster_test()` (cluster t-map
+  plot), `rel_dissimilarity()` (bootstrap-distribution plot),
+  `run_discriminability()` (whole-report and per-panel plots),
+  and `run_discriminability_pairwise()` (per-pair plots and the
+  pairwise dissimilarity grid).
+
 # rcisignal 0.1.1
 
 ## New features

@@ -13,14 +13,35 @@
 #' [plot_ci_overlay()] so the significance contours are rendered
 #' on top of the observed group CI.
 #'
+#' @section Reading the result and the paired plot:
+#' * `$observed_t`: per-pixel one-sample t (sign indicates the
+#'   direction of producer agreement; magnitude indicates strength).
+#' * `$pmap`: per-pixel p under the max-|t| null. Already
+#'   FWE-corrected at the alpha you chose; no further adjustment
+#'   needed.
+#' * `$significant_mask`: logical vector of pixels with
+#'   `pmap < alpha`. This is the field that
+#'   `plot_ci_overlay(..., test = result)` traces with black
+#'   contours on top of the group CI overlay.
+#' * Pass the result to `plot_ci_overlay(signal_matrix, base_image,
+#'   test = result)` to get the canonical figure: blue = positive
+#'   producer-mean signal, red = negative, opacity = magnitude,
+#'   black contours = FWE-significant pixels at this test's alpha.
+#'   To plot only the inferential mask (no continuous overlay),
+#'   pass `signal_matrix = result$observed_t * result$significant_mask`
+#'   or use `mask = result$significant_mask` to clip the overlay
+#'   to the significant region.
+#'
 #' @param signal_matrix Pixels x participants, base-subtracted.
 #' @param n_permutations Integer. Number of sign-flip iterations.
 #'   Default 5000.
 #' @param alpha Numeric. Significance level. Default 0.05.
 #' @param mask Optional logical vector of length
-#'   `nrow(signal_matrix)`; the test is computed on the masked
-#'   pixel subset. Pixels outside the mask are returned as
-#'   `NA_real_` per-pixel and `FALSE` in the significant mask.
+#'   `nrow(signal_matrix)` (column-major). When supplied, the test
+#'   is computed on the masked pixel subset. Pixels outside the
+#'   mask are returned as `NA_real_` per-pixel and `FALSE` in the
+#'   significant mask. Build with [make_face_mask()] (parametric
+#'   oval and sub-regions) or [read_face_mask()] (PNG/JPEG mask).
 #' @param seed Optional integer.
 #' @param progress Show a `cli` progress bar.
 #' @param acknowledge_scaling Logical. Forwarded to
@@ -55,6 +76,21 @@
 #' )
 #' cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 #' agreement_map_test(cis$signal_matrix, n_permutations = 500L, seed = 1)
+#' }
+#'
+#' \dontrun{
+#' # Canonical pairing: feed the test result to plot_ci_overlay() so the
+#' # FWE-significant pixels are outlined in black on top of the group CI.
+#' sim   <- simulate_briefrc_data(
+#'   n_per_condition = 20, n_trials = 60, conditions = "target",
+#'   signal_region = "eyes", signal_strength = "strong", seed = 1
+#' )
+#' cis   <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+#' agree <- agreement_map_test(cis$signal_matrix,
+#'                             n_permutations = 500L, seed = 1)
+#' plot_ci_overlay(cis$signal_matrix, sim$base_face,
+#'                 test = agree,
+#'                 main = "CI overlay + FWE-significant pixels")
 #' }
 #' @export
 agreement_map_test <- function(signal_matrix,

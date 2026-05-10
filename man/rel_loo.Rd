@@ -25,7 +25,10 @@ per-session deprecation message.}
 \item{flag_threshold_sd}{Deprecated alias for \code{flag_threshold}.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix)}.}
+\code{nrow(signal_matrix)} (column-major) restricting the LOO
+correlation to a region. Build with \code{\link[=make_face_mask]{make_face_mask()}}
+(parametric oval and sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}}
+(PNG/JPEG mask).}
 }
 \value{
 Object of class \code{rcisignal_rel_loo}.

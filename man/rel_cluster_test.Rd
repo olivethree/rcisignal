@@ -50,9 +50,11 @@ integration grid. Default 100.}
 \item{alpha}{Significance level. Default 0.05.}
 
 \item{mask}{Optional logical vector of length \code{n_pixels}
-restricting cluster / TFCE inference to a region. The
-implementation uses a zero-out pattern (not row-subsetting)
-so the 2D image structure is preserved for 4-connectivity.}
+(column-major) restricting cluster / TFCE inference to a
+region. The implementation uses a zero-out pattern (not
+row-subsetting) so the 2D image structure is preserved for
+4-connectivity. Build with \code{\link[=make_face_mask]{make_face_mask()}} (parametric
+oval and sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask).}
 
 \item{seed}{Optional integer; RNG state restored on exit.}
 
@@ -129,6 +131,33 @@ threshold parameter.
 }
 }
 
+\section{Reading the plot}{
+
+\code{plot()} on the returned object renders the per-pixel observed
+Welch t (or signed TFCE values for \code{method = "tfce"}) as a
+raster image with FWE-significant cluster boundaries traced on
+top.
+\itemize{
+\item \strong{Colour} encodes the sign and magnitude of the per-pixel
+statistic. Blue = condition A larger than B at that pixel
+(positive Welch t); red = condition B larger than A
+(negative Welch t); white = near zero. The colourbar reads
+in \verb{Welch t} units (or signed \verb{TFCE value} for TFCE).
+\item \strong{Black contours} trace the boundary of clusters that are
+significant at the chosen \code{alpha} under the max-mass null
+(threshold method) or the boundary of pixels with FWE-
+corrected \code{p < alpha} (TFCE method). Pixels inside the
+contour survive the FWE correction; pixels outside do not.
+\item The colour scale is symmetric around zero by default so the
+neutral colour aligns with \code{t = 0}. The displayed t-map is
+the \emph{observed} statistic before any thresholding; the
+contours encode the inferential decision.
+\item Colour convention matches \code{\link[=plot_agreement_map]{plot_agreement_map()}} and
+\code{\link[=plot_ci_overlay]{plot_ci_overlay()}} so the same data reads consistently
+across the package.
+}
+}
+
 \section{Reliability metrics expect raw masks}{
 
 Welch t and cluster mass / TFCE are variance-based and
@@ -169,8 +198,12 @@ sig_eyes  <- ci_from_responses_briefrc(
   sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
 sig_mouth <- ci_from_responses_briefrc(
   sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
-rel_cluster_test(sig_eyes, sig_mouth,
-                 n_permutations = 500L, seed = 1)
+ct <- rel_cluster_test(sig_eyes, sig_mouth,
+                       n_permutations = 500L, seed = 1)
+# Plot the t-map with significant cluster boundaries: blue = eyes
+# condition larger; red = mouth condition larger; black contours =
+# FWE-significant clusters at alpha.
+plot(ct, main = "Eyes vs Mouth (cluster-FWE)")
 }
 }
 \references{

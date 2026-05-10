@@ -68,8 +68,10 @@
 #' @param iter Reference-distribution Monte Carlo size. Default
 #'   10000.
 #' @param mask Optional logical vector of length
-#'   `nrow(signal_matrix)`. When supplied, both observed and
-#'   reference norms are computed on the masked pixel subset.
+#'   `nrow(signal_matrix)` (column-major). When supplied, both
+#'   observed and reference norms are computed on the masked
+#'   pixel subset. Build with [make_face_mask()] (parametric oval
+#'   and sub-regions) or [read_face_mask()] (PNG/JPEG mask).
 #' @param with_replacement Sampling regime for the reference
 #'   distribution at the across-trials level (how stimulus ids are
 #'   drawn when simulating a random producer). One of `"auto"`

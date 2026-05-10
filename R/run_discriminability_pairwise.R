@@ -35,8 +35,10 @@
 #'   Forwarded to per-pair calls.
 #' @param dissim_null Forwarded to [rel_dissimilarity()] as
 #'   `null`. Default `"none"` to keep wall time bounded.
-#' @param mask Optional logical vector forwarded to both per-pair
-#'   calls.
+#' @param mask Optional logical vector of length
+#'   `nrow(signal_matrices[[1]])` (column-major) forwarded to both
+#'   per-pair calls. Build with [make_face_mask()] (parametric
+#'   oval and sub-regions) or [read_face_mask()] (PNG/JPEG mask).
 #' @param seed Optional integer.
 #' @param progress Show `cli` progress bars per per-pair call.
 #' @param acknowledge_scaling Logical. Forwarded.
@@ -49,6 +51,19 @@
 #' * `$conditions`, the input names.
 #' * `$fwer`, the correction method used.
 #' * `$alpha`, the across-pairs alpha.
+#'
+#' @section Reading the plot:
+#' `print()` shows the across-pairs table (one row per pair,
+#' adjusted p-values, Euclidean magnitudes). To visualise a
+#' single pair, pull its child results out of `$results` and call
+#' `plot()` on either: e.g.
+#' `plot(res$results[["A_vs_B"]]$cluster_test)` for the
+#' cluster t-map (blue = A larger; red = B larger; black contours
+#' bound FWE-significant clusters), or
+#' `plot(res$results[["A_vs_B"]]$dissimilarity)` for the
+#' bootstrap distribution. To compare Euclidean distances across
+#' pairs on a shared axis, pass each pair's `dissimilarity` child
+#' to [plot_dissimilarity_grid()].
 #' @seealso [run_discriminability()], [rel_cluster_test()],
 #'   [rel_dissimilarity()]
 #' @examples
@@ -76,9 +91,20 @@
 #'   nose  = ci_from_responses_briefrc(
 #'     sim_nose$data,  noise_matrix = sim_nose$noise_matrix)$signal_matrix
 #' )
-#' run_discriminability_pairwise(sigs,
-#'                               n_permutations = 500L, n_boot = 500L,
-#'                               seed = 1)
+#' res <- run_discriminability_pairwise(sigs,
+#'                                      n_permutations = 500L,
+#'                                      n_boot = 500L, seed = 1)
+#' print(res)  # adjusted p-values across the three pairs
+#' # Cluster t-map for one pair (blue = first condition larger;
+#' # red = second condition larger; black contours = significant clusters):
+#' plot(res$results[["eyes_vs_mouth"]]$cluster_test,
+#'      main = "Eyes vs Mouth (cluster-FWE)")
+#' # Compare Euclidean distances across all three pairs on a shared axis:
+#' plot_dissimilarity_grid(
+#'   "eyes vs mouth" = res$results[["eyes_vs_mouth"]]$dissimilarity,
+#'   "eyes vs nose"  = res$results[["eyes_vs_nose"]]$dissimilarity,
+#'   "mouth vs nose" = res$results[["mouth_vs_nose"]]$dissimilarity
+#' )
 #' }
 #' @export
 run_discriminability_pairwise <- function(signal_matrices,

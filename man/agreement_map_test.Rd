@@ -23,9 +23,11 @@ Default 5000.}
 \item{alpha}{Numeric. Significance level. Default 0.05.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix)}; the test is computed on the masked
-pixel subset. Pixels outside the mask are returned as
-\code{NA_real_} per-pixel and \code{FALSE} in the significant mask.}
+\code{nrow(signal_matrix)} (column-major). When supplied, the test
+is computed on the masked pixel subset. Pixels outside the
+mask are returned as \code{NA_real_} per-pixel and \code{FALSE} in the
+significant mask. Build with \code{\link[=make_face_mask]{make_face_mask()}} (parametric
+oval and sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask).}
 
 \item{seed}{Optional integer.}
 
@@ -58,6 +60,28 @@ descriptive agreement-map plot, typically paired with
 \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} so the significance contours are rendered
 on top of the observed group CI.
 }
+\section{Reading the result and the paired plot}{
+
+\itemize{
+\item \verb{$observed_t}: per-pixel one-sample t (sign indicates the
+direction of producer agreement; magnitude indicates strength).
+\item \verb{$pmap}: per-pixel p under the max-|t| null. Already
+FWE-corrected at the alpha you chose; no further adjustment
+needed.
+\item \verb{$significant_mask}: logical vector of pixels with
+\code{pmap < alpha}. This is the field that
+\code{plot_ci_overlay(..., test = result)} traces with black
+contours on top of the group CI overlay.
+\item Pass the result to \code{plot_ci_overlay(signal_matrix, base_image, test = result)} to get the canonical figure: blue = positive
+producer-mean signal, red = negative, opacity = magnitude,
+black contours = FWE-significant pixels at this test's alpha.
+To plot only the inferential mask (no continuous overlay),
+pass \code{signal_matrix = result$observed_t * result$significant_mask}
+or use \code{mask = result$significant_mask} to clip the overlay
+to the significant region.
+}
+}
+
 \examples{
 \dontrun{
 # Minimal call-signature demo with a synthetic input.
@@ -79,6 +103,21 @@ sim <- simulate_briefrc_data(
 )
 cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 agreement_map_test(cis$signal_matrix, n_permutations = 500L, seed = 1)
+}
+
+\dontrun{
+# Canonical pairing: feed the test result to plot_ci_overlay() so the
+# FWE-significant pixels are outlined in black on top of the group CI.
+sim   <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "target",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+cis   <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+agree <- agreement_map_test(cis$signal_matrix,
+                            n_permutations = 500L, seed = 1)
+plot_ci_overlay(cis$signal_matrix, sim$base_face,
+                test = agree,
+                main = "CI overlay + FWE-significant pixels")
 }
 }
 \seealso{

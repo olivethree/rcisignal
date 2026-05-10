@@ -39,8 +39,10 @@ Euclidean distance.}
 \code{null = "permutation"}. Default 2000.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix_a)} restricting the Euclidean / correlation
-computation to a region.}
+\code{nrow(signal_matrix_a)} (column-major) restricting the
+Euclidean / correlation computation to a region. Build with
+\code{\link[=make_face_mask]{make_face_mask()}} (parametric oval and sub-regions) or
+\code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask).}
 
 \item{seed}{Optional integer; RNG state restored on exit.}
 
@@ -88,6 +90,30 @@ not share this failure mode. The Pearson correlation fields
 (\verb{$correlation}, \verb{$boot_cor}, \verb{$ci_cor}, \verb{$boot_se_cor}) are
 retained for backwards compatibility and slated for removal in
 a future release.
+}
+
+\section{Reading the plot}{
+
+\code{plot()} on the returned object renders the bootstrap
+distributions as two side-by-side histograms (Euclidean
+distance on the left, Pearson r on the right; the latter is
+deprecated and shown in grey).
+\itemize{
+\item The shaded vertical band marks the percentile CI at
+\code{ci_level}.
+\item The vertical line marks the \emph{observed} statistic on the
+real data (not a bootstrap mean).
+\item A non-overlapping CI band away from zero on the Euclidean
+panel indicates the two group-mean CIs sit a non-trivial
+distance apart in pixel space, robust to participant-level
+resampling. The numbers are returned in \verb{$ci_dist}.
+\item For visual comparison across multiple contrasts, pass each
+\code{rel_dissimilarity()} result to \code{\link[=plot_dissimilarity_grid]{plot_dissimilarity_grid()}},
+which lays them out as labelled CI bars on a shared axis.
+\item For a \emph{spatial} picture of where the two conditions differ,
+pair this with \code{\link[=rel_cluster_test]{rel_cluster_test()}} (or use
+\code{\link[=run_discriminability]{run_discriminability()}} to run both in one call).
+}
 }
 
 \section{Reading the result}{
@@ -140,7 +166,9 @@ sig_eyes  <- ci_from_responses_briefrc(
   sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
 sig_mouth <- ci_from_responses_briefrc(
   sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
-rel_dissimilarity(sig_eyes, sig_mouth, n_boot = 500L, seed = 1)
+d <- rel_dissimilarity(sig_eyes, sig_mouth, n_boot = 500L, seed = 1)
+# Bootstrap distribution + observed Euclidean + 95\% CI band.
+plot(d, main = "Eyes vs Mouth: bootstrap dissimilarity")
 }
 }
 \references{

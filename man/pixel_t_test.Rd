@@ -22,9 +22,11 @@ correspond to the same producer across matrices.}
 Welch t; \code{TRUE} uses paired t.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix_a)}. Both matrices are subsetted with the
-same mask before computing t. The returned vector is then of
-length \code{sum(mask)}.}
+\code{nrow(signal_matrix_a)} (column-major). Both matrices are
+subsetted with the same mask before computing t; the returned
+vector is then of length \code{sum(mask)}. Build with
+\code{\link[=make_face_mask]{make_face_mask()}} (parametric oval and sub-regions) or
+\code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask).}
 
 \item{acknowledge_scaling}{Logical. When \code{FALSE} (default), the
 shared \code{assert_raw_signal()} helper errors on a known-rendered

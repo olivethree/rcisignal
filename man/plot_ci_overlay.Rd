@@ -38,9 +38,13 @@ is a vector, the dimensions of \code{base_image}.}
 supplied, significance contours (around \code{significant_mask})
 are drawn on top of the heatmap.}
 
-\item{mask}{Optional logical vector restricting the visible
-overlay region; pixels outside the mask render as the bare
-base image.}
+\item{mask}{Optional logical vector of length
+\code{prod(img_dims)} restricting the visible overlay region.
+Pixels outside the mask render as the bare base image.
+Build with \code{\link[=make_face_mask]{make_face_mask()}} (parametric oval and
+sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask file). The
+mask is column-major to match the package's image
+vectorisation convention.}
 
 \item{threshold}{Optional numeric. Pixels with \verb{|signal| < threshold} are rendered as fully transparent (only the base
 shows through). Default \code{NULL} (no threshold).}
@@ -74,6 +78,28 @@ invisibly the composed \verb{nrow x ncol x 3} numeric raster so it
 can be saved to disk via \code{\link[png:writePNG]{png::writePNG()}} / \code{\link[jpeg:writeJPEG]{jpeg::writeJPEG()}}
 if needed.
 }
+\section{Reading the plot}{
+
+\itemize{
+\item \strong{Colour} encodes the sign of the producer-mean signal at each
+pixel. Blue = positive (producers' average mask is brighter than
+the base at that pixel); red = negative (darker than the base);
+pixels rendered as the bare base = at or near zero.
+\item \strong{Opacity} encodes the magnitude of the signal, scaled to
+\code{alpha_max} at the global peak \verb{|signal|}. Faint colour means
+weak agreement; saturated colour means a strong, consistent
+producer-mean deflection.
+\item \strong{Black contours} (only drawn when \code{test} is supplied) trace
+the boundary of the FWE-significant pixel set returned by
+\code{\link[=agreement_map_test]{agreement_map_test()}} at its \code{alpha}. Pixels inside the
+contour are individually significant under the max-|t| null;
+pixels outside are not.
+\item Colour convention matches \code{\link[=plot_agreement_map]{plot_agreement_map()}} and the
+cluster-test plots so the same group CI reads consistently
+across the package.
+}
+}
+
 \examples{
 \dontrun{
 # Minimal call-signature demo with synthetic inputs and a flat base.
@@ -97,6 +123,22 @@ sim <- simulate_briefrc_data(
 )
 cis  <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 plot_ci_overlay(cis$signal_matrix, sim$base_face)
+}
+
+\dontrun{
+# Same overlay with FWE-significant pixels outlined: feed an
+# agreement_map_test() result via `test = `. Black contours trace
+# the boundary of pixels significant at the test's alpha.
+sim   <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "target",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+cis   <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+agree <- agreement_map_test(cis$signal_matrix,
+                            n_permutations = 500L, seed = 1)
+plot_ci_overlay(cis$signal_matrix, sim$base_face,
+                test = agree,
+                main = "CI overlay + significant pixels")
 }
 }
 \seealso{

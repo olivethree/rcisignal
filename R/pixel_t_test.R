@@ -22,9 +22,11 @@
 #' @param paired Logical. `FALSE` (default) uses independent
 #'   Welch t; `TRUE` uses paired t.
 #' @param mask Optional logical vector of length
-#'   `nrow(signal_matrix_a)`. Both matrices are subsetted with the
-#'   same mask before computing t. The returned vector is then of
-#'   length `sum(mask)`.
+#'   `nrow(signal_matrix_a)` (column-major). Both matrices are
+#'   subsetted with the same mask before computing t; the returned
+#'   vector is then of length `sum(mask)`. Build with
+#'   [make_face_mask()] (parametric oval and sub-regions) or
+#'   [read_face_mask()] (PNG/JPEG mask).
 #' @param acknowledge_scaling Logical. When `FALSE` (default), the
 #'   shared `assert_raw_signal()` helper errors on a known-rendered
 #'   matrix. Cascades to internal `pixel_t_test()` calls from

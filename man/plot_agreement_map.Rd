@@ -23,9 +23,11 @@ by \verb{ci_from_responses_*()} or \code{read_cis()} + \code{extract_signal()}).
 \code{attr(signal_matrix, "img_dims")} or from \code{sqrt(n_pixels)} if
 the latter is a whole number.}
 
-\item{mask}{Optional logical vector of length \code{nrow(signal_matrix)}
-restricting display to a region (e.g.,
-\code{make_face_mask(img_dims, region = "eyes")}).}
+\item{mask}{Optional logical vector of length
+\code{nrow(signal_matrix)} (column-major) restricting display to a
+region (e.g., \code{make_face_mask(img_dims, region = "eyes")}).
+Also accepts the output of \code{\link[=read_face_mask]{read_face_mask()}} for PNG/JPEG
+masks. Pixels outside the mask render as \code{NA} (transparent).}
 
 \item{threshold}{Optional positive numeric. When supplied,
 pixels with \verb{|t| < threshold} are rendered in the neutral
@@ -73,6 +75,30 @@ formal pixel-level FWER control between conditions
 (\code{\link[=rel_cluster_test]{rel_cluster_test()}}); the agreement map is the \strong{descriptive}
 counterpart for a single condition.
 }
+\section{Reading the plot}{
+
+\itemize{
+\item \strong{Colour} encodes the sign of the per-pixel one-sample t.
+Blue = producers consistently \emph{add} to the base at that pixel
+(positive agreement); red = consistently \emph{subtract} (negative
+agreement); white = no agreement (t near zero).
+\item \strong{Saturation} encodes \verb{|t|}: deeper colour means the agreement
+among producers is both large and consistent in sign. The
+colourbar on the right reads in \code{t} units (one-sample vs 0).
+\item \strong{\code{zlim}} is symmetric around zero by default so the neutral
+colour aligns with \code{t = 0}. Pass \code{zlim = c(-z, z)} to fix the
+scale across panels for direct comparison.
+\item \strong{\code{threshold}} clips colour to white below \verb{|t| < threshold},
+making strong-agreement clusters stand out. This is descriptive
+only; it does not provide FWER control. For inferential pixel
+significance, use \code{\link[=agreement_map_test]{agreement_map_test()}} and overlay the
+contours via \code{\link[=plot_ci_overlay]{plot_ci_overlay()}}.
+\item Colour convention matches \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} and the
+cluster-test plots so the same group CI reads consistently
+across the package.
+}
+}
+
 \examples{
 \dontrun{
 # Minimal call-signature demo with a synthetic input. The agreement

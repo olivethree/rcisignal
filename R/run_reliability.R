@@ -41,7 +41,9 @@
 #'   `null = "random_responders"`; forwarded to [rel_split_half()].
 #' @param icc_variants Passed to [rel_icc()].
 #' @param mask Optional logical vector of length
-#'   `nrow(signal_matrix)`. Threaded through to both metrics.
+#'   `nrow(signal_matrix)` (column-major) threaded through to both
+#'   metrics. Build with [make_face_mask()] (parametric oval and
+#'   sub-regions) or [read_face_mask()] (PNG/JPEG mask).
 #' @param seed Optional integer; used for the split-half
 #'   permutations.
 #' @param progress Show `cli` progress bars.

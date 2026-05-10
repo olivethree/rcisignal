@@ -31,8 +31,10 @@ producer. Names must match \code{colnames(signal_matrix)}.}
 10000.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix)}. When supplied, both observed and
-reference norms are computed on the masked pixel subset.}
+\code{nrow(signal_matrix)} (column-major). When supplied, both
+observed and reference norms are computed on the masked
+pixel subset. Build with \code{\link[=make_face_mask]{make_face_mask()}} (parametric oval
+and sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask).}
 
 \item{with_replacement}{Sampling regime for the reference
 distribution at the across-trials level (how stimulus ids are

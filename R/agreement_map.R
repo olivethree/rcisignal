@@ -24,14 +24,36 @@
 #' ([rel_cluster_test()]); the agreement map is the **descriptive**
 #' counterpart for a single condition.
 #'
+#' @section Reading the plot:
+#' * **Colour** encodes the sign of the per-pixel one-sample t.
+#'   Blue = producers consistently *add* to the base at that pixel
+#'   (positive agreement); red = consistently *subtract* (negative
+#'   agreement); white = no agreement (t near zero).
+#' * **Saturation** encodes `|t|`: deeper colour means the agreement
+#'   among producers is both large and consistent in sign. The
+#'   colourbar on the right reads in `t` units (one-sample vs 0).
+#' * **`zlim`** is symmetric around zero by default so the neutral
+#'   colour aligns with `t = 0`. Pass `zlim = c(-z, z)` to fix the
+#'   scale across panels for direct comparison.
+#' * **`threshold`** clips colour to white below `|t| < threshold`,
+#'   making strong-agreement clusters stand out. This is descriptive
+#'   only; it does not provide FWER control. For inferential pixel
+#'   significance, use [agreement_map_test()] and overlay the
+#'   contours via [plot_ci_overlay()].
+#' * Colour convention matches [plot_ci_overlay()] and the
+#'   cluster-test plots so the same group CI reads consistently
+#'   across the package.
+#'
 #' @param signal_matrix Pixels x participants raw mask (as returned
 #'   by `ci_from_responses_*()` or `read_cis()` + `extract_signal()`).
 #' @param img_dims Integer `c(nrow, ncol)`. If `NULL`, inferred from
 #'   `attr(signal_matrix, "img_dims")` or from `sqrt(n_pixels)` if
 #'   the latter is a whole number.
-#' @param mask Optional logical vector of length `nrow(signal_matrix)`
-#'   restricting display to a region (e.g.,
-#'   `make_face_mask(img_dims, region = "eyes")`).
+#' @param mask Optional logical vector of length
+#'   `nrow(signal_matrix)` (column-major) restricting display to a
+#'   region (e.g., `make_face_mask(img_dims, region = "eyes")`).
+#'   Also accepts the output of [read_face_mask()] for PNG/JPEG
+#'   masks. Pixels outside the mask render as `NA` (transparent).
 #' @param threshold Optional positive numeric. When supplied,
 #'   pixels with `|t| < threshold` are rendered in the neutral
 #'   (white) colour, making clusters of agreement stand out.

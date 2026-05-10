@@ -14,6 +14,16 @@
 #' result object each, fields as in the standalone functions.
 #' `$method = "discriminability"`.
 #'
+#' @section Reading the plot:
+#' Calling `plot(result)` lays out one panel per child result
+#' (cluster t-map with FWE-significant contours; bootstrap
+#' dissimilarity histograms). To plot one panel at a time, call
+#' `plot(result$results$cluster_test)` or
+#' `plot(result$results$dissimilarity)` directly. Colour
+#' convention on the cluster panel matches the rest of the
+#' package: blue = condition A larger; red = condition B larger;
+#' black contours bound FWE-significant clusters.
+#'
 #' @section Reliability metrics expect raw masks:
 #' Both downstream metrics are scale-sensitive: the cluster test
 #' uses variance-based Welch t, and Euclidean distance in
@@ -33,8 +43,9 @@
 #' @param alpha Passed to [rel_cluster_test()]. Default 0.05.
 #' @param ci_level Passed to [rel_dissimilarity()]. Default 0.95.
 #' @param mask Optional logical vector of length
-#'   `nrow(signal_matrix_a)`. Threaded through to both downstream
-#'   calls.
+#'   `nrow(signal_matrix_a)` (column-major) threaded through to both
+#'   downstream calls. Build with [make_face_mask()] (parametric
+#'   oval and sub-regions) or [read_face_mask()] (PNG/JPEG mask).
 #' @param seed Optional integer.
 #' @param progress Show `cli` progress bars.
 #' @param acknowledge_scaling Logical. Forwarded.
@@ -61,8 +72,17 @@
 #'   sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
 #' sig_mouth <- ci_from_responses_briefrc(
 #'   sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
-#' run_discriminability(sig_eyes, sig_mouth,
-#'                      n_permutations = 500L, n_boot = 500L, seed = 1)
+#' res <- run_discriminability(sig_eyes, sig_mouth,
+#'                              n_permutations = 500L, n_boot = 500L,
+#'                              seed = 1)
+#' print(res)
+#' # Whole report (cluster panel + dissimilarity panel side by side):
+#' plot(res)
+#' # Or each panel on its own:
+#' plot(res$results$cluster_test,
+#'      main = "Eyes vs Mouth — cluster test")
+#' plot(res$results$dissimilarity,
+#'      main = "Eyes vs Mouth — dissimilarity")
 #' }
 #' @export
 run_discriminability <- function(signal_matrix_a,

@@ -89,7 +89,10 @@
 #'   per-session deprecation message.
 #' @param flag_threshold_sd Deprecated alias for `flag_threshold`.
 #' @param mask Optional logical vector of length
-#'   `nrow(signal_matrix)`.
+#'   `nrow(signal_matrix)` (column-major) restricting the LOO
+#'   correlation to a region. Build with [make_face_mask()]
+#'   (parametric oval and sub-regions) or [read_face_mask()]
+#'   (PNG/JPEG mask).
 #' @return Object of class `rcisignal_rel_loo`.
 #' @seealso [rel_loo_z()] for a tidy z-score accessor;
 #'   [rel_split_half()], [rel_icc()] for reliability metrics

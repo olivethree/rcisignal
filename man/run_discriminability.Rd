@@ -39,8 +39,9 @@ Default 2.0.}
 \item{ci_level}{Passed to \code{\link[=rel_dissimilarity]{rel_dissimilarity()}}. Default 0.95.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix_a)}. Threaded through to both downstream
-calls.}
+\code{nrow(signal_matrix_a)} (column-major) threaded through to both
+downstream calls. Build with \code{\link[=make_face_mask]{make_face_mask()}} (parametric
+oval and sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask).}
 
 \item{seed}{Optional integer.}
 
@@ -67,6 +68,18 @@ overall magnitude test in one call.
 \verb{$results$cluster_test} and \verb{$results$dissimilarity}, one
 result object each, fields as in the standalone functions.
 \verb{$method = "discriminability"}.
+}
+
+\section{Reading the plot}{
+
+Calling \code{plot(result)} lays out one panel per child result
+(cluster t-map with FWE-significant contours; bootstrap
+dissimilarity histograms). To plot one panel at a time, call
+\code{plot(result$results$cluster_test)} or
+\code{plot(result$results$dissimilarity)} directly. Colour
+convention on the cluster panel matches the rest of the
+package: blue = condition A larger; red = condition B larger;
+black contours bound FWE-significant clusters.
 }
 
 \section{Reliability metrics expect raw masks}{
@@ -96,8 +109,17 @@ sig_eyes  <- ci_from_responses_briefrc(
   sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
 sig_mouth <- ci_from_responses_briefrc(
   sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
-run_discriminability(sig_eyes, sig_mouth,
-                     n_permutations = 500L, n_boot = 500L, seed = 1)
+res <- run_discriminability(sig_eyes, sig_mouth,
+                             n_permutations = 500L, n_boot = 500L,
+                             seed = 1)
+print(res)
+# Whole report (cluster panel + dissimilarity panel side by side):
+plot(res)
+# Or each panel on its own:
+plot(res$results$cluster_test,
+     main = "Eyes vs Mouth — cluster test")
+plot(res$results$dissimilarity,
+     main = "Eyes vs Mouth — dissimilarity")
 }
 }
 \seealso{

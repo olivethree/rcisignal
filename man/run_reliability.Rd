@@ -29,7 +29,9 @@ run_reliability(
 \item{icc_variants}{Passed to \code{\link[=rel_icc]{rel_icc()}}.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix)}. Threaded through to both metrics.}
+\code{nrow(signal_matrix)} (column-major) threaded through to both
+metrics. Build with \code{\link[=make_face_mask]{make_face_mask()}} (parametric oval and
+sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask).}
 
 \item{seed}{Optional integer; used for the split-half
 permutations.}
