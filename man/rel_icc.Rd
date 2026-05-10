@@ -20,8 +20,9 @@ Subset of \code{c("3_1", "3_k", "2_1", "2_k")}. Defaults to
 \code{c("3_1", "3_k")}.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix)} restricting computation to a region
-(e.g., from \code{\link[=make_face_mask]{make_face_mask()}} or \code{\link[=read_face_mask]{read_face_mask()}}).}
+\code{nrow(signal_matrix)} (column-major) restricting computation
+to a region. Build with \code{\link[=make_face_mask]{make_face_mask()}} (parametric oval
+and sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}} (PNG/JPEG mask).}
 
 \item{acknowledge_scaling}{Logical. When \code{FALSE} (default), the
 shared \code{assert_raw_signal()} helper errors on a known-rendered

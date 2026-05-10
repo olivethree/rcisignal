@@ -38,8 +38,10 @@
 #' @param seed Optional integer; if set, results are reproducible.
 #'   The caller's global RNG state is restored on exit.
 #' @param mask Optional logical vector of length
-#'   `nrow(signal_matrix)` restricting computation to a region of
-#'   the image (e.g., from [make_face_mask()] or [read_face_mask()]).
+#'   `nrow(signal_matrix)` (column-major) restricting computation
+#'   to a region of the image. Build with [make_face_mask()]
+#'   (parametric oval and sub-regions) or [read_face_mask()]
+#'   (PNG/JPEG mask).
 #' @param progress Show a `cli` progress bar.
 #' @section Reading the result:
 #' * `$r_hh`, mean per-permutation Pearson r between the two halves.

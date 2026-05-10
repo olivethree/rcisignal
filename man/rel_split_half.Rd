@@ -39,8 +39,10 @@ chance baseline of an actual RC experiment.
 patterns. Required when \code{null = "random_responders"}.}
 
 \item{mask}{Optional logical vector of length
-\code{nrow(signal_matrix)} restricting computation to a region of
-the image (e.g., from \code{\link[=make_face_mask]{make_face_mask()}} or \code{\link[=read_face_mask]{read_face_mask()}}).}
+\code{nrow(signal_matrix)} (column-major) restricting computation
+to a region of the image. Build with \code{\link[=make_face_mask]{make_face_mask()}}
+(parametric oval and sub-regions) or \code{\link[=read_face_mask]{read_face_mask()}}
+(PNG/JPEG mask).}
 
 \item{seed}{Optional integer; if set, results are reproducible.
 The caller's global RNG state is restored on exit.}

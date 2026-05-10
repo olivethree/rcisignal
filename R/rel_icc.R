@@ -32,8 +32,9 @@
 #' @param signal_matrix Pixels x participants (targets x raters),
 #'   base-subtracted.
 #' @param mask Optional logical vector of length
-#'   `nrow(signal_matrix)` restricting computation to a region
-#'   (e.g., from [make_face_mask()] or [read_face_mask()]).
+#'   `nrow(signal_matrix)` (column-major) restricting computation
+#'   to a region. Build with [make_face_mask()] (parametric oval
+#'   and sub-regions) or [read_face_mask()] (PNG/JPEG mask).
 #' @param variants Character vector of which ICC variants to return.
 #'   Subset of `c("3_1", "3_k", "2_1", "2_k")`. Defaults to
 #'   `c("3_1", "3_k")`.
