@@ -10,7 +10,8 @@ but jointly suspicious:
 check_rt_infoval_consistency(
   responses,
   method = c("2ifc", "briefrc"),
-  rdata,
+  rdata = NULL,
+  stimuli = NULL,
   baseimage = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
@@ -38,7 +39,15 @@ check_rt_infoval_consistency(
 
 - rdata:
 
-  Path to the rcicr `.RData` file.
+  Path to the rcicr `.RData` file. Either `rdata` or `stimuli` must be
+  supplied for the 2IFC path.
+
+- stimuli:
+
+  In-memory stimuli list (the `$stimuli` element of an `rcisignal_sim`
+  object). Use in place of `rdata` when the file path no longer resolves
+  (e.g. after [`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/
+  [`readRDS()`](https://rdrr.io/r/base/readRDS.html) across R sessions).
 
 - baseimage:
 

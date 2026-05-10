@@ -32,6 +32,7 @@ simulate_briefrc_data(
   noise_type = "sinusoid",
   nscales = 5L,
   sigma = 25,
+  rdata_dir = NULL,
   seed = NULL,
   progress = TRUE
 )
@@ -41,10 +42,15 @@ simulate_briefrc_data(
 
 - n_per_condition, conditions, img_size, base_image, signal_strength,
   signal_region, rt_contamination_fast, rt_contamination_slow,
-  noise_type, nscales, sigma, seed, progress:
+  noise_type, nscales, sigma, rdata_dir, seed, progress:
 
   See
   [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md).
+  For Brief-RC the rcicr-format `.Rdata` is informational (downstream
+  Brief-RC functions read `$noise_matrix` directly); it is written for
+  symmetry with the 2IFC path and as a portable on-disk artefact when
+  `rdata_dir` is non-`NULL` (stable filename
+  `rcisignal_sim_briefrc_stimuli.Rdata`).
 
 - n_trials:
 

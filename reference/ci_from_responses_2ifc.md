@@ -13,7 +13,8 @@ to compute individual CIs ready for the reliability metrics.
 ``` r
 ci_from_responses_2ifc(
   responses,
-  rdata_path,
+  rdata_path = NULL,
+  stimuli = NULL,
   baseimage = NULL,
   participant_col = "participant_id",
   stimulus_col = "stimulus",
@@ -38,6 +39,18 @@ ci_from_responses_2ifc(
 
   Path to the `.Rdata` file produced by
   [`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html).
+  Either `rdata_path` or `stimuli` must be supplied; if both are given
+  `stimuli` wins.
+
+- stimuli:
+
+  In-memory stimuli list as returned in `$stimuli` by
+  [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md).
+  Use this in place of `rdata_path` when the simulation has been saved
+  with [`saveRDS()`](https://rdrr.io/r/base/readRDS.html) and reloaded
+  in a different R session: the path stored on `$rdata_path` no longer
+  resolves, but `$stimuli` is self-contained. Internally the list is
+  written to a fresh tempdir-backed `.Rdata` before the call into rcicr.
 
 - baseimage:
 
@@ -139,5 +152,9 @@ sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
 res <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
 dim(res$signal_matrix)   # n_pixels x n_producers
 rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
+
+# Same call, but using the portable in-memory stimuli list -- the
+# form that survives saveRDS()/readRDS() across R sessions.
+res2 <- ci_from_responses_2ifc(sim$data, stimuli = sim$stimuli)
 } # }
 ```

@@ -13,6 +13,7 @@ diagnose_infoval(
   responses,
   method = NULL,
   rdata = NULL,
+  stimuli = NULL,
   noise_matrix = NULL,
   baseimage = "base",
   col_participant = "participant_id",
@@ -44,7 +45,15 @@ diagnose_infoval(
 
 - rdata:
 
-  Path to an rcicr `.RData` file (2IFC).
+  Path to an rcicr `.RData` file (2IFC). Either `rdata` or `stimuli`
+  must be supplied for the 2IFC path.
+
+- stimuli:
+
+  In-memory stimuli list (the `$stimuli` element of an `rcisignal_sim`
+  object). Use in place of `rdata` when the file path no longer resolves
+  (e.g. after [`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/
+  [`readRDS()`](https://rdrr.io/r/base/readRDS.html) across R sessions).
 
 - noise_matrix:
 
@@ -195,5 +204,9 @@ if (FALSE) { # \dontrun{
 sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
 diagnose_infoval(sim$data, method = "2ifc",
                  rdata = sim$rdata_path, iter = 200L)
+
+# Same call via the session-portable in-memory stimuli list:
+diagnose_infoval(sim$data, method = "2ifc",
+                 stimuli = sim$stimuli, iter = 200L)
 } # }
 ```

@@ -12,6 +12,7 @@ run_diagnostics(
   responses,
   method = NULL,
   rdata = NULL,
+  stimuli = NULL,
   noise_matrix = NULL,
   baseimage = "base",
   expected_n = NULL,
@@ -51,6 +52,14 @@ run_diagnostics(
   [`check_response_inversion()`](https://olivethree.github.io/rcisignal/reference/check_response_inversion.md),
   and
   [`check_rt_infoval_consistency()`](https://olivethree.github.io/rcisignal/reference/check_rt_infoval_consistency.md).
+  Mutually exclusive alternative to `stimuli`.
+
+- stimuli:
+
+  Optional in-memory stimuli list (`$stimuli` from an `rcisignal_sim`
+  object). Same downstream effect as `rdata` but session-portable (use
+  after [`readRDS()`](https://rdrr.io/r/base/readRDS.html) when the path
+  stored on `$rdata_path` no longer resolves).
 
 - noise_matrix:
 

@@ -23,7 +23,7 @@ scores meaningfully higher, the response column is probably inverted.'><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,8 @@ scores meaningfully higher, the response column is probably inverted.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">check_response_inversion</span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2ifc"</span>, <span class="st">"briefrc"</span><span class="op">)</span>,</span>
-<span>  <span class="va">rdata</span>,</span>
+<span>  rdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stimuli <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  baseimage <span class="op">=</span> <span class="st">"base"</span>,</span>
 <span>  col_participant <span class="op">=</span> <span class="st">"participant_id"</span>,</span>
 <span>  col_stimulus <span class="op">=</span> <span class="st">"stimulus"</span>,</span>
@@ -94,7 +95,15 @@ columns: <code>participant_id</code>, <code>stimulus</code>, <code>response</cod
 
 
 <dt id="arg-rdata">rdata<a class="anchor" aria-label="anchor" href="#arg-rdata"></a></dt>
-<dd><p>Path to the rcicr <code>.RData</code> file.</p></dd>
+<dd><p>Path to the rcicr <code>.RData</code> file. Either <code>rdata</code>
+or <code>stimuli</code> must be supplied for the 2IFC path.</p></dd>
+
+
+<dt id="arg-stimuli">stimuli<a class="anchor" aria-label="anchor" href="#arg-stimuli"></a></dt>
+<dd><p>In-memory stimuli list (the <code>$stimuli</code> element
+of an <code>rcisignal_sim</code> object). Use in place of <code>rdata</code> when
+the file path no longer resolves (e.g. after <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code>/
+<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code> across R sessions).</p></dd>
 
 
 <dt id="arg-baseimage">baseimage<a class="anchor" aria-label="anchor" href="#arg-baseimage"></a></dt>

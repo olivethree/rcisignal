@@ -120,6 +120,19 @@ document every parameter (sample sizes, image size, signal
 strength/region, RT contamination, noise basis, seed); pass
 `signal_strength = "none"` for true bogus data.
 
+To cache the simulation across R sessions (e.g. via
+[`saveRDS()`](https://rdrr.io/r/base/readRDS.html), knitr
+`cache = TRUE`, or sharing with a collaborator), either pass an explicit
+`rdata_dir` to keep the stimuli `.Rdata` at a stable path, or hand the
+in-memory `$stimuli` list to the consumer in place of `rdata_path` —
+both routes survive a session restart:
+
+``` r
+
+sim <- simulate_2ifc_data(rdata_dir = "simdata/")
+cis <- ci_from_responses_2ifc(sim$data, stimuli = sim$stimuli)
+```
+
 ## User’s guide
 
 The [**full user

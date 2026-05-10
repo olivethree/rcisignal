@@ -17,7 +17,7 @@ metrics."><meta property="og:image" content="https://olivethree.github.io/rcisig
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,8 @@ metrics.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ci_from_responses_2ifc</span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
-<span>  <span class="va">rdata_path</span>,</span>
+<span>  rdata_path <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stimuli <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  baseimage <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  participant_col <span class="op">=</span> <span class="st">"participant_id"</span>,</span>
 <span>  stimulus_col <span class="op">=</span> <span class="st">"stimulus"</span>,</span>
@@ -81,7 +82,18 @@ noise pool), and <code>response_col</code> with values in <code>{-1, +1}</code>.
 
 <dt id="arg-rdata-path">rdata_path<a class="anchor" aria-label="anchor" href="#arg-rdata-path"></a></dt>
 <dd><p>Path to the <code>.Rdata</code> file produced by
-<code><a href="https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html" class="external-link">rcicr::generateStimuli2IFC()</a></code>.</p></dd>
+<code><a href="https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html" class="external-link">rcicr::generateStimuli2IFC()</a></code>. Either <code>rdata_path</code> or
+<code>stimuli</code> must be supplied; if both are given <code>stimuli</code> wins.</p></dd>
+
+
+<dt id="arg-stimuli">stimuli<a class="anchor" aria-label="anchor" href="#arg-stimuli"></a></dt>
+<dd><p>In-memory stimuli list as returned in
+<code>$stimuli</code> by <code><a href="simulate_2ifc_data.html">simulate_2ifc_data()</a></code>. Use this in place of
+<code>rdata_path</code> when the simulation has been saved with
+<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> and reloaded in a different R session: the path
+stored on <code>$rdata_path</code> no longer resolves, but <code>$stimuli</code>
+is self-contained. Internally the list is written to a
+fresh tempdir-backed <code>.Rdata</code> before the call into rcicr.</p></dd>
 
 
 <dt id="arg-baseimage">baseimage<a class="anchor" aria-label="anchor" href="#arg-baseimage"></a></dt>
@@ -182,6 +194,10 @@ later read <code>$rendered_ci</code> back from PNG instead of using
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">ci_from_responses_2ifc</span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, rdata_path <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">rdata_path</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span><span class="op">)</span>   <span class="co"># n_pixels x n_producers</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="rel_split_half.html">rel_split_half</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span>, n_permutations <span class="op">=</span> <span class="fl">200L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Same call, but using the portable in-memory stimuli list -- the</span></span></span>
+<span class="r-in"><span><span class="co"># form that survives saveRDS()/readRDS() across R sessions.</span></span></span>
+<span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ci_from_responses_2ifc</span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, stimuli <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">stimuli</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

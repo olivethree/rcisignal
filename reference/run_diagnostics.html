@@ -13,7 +13,7 @@ element."><meta property="og:image" content="https://olivethree.github.io/rcisig
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@ element.</p>
 <span>  <span class="va">responses</span>,</span>
 <span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stimuli <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  noise_matrix <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  baseimage <span class="op">=</span> <span class="st">"base"</span>,</span>
 <span>  expected_n <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -86,7 +87,15 @@ names are configurable via the <code>col_*</code> arguments.</p></dd>
 <dd><p>Optional. Path to an rcicr <code>.RData</code> file. Enables
 <code><a href="check_stimulus_alignment.html">check_stimulus_alignment()</a></code>, <code><a href="check_version_compat.html">check_version_compat()</a></code> (2IFC),
 <code><a href="compute_infoval_summary.html">compute_infoval_summary()</a></code>, <code><a href="check_response_inversion.html">check_response_inversion()</a></code>, and
-<code><a href="check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code>.</p></dd>
+<code><a href="check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code>. Mutually exclusive
+alternative to <code>stimuli</code>.</p></dd>
+
+
+<dt id="arg-stimuli">stimuli<a class="anchor" aria-label="anchor" href="#arg-stimuli"></a></dt>
+<dd><p>Optional in-memory stimuli list (<code>$stimuli</code> from
+an <code>rcisignal_sim</code> object). Same downstream effect as
+<code>rdata</code> but session-portable (use after <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code> when the
+path stored on <code>$rdata_path</code> no longer resolves).</p></dd>
 
 
 <dt id="arg-noise-matrix">noise_matrix<a class="anchor" aria-label="anchor" href="#arg-noise-matrix"></a></dt>

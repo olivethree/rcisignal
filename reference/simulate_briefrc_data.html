@@ -25,7 +25,7 @@ shared across participants)."><meta property="og:image" content="https://oliveth
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,6 +81,7 @@ shared across participants).</p>
 <span>  noise_type <span class="op">=</span> <span class="st">"sinusoid"</span>,</span>
 <span>  nscales <span class="op">=</span> <span class="fl">5L</span>,</span>
 <span>  sigma <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  rdata_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -90,8 +91,13 @@ shared across participants).</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-n-per-condition-conditions-img-size-base-image-signal-strength-signal-region-rt-contamination-fast-rt-contamination-slow-noise-type-nscales-sigma-seed-progress">n_per_condition, conditions, img_size, base_image, signal_strength, signal_region, rt_contamination_fast, rt_contamination_slow, noise_type, nscales, sigma, seed, progress<a class="anchor" aria-label="anchor" href="#arg-n-per-condition-conditions-img-size-base-image-signal-strength-signal-region-rt-contamination-fast-rt-contamination-slow-noise-type-nscales-sigma-seed-progress"></a></dt>
-<dd><p>See <code><a href="simulate_2ifc_data.html">simulate_2ifc_data()</a></code>.</p></dd>
+<dl><dt id="arg-n-per-condition-conditions-img-size-base-image-signal-strength-signal-region-rt-contamination-fast-rt-contamination-slow-noise-type-nscales-sigma-rdata-dir-seed-progress">n_per_condition, conditions, img_size, base_image, signal_strength, signal_region, rt_contamination_fast, rt_contamination_slow, noise_type, nscales, sigma, rdata_dir, seed, progress<a class="anchor" aria-label="anchor" href="#arg-n-per-condition-conditions-img-size-base-image-signal-strength-signal-region-rt-contamination-fast-rt-contamination-slow-noise-type-nscales-sigma-rdata-dir-seed-progress"></a></dt>
+<dd><p>See <code><a href="simulate_2ifc_data.html">simulate_2ifc_data()</a></code>. For Brief-RC the rcicr-format
+<code>.Rdata</code> is informational (downstream Brief-RC functions read
+<code>$noise_matrix</code> directly); it is written for symmetry with the
+2IFC path and as a portable on-disk artefact when
+<code>rdata_dir</code> is non-<code>NULL</code> (stable filename
+<code>rcisignal_sim_briefrc_stimuli.Rdata</code>).</p></dd>
 
 
 <dt id="arg-n-trials">n_trials<a class="anchor" aria-label="anchor" href="#arg-n-trials"></a></dt>

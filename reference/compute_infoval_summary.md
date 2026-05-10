@@ -15,7 +15,8 @@ bullets), see
 compute_infoval_summary(
   responses,
   method = c("2ifc", "briefrc"),
-  rdata,
+  rdata = NULL,
+  stimuli = NULL,
   baseimage = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
@@ -43,7 +44,16 @@ compute_infoval_summary(
 - rdata:
 
   Path to the rcicr `.RData` file that produced the stimuli. Required
-  for 2IFC.
+  for 2IFC unless `stimuli` is supplied.
+
+- stimuli:
+
+  In-memory stimuli list (the `$stimuli` element of an `rcisignal_sim`
+  object). Use in place of `rdata` when the file path no longer resolves
+  (e.g. after
+  [`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/[`readRDS()`](https://rdrr.io/r/base/readRDS.html)
+  across R sessions). Internally written to a fresh tempdir- backed
+  `.Rdata` before the call into rcicr.
 
 - baseimage:
 
@@ -125,5 +135,10 @@ if (FALSE) { # \dontrun{
 sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
 compute_infoval_summary(sim$data, method = "2ifc",
                         rdata = sim$rdata_path, iter = 200L)
+
+# After saveRDS(sim, "sim.rds") + restart + readRDS("sim.rds") the
+# path on `$rdata_path` will not resolve. Pass `stimuli` instead:
+compute_infoval_summary(sim$data, method = "2ifc",
+                        stimuli = sim$stimuli, iter = 200L)
 } # }
 ```

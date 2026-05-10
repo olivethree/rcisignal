@@ -34,6 +34,7 @@ simulate_2ifc_data(
   noise_type = "sinusoid",
   nscales = 5L,
   sigma = 25,
+  rdata_dir = NULL,
   seed = NULL,
   progress = TRUE
 )
@@ -90,6 +91,15 @@ simulate_2ifc_data(
   [`rcicr::generateNoisePattern()`](https://rdrr.io/pkg/rcicr/man/generateNoisePattern.html).
   Defaults match rcicr's defaults (`"sinusoid"`, `5`, `25`).
 
+- rdata_dir:
+
+  Optional directory in which to write the rcicr-format `.Rdata` stimuli
+  file with a stable filename (`rcisignal_sim_2ifc_stimuli.Rdata`). When
+  `NULL` (default) the file goes to a session tempdir and the returned
+  `$rdata_path` becomes invalid after the R session ends. Pass an
+  explicit directory to persist the simulation across sessions. See
+  Details.
+
 - seed:
 
   Integer or `NULL`. When `NULL`, a random seed is drawn and stored on
@@ -122,18 +132,40 @@ An object of class `"rcisignal_sim"` with elements:
 - `p` — the rcicr noise basis (`generateNoisePattern()` output); pair
   with `params` to regenerate any noise image.
 
-- `rdata_path` — path to an rcicr-format `.Rdata` file written to a
-  session tempdir, suitable for
+- `rdata_path` — path to an rcicr-format `.Rdata` file written either to
+  a session tempdir (when `rdata_dir = NULL`) or to the user-supplied
+  `rdata_dir`. Suitable for
   [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
   /
   [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md)
-  and other downstream functions that take an `rdata` argument.
+  and other downstream functions that take an `rdata` argument. **Not
+  portable across R sessions** when `rdata_dir = NULL`.
+
+- `stimuli` — a self-contained list (`base_face`, `params`, `p`, etc.)
+  that downstream consumers accept via their `stimuli =` argument as a
+  portable alternative to `rdata_path`. Round-trips through
+  [`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/[`readRDS()`](https://rdrr.io/r/base/readRDS.html).
 
 - `signal` — pixel-level signal vector used to plant the response bias.
 
 - `meta` — list of method, `n_per_condition`, `conditions`, `n_trials`,
   `img_size`, `signal_strength`, `signal_region`, `seed`,
   `elapsed_secs`.
+
+## Details
+
+When `rdata_dir = NULL`, the returned `$rdata_path` points at a session
+tempdir and becomes invalid after the R session ends. Persist the
+simulation across sessions (caching with
+[`saveRDS()`](https://rdrr.io/r/base/readRDS.html), knitr `cache=TRUE`,
+sharing with collaborators) either by passing an explicit `rdata_dir`
+such as `"simdata/"`, or by handing the returned `$stimuli` list to
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+(and the other infoval-dependent helpers) in place of `rdata_path`.
+`$stimuli` is a self-contained in-memory representation of the rcicr
+stimuli env, so the sim object round-trips through
+[`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/[`readRDS()`](https://rdrr.io/r/base/readRDS.html)
+without a file dependency.
 
 ## Signal model
 

@@ -1,5 +1,37 @@
 # Changelog
 
+## rcisignal 0.1.2
+
+### New features
+
+- [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
+  and
+  [`simulate_briefrc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md)
+  gain an `rdata_dir` argument and now return a self-contained
+  `$stimuli` list. The simulation object survives
+  [`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/[`readRDS()`](https://rdrr.io/r/base/readRDS.html)
+  and knitr `cache = TRUE` across R sessions: pass an explicit
+  `rdata_dir` to keep the stimuli `.Rdata` at a stable path, or hand
+  `$stimuli` to downstream consumers in place of `$rdata_path`.
+- [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
+  [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md),
+  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md),
+  [`check_response_inversion()`](https://olivethree.github.io/rcisignal/reference/check_response_inversion.md),
+  [`check_rt_infoval_consistency()`](https://olivethree.github.io/rcisignal/reference/check_rt_infoval_consistency.md),
+  and
+  [`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md)
+  gain a `stimuli =` argument as an in-memory alternative to
+  `rdata_path =` / `rdata =`. When both are supplied `stimuli` takes
+  precedence and a warning is emitted.
+
+### Fixes
+
+- [`simulate_briefrc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md)
+  now also writes an rcicr-format stimuli `.Rdata` (stable filename
+  `rcisignal_sim_briefrc_stimuli.Rdata` under `rdata_dir`) for symmetry
+  with the 2IFC path. The Brief-RC consumers still read `$noise_matrix`
+  directly so the file is informational rather than required.
+
 ## rcisignal 0.1.1
 
 ### New features
