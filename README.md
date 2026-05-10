@@ -113,7 +113,8 @@ library(rcisignal)
 sim <- simulate_2ifc_data()        # 50 x 2 producers, 500 trials each
 # sim <- simulate_briefrc_data()   # Brief-RC equivalent (12 images/trial)
 
-run_diagnostics(sim$data, method = "2ifc", col_rt = "rt")
+run_diagnostics(sim$data, method = "2ifc",
+                rdata = sim$rdata_path, col_rt = "rt")
 
 cis <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
 run_reliability(cis$signal_matrix, seed = 1)
@@ -268,13 +269,15 @@ untrustworthy <- ci_from_responses_2ifc(
 # --- Brief-RC equivalent ---
 # Same call shape and per-participant grouping behaviour, differences are:
 #   - function name ends in _briefrc
-#   - rdata_path may be replaced by noise_matrix = "data/noise_matrix.txt"
+#   - the noise pool is passed directly via `noise_matrix =` (a numeric
+#     pixels x pool-size matrix, or a path / .Rdata loadable as one)
+#     instead of rcicr's `rdata_path =`
 #   - base_image is optional unless you want a rendered visualisation
 #     (scaling != "none"); accepts either a path or a numeric matrix
 #
 # trustworthy <- ci_from_responses_briefrc(
 #   responses    = trust_rows,
-#   rdata_path   = "data/rcicr_stimuli.Rdata",
+#   noise_matrix = "data/noise_matrix.txt",
 #   base_image   = "data/base.jpg",   # or a numeric matrix in [0, 1]
 #   scaling      = "matched"
 # )

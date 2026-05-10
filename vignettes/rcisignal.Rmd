@@ -280,7 +280,11 @@ sim <- simulate_2ifc_data(
 )
 
 # Step 1: run the diagnostic battery on the simulated responses.
-print(run_diagnostics(sim$data, method = "2ifc", col_rt = "rt"))
+# Pass the simulator's rdata so rdata-dependent sub-checks (response
+# inversion, infoval consistency) run too. `stimuli = sim$stimuli`
+# is an in-memory equivalent.
+print(run_diagnostics(sim$data, method = "2ifc",
+                      rdata = sim$rdata_path, col_rt = "rt"))
 
 # Step 2: compute per-participant CIs using the bundled .Rdata.
 target_rows  <- subset(sim$data, condition == "target")
