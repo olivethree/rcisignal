@@ -38,7 +38,12 @@
 #'   `col_*` arguments.
 #' @param method `"2ifc"` (supported) or `"briefrc"` (returns `"skip"`).
 #' @param rdata Path to the rcicr `.RData` file that produced the
-#'   stimuli. Required for 2IFC.
+#'   stimuli. Required for 2IFC unless `stimuli` is supplied.
+#' @param stimuli In-memory stimuli list (the `$stimuli` element of
+#'   an `rcisignal_sim` object). Use in place of `rdata` when the
+#'   file path no longer resolves (e.g. after [saveRDS()]/[readRDS()]
+#'   across R sessions). Internally written to a fresh tempdir-
+#'   backed `.Rdata` before the call into rcicr.
 #' @param baseimage Name of the base image used at generation time
 #'   (the key in `base_face_files` in the rdata). Default `"base"`.
 #' @param col_participant,col_stimulus,col_response Column names.
@@ -67,12 +72,18 @@
 #' sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
 #' compute_infoval_summary(sim$data, method = "2ifc",
 #'                         rdata = sim$rdata_path, iter = 200L)
+#'
+#' # After saveRDS(sim, "sim.rds") + restart + readRDS("sim.rds") the
+#' # path on `$rdata_path` will not resolve. Pass `stimuli` instead:
+#' compute_infoval_summary(sim$data, method = "2ifc",
+#'                         stimuli = sim$stimuli, iter = 200L)
 #' }
 #'
 #' @export
 compute_infoval_summary <- function(responses,
                                     method = c("2ifc", "briefrc"),
-                                    rdata,
+                                    rdata = NULL,
+                                    stimuli = NULL,
                                     baseimage = "base",
                                     col_participant = "participant_id",
                                     col_stimulus = "stimulus",
@@ -102,7 +113,7 @@ compute_infoval_summary <- function(responses,
       "i" = "Install with {.code remotes::install_github(\"rdotsch/rcicr\")}."
     ))
   }
-  validate_path(rdata, "rdata")
+  rdata <- resolve_rdata_input(rdata, stimuli, method = "2ifc")
   validate_responses_df(
     responses, col_participant, col_stimulus, col_response
   )

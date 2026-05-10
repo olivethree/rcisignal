@@ -52,7 +52,12 @@
 #'   `col_*` arguments.
 #' @param method `"2ifc"` or `"briefrc"`. If `NULL`, inferred from
 #'   whichever of `rdata` / `noise_matrix` is supplied.
-#' @param rdata Path to an rcicr `.RData` file (2IFC).
+#' @param rdata Path to an rcicr `.RData` file (2IFC). Either
+#'   `rdata` or `stimuli` must be supplied for the 2IFC path.
+#' @param stimuli In-memory stimuli list (the `$stimuli` element
+#'   of an `rcisignal_sim` object). Use in place of `rdata` when
+#'   the file path no longer resolves (e.g. after [saveRDS()]/
+#'   [readRDS()] across R sessions).
 #' @param noise_matrix Path to a Brief-RC noise-matrix text file, or
 #'   an already-loaded numeric matrix.
 #' @param baseimage Name of the base image in the rdata
@@ -107,12 +112,17 @@
 #' sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
 #' diagnose_infoval(sim$data, method = "2ifc",
 #'                  rdata = sim$rdata_path, iter = 200L)
+#'
+#' # Same call via the session-portable in-memory stimuli list:
+#' diagnose_infoval(sim$data, method = "2ifc",
+#'                  stimuli = sim$stimuli, iter = 200L)
 #' }
 #'
 #' @export
 diagnose_infoval <- function(responses,
                              method           = NULL,
                              rdata            = NULL,
+                             stimuli          = NULL,
                              noise_matrix     = NULL,
                              baseimage        = "base",
                              col_participant  = "participant_id",
@@ -124,7 +134,11 @@ diagnose_infoval <- function(responses,
                              seed             = NULL,
                              progress         = TRUE,
                              ...) {
-  method <- resolve_method(method, rdata, noise_matrix)
+  method <- resolve_method(method, rdata, noise_matrix,
+                           stimuli = stimuli)
+  if (method == "2ifc") {
+    rdata <- resolve_rdata_input(rdata, stimuli, method = "2ifc")
+  }
   validate_responses_df(responses, col_participant, col_stimulus, col_response)
   iter <- as.integer(iter)
   label <- "InfoVal diagnostic"

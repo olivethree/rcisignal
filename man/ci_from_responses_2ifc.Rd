@@ -6,7 +6,8 @@
 \usage{
 ci_from_responses_2ifc(
   responses,
-  rdata_path,
+  rdata_path = NULL,
+  stimuli = NULL,
   baseimage = NULL,
   participant_col = "participant_id",
   stimulus_col = "stimulus",
@@ -24,7 +25,16 @@ contain \code{participant_col} (producer id), the column named by
 noise pool), and \code{response_col} with values in \verb{\{-1, +1\}}.}
 
 \item{rdata_path}{Path to the \code{.Rdata} file produced by
-\code{\link[rcicr:generateStimuli2IFC]{rcicr::generateStimuli2IFC()}}.}
+\code{\link[rcicr:generateStimuli2IFC]{rcicr::generateStimuli2IFC()}}. Either \code{rdata_path} or
+\code{stimuli} must be supplied; if both are given \code{stimuli} wins.}
+
+\item{stimuli}{In-memory stimuli list as returned in
+\verb{$stimuli} by \code{\link[=simulate_2ifc_data]{simulate_2ifc_data()}}. Use this in place of
+\code{rdata_path} when the simulation has been saved with
+\code{\link[=saveRDS]{saveRDS()}} and reloaded in a different R session: the path
+stored on \verb{$rdata_path} no longer resolves, but \verb{$stimuli}
+is self-contained. Internally the list is written to a
+fresh tempdir-backed \code{.Rdata} before the call into rcicr.}
 
 \item{baseimage}{Base image label used at stimulus-generation
 time. If \code{NULL}, tries to read the single base stored in
@@ -118,6 +128,10 @@ sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
 res <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
 dim(res$signal_matrix)   # n_pixels x n_producers
 rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
+
+# Same call, but using the portable in-memory stimuli list -- the
+# form that survives saveRDS()/readRDS() across R sessions.
+res2 <- ci_from_responses_2ifc(sim$data, stimuli = sim$stimuli)
 }
 }
 \seealso{

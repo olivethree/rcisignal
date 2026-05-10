@@ -60,10 +60,30 @@
 #' @param noise_type,nscales,sigma Forwarded to
 #'   [rcicr::generateNoisePattern()]. Defaults match rcicr's
 #'   defaults (`"sinusoid"`, `5`, `25`).
+#' @param rdata_dir Optional directory in which to write the
+#'   rcicr-format `.Rdata` stimuli file with a stable filename
+#'   (`rcisignal_sim_2ifc_stimuli.Rdata`). When `NULL` (default)
+#'   the file goes to a session tempdir and the returned
+#'   `$rdata_path` becomes invalid after the R session ends. Pass
+#'   an explicit directory to persist the simulation across
+#'   sessions. See Details.
 #' @param seed Integer or `NULL`. When `NULL`, a random seed is
 #'   drawn and stored on the result so the run is reproducible.
 #' @param progress Logical. Show a `cli` progress bar during noise
 #'   generation. Default `TRUE`.
+#'
+#' @details
+#' When `rdata_dir = NULL`, the returned `$rdata_path` points at a
+#' session tempdir and becomes invalid after the R session ends.
+#' Persist the simulation across sessions (caching with
+#' [saveRDS()], knitr `cache=TRUE`, sharing with collaborators)
+#' either by passing an explicit `rdata_dir` such as `"simdata/"`,
+#' or by handing the returned `$stimuli` list to
+#' [ci_from_responses_2ifc()] (and the other infoval-dependent
+#' helpers) in place of `rdata_path`. `$stimuli` is a
+#' self-contained in-memory representation of the rcicr stimuli
+#' env, so the sim object round-trips through
+#' `saveRDS()`/`readRDS()` without a file dependency.
 #'
 #' @return An object of class `"rcisignal_sim"` with elements:
 #'   * `data` — a [data.table::data.table] with one row per trial
@@ -76,10 +96,18 @@
 #'     coefficients (the rcicr `stimuli_params`).
 #'   * `p` — the rcicr noise basis (`generateNoisePattern()`
 #'     output); pair with `params` to regenerate any noise image.
-#'   * `rdata_path` — path to an rcicr-format `.Rdata` file written
-#'     to a session tempdir, suitable for
-#'     [ci_from_responses_2ifc()] / [compute_infoval_summary()]
-#'     and other downstream functions that take an `rdata` argument.
+#'   * `rdata_path` — path to an rcicr-format `.Rdata` file
+#'     written either to a session tempdir (when
+#'     `rdata_dir = NULL`) or to the user-supplied `rdata_dir`.
+#'     Suitable for [ci_from_responses_2ifc()] /
+#'     [compute_infoval_summary()] and other downstream functions
+#'     that take an `rdata` argument. **Not portable across R
+#'     sessions** when `rdata_dir = NULL`.
+#'   * `stimuli` — a self-contained list (`base_face`, `params`,
+#'     `p`, etc.) that downstream consumers accept via their
+#'     `stimuli =` argument as a portable alternative to
+#'     `rdata_path`. Round-trips through
+#'     [saveRDS()]/[readRDS()].
 #'   * `signal` — pixel-level signal vector used to plant the
 #'     response bias.
 #'   * `meta` — list of method, `n_per_condition`, `conditions`,
@@ -114,6 +142,7 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
                                noise_type            = "sinusoid",
                                nscales               = 5L,
                                sigma                 = 25,
+                               rdata_dir             = NULL,
                                seed                  = NULL,
                                progress              = TRUE) {
   ensure_rcicr()
@@ -167,11 +196,15 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
   }
   data <- data.table::rbindlist(data_list)
 
-  rdata_path <- write_sim_rdata_2ifc(
-    base_face = base_face, p = pool$p, params = pool$params,
-    img_size = img_size, n_trials = n_trials, seed = used_seed,
+  stimuli <- build_sim_stimuli(
+    base_face  = base_face, p = pool$p, params = pool$params,
+    img_size   = img_size, n_trials = n_trials, seed = used_seed,
     noise_type = noise_type, nscales = nscales, sigma = sigma
   )
+  rdata_path <- write_sim_rdata(
+    stimuli = stimuli, dir = rdata_dir, method = "2ifc"
+  )
+  inform_rdata_written(rdata_path, persistent = !is.null(rdata_dir))
 
   elapsed <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
   new_rcisignal_sim(
@@ -182,6 +215,7 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
     p            = pool$p,
     signal       = signal,
     rdata_path   = rdata_path,
+    stimuli      = stimuli,
     meta         = list(
       method            = "2ifc",
       n_per_condition   = as.integer(n_per_condition),
@@ -224,8 +258,13 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
 #'
 #' @inheritSection simulate_2ifc_data RT model
 #'
-#' @param n_per_condition,conditions,img_size,base_image,signal_strength,signal_region,rt_contamination_fast,rt_contamination_slow,noise_type,nscales,sigma,seed,progress
-#'   See [simulate_2ifc_data()].
+#' @param n_per_condition,conditions,img_size,base_image,signal_strength,signal_region,rt_contamination_fast,rt_contamination_slow,noise_type,nscales,sigma,rdata_dir,seed,progress
+#'   See [simulate_2ifc_data()]. For Brief-RC the rcicr-format
+#'   `.Rdata` is informational (downstream Brief-RC functions read
+#'   `$noise_matrix` directly); it is written for symmetry with the
+#'   2IFC path and as a portable on-disk artefact when
+#'   `rdata_dir` is non-`NULL` (stable filename
+#'   `rcisignal_sim_briefrc_stimuli.Rdata`).
 #' @param n_trials Integer or `NULL`. Brief-RC trials per
 #'   participant. When `NULL` (default), it is derived from the
 #'   pair budget as `noise_pool_size %/% (images_per_trial / 2)`,
@@ -291,6 +330,7 @@ simulate_briefrc_data <- function(n_per_condition       = 50L,
                                   noise_type            = "sinusoid",
                                   nscales               = 5L,
                                   sigma                 = 25,
+                                  rdata_dir             = NULL,
                                   seed                  = NULL,
                                   progress              = TRUE) {
   ensure_rcicr()
@@ -402,6 +442,16 @@ simulate_briefrc_data <- function(n_per_condition       = 50L,
   }
   data <- data.table::rbindlist(data_list)
 
+  stimuli <- build_sim_stimuli(
+    base_face  = base_face, p = pool$p, params = pool$params,
+    img_size   = img_size, n_trials = noise_pool_size, seed = used_seed,
+    noise_type = noise_type, nscales = nscales, sigma = sigma
+  )
+  rdata_path <- write_sim_rdata(
+    stimuli = stimuli, dir = rdata_dir, method = "briefrc"
+  )
+  inform_rdata_written(rdata_path, persistent = !is.null(rdata_dir))
+
   elapsed <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
   new_rcisignal_sim(
     data         = data,
@@ -410,6 +460,8 @@ simulate_briefrc_data <- function(n_per_condition       = 50L,
     params       = pool$params,
     p            = pool$p,
     signal       = signal,
+    rdata_path   = rdata_path,
+    stimuli      = stimuli,
     meta         = list(
       method            = "briefrc",
       n_per_condition   = as.integer(n_per_condition),
@@ -672,45 +724,193 @@ simulate_rts <- function(n, frac_fast, frac_slow) {
   round(base_rt)
 }
 
+#' Build the portable in-memory stimuli list
+#'
+#' Captures the rcicr-format stimuli env contents (base face,
+#' basis, per-trial params, generator settings) as a plain list
+#' that survives [saveRDS()]/[readRDS()]. Stored on the
+#' `rcisignal_sim` object as `$stimuli` and accepted by every
+#' rcicr-backed consumer (e.g. [ci_from_responses_2ifc()]) via a
+#' `stimuli =` argument.
+#'
 #' @keywords internal
 #' @noRd
-write_sim_rdata_2ifc <- function(base_face, p, params, img_size,
-                                 n_trials, seed,
-                                 noise_type = "sinusoid",
-                                 nscales = 5L, sigma = 25,
-                                 base_label = "base") {
-  dir <- tempfile("rcisignal_sim_")
-  dir.create(dir, recursive = TRUE)
+build_sim_stimuli <- function(base_face, p, params, img_size,
+                              n_trials, seed,
+                              noise_type = "sinusoid",
+                              nscales    = 5L,
+                              sigma      = 25,
+                              base_label = "base") {
+  rcicr_ver <- tryCatch(
+    as.character(utils::packageVersion("rcicr")),
+    error = function(e) NA_character_
+  )
+  list(
+    base_face         = base_face,
+    base_label        = as.character(base_label),
+    p                 = p,
+    params            = params,
+    img_size          = as.integer(img_size),
+    n_trials          = as.integer(n_trials),
+    seed              = as.integer(seed),
+    noise_type        = as.character(noise_type),
+    nscales           = as.integer(nscales),
+    sigma             = as.numeric(sigma),
+    generator_version = rcicr_ver
+  )
+}
+
+#' Materialise a stimuli list to a fresh rcicr-format `.Rdata`
+#'
+#' Used by consumers (e.g. [ci_from_responses_2ifc()]) when the
+#' user passes `stimuli =` instead of `rdata_path =`. Writes the
+#' env contents to a fresh tempdir so calls into rcicr (which
+#' `load()` a path) keep working unchanged.
+#'
+#' @keywords internal
+#' @noRd
+materialize_stimuli_rdata <- function(stimuli,
+                                      method = c("2ifc",
+                                                 "briefrc")) {
+  method <- match.arg(method)
+  required <- c("base_face", "base_label", "p", "params",
+                "img_size", "n_trials", "seed", "noise_type",
+                "nscales", "sigma")
+  miss <- setdiff(required, names(stimuli))
+  if (length(miss) > 0L) {
+    cli::cli_abort(c(
+      "{.arg stimuli} is missing required field{?s}: \\
+       {.val {miss}}.",
+      "i" = "Use the {.code $stimuli} element from a \\
+             {.cls rcisignal_sim} object returned by \\
+             {.fn simulate_2ifc_data} / \\
+             {.fn simulate_briefrc_data}."
+    ))
+  }
+  write_sim_rdata(stimuli = stimuli, dir = NULL, method = method)
+}
+
+#' Write an rcicr-format stimuli `.Rdata` to disk
+#'
+#' Single source of truth for the on-disk layout of the simulated
+#' stimuli env. When `dir = NULL` writes to a fresh tempdir
+#' (legacy behaviour). When `dir` is a character path the file
+#' goes there under a stable filename (overwrites if present).
+#'
+#' @keywords internal
+#' @noRd
+write_sim_rdata <- function(stimuli, dir = NULL,
+                            method = c("2ifc", "briefrc")) {
+  method <- match.arg(method)
+  base_label <- stimuli$base_label %||% "base"
+  if (is.null(dir)) {
+    dir <- tempfile("rcisignal_sim_")
+  } else if (!is.character(dir) || length(dir) != 1L) {
+    cli::cli_abort(
+      "{.arg rdata_dir} must be a single string or NULL."
+    )
+  }
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   png_path <- file.path(dir, paste0(base_label, ".png"))
   if (requireNamespace("png", quietly = TRUE)) {
-    png::writePNG(base_face, png_path)
+    png::writePNG(stimuli$base_face, png_path)
   } else {
-    saveRDS(base_face, sub("\\.png$", ".rds", png_path))
+    saveRDS(stimuli$base_face, sub("\\.png$", ".rds", png_path))
   }
   env <- new.env(parent = emptyenv())
   env$base_face_files     <- stats::setNames(list(png_path),
                                              base_label)
-  env$base_faces          <- stats::setNames(list(base_face),
+  env$base_faces          <- stats::setNames(list(stimuli$base_face),
                                              base_label)
-  env$stimuli_params      <- stats::setNames(list(params),
+  env$stimuli_params      <- stats::setNames(list(stimuli$params),
                                              base_label)
-  env$img_size            <- as.integer(img_size)
-  env$n_trials            <- as.integer(n_trials)
-  env$seed                <- as.integer(seed)
+  env$img_size            <- as.integer(stimuli$img_size)
+  env$n_trials            <- as.integer(stimuli$n_trials)
+  env$seed                <- as.integer(stimuli$seed)
   env$label               <- "rcisignal_sim"
   env$stimulus_path       <- dir
   env$trial               <- seq_len(env$n_trials)
-  env$generator_version   <- as.character(
-    utils::packageVersion("rcicr")
-  )
+  env$generator_version   <- if (is.na(stimuli$generator_version %||%
+                                         NA_character_)) {
+    NA_character_
+  } else {
+    as.character(stimuli$generator_version)
+  }
   env$use_same_parameters <- TRUE
-  env$p                   <- p
-  env$noise_type          <- as.character(noise_type)
-  env$nscales             <- as.integer(nscales)
-  env$sigma               <- as.numeric(sigma)
-  rdata_file <- file.path(dir, "rcisignal_sim_stimuli.Rdata")
+  env$p                   <- stimuli$p
+  env$noise_type          <- as.character(stimuli$noise_type)
+  env$nscales             <- as.integer(stimuli$nscales)
+  env$sigma               <- as.numeric(stimuli$sigma)
+  fname <- paste0("rcisignal_sim_", method, "_stimuli.Rdata")
+  rdata_file <- file.path(dir, fname)
   save(list = ls(env), envir = env, file = rdata_file)
   rdata_file
+}
+
+#' @keywords internal
+#' @noRd
+inform_rdata_written <- function(path, persistent) {
+  if (persistent) {
+    cli::cli_inform(c(
+      "i" = "Wrote stimuli to {.path {path}}."
+    ))
+  } else {
+    cli::cli_inform(c(
+      "i" = "Wrote stimuli to {.path {path}} (session tempdir).",
+      " " = "Pass {.arg rdata_dir} to persist across R sessions, \\
+             or hand {.code $stimuli} to downstream consumers."
+    ))
+  }
+  invisible(NULL)
+}
+
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
+#' Resolve `rdata` / `stimuli` to a usable path
+#'
+#' Consumers that delegate to rcicr need a file path (rcicr does
+#' `load(rdata)` internally). When the user passes `stimuli`,
+#' write a fresh tempdir-backed `.Rdata` and return its path so
+#' the rest of the consumer pipeline is unchanged.
+#'
+#' @keywords internal
+#' @noRd
+resolve_rdata_input <- function(rdata_path, stimuli,
+                                method = c("2ifc", "briefrc")) {
+  method <- match.arg(method)
+  if (!is.null(stimuli)) {
+    if (!is.null(rdata_path)) {
+      cli::cli_warn(
+        "Both {.arg rdata_path} and {.arg stimuli} supplied; \\
+         using {.arg stimuli}."
+      )
+    }
+    return(materialize_stimuli_rdata(stimuli, method = method))
+  }
+  if (is.null(rdata_path)) {
+    cli::cli_abort(c(
+      "Pass either {.arg rdata_path} or {.arg stimuli}.",
+      "i" = "{.arg stimuli} is the {.code $stimuli} element of an \\
+             {.cls rcisignal_sim} object; use it when the \\
+             {.code $rdata_path} on a saved sim no longer \\
+             resolves (e.g. after {.fn saveRDS} / \\
+             {.fn readRDS} across R sessions)."
+    ))
+  }
+  if (!is.character(rdata_path) || length(rdata_path) != 1L) {
+    cli::cli_abort(
+      "{.arg rdata_path} must be a single string."
+    )
+  }
+  if (!file.exists(rdata_path)) {
+    cli::cli_abort(c(
+      "rdata not found: {.path {rdata_path}}.",
+      "i" = "If this path was stored on an {.cls rcisignal_sim} \\
+             object before an R session restart, pass \\
+             {.code stimuli = sim$stimuli} instead."
+    ))
+  }
+  rdata_path
 }
 
 #' @keywords internal

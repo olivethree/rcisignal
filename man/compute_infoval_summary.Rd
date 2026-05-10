@@ -7,7 +7,8 @@
 compute_infoval_summary(
   responses,
   method = c("2ifc", "briefrc"),
-  rdata,
+  rdata = NULL,
+  stimuli = NULL,
   baseimage = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
@@ -27,7 +28,13 @@ columns: \code{participant_id}, \code{stimulus}, \code{response} (values in
 \item{method}{\code{"2ifc"} (supported) or \code{"briefrc"} (returns \code{"skip"}).}
 
 \item{rdata}{Path to the rcicr \code{.RData} file that produced the
-stimuli. Required for 2IFC.}
+stimuli. Required for 2IFC unless \code{stimuli} is supplied.}
+
+\item{stimuli}{In-memory stimuli list (the \verb{$stimuli} element of
+an \code{rcisignal_sim} object). Use in place of \code{rdata} when the
+file path no longer resolves (e.g. after \code{\link[=saveRDS]{saveRDS()}}/\code{\link[=readRDS]{readRDS()}}
+across R sessions). Internally written to a fresh tempdir-
+backed \code{.Rdata} before the call into rcicr.}
 
 \item{baseimage}{Name of the base image used at generation time
 (the key in \code{base_face_files} in the rdata). Default \code{"base"}.}
@@ -86,6 +93,11 @@ it. Copy your \code{rdata} beforehand if you want the original untouched.
 sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
 compute_infoval_summary(sim$data, method = "2ifc",
                         rdata = sim$rdata_path, iter = 200L)
+
+# After saveRDS(sim, "sim.rds") + restart + readRDS("sim.rds") the
+# path on `$rdata_path` will not resolve. Pass `stimuli` instead:
+compute_infoval_summary(sim$data, method = "2ifc",
+                        stimuli = sim$stimuli, iter = 200L)
 }
 
 }

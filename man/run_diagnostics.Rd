@@ -8,6 +8,7 @@ run_diagnostics(
   responses,
   method = NULL,
   rdata = NULL,
+  stimuli = NULL,
   noise_matrix = NULL,
   baseimage = "base",
   expected_n = NULL,
@@ -33,7 +34,13 @@ names are configurable via the \verb{col_*} arguments.}
 \item{rdata}{Optional. Path to an rcicr \code{.RData} file. Enables
 \code{\link[=check_stimulus_alignment]{check_stimulus_alignment()}}, \code{\link[=check_version_compat]{check_version_compat()}} (2IFC),
 \code{\link[=compute_infoval_summary]{compute_infoval_summary()}}, \code{\link[=check_response_inversion]{check_response_inversion()}}, and
-\code{\link[=check_rt_infoval_consistency]{check_rt_infoval_consistency()}}.}
+\code{\link[=check_rt_infoval_consistency]{check_rt_infoval_consistency()}}. Mutually exclusive
+alternative to \code{stimuli}.}
+
+\item{stimuli}{Optional in-memory stimuli list (\verb{$stimuli} from
+an \code{rcisignal_sim} object). Same downstream effect as
+\code{rdata} but session-portable (use after \code{\link[=readRDS]{readRDS()}} when the
+path stored on \verb{$rdata_path} no longer resolves).}
 
 \item{noise_matrix}{Optional. Path to a Brief-RC noise-matrix text
 file, or an already-loaded numeric matrix. Enables

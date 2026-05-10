@@ -1,3 +1,30 @@
+# rcisignal 0.1.2
+
+## New features
+
+* `simulate_2ifc_data()` and `simulate_briefrc_data()` gain an
+  `rdata_dir` argument and now return a self-contained `$stimuli`
+  list. The simulation object survives `saveRDS()`/`readRDS()`
+  and knitr `cache = TRUE` across R sessions: pass an explicit
+  `rdata_dir` to keep the stimuli `.Rdata` at a stable path, or
+  hand `$stimuli` to downstream consumers in place of
+  `$rdata_path`.
+* `ci_from_responses_2ifc()`, `diagnose_infoval()`,
+  `compute_infoval_summary()`, `check_response_inversion()`,
+  `check_rt_infoval_consistency()`, and `run_diagnostics()` gain a
+  `stimuli =` argument as an in-memory alternative to
+  `rdata_path =` / `rdata =`. When both are supplied `stimuli`
+  takes precedence and a warning is emitted.
+
+## Fixes
+
+* `simulate_briefrc_data()` now also writes an rcicr-format
+  stimuli `.Rdata` (stable filename
+  `rcisignal_sim_briefrc_stimuli.Rdata` under `rdata_dir`) for
+  symmetry with the 2IFC path. The Brief-RC consumers still read
+  `$noise_matrix` directly so the file is informational rather
+  than required.
+
 # rcisignal 0.1.1
 
 ## New features

@@ -155,3 +155,107 @@ test_that("simulated Brief-RC data flows through run_diagnostics", {
   )
   expect_s3_class(rep, "rcisignal_diag_report")
 })
+
+test_that("rdata_dir persists the stimuli file at a stable path", {
+  skip_if_no_rcicr()
+  tmp <- withr::local_tempdir()
+  sim <- suppressMessages(simulate_2ifc_data(
+    n_per_condition = 1L, n_trials = 6L, img_size = 64L,
+    base_image = matrix(0.5, 64, 64),
+    signal_strength = "none", rdata_dir = tmp,
+    seed = 1L, progress = FALSE
+  ))
+  expect_true(file.exists(sim$rdata_path))
+  expect_equal(normalizePath(dirname(sim$rdata_path)),
+               normalizePath(tmp))
+  expect_match(basename(sim$rdata_path),
+               "^rcisignal_sim_2ifc_stimuli\\.Rdata$")
+
+  sim_br <- suppressMessages(simulate_briefrc_data(
+    n_per_condition = 1L, n_trials = 4L, images_per_trial = 4L,
+    img_size = 64L, base_image = matrix(0.5, 64, 64),
+    signal_strength = "none", rdata_dir = tmp,
+    seed = 2L, progress = FALSE
+  ))
+  expect_true(file.exists(sim_br$rdata_path))
+  expect_match(basename(sim_br$rdata_path),
+               "^rcisignal_sim_briefrc_stimuli\\.Rdata$")
+})
+
+test_that("rdata_dir = NULL keeps legacy tempdir behaviour", {
+  skip_if_no_rcicr()
+  sim <- suppressMessages(simulate_2ifc_data(
+    n_per_condition = 1L, n_trials = 6L, img_size = 64L,
+    base_image = matrix(0.5, 64, 64),
+    signal_strength = "none", seed = 1L, progress = FALSE
+  ))
+  expect_true(file.exists(sim$rdata_path))
+  expect_true(grepl(normalizePath(tempdir(), mustWork = FALSE),
+                    normalizePath(sim$rdata_path),
+                    fixed = TRUE))
+})
+
+test_that("simulator emits an informational write message", {
+  skip_if_no_rcicr()
+  expect_message(
+    simulate_2ifc_data(
+      n_per_condition = 1L, n_trials = 4L, img_size = 64L,
+      base_image = matrix(0.5, 64, 64),
+      signal_strength = "none", seed = 1L, progress = FALSE
+    ),
+    "Wrote stimuli to"
+  )
+})
+
+test_that("sim$stimuli is self-contained and round-trips via saveRDS", {
+  skip_if_no_rcicr()
+  sim <- suppressMessages(simulate_2ifc_data(
+    n_per_condition = 1L, n_trials = 6L, img_size = 64L,
+    base_image = matrix(0.5, 64, 64),
+    signal_strength = "none", seed = 1L, progress = FALSE
+  ))
+  expect_type(sim$stimuli, "list")
+  expect_true(all(c("base_face", "p", "params", "img_size", "n_trials",
+                    "seed", "noise_type", "nscales", "sigma",
+                    "base_label") %in% names(sim$stimuli)))
+
+  rds <- tempfile(fileext = ".rds")
+  saveRDS(sim, rds)
+  file.remove(sim$rdata_path)
+  expect_false(file.exists(sim$rdata_path))
+
+  restored <- readRDS(rds)
+  expect_type(restored$stimuli, "list")
+  expect_equal(dim(restored$stimuli$base_face), c(64L, 64L))
+})
+
+test_that("ci_from_responses_2ifc accepts stimuli= without rdata_path", {
+  skip_if_not_installed("rcicr")
+  skip_if_not_installed("foreach")
+  skip_if_not_installed("tibble")
+  skip_if_not_installed("dplyr")
+  sim <- suppressMessages(simulate_2ifc_data(
+    n_per_condition = 2L, n_trials = 8L, img_size = 64L,
+    base_image = matrix(0.5, 64, 64),
+    signal_strength = "none", seed = 1L, progress = FALSE
+  ))
+  # Simulate the path-vanishing scenario.
+  unlink(dirname(sim$rdata_path), recursive = TRUE)
+  expect_false(file.exists(sim$rdata_path))
+
+  res <- ci_from_responses_2ifc(sim$data, stimuli = sim$stimuli)
+  expect_equal(dim(res$signal_matrix), c(64L * 64L, 2L * 2L))
+})
+
+test_that("resolve_rdata_input errors when both inputs are missing", {
+  skip_if_not_installed("rcicr")
+  resp <- data.frame(
+    participant_id = c("p1", "p1"),
+    stimulus       = c(1L, 2L),
+    response       = c(-1L, 1L)
+  )
+  expect_error(
+    ci_from_responses_2ifc(resp),
+    "rdata_path"
+  )
+})

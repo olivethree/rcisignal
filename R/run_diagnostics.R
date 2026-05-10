@@ -17,7 +17,12 @@
 #' @param rdata Optional. Path to an rcicr `.RData` file. Enables
 #'   [check_stimulus_alignment()], [check_version_compat()] (2IFC),
 #'   [compute_infoval_summary()], [check_response_inversion()], and
-#'   [check_rt_infoval_consistency()].
+#'   [check_rt_infoval_consistency()]. Mutually exclusive
+#'   alternative to `stimuli`.
+#' @param stimuli Optional in-memory stimuli list (`$stimuli` from
+#'   an `rcisignal_sim` object). Same downstream effect as
+#'   `rdata` but session-portable (use after [readRDS()] when the
+#'   path stored on `$rdata_path` no longer resolves).
 #' @param noise_matrix Optional. Path to a Brief-RC noise-matrix text
 #'   file, or an already-loaded numeric matrix. Enables
 #'   [validate_noise_matrix()] and [check_stimulus_alignment()] (Brief-RC).
@@ -56,6 +61,7 @@
 run_diagnostics <- function(responses,
                            method = NULL,
                            rdata = NULL,
+                           stimuli = NULL,
                            noise_matrix = NULL,
                            baseimage = "base",
                            expected_n = NULL,
@@ -67,7 +73,12 @@ run_diagnostics <- function(responses,
                            face_mask = "auto",
                            with_replacement = "auto",
                            ...) {
-  method <- resolve_method(method, rdata, noise_matrix)
+  method <- resolve_method(method, rdata, noise_matrix,
+                           stimuli = stimuli)
+  if (method == "2ifc" && (!is.null(rdata) || !is.null(stimuli))) {
+    rdata <- resolve_rdata_input(rdata, stimuli, method = "2ifc")
+    stimuli <- NULL
+  }
 
   results <- list()
   skipped <- character()
@@ -224,15 +235,17 @@ run_diagnostics <- function(responses,
   )
 }
 
-resolve_method <- function(method, rdata, noise_matrix) {
+resolve_method <- function(method, rdata, noise_matrix,
+                           stimuli = NULL) {
   if (!is.null(method)) {
     return(match.arg(method, c("2ifc", "briefrc")))
   }
-  have_rdata <- !is.null(rdata)
+  have_rdata <- !is.null(rdata) || !is.null(stimuli)
   have_nm <- !is.null(noise_matrix)
   if (have_rdata && have_nm) {
     cli::cli_abort(c(
-      "Both {.arg rdata} and {.arg noise_matrix} were supplied.",
+      "Both 2IFC inputs ({.arg rdata} / {.arg stimuli}) and \\
+       {.arg noise_matrix} were supplied.",
       "i" = "Set {.arg method} explicitly to {.val 2ifc} or {.val briefrc}."
     ))
   }

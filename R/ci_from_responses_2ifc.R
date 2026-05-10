@@ -48,7 +48,15 @@
 #'   `stimulus_col` (stimulus id, integer, index into the rcicr
 #'   noise pool), and `response_col` with values in `{-1, +1}`.
 #' @param rdata_path Path to the `.Rdata` file produced by
-#'   [rcicr::generateStimuli2IFC()].
+#'   [rcicr::generateStimuli2IFC()]. Either `rdata_path` or
+#'   `stimuli` must be supplied; if both are given `stimuli` wins.
+#' @param stimuli In-memory stimuli list as returned in
+#'   `$stimuli` by [simulate_2ifc_data()]. Use this in place of
+#'   `rdata_path` when the simulation has been saved with
+#'   [saveRDS()] and reloaded in a different R session: the path
+#'   stored on `$rdata_path` no longer resolves, but `$stimuli`
+#'   is self-contained. Internally the list is written to a
+#'   fresh tempdir-backed `.Rdata` before the call into rcicr.
 #' @param baseimage Base image label used at stimulus-generation
 #'   time. If `NULL`, tries to read the single base stored in
 #'   `rdata_path`.
@@ -83,9 +91,14 @@
 #' res <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path)
 #' dim(res$signal_matrix)   # n_pixels x n_producers
 #' rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
+#'
+#' # Same call, but using the portable in-memory stimuli list -- the
+#' # form that survives saveRDS()/readRDS() across R sessions.
+#' res2 <- ci_from_responses_2ifc(sim$data, stimuli = sim$stimuli)
 #' }
 ci_from_responses_2ifc <- function(responses,
-                                   rdata_path,
+                                   rdata_path      = NULL,
+                                   stimuli         = NULL,
                                    baseimage       = NULL,
                                    participant_col = "participant_id",
                                    stimulus_col    = "stimulus",
@@ -94,6 +107,8 @@ ci_from_responses_2ifc <- function(responses,
                                    keep_rendered   = FALSE,
                                    targetpath      = tempfile("rcisignal_2ifc_"),
                                    save_as_png     = FALSE) {
+  rdata_path <- resolve_rdata_input(rdata_path, stimuli,
+                                    method = "2ifc")
   if (!requireNamespace("rcicr", quietly = TRUE)) {
     cli::cli_abort(c(
       "The 2IFC CI path requires the {.pkg rcicr} package.",
@@ -135,10 +150,6 @@ ci_from_responses_2ifc <- function(responses,
       )
     }
     cli::cli_abort(msg)
-  }
-
-  if (!file.exists(rdata_path)) {
-    cli::cli_abort("rdata not found: {.path {rdata_path}}")
   }
 
   env <- new.env(parent = emptyenv())

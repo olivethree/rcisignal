@@ -7,7 +7,8 @@
 check_response_inversion(
   responses,
   method = c("2ifc", "briefrc"),
-  rdata,
+  rdata = NULL,
+  stimuli = NULL,
   baseimage = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
@@ -26,7 +27,13 @@ columns: \code{participant_id}, \code{stimulus}, \code{response} (values in
 
 \item{method}{\code{"2ifc"} or \code{"briefrc"}.}
 
-\item{rdata}{Path to the rcicr \code{.RData} file.}
+\item{rdata}{Path to the rcicr \code{.RData} file. Either \code{rdata}
+or \code{stimuli} must be supplied for the 2IFC path.}
+
+\item{stimuli}{In-memory stimuli list (the \verb{$stimuli} element
+of an \code{rcisignal_sim} object). Use in place of \code{rdata} when
+the file path no longer resolves (e.g. after \code{\link[=saveRDS]{saveRDS()}}/
+\code{\link[=readRDS]{readRDS()}} across R sessions).}
 
 \item{baseimage}{Name of the base image in \code{rdata$base_face_files}.}
 

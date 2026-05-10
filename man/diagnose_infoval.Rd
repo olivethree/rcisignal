@@ -8,6 +8,7 @@ diagnose_infoval(
   responses,
   method = NULL,
   rdata = NULL,
+  stimuli = NULL,
   noise_matrix = NULL,
   baseimage = "base",
   col_participant = "participant_id",
@@ -31,7 +32,13 @@ columns: \code{participant_id}, \code{stimulus}, \code{response} (values in
 \item{method}{\code{"2ifc"} or \code{"briefrc"}. If \code{NULL}, inferred from
 whichever of \code{rdata} / \code{noise_matrix} is supplied.}
 
-\item{rdata}{Path to an rcicr \code{.RData} file (2IFC).}
+\item{rdata}{Path to an rcicr \code{.RData} file (2IFC). Either
+\code{rdata} or \code{stimuli} must be supplied for the 2IFC path.}
+
+\item{stimuli}{In-memory stimuli list (the \verb{$stimuli} element
+of an \code{rcisignal_sim} object). Use in place of \code{rdata} when
+the file path no longer resolves (e.g. after \code{\link[=saveRDS]{saveRDS()}}/
+\code{\link[=readRDS]{readRDS()}} across R sessions).}
 
 \item{noise_matrix}{Path to a Brief-RC noise-matrix text file, or
 an already-loaded numeric matrix.}
@@ -136,6 +143,10 @@ path needs no \code{rcicr} dependency.
 sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
 diagnose_infoval(sim$data, method = "2ifc",
                  rdata = sim$rdata_path, iter = 200L)
+
+# Same call via the session-portable in-memory stimuli list:
+diagnose_infoval(sim$data, method = "2ifc",
+                 stimuli = sim$stimuli, iter = 200L)
 }
 
 }

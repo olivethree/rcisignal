@@ -17,6 +17,7 @@ simulate_2ifc_data(
   noise_type = "sinusoid",
   nscales = 5L,
   sigma = 25,
+  rdata_dir = NULL,
   seed = NULL,
   progress = TRUE
 )
@@ -58,6 +59,14 @@ ms) and uniform-slow (5000-20000 ms) contaminants. Default
 \code{\link[rcicr:generateNoisePattern]{rcicr::generateNoisePattern()}}. Defaults match rcicr's
 defaults (\code{"sinusoid"}, \code{5}, \code{25}).}
 
+\item{rdata_dir}{Optional directory in which to write the
+rcicr-format \code{.Rdata} stimuli file with a stable filename
+(\code{rcisignal_sim_2ifc_stimuli.Rdata}). When \code{NULL} (default)
+the file goes to a session tempdir and the returned
+\verb{$rdata_path} becomes invalid after the R session ends. Pass
+an explicit directory to persist the simulation across
+sessions. See Details.}
+
 \item{seed}{Integer or \code{NULL}. When \code{NULL}, a random seed is
 drawn and stored on the result so the run is reproducible.}
 
@@ -77,10 +86,18 @@ and columns \code{participant_id}, \code{condition}, \code{trial},
 coefficients (the rcicr \code{stimuli_params}).
 \item \code{p} — the rcicr noise basis (\code{generateNoisePattern()}
 output); pair with \code{params} to regenerate any noise image.
-\item \code{rdata_path} — path to an rcicr-format \code{.Rdata} file written
-to a session tempdir, suitable for
-\code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}} / \code{\link[=compute_infoval_summary]{compute_infoval_summary()}}
-and other downstream functions that take an \code{rdata} argument.
+\item \code{rdata_path} — path to an rcicr-format \code{.Rdata} file
+written either to a session tempdir (when
+\code{rdata_dir = NULL}) or to the user-supplied \code{rdata_dir}.
+Suitable for \code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}} /
+\code{\link[=compute_infoval_summary]{compute_infoval_summary()}} and other downstream functions
+that take an \code{rdata} argument. \strong{Not portable across R
+sessions} when \code{rdata_dir = NULL}.
+\item \code{stimuli} — a self-contained list (\code{base_face}, \code{params},
+\code{p}, etc.) that downstream consumers accept via their
+\verb{stimuli =} argument as a portable alternative to
+\code{rdata_path}. Round-trips through
+\code{\link[=saveRDS]{saveRDS()}}/\code{\link[=readRDS]{readRDS()}}.
 \item \code{signal} — pixel-level signal vector used to plant the
 response bias.
 \item \code{meta} — list of method, \code{n_per_condition}, \code{conditions},
@@ -103,6 +120,19 @@ so it requires the \code{rcicr} package to be installed. With default
 arguments (50 participants per condition, 500 trials, 256-pixel
 images) the noise generation step takes one to a few minutes; a
 progress bar is shown.
+}
+\details{
+When \code{rdata_dir = NULL}, the returned \verb{$rdata_path} points at a
+session tempdir and becomes invalid after the R session ends.
+Persist the simulation across sessions (caching with
+\code{\link[=saveRDS]{saveRDS()}}, knitr \code{cache=TRUE}, sharing with collaborators)
+either by passing an explicit \code{rdata_dir} such as \code{"simdata/"},
+or by handing the returned \verb{$stimuli} list to
+\code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}} (and the other infoval-dependent
+helpers) in place of \code{rdata_path}. \verb{$stimuli} is a
+self-contained in-memory representation of the rcicr stimuli
+env, so the sim object round-trips through
+\code{saveRDS()}/\code{readRDS()} without a file dependency.
 }
 \section{Signal model}{
 

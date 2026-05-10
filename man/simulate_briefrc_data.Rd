@@ -19,12 +19,18 @@ simulate_briefrc_data(
   noise_type = "sinusoid",
   nscales = 5L,
   sigma = 25,
+  rdata_dir = NULL,
   seed = NULL,
   progress = TRUE
 )
 }
 \arguments{
-\item{n_per_condition, conditions, img_size, base_image, signal_strength, signal_region, rt_contamination_fast, rt_contamination_slow, noise_type, nscales, sigma, seed, progress}{See \code{\link[=simulate_2ifc_data]{simulate_2ifc_data()}}.}
+\item{n_per_condition, conditions, img_size, base_image, signal_strength, signal_region, rt_contamination_fast, rt_contamination_slow, noise_type, nscales, sigma, rdata_dir, seed, progress}{See \code{\link[=simulate_2ifc_data]{simulate_2ifc_data()}}. For Brief-RC the rcicr-format
+\code{.Rdata} is informational (downstream Brief-RC functions read
+\verb{$noise_matrix} directly); it is written for symmetry with the
+2IFC path and as a portable on-disk artefact when
+\code{rdata_dir} is non-\code{NULL} (stable filename
+\code{rcisignal_sim_briefrc_stimuli.Rdata}).}
 
 \item{n_trials}{Integer or \code{NULL}. Brief-RC trials per
 participant. When \code{NULL} (default), it is derived from the

@@ -26,7 +26,12 @@
 #'   from CSV via [read_responses()] or [utils::read.csv()]; column
 #'   names are configurable via the `col_*` arguments.
 #' @param method `"2ifc"` or `"briefrc"`.
-#' @param rdata Path to the rcicr `.RData` file.
+#' @param rdata Path to the rcicr `.RData` file. Either `rdata`
+#'   or `stimuli` must be supplied for the 2IFC path.
+#' @param stimuli In-memory stimuli list (the `$stimuli` element
+#'   of an `rcisignal_sim` object). Use in place of `rdata` when
+#'   the file path no longer resolves (e.g. after [saveRDS()]/
+#'   [readRDS()] across R sessions).
 #' @param baseimage Name of the base image in `rdata$base_face_files`.
 #' @param col_participant,col_stimulus,col_response,col_rt Column names.
 #'   `col_rt` is required.
@@ -47,7 +52,8 @@
 #' @export
 check_rt_infoval_consistency <- function(responses,
                                       method = c("2ifc", "briefrc"),
-                                      rdata,
+                                      rdata = NULL,
+                                      stimuli = NULL,
                                       baseimage = "base",
                                       col_participant = "participant_id",
                                       col_stimulus = "stimulus",
@@ -78,7 +84,8 @@ check_rt_infoval_consistency <- function(responses,
   }
 
   iv_result <- compute_infoval_summary(
-    responses, method = method, rdata = rdata, baseimage = baseimage,
+    responses, method = method, rdata = rdata, stimuli = stimuli,
+    baseimage = baseimage,
     col_participant = col_participant, col_stimulus = col_stimulus,
     col_response = col_response, iter = iter
   )
