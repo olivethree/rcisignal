@@ -93,6 +93,15 @@ Suitable for \code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}} /
 \code{\link[=compute_infoval_summary]{compute_infoval_summary()}} and other downstream functions
 that take an \code{rdata} argument. \strong{Not portable across R
 sessions} when \code{rdata_dir = NULL}.
+\item \code{base_image_path} — path to a standalone PNG of \code{base_face}
+written next to the \code{.Rdata}
+(\code{rcisignal_sim_2ifc_base_face.png} for 2IFC,
+\code{rcisignal_sim_briefrc_base_face.png} for Brief-RC). Same
+persistence story as \code{rdata_path}: persists when
+\code{rdata_dir} is supplied, lives in a session tempdir
+otherwise. Most users prefer the matrix form \code{base_face}
+directly; the path is provided for symmetry with rcicr's
+standard workflow.
 \item \code{stimuli} — a self-contained list (\code{base_face}, \code{params},
 \code{p}, etc.) that downstream consumers accept via their
 \verb{stimuli =} argument as a portable alternative to

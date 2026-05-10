@@ -247,6 +247,59 @@ test_that("ci_from_responses_2ifc accepts stimuli= without rdata_path", {
   expect_equal(dim(res$signal_matrix), c(64L * 64L, 2L * 2L))
 })
 
+test_that("simulate_2ifc_data writes a base-face PNG and exposes its path", {
+  skip_if_no_rcicr()
+  skip_if_not_installed("png")
+  tmp <- withr::local_tempdir()
+  sim <- suppressMessages(simulate_2ifc_data(
+    n_per_condition = 1L, n_trials = 4L, img_size = 64L,
+    base_image = matrix(0.5, 64, 64),
+    signal_strength = "none", rdata_dir = tmp,
+    seed = 1L, progress = FALSE
+  ))
+  expect_true(file.exists(sim$base_image_path))
+  expect_equal(normalizePath(dirname(sim$base_image_path)),
+               normalizePath(tmp))
+  expect_match(basename(sim$base_image_path),
+               "^rcisignal_sim_2ifc_base_face\\.png$")
+  img <- png::readPNG(sim$base_image_path)
+  if (length(dim(img)) == 3L) img <- img[, , 1L]
+  expect_equal(dim(img), dim(sim$base_face))
+})
+
+test_that("simulate_briefrc_data writes a base-face PNG and exposes its path", {
+  skip_if_no_rcicr()
+  skip_if_not_installed("png")
+  tmp <- withr::local_tempdir()
+  sim <- suppressMessages(simulate_briefrc_data(
+    n_per_condition = 1L, n_trials = 4L, images_per_trial = 4L,
+    img_size = 64L, base_image = matrix(0.5, 64, 64),
+    signal_strength = "none", rdata_dir = tmp,
+    seed = 2L, progress = FALSE
+  ))
+  expect_true(file.exists(sim$base_image_path))
+  expect_equal(normalizePath(dirname(sim$base_image_path)),
+               normalizePath(tmp))
+  expect_match(basename(sim$base_image_path),
+               "^rcisignal_sim_briefrc_base_face\\.png$")
+  img <- png::readPNG(sim$base_image_path)
+  if (length(dim(img)) == 3L) img <- img[, , 1L]
+  expect_equal(dim(img), dim(sim$base_face))
+})
+
+test_that("simulator base-face PNG also written under tempdir mode", {
+  skip_if_no_rcicr()
+  skip_if_not_installed("png")
+  sim <- suppressMessages(simulate_2ifc_data(
+    n_per_condition = 1L, n_trials = 4L, img_size = 64L,
+    base_image = matrix(0.5, 64, 64),
+    signal_strength = "none", seed = 1L, progress = FALSE
+  ))
+  expect_true(file.exists(sim$base_image_path))
+  expect_equal(normalizePath(dirname(sim$base_image_path)),
+               normalizePath(dirname(sim$rdata_path)))
+})
+
 test_that("resolve_rdata_input errors when both inputs are missing", {
   skip_if_not_installed("rcicr")
   resp <- data.frame(

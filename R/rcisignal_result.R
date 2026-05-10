@@ -422,19 +422,21 @@ print.rcisignal_diag_infoval <- function(x, ...) {
 #' @noRd
 new_rcisignal_sim <- function(data, noise_matrix, base_face,
                               params, p, signal, meta,
-                              rdata_path = NULL,
-                              stimuli    = NULL) {
+                              rdata_path      = NULL,
+                              stimuli         = NULL,
+                              base_image_path = NULL) {
   structure(
     list(
-      data         = data,
-      noise_matrix = noise_matrix,
-      base_face    = base_face,
-      params       = params,
-      p            = p,
-      signal       = signal,
-      rdata_path   = rdata_path,
-      stimuli      = stimuli,
-      meta         = meta
+      data            = data,
+      noise_matrix    = noise_matrix,
+      base_face       = base_face,
+      params          = params,
+      p               = p,
+      signal          = signal,
+      rdata_path      = rdata_path,
+      base_image_path = base_image_path,
+      stimuli         = stimuli,
+      meta            = meta
     ),
     class             = c("rcisignal_sim", "rcisignal_result"),
     rcisignal_version = utils::packageVersion("rcisignal")
@@ -469,6 +471,9 @@ print.rcisignal_sim <- function(x, ...) {
               nrow(x$data), ncol(x$data)))
   if (!is.null(x$rdata_path)) {
     cat(sprintf("  rdata_path   : %s\n", x$rdata_path))
+  }
+  if (!is.null(x$base_image_path)) {
+    cat(sprintf("  base_image   : %s\n", x$base_image_path))
   }
   if (!is.null(x$stimuli)) {
     cat("  stimuli      : in-memory (portable across R sessions)\n")

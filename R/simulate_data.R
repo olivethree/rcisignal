@@ -103,6 +103,15 @@
 #'     [compute_infoval_summary()] and other downstream functions
 #'     that take an `rdata` argument. **Not portable across R
 #'     sessions** when `rdata_dir = NULL`.
+#'   * `base_image_path` — path to a standalone PNG of `base_face`
+#'     written next to the `.Rdata`
+#'     (`rcisignal_sim_2ifc_base_face.png` for 2IFC,
+#'     `rcisignal_sim_briefrc_base_face.png` for Brief-RC). Same
+#'     persistence story as `rdata_path`: persists when
+#'     `rdata_dir` is supplied, lives in a session tempdir
+#'     otherwise. Most users prefer the matrix form `base_face`
+#'     directly; the path is provided for symmetry with rcicr's
+#'     standard workflow.
 #'   * `stimuli` — a self-contained list (`base_face`, `params`,
 #'     `p`, etc.) that downstream consumers accept via their
 #'     `stimuli =` argument as a portable alternative to
@@ -204,19 +213,24 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
   rdata_path <- write_sim_rdata(
     stimuli = stimuli, dir = rdata_dir, method = "2ifc"
   )
-  inform_rdata_written(rdata_path, persistent = !is.null(rdata_dir))
+  base_image_path <- write_sim_base_face_png(
+    base_face = base_face, dir = dirname(rdata_path), method = "2ifc"
+  )
+  inform_sim_artifacts_written(rdata_path, base_image_path,
+                               persistent = !is.null(rdata_dir))
 
   elapsed <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
   new_rcisignal_sim(
-    data         = data,
-    noise_matrix = pool$noise_matrix,
-    base_face    = base_face,
-    params       = pool$params,
-    p            = pool$p,
-    signal       = signal,
-    rdata_path   = rdata_path,
-    stimuli      = stimuli,
-    meta         = list(
+    data            = data,
+    noise_matrix    = pool$noise_matrix,
+    base_face       = base_face,
+    params          = pool$params,
+    p               = pool$p,
+    signal          = signal,
+    rdata_path      = rdata_path,
+    base_image_path = base_image_path,
+    stimuli         = stimuli,
+    meta            = list(
       method            = "2ifc",
       n_per_condition   = as.integer(n_per_condition),
       conditions        = as.character(conditions),
@@ -450,19 +464,25 @@ simulate_briefrc_data <- function(n_per_condition       = 50L,
   rdata_path <- write_sim_rdata(
     stimuli = stimuli, dir = rdata_dir, method = "briefrc"
   )
-  inform_rdata_written(rdata_path, persistent = !is.null(rdata_dir))
+  base_image_path <- write_sim_base_face_png(
+    base_face = base_face, dir = dirname(rdata_path),
+    method = "briefrc"
+  )
+  inform_sim_artifacts_written(rdata_path, base_image_path,
+                               persistent = !is.null(rdata_dir))
 
   elapsed <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
   new_rcisignal_sim(
-    data         = data,
-    noise_matrix = pool$noise_matrix,
-    base_face    = base_face,
-    params       = pool$params,
-    p            = pool$p,
-    signal       = signal,
-    rdata_path   = rdata_path,
-    stimuli      = stimuli,
-    meta         = list(
+    data            = data,
+    noise_matrix    = pool$noise_matrix,
+    base_face       = base_face,
+    params          = pool$params,
+    p               = pool$p,
+    signal          = signal,
+    rdata_path      = rdata_path,
+    base_image_path = base_image_path,
+    stimuli         = stimuli,
+    meta            = list(
       method            = "briefrc",
       n_per_condition   = as.integer(n_per_condition),
       conditions        = as.character(conditions),
@@ -847,16 +867,44 @@ write_sim_rdata <- function(stimuli, dir = NULL,
   rdata_file
 }
 
+#' Write the base face as a standalone PNG alongside the rdata
+#'
+#' rcicr's standard workflow drops a base-face PNG next to the
+#' stimuli `.Rdata`. This helper does the same for simulated data
+#' under a method-specific filename so users can pass the path
+#' directly into Brief-RC analysis or external tooling.
+#'
 #' @keywords internal
 #' @noRd
-inform_rdata_written <- function(path, persistent) {
+write_sim_base_face_png <- function(base_face, dir,
+                                    method = c("2ifc", "briefrc")) {
+  method <- match.arg(method)
+  if (!requireNamespace("png", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "Writing the base-face PNG requires the {.pkg png} package.",
+      "i" = "Install: {.run install.packages(\"png\")}"
+    ))
+  }
+  fname <- paste0("rcisignal_sim_", method, "_base_face.png")
+  path  <- file.path(dir, fname)
+  png::writePNG(base_face, path)
+  path
+}
+
+#' @keywords internal
+#' @noRd
+inform_sim_artifacts_written <- function(rdata_path, base_image_path,
+                                         persistent) {
   if (persistent) {
     cli::cli_inform(c(
-      "i" = "Wrote stimuli to {.path {path}}."
+      "i" = "Wrote stimuli to {.path {rdata_path}}.",
+      "i" = "Wrote base face to {.path {base_image_path}}."
     ))
   } else {
     cli::cli_inform(c(
-      "i" = "Wrote stimuli to {.path {path}} (session tempdir).",
+      "i" = "Wrote stimuli to {.path {rdata_path}} (session tempdir).",
+      "i" = "Wrote base face to {.path {base_image_path}} \\
+             (session tempdir).",
       " " = "Pass {.arg rdata_dir} to persist across R sessions, \\
              or hand {.code $stimuli} to downstream consumers."
     ))
