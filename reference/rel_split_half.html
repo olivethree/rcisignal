@@ -121,8 +121,10 @@ patterns. Required when <code>null = "random_responders"</code>.</p></dd>
 
 <dt id="arg-mask">mask<a class="anchor" aria-label="anchor" href="#arg-mask"></a></dt>
 <dd><p>Optional logical vector of length
-<code>nrow(signal_matrix)</code> restricting computation to a region of
-the image (e.g., from <code><a href="make_face_mask.html">make_face_mask()</a></code> or <code><a href="read_face_mask.html">read_face_mask()</a></code>).</p></dd>
+<code>nrow(signal_matrix)</code> (column-major) restricting computation
+to a region of the image. Build with <code><a href="make_face_mask.html">make_face_mask()</a></code>
+(parametric oval and sub-regions) or <code><a href="read_face_mask.html">read_face_mask()</a></code>
+(PNG/JPEG mask).</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>

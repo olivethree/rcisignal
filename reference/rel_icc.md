@@ -30,11 +30,12 @@ rel_icc(
 
 - mask:
 
-  Optional logical vector of length `nrow(signal_matrix)` restricting
-  computation to a region (e.g., from
+  Optional logical vector of length `nrow(signal_matrix)` (column-major)
+  restricting computation to a region. Build with
   [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
-  or
-  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)).
+  (parametric oval and sub-regions) or
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  (PNG/JPEG mask).
 
 - acknowledge_scaling:
 
