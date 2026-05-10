@@ -135,9 +135,11 @@ integration grid. Default 100.</p></dd>
 
 <dt id="arg-mask">mask<a class="anchor" aria-label="anchor" href="#arg-mask"></a></dt>
 <dd><p>Optional logical vector of length <code>n_pixels</code>
-restricting cluster / TFCE inference to a region. The
-implementation uses a zero-out pattern (not row-subsetting)
-so the 2D image structure is preserved for 4-connectivity.</p></dd>
+(column-major) restricting cluster / TFCE inference to a
+region. The implementation uses a zero-out pattern (not
+row-subsetting) so the 2D image structure is preserved for
+4-connectivity. Build with <code><a href="make_face_mask.html">make_face_mask()</a></code> (parametric
+oval and sub-regions) or <code><a href="read_face_mask.html">read_face_mask()</a></code> (PNG/JPEG mask).</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -202,6 +204,31 @@ threshold parameter.</p></li>
 <code>$method = "tfce"</code>.</p></li>
 </ul></div>
     <div class="section level2">
+    <h2 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a></h2>
+
+
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on the returned object renders the per-pixel observed
+Welch t (or signed TFCE values for <code>method = "tfce"</code>) as a
+raster image with FWE-significant cluster boundaries traced on
+top.</p><ul><li><p><strong>Colour</strong> encodes the sign and magnitude of the per-pixel
+statistic. Blue = condition A larger than B at that pixel
+(positive Welch t); red = condition B larger than A
+(negative Welch t); white = near zero. The colourbar reads
+in <code>Welch t</code> units (or signed <code>TFCE value</code> for TFCE).</p></li>
+<li><p><strong>Black contours</strong> trace the boundary of clusters that are
+significant at the chosen <code>alpha</code> under the max-mass null
+(threshold method) or the boundary of pixels with FWE-
+corrected <code>p &lt; alpha</code> (TFCE method). Pixels inside the
+contour survive the FWE correction; pixels outside do not.</p></li>
+<li><p>The colour scale is symmetric around zero by default so the
+neutral colour aligns with <code>t = 0</code>. The displayed t-map is
+the <em>observed</em> statistic before any thresholding; the
+contours encode the inferential decision.</p></li>
+<li><p>Colour convention matches <code><a href="plot_agreement_map.html">plot_agreement_map()</a></code> and
+<code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code> so the same data reads consistently
+across the package.</p></li>
+</ul></div>
+    <div class="section level2">
     <h2 id="reliability-metrics-expect-raw-masks">Reliability metrics expect raw masks<a class="anchor" aria-label="anchor" href="#reliability-metrics-expect-raw-masks"></a></h2>
 
 
@@ -262,8 +289,12 @@ dependence and localisation in cluster inference. <em>NeuroImage</em>,
 <span class="r-in"><span>  <span class="va">sim_eyes</span><span class="op">$</span><span class="va">data</span>, noise_matrix <span class="op">=</span> <span class="va">sim_eyes</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span><span class="op">$</span><span class="va">signal_matrix</span></span></span>
 <span class="r-in"><span><span class="va">sig_mouth</span> <span class="op">&lt;-</span> <span class="fu"><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">sim_mouth</span><span class="op">$</span><span class="va">data</span>, noise_matrix <span class="op">=</span> <span class="va">sim_mouth</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span><span class="op">$</span><span class="va">signal_matrix</span></span></span>
-<span class="r-in"><span><span class="fu">rel_cluster_test</span><span class="op">(</span><span class="va">sig_eyes</span>, <span class="va">sig_mouth</span>,</span></span>
-<span class="r-in"><span>                 n_permutations <span class="op">=</span> <span class="fl">500L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ct</span> <span class="op">&lt;-</span> <span class="fu">rel_cluster_test</span><span class="op">(</span><span class="va">sig_eyes</span>, <span class="va">sig_mouth</span>,</span></span>
+<span class="r-in"><span>                       n_permutations <span class="op">=</span> <span class="fl">500L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Plot the t-map with significant cluster boundaries: blue = eyes</span></span></span>
+<span class="r-in"><span><span class="co"># condition larger; red = mouth condition larger; black contours =</span></span></span>
+<span class="r-in"><span><span class="co"># FWE-significant clusters at alpha.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ct</span>, main <span class="op">=</span> <span class="st">"Eyes vs Mouth (cluster-FWE)"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

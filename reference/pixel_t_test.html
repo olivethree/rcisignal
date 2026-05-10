@@ -99,9 +99,11 @@ Welch t; <code>TRUE</code> uses paired t.</p></dd>
 
 <dt id="arg-mask">mask<a class="anchor" aria-label="anchor" href="#arg-mask"></a></dt>
 <dd><p>Optional logical vector of length
-<code>nrow(signal_matrix_a)</code>. Both matrices are subsetted with the
-same mask before computing t. The returned vector is then of
-length <code>sum(mask)</code>.</p></dd>
+<code>nrow(signal_matrix_a)</code> (column-major). Both matrices are
+subsetted with the same mask before computing t; the returned
+vector is then of length <code>sum(mask)</code>. Build with
+<code><a href="make_face_mask.html">make_face_mask()</a></code> (parametric oval and sub-regions) or
+<code><a href="read_face_mask.html">read_face_mask()</a></code> (PNG/JPEG mask).</p></dd>
 
 
 <dt id="arg-acknowledge-scaling">acknowledge_scaling<a class="anchor" aria-label="anchor" href="#arg-acknowledge-scaling"></a></dt>

@@ -106,8 +106,10 @@ variant. All matrices must have identical column names.</p></dd>
 
 
 <dt id="arg-mask">mask<a class="anchor" aria-label="anchor" href="#arg-mask"></a></dt>
-<dd><p>Optional logical vector forwarded to both per-pair
-calls.</p></dd>
+<dd><p>Optional logical vector of length
+<code>nrow(signal_matrices[[1]])</code> (column-major) forwarded to both
+per-pair calls. Build with <code><a href="make_face_mask.html">make_face_mask()</a></code> (parametric
+oval and sub-regions) or <code><a href="read_face_mask.html">read_face_mask()</a></code> (PNG/JPEG mask).</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -151,6 +153,22 @@ remain the max-statistic FWER-controlled values from
 <code>p_min = 1.0</code> so the Holm ordering is well-defined.</p>
     </div>
     <div class="section level2">
+    <h2 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a></h2>
+
+
+<p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> shows the across-pairs table (one row per pair,
+adjusted p-values, Euclidean magnitudes). To visualise a
+single pair, pull its child results out of <code>$results</code> and call
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on either: e.g.
+<code>plot(res$results[["A_vs_B"]]$cluster_test)</code> for the
+cluster t-map (blue = A larger; red = B larger; black contours
+bound FWE-significant clusters), or
+<code>plot(res$results[["A_vs_B"]]$dissimilarity)</code> for the
+bootstrap distribution. To compare Euclidean distances across
+pairs on a shared axis, pass each pair's <code>dissimilarity</code> child
+to <code><a href="plot_dissimilarity_grid.html">plot_dissimilarity_grid()</a></code>.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="run_discriminability.html">run_discriminability()</a></code>, <code><a href="rel_cluster_test.html">rel_cluster_test()</a></code>,
 <code><a href="rel_dissimilarity.html">rel_dissimilarity()</a></code></p></div>
@@ -182,9 +200,20 @@ remain the max-statistic FWER-controlled values from
 <span class="r-in"><span>  nose  <span class="op">=</span> <span class="fu"><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">sim_nose</span><span class="op">$</span><span class="va">data</span>,  noise_matrix <span class="op">=</span> <span class="va">sim_nose</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span><span class="op">$</span><span class="va">signal_matrix</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">run_discriminability_pairwise</span><span class="op">(</span><span class="va">sigs</span>,</span></span>
-<span class="r-in"><span>                              n_permutations <span class="op">=</span> <span class="fl">500L</span>, n_boot <span class="op">=</span> <span class="fl">500L</span>,</span></span>
-<span class="r-in"><span>                              seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">run_discriminability_pairwise</span><span class="op">(</span><span class="va">sigs</span>,</span></span>
+<span class="r-in"><span>                                     n_permutations <span class="op">=</span> <span class="fl">500L</span>,</span></span>
+<span class="r-in"><span>                                     n_boot <span class="op">=</span> <span class="fl">500L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span>  <span class="co"># adjusted p-values across the three pairs</span></span></span>
+<span class="r-in"><span><span class="co"># Cluster t-map for one pair (blue = first condition larger;</span></span></span>
+<span class="r-in"><span><span class="co"># red = second condition larger; black contours = significant clusters):</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">results</span><span class="op">[[</span><span class="st">"eyes_vs_mouth"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">cluster_test</span>,</span></span>
+<span class="r-in"><span>     main <span class="op">=</span> <span class="st">"Eyes vs Mouth (cluster-FWE)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Compare Euclidean distances across all three pairs on a shared axis:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot_dissimilarity_grid.html">plot_dissimilarity_grid</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"eyes vs mouth"</span> <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">results</span><span class="op">[[</span><span class="st">"eyes_vs_mouth"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">dissimilarity</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"eyes vs nose"</span>  <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">results</span><span class="op">[[</span><span class="st">"eyes_vs_nose"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">dissimilarity</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"mouth vs nose"</span> <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">results</span><span class="op">[[</span><span class="st">"mouth_vs_nose"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">dissimilarity</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

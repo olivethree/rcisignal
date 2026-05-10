@@ -65,8 +65,14 @@ plot_ci_overlay(
 
 - mask:
 
-  Optional logical vector restricting the visible overlay region; pixels
-  outside the mask render as the bare base image.
+  Optional logical vector of length `prod(img_dims)` restricting the
+  visible overlay region. Pixels outside the mask render as the bare
+  base image. Build with
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  (parametric oval and sub-regions) or
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  (PNG/JPEG mask file). The mask is column-major to match the package's
+  image vectorisation convention.
 
 - threshold:
 
@@ -98,6 +104,28 @@ plot_ci_overlay(
 Invisibly the composed `nrow x ncol x 3` raster. The plot is drawn on
 the active device as a side effect.
 
+## Reading the plot
+
+- **Colour** encodes the sign of the producer-mean signal at each pixel.
+  Blue = positive (producers' average mask is brighter than the base at
+  that pixel); red = negative (darker than the base); pixels rendered as
+  the bare base = at or near zero.
+
+- **Opacity** encodes the magnitude of the signal, scaled to `alpha_max`
+  at the global peak `|signal|`. Faint colour means weak agreement;
+  saturated colour means a strong, consistent producer-mean deflection.
+
+- **Black contours** (only drawn when `test` is supplied) trace the
+  boundary of the FWE-significant pixel set returned by
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+  at its `alpha`. Pixels inside the contour are individually significant
+  under the max-\|t\| null; pixels outside are not.
+
+- Colour convention matches
+  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  and the cluster-test plots so the same group CI reads consistently
+  across the package.
+
 ## See also
 
 [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
@@ -128,5 +156,21 @@ sim <- simulate_briefrc_data(
 )
 cis  <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 plot_ci_overlay(cis$signal_matrix, sim$base_face)
+} # }
+
+if (FALSE) { # \dontrun{
+# Same overlay with FWE-significant pixels outlined: feed an
+# agreement_map_test() result via `test = `. Black contours trace
+# the boundary of pixels significant at the test's alpha.
+sim   <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "target",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+cis   <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+agree <- agreement_map_test(cis$signal_matrix,
+                            n_permutations = 500L, seed = 1)
+plot_ci_overlay(cis$signal_matrix, sim$base_face,
+                test = agree,
+                main = "CI overlay + significant pixels")
 } # }
 ```

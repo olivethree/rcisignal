@@ -116,9 +116,13 @@ are drawn on top of the heatmap.</p></dd>
 
 
 <dt id="arg-mask">mask<a class="anchor" aria-label="anchor" href="#arg-mask"></a></dt>
-<dd><p>Optional logical vector restricting the visible
-overlay region; pixels outside the mask render as the bare
-base image.</p></dd>
+<dd><p>Optional logical vector of length
+<code>prod(img_dims)</code> restricting the visible overlay region.
+Pixels outside the mask render as the bare base image.
+Build with <code><a href="make_face_mask.html">make_face_mask()</a></code> (parametric oval and
+sub-regions) or <code><a href="read_face_mask.html">read_face_mask()</a></code> (PNG/JPEG mask file). The
+mask is column-major to match the package's image
+vectorisation convention.</p></dd>
 
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
@@ -151,6 +155,27 @@ line width when <code>test</code> is supplied. Defaults: <code>"black"</code>, <
 plot is drawn on the active device as a side effect.</p>
     </div>
     <div class="section level2">
+    <h2 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a></h2>
+
+
+<ul><li><p><strong>Colour</strong> encodes the sign of the producer-mean signal at each
+pixel. Blue = positive (producers' average mask is brighter than
+the base at that pixel); red = negative (darker than the base);
+pixels rendered as the bare base = at or near zero.</p></li>
+<li><p><strong>Opacity</strong> encodes the magnitude of the signal, scaled to
+<code>alpha_max</code> at the global peak <code>|signal|</code>. Faint colour means
+weak agreement; saturated colour means a strong, consistent
+producer-mean deflection.</p></li>
+<li><p><strong>Black contours</strong> (only drawn when <code>test</code> is supplied) trace
+the boundary of the FWE-significant pixel set returned by
+<code><a href="agreement_map_test.html">agreement_map_test()</a></code> at its <code>alpha</code>. Pixels inside the
+contour are individually significant under the max-|t| null;
+pixels outside are not.</p></li>
+<li><p>Colour convention matches <code><a href="plot_agreement_map.html">plot_agreement_map()</a></code> and the
+cluster-test plots so the same group CI reads consistently
+across the package.</p></li>
+</ul></div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="agreement_map_test.html">agreement_map_test()</a></code>, <code><a href="make_face_mask.html">make_face_mask()</a></code></p></div>
     </div>
@@ -179,6 +204,22 @@ plot is drawn on the active device as a side effect.</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cis</span>  <span class="op">&lt;-</span> <span class="fu"><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, noise_matrix <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">plot_ci_overlay</span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>, <span class="va">sim</span><span class="op">$</span><span class="va">base_face</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># Same overlay with FWE-significant pixels outlined: feed an</span></span></span>
+<span class="r-in"><span><span class="co"># agreement_map_test() result via `test = `. Black contours trace</span></span></span>
+<span class="r-in"><span><span class="co"># the boundary of pixels significant at the test's alpha.</span></span></span>
+<span class="r-in"><span><span class="va">sim</span>   <span class="op">&lt;-</span> <span class="fu"><a href="simulate_briefrc_data.html">simulate_briefrc_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_per_condition <span class="op">=</span> <span class="fl">20</span>, n_trials <span class="op">=</span> <span class="fl">60</span>, conditions <span class="op">=</span> <span class="st">"target"</span>,</span></span>
+<span class="r-in"><span>  signal_region <span class="op">=</span> <span class="st">"eyes"</span>, signal_strength <span class="op">=</span> <span class="st">"strong"</span>, seed <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">cis</span>   <span class="op">&lt;-</span> <span class="fu"><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, noise_matrix <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">agree</span> <span class="op">&lt;-</span> <span class="fu"><a href="agreement_map_test.html">agreement_map_test</a></span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span></span>
+<span class="r-in"><span>                            n_permutations <span class="op">=</span> <span class="fl">500L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_ci_overlay</span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>, <span class="va">sim</span><span class="op">$</span><span class="va">base_face</span>,</span></span>
+<span class="r-in"><span>                test <span class="op">=</span> <span class="va">agree</span>,</span></span>
+<span class="r-in"><span>                main <span class="op">=</span> <span class="st">"CI overlay + significant pixels"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

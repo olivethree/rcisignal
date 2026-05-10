@@ -55,8 +55,12 @@ run_reliability(
 
 - mask:
 
-  Optional logical vector of length `nrow(signal_matrix)`. Threaded
-  through to both metrics.
+  Optional logical vector of length `nrow(signal_matrix)` (column-major)
+  threaded through to both metrics. Build with
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  (parametric oval and sub-regions) or
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  (PNG/JPEG mask).
 
 - seed:
 

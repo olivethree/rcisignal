@@ -97,7 +97,9 @@ to tune arguments per metric.</p>
 
 <dt id="arg-mask">mask<a class="anchor" aria-label="anchor" href="#arg-mask"></a></dt>
 <dd><p>Optional logical vector of length
-<code>nrow(signal_matrix)</code>. Threaded through to both metrics.</p></dd>
+<code>nrow(signal_matrix)</code> (column-major) threaded through to both
+metrics. Build with <code><a href="make_face_mask.html">make_face_mask()</a></code> (parametric oval and
+sub-regions) or <code><a href="read_face_mask.html">read_face_mask()</a></code> (PNG/JPEG mask).</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>

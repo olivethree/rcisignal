@@ -47,9 +47,13 @@ infoval(
 
 - mask:
 
-  Optional logical vector of length `nrow(signal_matrix)`. When
-  supplied, both observed and reference norms are computed on the masked
-  pixel subset.
+  Optional logical vector of length `nrow(signal_matrix)`
+  (column-major). When supplied, both observed and reference norms are
+  computed on the masked pixel subset. Build with
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  (parametric oval and sub-regions) or
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  (PNG/JPEG mask).
 
 - with_replacement:
 

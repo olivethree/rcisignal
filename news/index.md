@@ -46,6 +46,64 @@
   with the 2IFC path. The Brief-RC consumers still read `$noise_matrix`
   directly so the file is informational rather than required.
 
+### Behavioural change
+
+- [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  now uses positive = blue, negative = red (matching
+  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  and the cluster-test plots). Previously it rendered positive = red,
+  negative = blue, which flipped the colour reading between the
+  package’s three diverging plots. Saved overlay PNGs from prior
+  versions will look mirrored if regenerated. The four worked-example
+  pairwise figures in `vignettes/figures/oliveira_2019/` and the README
+  captions were refreshed to match.
+
+### Documentation
+
+- Added `Reading the plot:` sections to
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md),
+  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md),
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
+  [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
+  [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
+  [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
+  and
+  [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md)
+  describing colour semantics, contour meaning, and
+  significance/observed-statistic distinctions.
+- Standardised the `mask` `@param` description across
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
+  `agreement_map()`,
+  [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
+  [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md),
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md),
+  [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
+  [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
+  [`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md),
+  [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
+  [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
+  and
+  [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md)
+  to point at
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  /
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  and call out the column-major convention.
+- Added chained `\dontrun{}` plot examples to
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  (with `test =`),
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+  (canonical pairing with
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)),
+  [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
+  (cluster t-map plot),
+  [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
+  (bootstrap-distribution plot),
+  [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
+  (whole-report and per-panel plots), and
+  [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md)
+  (per-pair plots and the pairwise dissimilarity grid).
+
 ## rcisignal 0.1.1
 
 ### New features

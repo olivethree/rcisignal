@@ -62,8 +62,13 @@ rel_dissimilarity(
 
 - mask:
 
-  Optional logical vector of length `nrow(signal_matrix_a)` restricting
-  the Euclidean / correlation computation to a region.
+  Optional logical vector of length `nrow(signal_matrix_a)`
+  (column-major) restricting the Euclidean / correlation computation to
+  a region. Build with
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  (parametric oval and sub-regions) or
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  (PNG/JPEG mask).
 
 - seed:
 
@@ -106,6 +111,35 @@ Euclidean distance does not share this failure mode. The Pearson
 correlation fields (`$correlation`, `$boot_cor`, `$ci_cor`,
 `$boot_se_cor`) are retained for backwards compatibility and slated for
 removal in a future release.
+
+## Reading the plot
+
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) on the returned
+object renders the bootstrap distributions as two side-by-side
+histograms (Euclidean distance on the left, Pearson r on the right; the
+latter is deprecated and shown in grey).
+
+- The shaded vertical band marks the percentile CI at `ci_level`.
+
+- The vertical line marks the *observed* statistic on the real data (not
+  a bootstrap mean).
+
+- A non-overlapping CI band away from zero on the Euclidean panel
+  indicates the two group-mean CIs sit a non-trivial distance apart in
+  pixel space, robust to participant-level resampling. The numbers are
+  returned in `$ci_dist`.
+
+- For visual comparison across multiple contrasts, pass each
+  `rel_dissimilarity()` result to
+  [`plot_dissimilarity_grid()`](https://olivethree.github.io/rcisignal/reference/plot_dissimilarity_grid.md),
+  which lays them out as labelled CI bars on a shared axis.
+
+- For a *spatial* picture of where the two conditions differ, pair this
+  with
+  [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
+  (or use
+  [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
+  to run both in one call).
 
 ## Reading the result
 
@@ -175,6 +209,8 @@ sig_eyes  <- ci_from_responses_briefrc(
   sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
 sig_mouth <- ci_from_responses_briefrc(
   sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
-rel_dissimilarity(sig_eyes, sig_mouth, n_boot = 500L, seed = 1)
+d <- rel_dissimilarity(sig_eyes, sig_mouth, n_boot = 500L, seed = 1)
+# Bootstrap distribution + observed Euclidean + 95% CI band.
+plot(d, main = "Eyes vs Mouth: bootstrap dissimilarity")
 } # }
 ```

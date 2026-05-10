@@ -80,10 +80,14 @@ rel_cluster_test(
 
 - mask:
 
-  Optional logical vector of length `n_pixels` restricting cluster /
-  TFCE inference to a region. The implementation uses a zero-out pattern
-  (not row-subsetting) so the 2D image structure is preserved for
-  4-connectivity.
+  Optional logical vector of length `n_pixels` (column-major)
+  restricting cluster / TFCE inference to a region. The implementation
+  uses a zero-out pattern (not row-subsetting) so the 2D image structure
+  is preserved for 4-connectivity. Build with
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  (parametric oval and sub-regions) or
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  (PNG/JPEG mask).
 
 - seed:
 
@@ -156,6 +160,35 @@ Method-specific step:
 - `$tfce_H`, `$tfce_E`, `$tfce_n_steps`, `$alpha`, `$n_permutations`,
   `$n_participants_a`, `$n_participants_b`, `$method = "tfce"`.
 
+## Reading the plot
+
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) on the returned
+object renders the per-pixel observed Welch t (or signed TFCE values for
+`method = "tfce"`) as a raster image with FWE-significant cluster
+boundaries traced on top.
+
+- **Colour** encodes the sign and magnitude of the per-pixel statistic.
+  Blue = condition A larger than B at that pixel (positive Welch t); red
+  = condition B larger than A (negative Welch t); white = near zero. The
+  colourbar reads in `Welch t` units (or signed `TFCE value` for TFCE).
+
+- **Black contours** trace the boundary of clusters that are significant
+  at the chosen `alpha` under the max-mass null (threshold method) or
+  the boundary of pixels with FWE- corrected `p < alpha` (TFCE method).
+  Pixels inside the contour survive the FWE correction; pixels outside
+  do not.
+
+- The colour scale is symmetric around zero by default so the neutral
+  colour aligns with `t = 0`. The displayed t-map is the *observed*
+  statistic before any thresholding; the contours encode the inferential
+  decision.
+
+- Colour convention matches
+  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  and
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  so the same data reads consistently across the package.
+
 ## Reliability metrics expect raw masks
 
 Welch t and cluster mass / TFCE are variance-based and sensitive to any
@@ -219,7 +252,11 @@ sig_eyes  <- ci_from_responses_briefrc(
   sim_eyes$data, noise_matrix = sim_eyes$noise_matrix)$signal_matrix
 sig_mouth <- ci_from_responses_briefrc(
   sim_mouth$data, noise_matrix = sim_mouth$noise_matrix)$signal_matrix
-rel_cluster_test(sig_eyes, sig_mouth,
-                 n_permutations = 500L, seed = 1)
+ct <- rel_cluster_test(sig_eyes, sig_mouth,
+                       n_permutations = 500L, seed = 1)
+# Plot the t-map with significant cluster boundaries: blue = eyes
+# condition larger; red = mouth condition larger; black contours =
+# FWE-significant clusters at alpha.
+plot(ct, main = "Eyes vs Mouth (cluster-FWE)")
 } # }
 ```

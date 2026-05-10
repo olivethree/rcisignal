@@ -100,9 +100,11 @@ the latter is a whole number.</p></dd>
 
 
 <dt id="arg-mask">mask<a class="anchor" aria-label="anchor" href="#arg-mask"></a></dt>
-<dd><p>Optional logical vector of length <code>nrow(signal_matrix)</code>
-restricting display to a region (e.g.,
-<code>make_face_mask(img_dims, region = "eyes")</code>).</p></dd>
+<dd><p>Optional logical vector of length
+<code>nrow(signal_matrix)</code> (column-major) restricting display to a
+region (e.g., <code>make_face_mask(img_dims, region = "eyes")</code>).
+Also accepts the output of <code><a href="read_face_mask.html">read_face_mask()</a></code> for PNG/JPEG
+masks. Pixels outside the mask render as <code>NA</code> (transparent).</p></dd>
 
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
@@ -148,6 +150,29 @@ formal pixel-level FWER control between conditions
 (<code><a href="rel_cluster_test.html">rel_cluster_test()</a></code>); the agreement map is the <strong>descriptive</strong>
 counterpart for a single condition.</p>
     </div>
+    <div class="section level2">
+    <h2 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a></h2>
+
+
+<ul><li><p><strong>Colour</strong> encodes the sign of the per-pixel one-sample t.
+Blue = producers consistently <em>add</em> to the base at that pixel
+(positive agreement); red = consistently <em>subtract</em> (negative
+agreement); white = no agreement (t near zero).</p></li>
+<li><p><strong>Saturation</strong> encodes <code>|t|</code>: deeper colour means the agreement
+among producers is both large and consistent in sign. The
+colourbar on the right reads in <code>t</code> units (one-sample vs 0).</p></li>
+<li><p><strong><code>zlim</code></strong> is symmetric around zero by default so the neutral
+colour aligns with <code>t = 0</code>. Pass <code>zlim = c(-z, z)</code> to fix the
+scale across panels for direct comparison.</p></li>
+<li><p><strong><code>threshold</code></strong> clips colour to white below <code>|t| &lt; threshold</code>,
+making strong-agreement clusters stand out. This is descriptive
+only; it does not provide FWER control. For inferential pixel
+significance, use <code><a href="agreement_map_test.html">agreement_map_test()</a></code> and overlay the
+contours via <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code>.</p></li>
+<li><p>Colour convention matches <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code> and the
+cluster-test plots so the same group CI reads consistently
+across the package.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="make_face_mask.html">make_face_mask()</a></code>, <code><a href="rel_cluster_test.html">rel_cluster_test()</a></code> for inferential

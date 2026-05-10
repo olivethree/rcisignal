@@ -345,8 +345,8 @@ whole-face features and competence reading off subtler ability cues.
 ### Descriptive cluster-agreement maps
 
 Difference of the two group-mean CIs across all face-oval pixels; no
-inferential filter applied. Red = first condition stronger; blue =
-second condition stronger.
+inferential filter applied. Blue = first condition stronger; red =
+second condition stronger; opacity = magnitude of the difference.
 
 |  |  |
 |----|----|

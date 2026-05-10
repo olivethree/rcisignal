@@ -44,9 +44,13 @@ plot_agreement_map(
 
 - mask:
 
-  Optional logical vector of length `nrow(signal_matrix)` restricting
-  display to a region (e.g.,
-  `make_face_mask(img_dims, region = "eyes")`).
+  Optional logical vector of length `nrow(signal_matrix)` (column-major)
+  restricting display to a region (e.g.,
+  `make_face_mask(img_dims, region = "eyes")`). Also accepts the output
+  of
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  for PNG/JPEG masks. Pixels outside the mask render as `NA`
+  (transparent).
 
 - threshold:
 
@@ -91,6 +95,33 @@ pixel-level FWER control between conditions
 ([`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md));
 the agreement map is the **descriptive** counterpart for a single
 condition.
+
+## Reading the plot
+
+- **Colour** encodes the sign of the per-pixel one-sample t. Blue =
+  producers consistently *add* to the base at that pixel (positive
+  agreement); red = consistently *subtract* (negative agreement); white
+  = no agreement (t near zero).
+
+- **Saturation** encodes `|t|`: deeper colour means the agreement among
+  producers is both large and consistent in sign. The colourbar on the
+  right reads in `t` units (one-sample vs 0).
+
+- **`zlim`** is symmetric around zero by default so the neutral colour
+  aligns with `t = 0`. Pass `zlim = c(-z, z)` to fix the scale across
+  panels for direct comparison.
+
+- **`threshold`** clips colour to white below `|t| < threshold`, making
+  strong-agreement clusters stand out. This is descriptive only; it does
+  not provide FWER control. For inferential pixel significance, use
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+  and overlay the contours via
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md).
+
+- Colour convention matches
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  and the cluster-test plots so the same group CI reads consistently
+  across the package.
 
 ## See also
 

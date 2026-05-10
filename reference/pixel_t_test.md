@@ -43,9 +43,14 @@ pixel_t_test(
 
 - mask:
 
-  Optional logical vector of length `nrow(signal_matrix_a)`. Both
-  matrices are subsetted with the same mask before computing t. The
-  returned vector is then of length `sum(mask)`.
+  Optional logical vector of length `nrow(signal_matrix_a)`
+  (column-major). Both matrices are subsetted with the same mask before
+  computing t; the returned vector is then of length `sum(mask)`. Build
+  with
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  (parametric oval and sub-regions) or
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  (PNG/JPEG mask).
 
 - acknowledge_scaling:
 
