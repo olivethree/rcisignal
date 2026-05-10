@@ -226,20 +226,30 @@ that <code><a href="https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html" clas
 <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>,
 <code><a href="../reference/compute_infoval_summary.html">compute_infoval_summary()</a></code>, and every other function that
 asks for an <code>rdata</code> argument works out of the box.</li>
+<li>
+<strong>A self-contained <code>$stimuli</code> list</strong> that
+round-trips through <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code>/<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code> and a
+<strong><code>$base_image_path</code></strong> PNG written next to the
+stimuli <code>.Rdata</code>. The first survives session restarts when
+handed to a consumer via <code>stimuli =</code>; the second is the
+rcicr-style on-disk artefact for tools that expect a base-face
+file.</li>
 </ul>
 <p>The return value is an <code>rcisignal_sim</code> S3 object:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_2ifc_data.html">simulate_2ifc_data</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">sim</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; List of 9</span></span>
-<span><span class="co">#&gt;  $ data         : data.table  [50000 x 6]</span></span>
-<span><span class="co">#&gt;  $ noise_matrix : num [1:65536, 1:500]   (pixels x trials)</span></span>
-<span><span class="co">#&gt;  $ base_face    : num [1:256, 1:256]</span></span>
-<span><span class="co">#&gt;  $ params       : num [1:500, 1:4092]    (rcicr stimuli_params)</span></span>
-<span><span class="co">#&gt;  $ p            : list of 4               (rcicr noise basis)</span></span>
-<span><span class="co">#&gt;  $ signal       : num [1:65536]           (planted signal vector)</span></span>
-<span><span class="co">#&gt;  $ rdata_path   : chr "/tmp/.../rcisignal_sim_stimuli.Rdata"</span></span>
-<span><span class="co">#&gt;  $ meta         : list (seed, elapsed, etc.)</span></span></code></pre></div>
+<span><span class="co">#&gt; List of 10</span></span>
+<span><span class="co">#&gt;  $ data            : data.table  [50000 x 6]</span></span>
+<span><span class="co">#&gt;  $ noise_matrix    : num [1:65536, 1:500]   (pixels x trials)</span></span>
+<span><span class="co">#&gt;  $ base_face       : num [1:256, 1:256]</span></span>
+<span><span class="co">#&gt;  $ params          : num [1:500, 1:4092]    (rcicr stimuli_params)</span></span>
+<span><span class="co">#&gt;  $ p               : list of 4               (rcicr noise basis)</span></span>
+<span><span class="co">#&gt;  $ signal          : num [1:65536]           (planted signal vector)</span></span>
+<span><span class="co">#&gt;  $ rdata_path      : chr "/tmp/.../rcisignal_sim_2ifc_stimuli.Rdata"</span></span>
+<span><span class="co">#&gt;  $ base_image_path : chr "/tmp/.../rcisignal_sim_2ifc_base_face.png"</span></span>
+<span><span class="co">#&gt;  $ stimuli         : list of 11             (portable, round-trips via saveRDS)</span></span>
+<span><span class="co">#&gt;  $ meta            : list (seed, elapsed, etc.)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="defaults-at-a-glance">Defaults at a glance<a class="anchor" aria-label="anchor" href="#defaults-at-a-glance"></a>
@@ -328,11 +338,17 @@ uniform-slow (5000-20000 ms) responses</td>
 </td>
 </tr>
 <tr class="even">
+<td><code>rdata_dir</code></td>
+<td><code>NULL</code></td>
+<td>optional directory for a stable-path stimuli <code>.Rdata</code>;
+pass to keep the sim usable across R sessions</td>
+</tr>
+<tr class="odd">
 <td><code>seed</code></td>
 <td><code>NULL</code></td>
 <td>a random seed is drawn and stored on the result</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>progress</code></td>
 <td><code>TRUE</code></td>
 <td>shows a <code>cli</code> progress bar during noise generation</td>
@@ -434,11 +450,13 @@ at all to a within-condition reliability summary:</p>
 <span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>For the Brief-RC pipeline the equivalent demo replaces
 <code><a href="../reference/simulate_2ifc_data.html">simulate_2ifc_data()</a></code> with
-<code><a href="../reference/simulate_briefrc_data.html">simulate_briefrc_data()</a></code>,
+<code><a href="../reference/simulate_briefrc_data.html">simulate_briefrc_data()</a></code> and
 <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> with
-<code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>, and passes
-<code>noise_matrix = sim$noise_matrix</code> instead of an
-<code>rdata_path</code>.</p>
+<code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>. The Brief-RC consumer reads
+the noise matrix directly, so the call becomes
+<code>ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)</code>;
+add <code>base_image = sim$base_face</code> if you also want the
+rendered visualisation (<code>scaling = "matched"</code>).</p>
 </div>
 <div class="section level4">
 <h4 id="a-note-on-speed">A note on speed<a class="anchor" aria-label="anchor" href="#a-note-on-speed"></a>
@@ -448,10 +466,16 @@ at all to a within-condition reliability summary:</p>
 parameters expect roughly 1-3 minutes per call. A future release may
 provide an <code>Rcpp</code> accelerator; for now the function is
 intentionally single-shot (“generate once, reuse the
-<code>rcisignal_sim</code> object across many analyses”). For repeated
-runs with the same noise pool, save <code>sim</code> to disk via
-<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> and reload — the cost only needs to be paid
-once.</p>
+<code>rcisignal_sim</code> object across many analyses”).</p>
+<p>To pay the cost only once across R sessions (<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> /
+<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code>, knitr <code>cache = TRUE</code>, sharing with a
+collaborator), use one of two portable routes. Pass
+<code>rdata_dir = "simdata/"</code> to the simulator so the stimuli
+<code>.Rdata</code> keeps a stable path, or hand
+<code>stimuli = sim$stimuli</code> to the consumer in place of
+<code>rdata_path = sim$rdata_path</code>. The <code>$stimuli</code> list
+is self-contained and survives session restarts even after the
+<code>.Rdata</code> file is gone.</p>
 </div>
 </div>
 </div>
@@ -1484,9 +1508,9 @@ collapses repeated stimulus ids by averaging their responses:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
-<span>  rdata_path      <span class="op">=</span> <span class="st">"rcic_stimuli.Rdata"</span>,  <span class="co"># for the noise pool</span></span>
-<span>  base_image_path <span class="op">=</span> <span class="st">"base.jpg"</span>,</span>
-<span>  method          <span class="op">=</span> <span class="st">"briefrc12"</span></span>
+<span>  rdata_path <span class="op">=</span> <span class="st">"rcic_stimuli.Rdata"</span>,  <span class="co"># for the noise pool</span></span>
+<span>  base_image <span class="op">=</span> <span class="st">"base.jpg"</span>,            <span class="co"># path or numeric matrix in [0, 1]</span></span>
+<span>  method     <span class="op">=</span> <span class="st">"briefrc12"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>You can pass a pre-loaded <code>noise_matrix</code> instead of
 <code>rdata_path</code>; useful when you have a non-rcicr-generated pool
@@ -2180,9 +2204,9 @@ significant-pixel mask returned by
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ci_overlay.html">plot_ci_overlay</a></span><span class="op">(</span></span>
 <span>  <span class="va">signal_matrix</span>,</span>
-<span>  base_image_path <span class="op">=</span> <span class="st">"data/base.jpg"</span>,</span>
-<span>  mask            <span class="op">=</span> <span class="va">am</span><span class="op">$</span><span class="va">significant_mask</span>,</span>
-<span>  alpha_max       <span class="op">=</span> <span class="fl">0.7</span></span>
+<span>  base_image <span class="op">=</span> <span class="st">"data/base.jpg"</span>,</span>
+<span>  mask       <span class="op">=</span> <span class="va">am</span><span class="op">$</span><span class="va">significant_mask</span>,</span>
+<span>  alpha_max  <span class="op">=</span> <span class="fl">0.7</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -3318,10 +3342,9 @@ result should be reported as exploratory.</p>
 <span><span class="co"># 3. Compute individual masks.</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span>
 <span>  <span class="va">briefrc_responses</span>,</span>
-<span>  noise_matrix    <span class="op">=</span> <span class="va">nm</span>,</span>
-<span>  base_image_path <span class="op">=</span> <span class="st">"base.jpg"</span>,</span>
-<span>  method          <span class="op">=</span> <span class="st">"briefrc12"</span>,</span>
-<span>  scaling         <span class="op">=</span> <span class="st">"none"</span></span>
+<span>  noise_matrix <span class="op">=</span> <span class="va">nm</span>,</span>
+<span>  method       <span class="op">=</span> <span class="st">"briefrc12"</span>,</span>
+<span>  scaling      <span class="op">=</span> <span class="st">"none"</span>           <span class="co"># base_image not needed at scaling = "none"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">signal</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span></span>
 <span></span>
@@ -3338,9 +3361,9 @@ result should be reported as exploratory.</p>
 <span><span class="co">#    feed these to rel_* or to hand-rolled infoVal.</span></span>
 <span><span class="va">res_render</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span>
 <span>  <span class="va">briefrc_responses</span>,</span>
-<span>  noise_matrix    <span class="op">=</span> <span class="va">nm</span>,</span>
-<span>  base_image_path <span class="op">=</span> <span class="st">"base.jpg"</span>,</span>
-<span>  scaling         <span class="op">=</span> <span class="st">"matched"</span>   <span class="co"># Schmitz Experiment 2 convention</span></span>
+<span>  noise_matrix <span class="op">=</span> <span class="va">nm</span>,</span>
+<span>  base_image   <span class="op">=</span> <span class="st">"base.jpg"</span>,   <span class="co"># required when scaling != "none"</span></span>
+<span>  scaling      <span class="op">=</span> <span class="st">"matched"</span>     <span class="co"># Schmitz Experiment 2 convention</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co"># res_render$rendered_ci is base + matched(mask), ready for PNG</span></span></code></pre></div>
 </div>

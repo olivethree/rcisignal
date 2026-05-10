@@ -165,6 +165,12 @@ reliability and discriminability metrics, sensitivity to contamination).
   [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md),
   and every other function that asks for an `rdata` argument works out
   of the box.
+- **A self-contained `$stimuli` list** that round-trips through
+  [`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/[`readRDS()`](https://rdrr.io/r/base/readRDS.html)
+  and a **`$base_image_path`** PNG written next to the stimuli `.Rdata`.
+  The first survives session restarts when handed to a consumer via
+  `stimuli =`; the second is the rcicr-style on-disk artefact for tools
+  that expect a base-face file.
 
 The return value is an `rcisignal_sim` S3 object:
 
@@ -172,15 +178,17 @@ The return value is an `rcisignal_sim` S3 object:
 
 sim <- simulate_2ifc_data()
 str(sim, max.level = 1)
-#> List of 9
-#>  $ data         : data.table  [50000 x 6]
-#>  $ noise_matrix : num [1:65536, 1:500]   (pixels x trials)
-#>  $ base_face    : num [1:256, 1:256]
-#>  $ params       : num [1:500, 1:4092]    (rcicr stimuli_params)
-#>  $ p            : list of 4               (rcicr noise basis)
-#>  $ signal       : num [1:65536]           (planted signal vector)
-#>  $ rdata_path   : chr "/tmp/.../rcisignal_sim_stimuli.Rdata"
-#>  $ meta         : list (seed, elapsed, etc.)
+#> List of 10
+#>  $ data            : data.table  [50000 x 6]
+#>  $ noise_matrix    : num [1:65536, 1:500]   (pixels x trials)
+#>  $ base_face       : num [1:256, 1:256]
+#>  $ params          : num [1:500, 1:4092]    (rcicr stimuli_params)
+#>  $ p               : list of 4               (rcicr noise basis)
+#>  $ signal          : num [1:65536]           (planted signal vector)
+#>  $ rdata_path      : chr "/tmp/.../rcisignal_sim_2ifc_stimuli.Rdata"
+#>  $ base_image_path : chr "/tmp/.../rcisignal_sim_2ifc_base_face.png"
+#>  $ stimuli         : list of 11             (portable, round-trips via saveRDS)
+#>  $ meta            : list (seed, elapsed, etc.)
 ```
 
 #### Defaults at a glance
@@ -198,6 +206,7 @@ str(sim, max.level = 1)
 | `signal_region` | `"eyes"` | any region accepted by [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md) |
 | `rt_contamination_fast` / `_slow` | `0.02` / `0.02` | fraction of trials replaced by uniform-fast (50-200 ms) / uniform-slow (5000-20000 ms) responses |
 | `noise_type`, `nscales`, `sigma` | `"sinusoid"`, `5`, `25` | forwarded to [`rcicr::generateNoisePattern()`](https://rdrr.io/pkg/rcicr/man/generateNoisePattern.html) |
+| `rdata_dir` | `NULL` | optional directory for a stable-path stimuli `.Rdata`; pass to keep the sim usable across R sessions |
 | `seed` | `NULL` | a random seed is drawn and stored on the result |
 | `progress` | `TRUE` | shows a `cli` progress bar during noise generation |
 
@@ -290,11 +299,16 @@ print(run_discriminability(
 For the Brief-RC pipeline the equivalent demo replaces
 [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
 with
-[`simulate_briefrc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md),
+[`simulate_briefrc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.md)
+and
 [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
 with
-[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md),
-and passes `noise_matrix = sim$noise_matrix` instead of an `rdata_path`.
+[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md).
+The Brief-RC consumer reads the noise matrix directly, so the call
+becomes
+`ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)`;
+add `base_image = sim$base_face` if you also want the rendered
+visualisation (`scaling = "matched"`).
 
 #### A note on speed
 
@@ -303,9 +317,17 @@ pixels with default basis settings, in pure R). With default parameters
 expect roughly 1-3 minutes per call. A future release may provide an
 `Rcpp` accelerator; for now the function is intentionally single-shot
 (“generate once, reuse the `rcisignal_sim` object across many
-analyses”). For repeated runs with the same noise pool, save `sim` to
-disk via [`saveRDS()`](https://rdrr.io/r/base/readRDS.html) and reload —
-the cost only needs to be paid once.
+analyses”).
+
+To pay the cost only once across R sessions
+([`saveRDS()`](https://rdrr.io/r/base/readRDS.html) /
+[`readRDS()`](https://rdrr.io/r/base/readRDS.html), knitr
+`cache = TRUE`, sharing with a collaborator), use one of two portable
+routes. Pass `rdata_dir = "simdata/"` to the simulator so the stimuli
+`.Rdata` keeps a stable path, or hand `stimuli = sim$stimuli` to the
+consumer in place of `rdata_path = sim$rdata_path`. The `$stimuli` list
+is self-contained and survives session restarts even after the `.Rdata`
+file is gone.
 
 ## 3. Signal matrix
 
@@ -1272,9 +1294,9 @@ stimulus ids by averaging their responses:
 
 res <- ci_from_responses_briefrc(
   responses,
-  rdata_path      = "rcic_stimuli.Rdata",  # for the noise pool
-  base_image_path = "base.jpg",
-  method          = "briefrc12"
+  rdata_path = "rcic_stimuli.Rdata",  # for the noise pool
+  base_image = "base.jpg",            # path or numeric matrix in [0, 1]
+  method     = "briefrc12"
 )
 ```
 
@@ -2036,9 +2058,9 @@ significant-pixel mask returned by
 
 plot_ci_overlay(
   signal_matrix,
-  base_image_path = "data/base.jpg",
-  mask            = am$significant_mask,
-  alpha_max       = 0.7
+  base_image = "data/base.jpg",
+  mask       = am$significant_mask,
+  alpha_max  = 0.7
 )
 ```
 
@@ -2929,10 +2951,9 @@ report
 # 3. Compute individual masks.
 res <- ci_from_responses_briefrc(
   briefrc_responses,
-  noise_matrix    = nm,
-  base_image_path = "base.jpg",
-  method          = "briefrc12",
-  scaling         = "none"
+  noise_matrix = nm,
+  method       = "briefrc12",
+  scaling      = "none"           # base_image not needed at scaling = "none"
 )
 signal <- res$signal_matrix
 
@@ -2949,9 +2970,9 @@ infoval(signal, nm,
 #    feed these to rel_* or to hand-rolled infoVal.
 res_render <- ci_from_responses_briefrc(
   briefrc_responses,
-  noise_matrix    = nm,
-  base_image_path = "base.jpg",
-  scaling         = "matched"   # Schmitz Experiment 2 convention
+  noise_matrix = nm,
+  base_image   = "base.jpg",   # required when scaling != "none"
+  scaling      = "matched"     # Schmitz Experiment 2 convention
 )
 # res_render$rendered_ci is base + matched(mask), ready for PNG
 ```
