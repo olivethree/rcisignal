@@ -111,7 +111,8 @@
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_2ifc_data.html">simulate_2ifc_data</a></span><span class="op">(</span><span class="op">)</span>        <span class="co"># 50 x 2 producers, 500 trials each</span></span>
 <span><span class="co"># sim &lt;- simulate_briefrc_data()   # Brief-RC equivalent (12 images/trial)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/run_diagnostics.html">run_diagnostics</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, method <span class="op">=</span> <span class="st">"2ifc"</span>, col_rt <span class="op">=</span> <span class="st">"rt"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/run_diagnostics.html">run_diagnostics</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, method <span class="op">=</span> <span class="st">"2ifc"</span>,</span>
+<span>                rdata <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">rdata_path</span>, col_rt <span class="op">=</span> <span class="st">"rt"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cis</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, rdata_path <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">rdata_path</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -249,13 +250,15 @@
 <span><span class="co"># --- Brief-RC equivalent ---</span></span>
 <span><span class="co"># Same call shape and per-participant grouping behaviour, differences are:</span></span>
 <span><span class="co">#   - function name ends in _briefrc</span></span>
-<span><span class="co">#   - rdata_path may be replaced by noise_matrix = "data/noise_matrix.txt"</span></span>
+<span><span class="co">#   - the noise pool is passed directly via `noise_matrix =` (a numeric</span></span>
+<span><span class="co">#     pixels x pool-size matrix, or a path / .Rdata loadable as one)</span></span>
+<span><span class="co">#     instead of rcicr's `rdata_path =`</span></span>
 <span><span class="co">#   - base_image is optional unless you want a rendered visualisation</span></span>
 <span><span class="co">#     (scaling != "none"); accepts either a path or a numeric matrix</span></span>
 <span><span class="co">#</span></span>
 <span><span class="co"># trustworthy &lt;- ci_from_responses_briefrc(</span></span>
 <span><span class="co">#   responses    = trust_rows,</span></span>
-<span><span class="co">#   rdata_path   = "data/rcicr_stimuli.Rdata",</span></span>
+<span><span class="co">#   noise_matrix = "data/noise_matrix.txt",</span></span>
 <span><span class="co">#   base_image   = "data/base.jpg",   # or a numeric matrix in [0, 1]</span></span>
 <span><span class="co">#   scaling      = "matched"</span></span>
 <span><span class="co"># )</span></span>
