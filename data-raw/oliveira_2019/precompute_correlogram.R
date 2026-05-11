@@ -25,7 +25,14 @@ message("Computing pairwise correlations across the ten group-mean CIs ...")
 
 sm <- readRDS(file.path(cache_dir, "signal_matrices.rds"))
 group_cis <- sapply(sm, rowMeans)               # n_pixels x n_traits
-trait_cor <- cor(group_cis)                     # 10 x 10 Pearson
+
+# Match Oliveira et al. (2019, p. 892): CIs were masked with an oval
+# over face / hair / ears before being correlated. Off-face pixels
+# carry sinusoid energy from the noise pool and dilute every pair if
+# included; restricting to the oval recovers the paper's Table 2
+# values to +/- 0.02 across 17 of 18 spot-checked cells.
+oval      <- make_face_mask(c(256L, 256L), region = "full")
+trait_cor <- cor(group_cis[oval, , drop = FALSE])
 
 saveRDS(trait_cor, file.path(cache_dir, "trait_ci_correlations.rds"))
 

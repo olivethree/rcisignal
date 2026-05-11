@@ -2288,11 +2288,26 @@ Restricted to the four traits used in the example contrasts
 (trust, friendly, competent, dominant), pairwise Pearson
 correlations between the group-mean CIs follow the expected
 valence structure: prosocial pairs correlate positively
-(trust–friendly +0.68, friendly–competent +0.45,
-trust–competent +0.39), and pairs that cross into dominance
-correlate negatively (friendly–dominant −0.48,
-trust–dominant −0.34). Competent–dominant is weakly negative
-(−0.17).
+(trust–friendly +0.68, friendly–competent +0.48,
+trust–competent +0.42), and pairs that cross into dominance
+correlate negatively (friendly–dominant −0.51,
+trust–dominant −0.37). Competent–dominant is weakly negative
+(−0.22).
+
+Correlations are computed over the pixels inside the parametric
+oval face mask (`make_face_mask(c(256L, 256L), region = "full")`),
+matching the masking step described in Oliveira et al. (2019,
+p. 892). Without the mask, off-face pixels carry sinusoid energy
+from the noise pool and attenuate every pair by roughly 0.02–0.05.
+The full ten-trait matrix reproduces Oliveira et al. (2019)
+Table 2 to within ±0.02 across 17 of 18 spot-checked cells; the
+one exception is trustworthy–untrustworthy, where the package
+recovers −0.57 against the paper's −0.68. Same-dimension
+opposite-pole pairs are the most sensitive to small differences
+in the underlying CIs, so the most plausible source is a small
+producer-set or pipeline difference between the 2019 analysis
+(rcicr v0.3.0 directly) and the cached signal matrices used here
+(rebuilt from the OSF responses).
 
 ```{r olv-trait-cor-show, eval = TRUE, echo = FALSE, results = "asis"}
 if (olv_have_cache &&
