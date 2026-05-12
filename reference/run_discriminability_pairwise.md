@@ -124,14 +124,17 @@ is well-defined.
 ## Reading the plot
 
 [`print()`](https://rdrr.io/r/base/print.html) shows the across-pairs
-table (one row per pair, adjusted p-values, Euclidean magnitudes). To
-visualise a single pair, pull its child results out of `$results` and
-call [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on either:
-e.g. `plot(res$results[["A_vs_B"]]$cluster_test)` for the cluster t-map
-(blue = A larger; red = B larger; black contours bound FWE-significant
-clusters), or `plot(res$results[["A_vs_B"]]$dissimilarity)` for the
-bootstrap distribution. To compare Euclidean distances across pairs on a
-shared axis, pass each pair's `dissimilarity` child to
+table (one row per pair, adjusted p-values, Euclidean magnitudes).
+`plot(res)` lays out one cluster t-map per pair in a square-ish grid
+(blue = first condition larger; red = second condition larger; black
+contours bound FWE-significant clusters); a warning fires above
+`max_pairs = 12` because individual panels become illegible. To inspect
+a single pair, pull its child results out of `$results` and call
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) on either:
+`plot(res$results[["A_vs_B"]]$cluster_test)` for the cluster t-map or
+`plot(res$results[["A_vs_B"]]$dissimilarity)` for the bootstrap
+distribution. To compare Euclidean distances across pairs on a shared
+axis, pass each pair's `dissimilarity` child to
 [`plot_dissimilarity_grid()`](https://olivethree.github.io/rcisignal/reference/plot_dissimilarity_grid.md).
 
 ## See also
@@ -171,8 +174,11 @@ res <- run_discriminability_pairwise(sigs,
                                      n_permutations = 500L,
                                      n_boot = 500L, seed = 1)
 print(res)  # adjusted p-values across the three pairs
-# Cluster t-map for one pair (blue = first condition larger;
-# red = second condition larger; black contours = significant clusters):
+# One call: cluster t-map per pair in a grid (blue = first
+# condition larger; red = second condition larger; black
+# contours = FWE-significant clusters).
+plot(res)
+# Or zoom in on a single pair:
 plot(res$results[["eyes_vs_mouth"]]$cluster_test,
      main = "Eyes vs Mouth (cluster-FWE)")
 # Compare Euclidean distances across all three pairs on a shared axis:

@@ -82,6 +82,8 @@ warning.
 
 ## See also
 
+[`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
+(side-by-side base + overlay view),
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md),
 [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md),
 [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md).

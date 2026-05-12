@@ -227,6 +227,10 @@ contours encode the inferential decision.</p></li>
 <li><p>Colour convention matches <code><a href="plot_agreement_map.html">plot_agreement_map()</a></code> and
 <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code> so the same data reads consistently
 across the package.</p></li>
+<li><p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> accepts <code>main =</code> (title) and <code>colour_bar =</code> (logical,
+default <code>TRUE</code>). Set <code>colour_bar = FALSE</code> when packing many
+panels into a small grid — used internally by
+<code><a href="plot.rcisignal_rel_pairwise_report.html">plot.rcisignal_rel_pairwise_report()</a></code> for that reason.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="reliability-metrics-expect-raw-masks">Reliability metrics expect raw masks<a class="anchor" aria-label="anchor" href="#reliability-metrics-expect-raw-masks"></a></h2>

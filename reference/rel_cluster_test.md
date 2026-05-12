@@ -189,6 +189,13 @@ boundaries traced on top.
   [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
   so the same data reads consistently across the package.
 
+- [`plot()`](https://rdrr.io/r/graphics/plot.default.html) accepts
+  `main =` (title) and `colour_bar =` (logical, default `TRUE`). Set
+  `colour_bar = FALSE` when packing many panels into a small grid — used
+  internally by
+  [`plot.rcisignal_rel_pairwise_report()`](https://olivethree.github.io/rcisignal/reference/plot.rcisignal_rel_pairwise_report.md)
+  for that reason.
+
 ## Reliability metrics expect raw masks
 
 Welch t and cluster mass / TFCE are variance-based and sensitive to any

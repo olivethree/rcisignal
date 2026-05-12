@@ -1884,11 +1884,22 @@ rep <- run_discriminability(signal_a, signal_b,
                             cluster_threshold = 2.0,
                             seed              = 1L)
 rep
-plot(rep)
+plot(rep)  # cluster t-map + bootstrap dissimilarity, side by side
 ```
 
+`plot(rep)` is the one-call view of the whole report. The children
 `rep$results$cluster_test` and `rep$results$dissimilarity` are the
-standalone results.
+standalone results, useful when you want a single panel with a custom
+title (for example to compare conditions named on a poster or a figure
+caption):
+
+``` r
+
+plot(rep$results$cluster_test,
+     main = "US vs PT - cluster test")
+plot(rep$results$dissimilarity,
+     main = "US vs PT - bootstrap dissimilarity")
+```
 
 ### 8.5 `run_discriminability_pairwise()`
 
@@ -1909,7 +1920,26 @@ rep <- run_discriminability_pairwise(
   seed = 1L
 )
 rep$pairs   # one row per pair: cond_a, cond_b, p_min, p_adj_pair
+plot(rep)   # cluster t-map per pair, laid out in a grid
 ```
+
+`plot(rep)` lays out one cluster t-map per pair in a square-ish grid. A
+warning fires above `max_pairs = 12` because at that density the panels
+become illegible; subset `rep$results` and plot a slice, or call
+`plot(rep, max_pairs = Inf)` to silence the warning. To inspect a single
+pair on its own, or to override the title:
+
+``` r
+
+plot(rep$results[["Trust_vs_Dominant"]]$cluster_test,
+     main = "Trust vs Dominant")
+plot(rep$results[["Trust_vs_Dominant"]]$dissimilarity,
+     main = "Trust vs Dominant - bootstrap")
+```
+
+For a shared-axis comparison of bootstrap distances across pairs, pass
+each pair’s dissimilarity child to
+[`plot_dissimilarity_grid()`](https://olivethree.github.io/rcisignal/reference/plot_dissimilarity_grid.md).
 
 The per-pair statistic carried into the across-pairs adjustment is the
 **minimum cluster-level p-value within each pair**; within-pair cluster

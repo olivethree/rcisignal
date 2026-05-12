@@ -11,6 +11,27 @@
   any of the package’s supported forms (logical/numeric vector, matrix,
   or PNG/JPEG path) and draws either a side-by-side base + overlay pair
   or just the overlay panel.
+- [`plot()`](https://rdrr.io/r/graphics/plot.default.html) is now
+  defined for `rcisignal_rel_pairwise_report` objects returned by
+  [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md).
+  One call lays out one cluster t-map per pair in a square-ish grid
+  (same blue/red sign convention and FWE contours as the per-pair
+  `plot.rcisignal_rel_cluster_test()`). A warning fires above
+  `max_pairs = 12`; pass `max_pairs = Inf` to silence.
+- [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on a
+  `rcisignal_rel_cluster_test` result gains a `colour_bar = TRUE`
+  argument (default preserves prior behaviour). Set `FALSE` to suppress
+  the per-panel colour bar when packing many panels into a small grid;
+  the new pairwise plot method uses this internally.
+
+### Documentation
+
+- Vignette §8.4 and §8.5 now show `plot(rep)` as the one-call view for
+  the two-condition and pairwise discriminability orchestrators, with
+  per-panel `plot(rep$results$...)` shown as the custom-title
+  alternative. The
+  [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md)
+  help page is updated in lockstep.
 
 ## rcisignal 0.1.2
 

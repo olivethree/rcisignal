@@ -38,6 +38,14 @@
 <h3 id="new-features-0-1-3">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-3"></a></h3>
 <ul><li>
 <code><a href="../reference/plot_mask_overlay.html">plot_mask_overlay()</a></code> lets you sanity-check that a face mask aligns with a specific base image before running CI / reliability / discriminability analyses. Accepts a base image (numeric matrix or PNG/JPEG path) plus a mask in any of the package’s supported forms (logical/numeric vector, matrix, or PNG/JPEG path) and draws either a side-by-side base + overlay pair or just the overlay panel.</li>
+<li>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> is now defined for <code>rcisignal_rel_pairwise_report</code> objects returned by <code><a href="../reference/run_discriminability_pairwise.html">run_discriminability_pairwise()</a></code>. One call lays out one cluster t-map per pair in a square-ish grid (same blue/red sign convention and FWE contours as the per-pair <code>plot.rcisignal_rel_cluster_test()</code>). A warning fires above <code>max_pairs = 12</code>; pass <code>max_pairs = Inf</code> to silence.</li>
+<li>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on a <code>rcisignal_rel_cluster_test</code> result gains a <code>colour_bar = TRUE</code> argument (default preserves prior behaviour). Set <code>FALSE</code> to suppress the per-panel colour bar when packing many panels into a small grid; the new pairwise plot method uses this internally.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-3">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-3"></a></h3>
+<ul><li>Vignette §8.4 and §8.5 now show <code>plot(rep)</code> as the one-call view for the two-condition and pairwise discriminability orchestrators, with per-panel <code>plot(rep$results$...)</code> shown as the custom-title alternative. The <code><a href="../reference/run_discriminability_pairwise.html">run_discriminability_pairwise()</a></code> help page is updated in lockstep.</li>
 </ul></div>
 </div>
     <div class="section level2">

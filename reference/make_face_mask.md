@@ -83,7 +83,9 @@ reverse correlation: an improved tool to assess visual representations.
 
 [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md),
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
-[`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+[`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md),
+[`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md),
+[`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
 
 ## Examples
 

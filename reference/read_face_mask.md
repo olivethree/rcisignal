@@ -50,7 +50,9 @@ Logical vector of length `prod(img_dims)`, column-major.
 ## See also
 
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md),
-[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md).
+[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
+[`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md),
+[`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md).
 
 ## Examples
 
