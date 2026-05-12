@@ -147,6 +147,11 @@ plus the base packages). PNG and JPEG readers (`png`, `jpeg`),
 `rcicr` for 2IFC pipelines, and `psych` for ICC cross-validation
 sit in `Suggests` and load on demand.
 
+`rcisignal` is in an experimental stage and exported functions are
+still being refined. Re-running the `install_github()` call above at
+the start of each analysis session pulls the latest version; this
+user guide is kept in sync with new and updated functions.
+
 ```{r load}
 library(rcisignal)
 ```
@@ -787,6 +792,15 @@ plot_face_mask(fm, img_dims = c(256L, 256L),
                main = "Full face oval (Schmitz default)")
 ```
 
+For a side-by-side comparison of the base alone and the base with
+the mask overlaid (the workflow you want when the question is "does
+this mask cover the right region of this specific base image?"),
+use `plot_mask_overlay()`:
+
+```{r plot-mask-overlay, eval = FALSE}
+plot_mask_overlay(base_image = "data/base.jpg", mask = fm)
+```
+
 **Apply masks symmetrically.** When a mask enters the analysis,
 apply it to *every* term that goes into the statistic. For
 `infoval()`, this means passing the mask to the function so both
@@ -912,9 +926,10 @@ imgs <- imgs[file.exists(imgs)]
 if (length(imgs)) knitr::include_graphics(imgs)
 ```
 
-Iterate with `plot_face_mask()` until the overlay sits where you
-want, then pass the tuned mask to `infoval()` or any `rel_*()`
-function exactly as you would a parametric mask. Useful shift
+Iterate with `plot_mask_overlay()` (base alongside base + mask) or
+`plot_face_mask()` until the overlay sits where you want, then pass
+the tuned mask to `infoval()` or any `rel_*()` function exactly as
+you would a parametric mask. Useful shift
 magnitudes are typically a few pixels to a few dozen on a 256-pixel
 image; if you find yourself needing more than that, the whole face
 is probably misaligned and `centre` should be retuned at the global
