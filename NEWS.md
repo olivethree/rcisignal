@@ -1,3 +1,14 @@
+# rcisignal 0.1.3
+
+## New features
+
+* `plot_mask_overlay()` lets you sanity-check that a face mask aligns
+  with a specific base image before running CI / reliability /
+  discriminability analyses. Accepts a base image (numeric matrix or
+  PNG/JPEG path) plus a mask in any of the package's supported forms
+  (logical/numeric vector, matrix, or PNG/JPEG path) and draws either
+  a side-by-side base + overlay pair or just the overlay panel.
+
 # rcisignal 0.1.2
 
 ## New features
