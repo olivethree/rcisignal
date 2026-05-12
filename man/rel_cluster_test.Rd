@@ -155,6 +155,10 @@ contours encode the inferential decision.
 \item Colour convention matches \code{\link[=plot_agreement_map]{plot_agreement_map()}} and
 \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} so the same data reads consistently
 across the package.
+\item \code{plot()} accepts \verb{main =} (title) and \verb{colour_bar =} (logical,
+default \code{TRUE}). Set \code{colour_bar = FALSE} when packing many
+panels into a small grid — used internally by
+\code{\link[=plot.rcisignal_rel_pairwise_report]{plot.rcisignal_rel_pairwise_report()}} for that reason.
 }
 }
 

@@ -418,11 +418,13 @@ summary.rcisignal_rel_cluster_test <- function(object, ...) {
 
 #' @export
 plot.rcisignal_rel_cluster_test <- function(x, ...,
-                                       main = NULL) {
+                                       main       = NULL,
+                                       colour_bar = TRUE) {
   op <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(op), add = TRUE)
   method <- if (is.null(x$method)) "threshold" else x$method
-  set_pub_par(mar = c(1, 1, 3, 6) + 0.1)
+  bar_mar <- if (isTRUE(colour_bar)) 6 else 1
+  set_pub_par(mar = c(1, 1, 3, bar_mar) + 0.1)
 
   pal <- grDevices::hcl.colors(256L, "RdBu", rev = TRUE)
 
@@ -455,7 +457,9 @@ plot.rcisignal_rel_cluster_test <- function(x, ...,
         col = "grey10", lwd = 1.5
       )
     }
-    add_colour_bar(zlim, pal, label = "TFCE value (signed)")
+    if (isTRUE(colour_bar)) {
+      add_colour_bar(zlim, pal, label = "TFCE value (signed)")
+    }
     graphics::mtext(
       sprintf("alpha = %.2f, %d permutations, H = %.1f, E = %.1f",
               x$alpha, x$n_permutations, x$tfce_H, x$tfce_E),
@@ -500,7 +504,9 @@ plot.rcisignal_rel_cluster_test <- function(x, ...,
   add_contour(x$pos_labels, sig_pos_ids, "grey10")
   add_contour(x$neg_labels, sig_neg_ids, "grey10")
 
-  add_colour_bar(zlim, pal, label = "Welch t")
+  if (isTRUE(colour_bar)) {
+    add_colour_bar(zlim, pal, label = "Welch t")
+  }
   n_sig <- sum(x$clusters$significant)
   graphics::mtext(
     sprintf("|t| threshold = %.1f, alpha = %.2f, %d perms, %d/%d clusters significant",
@@ -754,6 +760,62 @@ print.rcisignal_rel_pairwise_report <- function(x, ...) {
     "\n  p_adj_pair: minimum within-pair cluster p, %s-adjusted across %d pairs.\n",
     x$fwer, nrow(x$pairs)
   ))
+  invisible(x)
+}
+
+#' Plot the cluster-test grid for a pairwise discriminability report
+#'
+#' Renders one cluster t-map (or signed TFCE map) per pair, laid out
+#' in a square-ish grid. Each panel shows the per-pixel statistic
+#' with black contours bounding FWE-significant clusters (or
+#' FWE-corrected pixels under TFCE). Colour convention matches the
+#' rest of the package: blue = first condition larger, red = second
+#' condition larger.
+#'
+#' To compare overall magnitudes across pairs on a shared axis,
+#' pass the per-pair `$dissimilarity` children to
+#' [plot_dissimilarity_grid()] instead.
+#'
+#' @param x A [run_discriminability_pairwise()] result.
+#' @param ... Reserved for future use.
+#' @param ncol Optional integer. Columns in the panel grid. When
+#'   `NULL` (default), `ceiling(sqrt(n_pairs))` is used.
+#' @param max_pairs Integer. Above this many pairs a warning is
+#'   emitted (panels become illegible). Default `12L`. The grid is
+#'   still drawn; pass `max_pairs = Inf` to silence the warning.
+#' @return Invisibly the input `x`.
+#' @seealso [plot_dissimilarity_grid()] for a shared-axis comparison
+#'   of bootstrap dissimilarity distances across pairs.
+#' @export
+plot.rcisignal_rel_pairwise_report <- function(x, ...,
+                                               ncol      = NULL,
+                                               max_pairs = 12L) {
+  pair_ids <- names(x$results)
+  n_pairs  <- length(pair_ids)
+  if (n_pairs == 0L) {
+    cli::cli_abort("Pairwise report has no per-pair results to plot.")
+  }
+  if (n_pairs > max_pairs) {
+    cli::cli_warn(c(
+      "Pairwise report has {n_pairs} pairs; panels will be small.",
+      "i" = "Pass {.code max_pairs = Inf} to silence this warning, or \\
+             subset {.code x$results} and plot a slice."
+    ))
+  }
+  if (is.null(ncol)) ncol <- as.integer(ceiling(sqrt(n_pairs)))
+  nrow_grid <- as.integer(ceiling(n_pairs / ncol))
+
+  op <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(op), add = TRUE)
+  graphics::par(mfrow = c(nrow_grid, ncol),
+                mar   = c(0.5, 0.5, 2.0, 0.5),
+                oma   = c(0, 0, 0, 0))
+
+  for (pid in pair_ids) {
+    child <- x$results[[pid]]$cluster_test
+    pretty_title <- gsub("_vs_", " vs ", pid, fixed = TRUE)
+    plot(child, main = pretty_title, colour_bar = FALSE)
+  }
   invisible(x)
 }
 

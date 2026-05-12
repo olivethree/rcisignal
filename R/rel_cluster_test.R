@@ -105,6 +105,10 @@
 #' * Colour convention matches [plot_agreement_map()] and
 #'   [plot_ci_overlay()] so the same data reads consistently
 #'   across the package.
+#' * `plot()` accepts `main =` (title) and `colour_bar =` (logical,
+#'   default `TRUE`). Set `colour_bar = FALSE` when packing many
+#'   panels into a small grid — used internally by
+#'   [plot.rcisignal_rel_pairwise_report()] for that reason.
 #'
 #' @section Reliability metrics expect raw masks:
 #' Welch t and cluster mass / TFCE are variance-based and

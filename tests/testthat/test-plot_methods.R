@@ -43,3 +43,71 @@ test_that("print/summary/plot methods exist and do not error", {
   expect_invisible(summary(rep))
   expect_silent({ grDevices::pdf(NULL); plot(rep); grDevices::dev.off() })
 })
+
+test_that("cluster_test plot() accepts colour_bar = FALSE", {
+  pair <- make_sig_pair(64L, 8L)
+  ct <- suppressWarnings(
+    rel_cluster_test(pair$a, pair$b, img_dims = pair$img_dims,
+                     n_permutations = 30L, progress = FALSE)
+  )
+  grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(plot(ct, colour_bar = FALSE))
+  expect_no_error(plot(ct, colour_bar = TRUE))
+})
+
+test_that("plot.rcisignal_rel_pairwise_report draws a grid", {
+  pa <- make_sig_pair(64L, 6L, seed = 1L)
+  pb <- make_sig_pair(64L, 6L, seed = 2L)
+  pc <- make_sig_pair(64L, 6L, seed = 3L)
+  sigs <- list(A = pa$a, B = pa$b, C = pb$b)
+  for (nm in names(sigs)) {
+    attr(sigs[[nm]], "img_dims") <- pa$img_dims
+  }
+  pw <- suppressWarnings(
+    run_discriminability_pairwise(
+      sigs, n_permutations = 30L, n_boot = 50L,
+      seed = 1L, progress = FALSE
+    )
+  )
+  grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+  mfrow_before <- graphics::par("mfrow")
+  expect_no_error(plot(pw))
+  expect_identical(graphics::par("mfrow"), mfrow_before)
+})
+
+test_that("plot.rcisignal_rel_pairwise_report warns when many pairs", {
+  fake_child <- list(cluster_test = structure(
+    list(
+      observed_t        = rep(0, 16L),
+      img_dims          = c(4L, 4L),
+      method            = "threshold",
+      cluster_threshold = 2.0,
+      alpha             = 0.05,
+      n_permutations    = 30L,
+      pos_labels        = rep(0L, 16L),
+      neg_labels        = rep(0L, 16L),
+      clusters          = data.frame(
+        cluster_id  = integer(0),
+        direction   = character(0),
+        significant = logical(0)
+      )
+    ),
+    class = "rcisignal_rel_cluster_test"
+  ))
+  pairs <- paste0("p", seq_len(15L), "_vs_q", seq_len(15L))
+  fake <- structure(
+    list(
+      results    = stats::setNames(replicate(15L, fake_child,
+                                             simplify = FALSE), pairs),
+      pairs      = data.frame(pair_id = pairs),
+      conditions = letters[1:6],
+      fwer       = "holm",
+      alpha      = 0.05,
+      method     = "threshold"
+    ),
+    class = "rcisignal_rel_pairwise_report"
+  )
+  grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+  expect_warning(plot(fake), "panels will be small")
+  expect_no_warning(plot(fake, max_pairs = Inf))
+})
