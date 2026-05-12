@@ -45,5 +45,6 @@ iv <- infoval(signal_matrix, noise_matrix, trial_counts,
 }
 }
 \seealso{
-\code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=infoval]{infoval()}}.
+\code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=infoval]{infoval()}}, \code{\link[=plot_face_mask]{plot_face_mask()}},
+\code{\link[=plot_mask_overlay]{plot_mask_overlay()}}.
 }

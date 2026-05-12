@@ -33,7 +33,8 @@
 #' @return Invisibly returns the resolved logical matrix
 #'   (`nrow` x `ncol`, top-left origin).
 #'
-#' @seealso [make_face_mask()], [read_face_mask()], [diagnose_infoval()].
+#' @seealso [plot_mask_overlay()] (side-by-side base + overlay view),
+#'   [make_face_mask()], [read_face_mask()], [diagnose_infoval()].
 #'
 #' @examples
 #' m <- make_face_mask(c(128L, 128L), region = "eyes")

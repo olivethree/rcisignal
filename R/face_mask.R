@@ -35,7 +35,8 @@
 #'   fraction of image height. Default 0.45.
 #' @return Logical vector of length `prod(img_dims)`, column-major
 #'   to match the package's image vectorisation convention.
-#' @seealso [read_face_mask()], [infoval()], [plot_agreement_map()]
+#' @seealso [read_face_mask()], [infoval()], [plot_agreement_map()],
+#'   [plot_face_mask()], [plot_mask_overlay()]
 #' @references
 #' Schmitz, M., Rougier, M., & Yzerbyt, V. (2024). Introducing the
 #' brief reverse correlation: an improved tool to assess visual
@@ -132,7 +133,8 @@ make_face_mask <- function(img_dims,
 #'   for catching a wrong-resolution mask before it silently corrupts
 #'   a downstream computation.
 #' @return Logical vector of length `prod(img_dims)`, column-major.
-#' @seealso [make_face_mask()], [infoval()].
+#' @seealso [make_face_mask()], [infoval()], [plot_face_mask()],
+#'   [plot_mask_overlay()].
 #' @export
 #' @examples
 #' \dontrun{

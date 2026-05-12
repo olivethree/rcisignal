@@ -70,5 +70,6 @@ representations. \emph{European Journal of Social Psychology}.
 \doi{10.1002/ejsp.3100}
 }
 \seealso{
-\code{\link[=read_face_mask]{read_face_mask()}}, \code{\link[=infoval]{infoval()}}, \code{\link[=plot_agreement_map]{plot_agreement_map()}}
+\code{\link[=read_face_mask]{read_face_mask()}}, \code{\link[=infoval]{infoval()}}, \code{\link[=plot_agreement_map]{plot_agreement_map()}},
+\code{\link[=plot_face_mask]{plot_face_mask()}}, \code{\link[=plot_mask_overlay]{plot_mask_overlay()}}
 }

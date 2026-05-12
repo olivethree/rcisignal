@@ -65,5 +65,6 @@ plot_face_mask(m, img_dims = c(128L, 128L), main = "eyes region")
 
 }
 \seealso{
+\code{\link[=plot_mask_overlay]{plot_mask_overlay()}} (side-by-side base + overlay view),
 \code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=read_face_mask]{read_face_mask()}}, \code{\link[=diagnose_infoval]{diagnose_infoval()}}.
 }
