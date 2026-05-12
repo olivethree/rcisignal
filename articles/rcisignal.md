@@ -3221,7 +3221,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation
-#>   Data and Classification Images_. R package version 0.1.2,
+#>   Data and Classification Images_. R package version 0.1.3,
 #>   <https://github.com/olivethree/rcisignal>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -3231,7 +3231,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> Images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.1.2},
+#>     note = {R package version 0.1.3},
 #>     url = {https://github.com/olivethree/rcisignal},
 #>   }
 ```

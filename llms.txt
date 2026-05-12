@@ -213,6 +213,9 @@ enthusiasts out there! :)
 - [`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md)
   : Plot a face mask for visual verification
 
+- [`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
+  : Sanity-check a face mask against a base image
+
 - [`rcisignal_diag_report()`](https://olivethree.github.io/rcisignal/reference/rcisignal_diag_report.md)
   :
 
