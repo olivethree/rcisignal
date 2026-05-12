@@ -54,7 +54,7 @@
                         <h4 data-toc-skip class="author">Manuel
 Oliveira</h4>
             
-            <h4 data-toc-skip class="date">2026-05-11</h4>
+            <h4 data-toc-skip class="date">2026-05-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
       <div class="d-none name"><code>rcisignal.Rmd</code></div>
@@ -389,9 +389,9 @@ pair was chosen, <code>-1</code> if the inverted version.</li>
 <p>A weak signal is the default rather than <code>"none"</code> so the
 worked example produces a recognisable CI on the planted region rather
 than a flat null result. Pass <code>signal_strength = "none"</code> to
-get truly bogus data — useful for testing the diagnostic side,
+get truly bogus data (useful for testing the diagnostic side,
 calibrating null distributions, or stress-testing the reliability /
-cluster permutation code under no-signal conditions.</p>
+cluster permutation code under no-signal conditions).</p>
 </div>
 <div class="section level4">
 <h4 id="response-time-model">Response-time model<a class="anchor" aria-label="anchor" href="#response-time-model"></a>
@@ -411,8 +411,8 @@ milliseconds) with two contaminant streams:</p>
 pauses.</li>
 </ul>
 <p>These are deliberately tuned so that <code><a href="../reference/check_rt.html">check_rt()</a></code> finds
-something to flag — useful for sanity-checking the RT diagnostic without
-curating real outliers by hand.</p>
+something to flag (useful for sanity-checking the RT diagnostic without
+curating real outliers by hand).</p>
 </div>
 <div class="section level4">
 <h4 id="end-to-end-demo-2ifc">End-to-end demo (2IFC)<a class="anchor" aria-label="anchor" href="#end-to-end-demo-2ifc"></a>
@@ -1752,7 +1752,7 @@ turn, recompute the group CI with that producer removed and correlate
 the result with the full-sample group CI. Producers whose removal
 changes the group CI more than the others stand out as high-influence
 cases worth a closer look. This is <strong>not</strong> a reliability
-metric — the with-producer and without-producer group CIs share
+metric. The with-producer and without-producer group CIs share
 <code>(N-1)/N</code> of their data, so LOO correlations are near 1 by
 construction even on noisy data; the diagnostic information lives in the
 <em>relative</em> ordering of producers, which the function summarises

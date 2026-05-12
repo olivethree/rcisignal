@@ -238,10 +238,10 @@ for the chosen `signal_region`).
 
 A weak signal is the default rather than `"none"` so the worked example
 produces a recognisable CI on the planted region rather than a flat null
-result. Pass `signal_strength = "none"` to get truly bogus data — useful
+result. Pass `signal_strength = "none"` to get truly bogus data (useful
 for testing the diagnostic side, calibrating null distributions, or
 stress-testing the reliability / cluster permutation code under
-no-signal conditions.
+no-signal conditions).
 
 #### Response-time model
 
@@ -256,8 +256,8 @@ two contaminant streams:
 
 These are deliberately tuned so that
 [`check_rt()`](https://olivethree.github.io/rcisignal/reference/check_rt.md)
-finds something to flag — useful for sanity-checking the RT diagnostic
-without curating real outliers by hand.
+finds something to flag (useful for sanity-checking the RT diagnostic
+without curating real outliers by hand).
 
 #### End-to-end demo (2IFC)
 
@@ -1544,7 +1544,7 @@ diagnostic (Tukey, 1958; Cook, 1977): for each producer in turn,
 recompute the group CI with that producer removed and correlate the
 result with the full-sample group CI. Producers whose removal changes
 the group CI more than the others stand out as high-influence cases
-worth a closer look. This is **not** a reliability metric — the
+worth a closer look. This is **not** a reliability metric. The
 with-producer and without-producer group CIs share `(N-1)/N` of their
 data, so LOO correlations are near 1 by construction even on noisy data;
 the diagnostic information lives in the *relative* ordering of
