@@ -12,7 +12,7 @@ designs.
 <br clear="left"/>
 
 <!-- badges: start -->
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19961180.svg)](https://doi.org/10.5281/zenodo.19961180)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19961180-1682d4.svg)](https://doi.org/10.5281/zenodo.19961180)
 [![R-CMD-check](https://github.com/olivethree/rcisignal/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/olivethree/rcisignal/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/olivethree/rcisignal/actions/workflows/pkgdown.yaml/badge.svg)](https://olivethree.github.io/rcisignal/)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
