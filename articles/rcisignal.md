@@ -127,6 +127,11 @@ base packages). PNG and JPEG readers (`png`, `jpeg`), `rcicr` for 2IFC
 pipelines, and `psych` for ICC cross-validation sit in `Suggests` and
 load on demand.
 
+`rcisignal` is in an experimental stage and exported functions are still
+being refined. Re-running the `install_github()` call above at the start
+of each analysis session pulls the latest version; this user guide is
+kept in sync with new and updated functions.
+
 ``` r
 
 library(rcisignal)
@@ -841,6 +846,16 @@ plot_face_mask(fm, img_dims = c(256L, 256L),
                main = "Full face oval (Schmitz default)")
 ```
 
+For a side-by-side comparison of the base alone and the base with the
+mask overlaid (the workflow you want when the question is “does this
+mask cover the right region of this specific base image?”), use
+[`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md):
+
+``` r
+
+plot_mask_overlay(base_image = "data/base.jpg", mask = fm)
+```
+
 **Apply masks symmetrically.** When a mask enters the analysis, apply it
 to *every* term that goes into the statistic. For
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
@@ -1036,6 +1051,8 @@ second knob. Each panel renders one of the matrices produced by
 `shift_mask()` above.
 
 Iterate with
+[`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
+(base alongside base + mask) or
 [`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md)
 until the overlay sits where you want, then pass the tuned mask to
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)

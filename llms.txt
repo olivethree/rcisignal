@@ -38,6 +38,13 @@ remotes::install_github("rdotsch/rcicr")
 Brief-RC users can skip `rcicr`; the Brief-RC code is fully native to
 `rcisignal`.
 
+> **Re-install before each fresh analysis.** `rcisignal` is in an
+> experimental stage and exported functions are still being refined.
+> Re-running `remotes::install_github("olivethree/rcisignal")` at the
+> start of an analysis session pulls the latest version; the [user
+> guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html)
+> is kept in sync with new and updated functions.
+
 ## Showcase: Oliveira et al. (2019)
 
 A re-analysis of the open data from [Oliveira, Garcia-Marques, Dotsch &
