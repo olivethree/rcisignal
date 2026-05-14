@@ -71,9 +71,8 @@ Friendly** and **Dominant vs Competent**.
 
 Per (trait, region) cell. Values are the **median producer z-score** and
 (in parentheses) the **number of producers (out of 20) clearing
-`z >= 1.96`**, using the [Schmitz et al.
-(2024)](https://doi.org/10.1002/ejsp.3100) face-region masks and a
-trial-count-matched reference distribution.
+`z >= 1.96`**, using face-region masks and a trial-count-matched
+reference distribution.
 
 | Trait       | Full face    | Upper face   | Eyes         | Mouth        |
 |-------------|--------------|--------------|--------------|--------------|
