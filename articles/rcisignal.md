@@ -814,8 +814,13 @@ Three ways to obtain a mask:
 #    follows Schmitz, Rougier, & Yzerbyt (2024).
 fm <- make_face_mask(c(256L, 256L), region = "full")
 
-# Sub-regions for region-restricted analyses:
-make_face_mask(c(256L, 256L), region = "eyes")
+# Sub-regions for region-restricted analyses. Three of these
+# (eyes, left_eye, right_eye) are axis-aligned rectangles
+# tunable via the `region_bounds` argument; the rest are
+# ellipses tunable via `centre`, `half_width`, `half_height`.
+make_face_mask(c(256L, 256L), region = "eyes")        # wide rectangle, both eyes
+make_face_mask(c(256L, 256L), region = "left_eye")    # rectangle, viewer's left eye
+make_face_mask(c(256L, 256L), region = "right_eye")   # rectangle, viewer's right eye
 make_face_mask(c(256L, 256L), region = "mouth")
 make_face_mask(c(256L, 256L), region = "nose")
 make_face_mask(c(256L, 256L), region = "upper_face")
@@ -899,48 +904,78 @@ the inside-mask pixels when a mask is supplied via the `mask` argument.
 
 When
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
-is used to generate the mask parametrically, six region presets are
+is used to generate the mask parametrically, eight region presets are
 available. Imposed on the same base face (an artificial face generated
 with thispersondoesnotexist.com so no consent or licensing concerns
-apply), the six regions look as follows.
+apply), they look as follows. Five regions are ellipses (`full`, `nose`,
+`mouth`, `upper_face`, `lower_face`) following the Schmitz, Rougier, and
+Yzerbyt (2024) geometry; the three eye regions (`eyes`, `left_eye`,
+`right_eye`) are axis-aligned rectangles, tunable to a specific base via
+the `region_bounds` argument (see the tuning subsection below).
 
-![The six built-in face-region masks rendered over the same
+![The eight built-in face-region masks rendered over the same
 artificial-person base face (256 x 256). Each translucent red overlay
-marks the pixels that pass through the mask; pixels outside the overlay
-are excluded from the analysis. Region geometry follows Schmitz,
-Rougier, and Yzerbyt
-(2024).](figures/face_masks/artificial_full.png)![The six built-in
-face-region masks rendered over the same artificial-person base face
-(256 x 256). Each translucent red overlay marks the pixels that pass
-through the mask; pixels outside the overlay are excluded from the
-analysis. Region geometry follows Schmitz, Rougier, and Yzerbyt
-(2024).](figures/face_masks/artificial_eyes.png)![The six built-in
-face-region masks rendered over the same artificial-person base face
-(256 x 256). Each translucent red overlay marks the pixels that pass
-through the mask; pixels outside the overlay are excluded from the
-analysis. Region geometry follows Schmitz, Rougier, and Yzerbyt
-(2024).](figures/face_masks/artificial_nose.png)![The six built-in
-face-region masks rendered over the same artificial-person base face
-(256 x 256). Each translucent red overlay marks the pixels that pass
-through the mask; pixels outside the overlay are excluded from the
-analysis. Region geometry follows Schmitz, Rougier, and Yzerbyt
-(2024).](figures/face_masks/artificial_mouth.png)![The six built-in
-face-region masks rendered over the same artificial-person base face
-(256 x 256). Each translucent red overlay marks the pixels that pass
-through the mask; pixels outside the overlay are excluded from the
-analysis. Region geometry follows Schmitz, Rougier, and Yzerbyt
-(2024).](figures/face_masks/artificial_upper_face.png)![The six built-in
-face-region masks rendered over the same artificial-person base face
-(256 x 256). Each translucent red overlay marks the pixels that pass
-through the mask; pixels outside the overlay are excluded from the
-analysis. Region geometry follows Schmitz, Rougier, and Yzerbyt
-(2024).](figures/face_masks/artificial_lower_face.png)
+marks the pixels that pass through the mask; pixels outside are excluded
+from the analysis. The five elliptical regions follow Schmitz, Rougier,
+and Yzerbyt (2024); the three rectangle eye regions are independent of
+the full-oval geometry and tunable via
+\`region_bounds\`.](figures/face_masks/artificial_full.png)![The eight
+built-in face-region masks rendered over the same artificial-person base
+face (256 x 256). Each translucent red overlay marks the pixels that
+pass through the mask; pixels outside are excluded from the analysis.
+The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024);
+the three rectangle eye regions are independent of the full-oval
+geometry and tunable via
+\`region_bounds\`.](figures/face_masks/artificial_upper_face.png)![The
+eight built-in face-region masks rendered over the same
+artificial-person base face (256 x 256). Each translucent red overlay
+marks the pixels that pass through the mask; pixels outside are excluded
+from the analysis. The five elliptical regions follow Schmitz, Rougier,
+and Yzerbyt (2024); the three rectangle eye regions are independent of
+the full-oval geometry and tunable via
+\`region_bounds\`.](figures/face_masks/artificial_lower_face.png)![The
+eight built-in face-region masks rendered over the same
+artificial-person base face (256 x 256). Each translucent red overlay
+marks the pixels that pass through the mask; pixels outside are excluded
+from the analysis. The five elliptical regions follow Schmitz, Rougier,
+and Yzerbyt (2024); the three rectangle eye regions are independent of
+the full-oval geometry and tunable via
+\`region_bounds\`.](figures/face_masks/artificial_nose.png)![The eight
+built-in face-region masks rendered over the same artificial-person base
+face (256 x 256). Each translucent red overlay marks the pixels that
+pass through the mask; pixels outside are excluded from the analysis.
+The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024);
+the three rectangle eye regions are independent of the full-oval
+geometry and tunable via
+\`region_bounds\`.](figures/face_masks/artificial_mouth.png)![The eight
+built-in face-region masks rendered over the same artificial-person base
+face (256 x 256). Each translucent red overlay marks the pixels that
+pass through the mask; pixels outside are excluded from the analysis.
+The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024);
+the three rectangle eye regions are independent of the full-oval
+geometry and tunable via
+\`region_bounds\`.](figures/face_masks/artificial_eyes.png)![The eight
+built-in face-region masks rendered over the same artificial-person base
+face (256 x 256). Each translucent red overlay marks the pixels that
+pass through the mask; pixels outside are excluded from the analysis.
+The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024);
+the three rectangle eye regions are independent of the full-oval
+geometry and tunable via
+\`region_bounds\`.](figures/face_masks/artificial_left_eye.png)![The
+eight built-in face-region masks rendered over the same
+artificial-person base face (256 x 256). Each translucent red overlay
+marks the pixels that pass through the mask; pixels outside are excluded
+from the analysis. The five elliptical regions follow Schmitz, Rougier,
+and Yzerbyt (2024); the three rectangle eye regions are independent of
+the full-oval geometry and tunable via
+\`region_bounds\`.](figures/face_masks/artificial_right_eye.png)
 
-The six built-in face-region masks rendered over the same
+The eight built-in face-region masks rendered over the same
 artificial-person base face (256 x 256). Each translucent red overlay
-marks the pixels that pass through the mask; pixels outside the overlay
-are excluded from the analysis. Region geometry follows Schmitz,
-Rougier, and Yzerbyt (2024).
+marks the pixels that pass through the mask; pixels outside are excluded
+from the analysis. The five elliptical regions follow Schmitz, Rougier,
+and Yzerbyt (2024); the three rectangle eye regions are independent of
+the full-oval geometry and tunable via `region_bounds`.
 
 The default geometry assumes the eyes sit roughly in the upper third of
 the image and the mouth in the lower third (centred square base, face
@@ -951,11 +986,77 @@ if your base image has different framing.
 
 #### Tuning a sub-region for a non-default base face
 
-The default sub-region geometry (eyes, nose, mouth) is calibrated for a
-centred, frontal base face that fills most of the frame, following
-Schmitz et al. (2024). When the base image violates that assumption, the
+The default sub-region geometry is calibrated for a centred, frontal
+base face that fills most of the frame, following Schmitz et al. (2024)
+for the elliptical regions and a matching heuristic for the rectangle
+eye regions. When the base image violates that assumption, the
 parametric overlay drifts off the intended feature and the metrics
 computed against it no longer mean what their name implies.
+
+There are two tuning routes, depending on the region’s shape:
+
+- **Rectangle regions (`"eyes"`, `"left_eye"`, `"right_eye"`)** take a
+  `region_bounds = c(row_min, row_max, col_min, col_max)` argument that
+  sets the rectangle’s edges directly in 0-1 image fractions.
+  Independent of the full-oval geometry; the rectangle for either eye
+  can move without dragging the other along, which is the friction the
+  previous two-ellipses-that-moved-together design ran into.
+- **Elliptical regions (`"full"`, `"nose"`, `"mouth"`, `"upper_face"`,
+  `"lower_face"`)** are positioned relative to the full-face oval and
+  tuned via the global `centre`, `half_width`, `half_height`. For
+  independent per-region adjustment of an ellipse (a common need with
+  non-portrait or AI-generated bases), the simplest recipe is to reshape
+  the returned vector back into a logical matrix and slide that grid by
+  a few pixels with a small `shift_mask()` helper.
+
+##### Rectangle regions: tune `region_bounds`
+
+`region_bounds` accepts a length-4 numeric vector
+`c(row_min, row_max, col_min, col_max)` in 0-1 image fractions. Each
+pair must satisfy `row_min < row_max` and `col_min < col_max`, and every
+entry must lie in `[0, 1]`. The left and right eye rectangles are
+independent, so each can be nudged separately to match a specific base.
+
+``` r
+
+# Tune just the viewer's left-eye rectangle on a base whose
+# eye line sits a few percent below the heuristic default. The
+# right-eye rectangle is unaffected.
+left_eye_tuned <- make_face_mask(
+  c(256L, 256L), region = "left_eye",
+  region_bounds = c(0.40, 0.50, 0.24, 0.44)
+)
+
+# Verify the alignment visually before passing to a metric.
+plot_mask_overlay(base_image = "data/base.png",
+                  mask = left_eye_tuned)
+```
+
+Rendered over the artificial-person base used earlier, the default
+`left_eye` rectangle and the tuned variant look as follows:
+
+![Rectangle \`left_eye\` mask before and after tuning on a base face
+whose eye line sits below the default. Left: default \`region_bounds\`,
+sitting on the eyebrow. Right: nudged downward by passing
+\`region_bounds = c(0.40, 0.50, 0.24, 0.44)\`. Because the rectangle eye
+regions are independent of the full-oval geometry, the right-eye
+rectangle would remain
+untouched.](figures/face_masks/artificial_left_eye_demo_default.png)![Rectangle
+\`left_eye\` mask before and after tuning on a base face whose eye line
+sits below the default. Left: default \`region_bounds\`, sitting on the
+eyebrow. Right: nudged downward by passing \`region_bounds = c(0.40,
+0.50, 0.24, 0.44)\`. Because the rectangle eye regions are independent
+of the full-oval geometry, the right-eye rectangle would remain
+untouched.](figures/face_masks/artificial_left_eye_demo_tuned.png)
+
+Rectangle `left_eye` mask before and after tuning on a base face whose
+eye line sits below the default. Left: default `region_bounds`, sitting
+on the eyebrow. Right: nudged downward by passing
+`region_bounds = c(0.40, 0.50, 0.24, 0.44)`. Because the rectangle eye
+regions are independent of the full-oval geometry, the right-eye
+rectangle would remain untouched.
+
+##### Elliptical regions: global `centre` or per-region shift
 
 If every feature is offset in the same direction, pass the global
 `centre` (and optionally `half_width`, `half_height`) to
@@ -963,14 +1064,14 @@ If every feature is offset in the same direction, pass the global
 
 ``` r
 
-# Whole-face shift: eyes, nose, and mouth move together.
-make_face_mask(c(256L, 256L), region = "eyes",
+# Whole-face shift: nose, mouth, and the full oval all move
+# together. Rectangle eye regions are unaffected.
+make_face_mask(c(256L, 256L), region = "mouth",
                centre = c(0.55, 0.50))   # 5% down
 ```
 
-For independent per-region tuning (a common need with non-portrait or
-AI-generated bases), the simplest recipe is: take the default mask
-returned by
+For independent per-region tuning of an ellipse, the simplest recipe is:
+take the default mask returned by
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md),
 reshape it back into a `nrow x ncol` logical matrix (so you can think of
 it as a grid of pixels), and slide that grid by a few pixels in any
@@ -979,19 +1080,18 @@ are dropped, and the new edges are filled with `FALSE`.
 
 ``` r
 
-# Default eye mask, reshaped from a flat logical vector (pixels
-# in column-by-column order) back into a 256 x 256 grid.
-eye_mask_default <- matrix(
-  make_face_mask(c(256L, 256L), region = "eyes"),
+# Default mouth mask, reshaped from a flat logical vector
+# (pixels in column-by-column order) back into a 256 x 256
+# grid.
+mouth_mask_default <- matrix(
+  make_face_mask(c(256L, 256L), region = "mouth"),
   nrow = 256, ncol = 256
 )
 
 # Shift a logical mask by `down` and `right` pixels. Positive
-# values move the mask down / right; negative values move it up /
-# left. The idea is to start from a destination matrix of FALSE
-# the same size as the input, then copy the source pixels into
-# the shifted positions; pixels that land off the image are
-# dropped.
+# values move the mask down / right; negative values move it
+# up / left. Pixels that land off the image are dropped; new
+# edges are filled with FALSE.
 shift_mask <- function(mask, down = 0, right = 0) {
   out <- matrix(FALSE, nrow(mask), ncol(mask))
   src_rows <- seq_len(nrow(mask)) - down
@@ -1002,10 +1102,10 @@ shift_mask <- function(mask, down = 0, right = 0) {
   out
 }
 
-# Tune. On a 256-pixel image, 20 pixels is about 8 % of the height
-# and 8 pixels is about 3 % of the width.
-eye_mask_v  <- shift_mask(eye_mask_default, down = 20)
-eye_mask_vh <- shift_mask(eye_mask_default, down = 20, right = 8)
+# Tune. On a 256-pixel image, 20 pixels is about 8 % of the
+# height and 8 pixels is about 3 % of the width.
+mouth_mask_v  <- shift_mask(mouth_mask_default, down = 20)
+mouth_mask_vh <- shift_mask(mouth_mask_default, down = 20, right = 8)
 ```
 
 `shift_mask()` accepts both `down` and `right` and combines them in a
@@ -1015,40 +1115,42 @@ the same idiom. Both
 and the `rel_*()` family accept a logical matrix as the `mask` argument,
 so the tuned grid can be passed in directly without flattening.
 
-Rendered over the same `artif_base.png` shown earlier (where the eye
-line sits noticeably below the Schmitz default), the default mask and
-the two tuned variants look as follows:
+Rendered over the same `artif_base.png` shown earlier (where the mouth
+sits noticeably below the default), the default mask and the two tuned
+variants look as follows:
 
-![Eye-region mask before and after tuning on a base face whose eye line
-sits below the Schmitz default. Left: default geometry, where the eye
-ovals sit on the eyebrows. Middle: shifted down by ~20 pixels (about 8
-percent of image height), which drops the ovals onto the eyes. Right:
-same vertical shift plus an ~8-pixel rightward shift, illustrating the
-second knob. Each panel renders one of the matrices produced by
-\`shift_mask()\`
-above.](figures/face_masks/artificial_eyes_demo_default.png)![Eye-region
-mask before and after tuning on a base face whose eye line sits below
-the Schmitz default. Left: default geometry, where the eye ovals sit on
-the eyebrows. Middle: shifted down by ~20 pixels (about 8 percent of
-image height), which drops the ovals onto the eyes. Right: same vertical
-shift plus an ~8-pixel rightward shift, illustrating the second knob.
-Each panel renders one of the matrices produced by \`shift_mask()\`
-above.](figures/face_masks/artificial_eyes_demo_shift_v.png)![Eye-region
-mask before and after tuning on a base face whose eye line sits below
-the Schmitz default. Left: default geometry, where the eye ovals sit on
-the eyebrows. Middle: shifted down by ~20 pixels (about 8 percent of
-image height), which drops the ovals onto the eyes. Right: same vertical
-shift plus an ~8-pixel rightward shift, illustrating the second knob.
-Each panel renders one of the matrices produced by \`shift_mask()\`
-above.](figures/face_masks/artificial_eyes_demo_shift_vh.png)
+![Elliptical mouth-region mask before and after shift-tuning on a base
+face whose mouth sits below the default. Left: default geometry. Middle:
+shifted down by ~20 pixels (about 8 percent of image height). Right:
+same vertical shift plus an ~8-pixel rightward shift. Each panel renders
+one of the matrices produced by \`shift_mask()\` above. The same recipe
+works for \`nose\`, \`upper_face\`, \`lower_face\`, and the \`full\`
+oval; the three rectangle eye regions use \`region_bounds\`
+instead.](figures/face_masks/artificial_mouth_demo_default.png)![Elliptical
+mouth-region mask before and after shift-tuning on a base face whose
+mouth sits below the default. Left: default geometry. Middle: shifted
+down by ~20 pixels (about 8 percent of image height). Right: same
+vertical shift plus an ~8-pixel rightward shift. Each panel renders one
+of the matrices produced by \`shift_mask()\` above. The same recipe
+works for \`nose\`, \`upper_face\`, \`lower_face\`, and the \`full\`
+oval; the three rectangle eye regions use \`region_bounds\`
+instead.](figures/face_masks/artificial_mouth_demo_shift_v.png)![Elliptical
+mouth-region mask before and after shift-tuning on a base face whose
+mouth sits below the default. Left: default geometry. Middle: shifted
+down by ~20 pixels (about 8 percent of image height). Right: same
+vertical shift plus an ~8-pixel rightward shift. Each panel renders one
+of the matrices produced by \`shift_mask()\` above. The same recipe
+works for \`nose\`, \`upper_face\`, \`lower_face\`, and the \`full\`
+oval; the three rectangle eye regions use \`region_bounds\`
+instead.](figures/face_masks/artificial_mouth_demo_shift_vh.png)
 
-Eye-region mask before and after tuning on a base face whose eye line
-sits below the Schmitz default. Left: default geometry, where the eye
-ovals sit on the eyebrows. Middle: shifted down by ~20 pixels (about 8
-percent of image height), which drops the ovals onto the eyes. Right:
-same vertical shift plus an ~8-pixel rightward shift, illustrating the
-second knob. Each panel renders one of the matrices produced by
-`shift_mask()` above.
+Elliptical mouth-region mask before and after shift-tuning on a base
+face whose mouth sits below the default. Left: default geometry. Middle:
+shifted down by ~20 pixels (about 8 percent of image height). Right:
+same vertical shift plus an ~8-pixel rightward shift. Each panel renders
+one of the matrices produced by `shift_mask()` above. The same recipe
+works for `nose`, `upper_face`, `lower_face`, and the `full` oval; the
+three rectangle eye regions use `region_bounds` instead.
 
 Iterate with
 [`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
@@ -2684,9 +2786,9 @@ Loaded from cache, the resulting grid on this dataset:
 | Trust vs Friendly     | full       |        220 |             1 | 0.0430 |
 | Competent vs Dominant | full       |        223 |             3 | 0.0045 |
 | Trust vs Dominant     | full       |        243 |             6 | 0.0000 |
-| Trust vs Friendly     | eyes       |          9 |             0 | 0.0560 |
-| Competent vs Dominant | eyes       |         10 |             1 | 0.0130 |
-| Trust vs Dominant     | eyes       |         11 |             2 | 0.0300 |
+| Trust vs Friendly     | eyes       |         83 |             0 | 0.2450 |
+| Competent vs Dominant | eyes       |         82 |             2 | 0.0150 |
+| Trust vs Dominant     | eyes       |        101 |             4 | 0.0010 |
 | Trust vs Friendly     | mouth      |          9 |             0 | 0.0630 |
 | Competent vs Dominant | mouth      |         10 |             2 | 0.0065 |
 | Trust vs Dominant     | mouth      |         10 |             1 | 0.0200 |
@@ -2756,10 +2858,10 @@ Loaded from cache, the resulting grid on this dataset:
 | friendly  | full       | +0.97             |                    5 |
 | competent | full       | +0.70             |                    3 |
 | dominant  | full       | +0.89             |                    6 |
-| trust     | eyes       | +0.62             |                    0 |
-| friendly  | eyes       | +0.09             |                    2 |
-| competent | eyes       | +0.24             |                    2 |
-| dominant  | eyes       | +0.76             |                    3 |
+| trust     | eyes       | +0.50             |                    1 |
+| friendly  | eyes       | +0.34             |                    2 |
+| competent | eyes       | +0.36             |                    2 |
+| dominant  | eyes       | +0.91             |                    3 |
 | trust     | mouth      | +0.53             |                    3 |
 | friendly  | mouth      | +0.75             |                    4 |
 | competent | mouth      | +0.25             |                    5 |
@@ -2776,14 +2878,15 @@ a trait that looks strong overall may localise to one region rather than
 spanning the whole face.
 
 In this dataset the regional pattern is informative on its own.
-Dominance carries comparatively strong signal in the **eyes** and
-**upper face** but only modest signal around the **mouth**. Friendliness
-flips that pattern, with the **mouth** carrying its strongest regional
-signal and the **eyes** the weakest of the four traits. Trustworthy
+Dominance carries comparatively strong signal in the **eyes** (median
+producer z noticeably higher than the other three traits in that region)
+and weaker, comparable signal in the **mouth** and **upper face**.
+Friendliness flips that pattern, with the **mouth** carrying its
+strongest regional signal and the **eyes** its weakest. Trustworthy
 localises broadly across the eyes and mouth without a clear regional
-peak, and competent’s signal is the most evenly spread across regions.
-The headline full-face median for each trait masks these regional
-contrasts.
+peak, and competent’s signal is the most evenly spread across regions,
+though at uniformly modest levels. The headline full-face median for
+each trait masks these regional contrasts.
 
 The two grids (the cluster grid from §12.8 and the infoVal grid here)
 answer two different questions about the same masked region. The cluster
@@ -3268,7 +3371,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation
-#>   Data and Classification Images_. R package version 0.1.3,
+#>   Data and Classification Images_. R package version 0.1.4,
 #>   <https://github.com/olivethree/rcisignal>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -3278,7 +3381,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> Images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.1.3},
+#>     note = {R package version 0.1.4},
 #>     url = {https://github.com/olivethree/rcisignal},
 #>   }
 ```

@@ -39,7 +39,7 @@ read_face_mask(path, threshold = 0.5, invert = FALSE, expected_dims = NULL)
 - expected_dims:
 
   Optional integer `c(nrow, ncol)`. When set, aborts if the loaded
-  image's dimensions do not match — useful for catching a
+  image's dimensions do not match. Useful for catching a
   wrong-resolution mask before it silently corrupts a downstream
   computation.
 
