@@ -114,6 +114,24 @@ pipeline:
   al. (2019) for infoVal.
 - **Brief-RC**: Schmitz, Rougier, and Yzerbyt (2024).
 
+## References
+
+- Brinkman, L., Goffin, S., van de Schoot, R., van Haren, N. E. M.,
+  Dotsch, R., & Aarts, H. (2019). Quantifying the informational value of
+  classification images. *Behavior Research Methods*, *51*(5),
+  2059-2073. <https://doi.org/10.3758/s13428-019-01232-2>
+- Dotsch, R. (2016, 2023). *rcicr: Reverse-correlation
+  image-classification toolbox* \[R package\].
+  <https://github.com/rdotsch/rcicr>
+- Oliveira, M., Garcia-Marques, T., Dotsch, R., & Garcia-Marques, L.
+  (2019). Dominance and competence face to face: Dissociations obtained
+  with a reverse correlation approach. *European Journal of Social
+  Psychology*. <https://doi.org/10.1002/ejsp.2569>
+- Schmitz, M., Rougier, M., & Yzerbyt, V. (2024). Introducing the brief
+  reverse correlation: An improved tool to assess visual
+  representations. *European Journal of Social Psychology*.
+  <https://doi.org/10.1002/ejsp.3100>
+
 ## License
 
 Released under the [MIT
