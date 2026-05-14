@@ -6,8 +6,9 @@
 \usage{
 plot_mask_overlay(
   base_image,
-  mask,
-  side_by_side = TRUE,
+  mask = NULL,
+  region = NULL,
+  region_bounds = NULL,
   alpha = 0.35,
   overlay_col = "red",
   main = NULL
@@ -24,11 +25,21 @@ rest of the package uses (BT.709 luminance for RGB inputs).}
 used by \code{\link[=make_face_mask]{make_face_mask()}} / \code{\link[=read_face_mask]{read_face_mask()}}); a logical or
 numeric matrix of the same dimensions as \code{base_image}; or a
 single character path to a PNG/JPEG mask file (resolved via
-\code{\link[=read_face_mask]{read_face_mask()}}). Numeric inputs are thresholded at \code{0.5}.}
+\code{\link[=read_face_mask]{read_face_mask()}}). Numeric inputs are thresholded at \code{0.5}.
+Pass \code{NULL} (the default) and a \code{region} to build the mask
+internally via \code{\link[=make_face_mask]{make_face_mask()}}.}
 
-\item{side_by_side}{Logical. \code{TRUE} (default) draws the base on
-the left and the base + mask overlay on the right. \code{FALSE}
-draws only the overlay panel.}
+\item{region}{Optional character region name for the
+convenience shortcut: passing e.g. \code{region = "left_eye"}
+builds the mask via
+\code{make_face_mask(dim(base_image), region, region_bounds)} and
+skips the separate construction step. Mutually exclusive with
+\code{mask}.}
+
+\item{region_bounds}{Optional length-4 numeric vector forwarded
+to \code{\link[=make_face_mask]{make_face_mask()}} when \code{region} is one of the rectangle
+regions (\code{"eyes"}, \code{"left_eye"}, \code{"right_eye"}). Ignored
+otherwise.}
 
 \item{alpha}{Numeric in \verb{[0, 1]}. Opacity of the mask overlay.
 Default \code{0.35}.}
@@ -36,22 +47,19 @@ Default \code{0.35}.}
 \item{overlay_col}{Single colour for the mask overlay. Default
 \code{"red"}.}
 
-\item{main}{Optional plot title. When \code{NULL}, the panels are
-titled \code{"Base face"} and \code{"Base + mask overlay"} for
-\code{side_by_side = TRUE}, or just \code{"Base + mask overlay"} for
-\code{side_by_side = FALSE}. When \code{side_by_side = TRUE}, you can
-pass a length-2 character vector to override both titles.}
+\item{main}{Optional plot title (character of length 1). Default
+\code{NULL} (no title).}
 }
 \value{
 Invisibly \code{NULL}. Called for the side-effect of drawing
 on the active graphics device.
 }
 \description{
-Renders a base face next to (or under) a translucent mask overlay
-so you can verify the mask aligns with the anatomy you intended
-before feeding it into \code{\link[=infoval]{infoval()}}, \code{\link[=run_reliability]{run_reliability()}}, or any
-other downstream analysis. Avoids the usual hand-rolled
-\code{par(mfrow = c(1, 2)) + image() + adjustcolor()} workflow.
+Renders a base face with a translucent mask overlay so you can
+verify the mask aligns with the anatomy you intended before
+feeding it into \code{\link[=infoval]{infoval()}}, \code{\link[=run_reliability]{run_reliability()}}, or any other
+downstream analysis. Avoids the usual hand-rolled
+\code{image() + adjustcolor()} workflow.
 
 Companion to \code{\link[=plot_face_mask]{plot_face_mask()}} (mask alone, optional base) and
 \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} (signal + base): use \code{plot_mask_overlay()}
@@ -68,22 +76,24 @@ plot_mask_overlay(base, eyes)
 }
 
 \dontrun{
-# Use the simulator's base face and the eye sub-region to verify
-# that the parametric oval lands on the intended anatomy.
+# Use the simulator's base face and a sub-region to verify
+# that the parametric mask lands on the intended anatomy.
 sim   <- simulate_briefrc_data(
   n_per_condition = 5, n_trials = 10, conditions = "target",
   seed = 1
 )
 mouth <- make_face_mask(dim(sim$base_face), region = "mouth")
-plot_mask_overlay(sim$base_face, mouth,
-                  main = c("Base face", "Mouth region"))
+plot_mask_overlay(sim$base_face, mouth, main = "Mouth region")
 }
 
 \dontrun{
 # Mask loaded from a PNG file; pass both as paths.
-plot_mask_overlay("path/to/base.png", "path/to/mask.png",
-                  side_by_side = FALSE)
+plot_mask_overlay("path/to/base.png", "path/to/mask.png")
 }
+
+# Region shortcut: skip the make_face_mask() call.
+base <- matrix(0.5, 128L, 128L)
+plot_mask_overlay(base, region = "left_eye")
 }
 \seealso{
 \code{\link[=plot_face_mask]{plot_face_mask()}}, \code{\link[=plot_ci_overlay]{plot_ci_overlay()}},

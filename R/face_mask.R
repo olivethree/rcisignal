@@ -9,9 +9,15 @@
 #' or discriminability on a single anatomical region.
 #'
 #' Eight regions are supported:
-#' * `"full"` (default): the full face oval. Defaults follow the
-#'   geometry used by Schmitz, Rougier, & Yzerbyt (2024) and tunable
-#'   via `centre` / `half_width` / `half_height`.
+#' * `"full"` (default): the full face oval. Defaults are a
+#'   typical centred-face oval (`half_width = 0.35`,
+#'   `half_height = 0.45`) and tunable via `centre` /
+#'   `half_width` / `half_height`. Applying an oval mask to a CI
+#'   before computing pixel-wise metrics follows the convention
+#'   used by Oliveira et al. (2019), Ratner et al. (2014), and
+#'   Schmitz, Rougier, & Yzerbyt (2024); the specific oval
+#'   parameters are this package's defaults, not any of those
+#'   papers'.
 #' * `"eyes"`: a wide rectangle covering both eyes ear-to-ear and
 #'   from the eyebrows down to just below the eye line. Independent
 #'   of the full-oval geometry; tune via `region_bounds`.
@@ -276,9 +282,9 @@ rect_mask <- function(img_dims, row_min, row_max, col_min, col_max) {
 #' Internal: validate `region_bounds` and resolve to a default
 #' rectangle if `NULL`.
 #'
-#' Defaults are heuristics for a centred 256x256 face with
-#' Schmitz-style framing. They are exposed via `region_bounds` for
-#' precise tuning on non-default bases.
+#' Defaults are heuristics for a typical centred-portrait base
+#' on a square 256x256 image. They are exposed via `region_bounds`
+#' for precise tuning on non-default bases.
 #'
 #' @keywords internal
 #' @noRd

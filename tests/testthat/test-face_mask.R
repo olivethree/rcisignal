@@ -84,6 +84,25 @@ test_that("face_mask rejects bad img_dims", {
   expect_error(make_face_mask(c(64L, 64L, 64L)), "positive")
 })
 
+test_that("plot_face_mask accepts a region shortcut", {
+  pdf(NULL)
+  on.exit(dev.off(), add = TRUE)
+  expect_silent(out <- plot_face_mask(region = "left_eye",
+                                      img_dims = c(48L, 48L)))
+  expect_true(is.matrix(out))
+  expect_true(any(out))
+  expect_error(plot_face_mask(), "Supply one of")
+  expect_error(
+    plot_face_mask(region = "left_eye"),
+    "img_dims"
+  )
+  m <- make_face_mask(c(16L, 16L), region = "full")
+  expect_error(
+    plot_face_mask(m, region = "left_eye", img_dims = c(16L, 16L)),
+    "either"
+  )
+})
+
 test_that("plot_face_mask renders for vector + img_dims", {
   m <- make_face_mask(c(64L, 64L), region = "eyes")
   pdf(NULL)

@@ -1,3 +1,81 @@
+# rcisignal 0.1.5
+
+## Behavioural change
+
+* `plot_mask_overlay()` now always renders a single panel
+  (the base image with the mask overlaid). The
+  `side_by_side =` argument is removed (the base-alongside-base
+  layout duplicated the base image and added nothing beyond
+  what the single overlay panel already shows). The plot region
+  is now forced square (`pty = "s"`) to avoid the empty
+  canvas that appeared around the image on wide / tall
+  devices.
+
+## New features
+
+* New `shift_mask()` exported helper. Slides a logical face-region
+  mask by `down` and `right` pixels and returns the shifted mask
+  in the same input shape (matrix or column-major vector). This
+  was previously a copy-paste recipe in vignette §4.5; it is now
+  a real API surface with help page and tests. Useful for
+  fine-tuning the *elliptical* `make_face_mask()` regions on a
+  non-default base; for the *rectangle* regions, prefer the
+  `region_bounds` argument.
+* New `region_bounds_from_pixels()` exported helper. Converts
+  pixel-coordinate rectangle bounds
+  (`c(row_min, row_max, col_min, col_max)` in 1-indexed image
+  pixels) to the 0-1 image fractions that
+  `make_face_mask(region_bounds = ...)` expects. Bridges visual
+  inspection of a base image (where users think in pixels) and
+  the parametric API (which expects fractions).
+* `plot_mask_overlay()` and `plot_face_mask()` gain a `region =`
+  shortcut: `plot_mask_overlay(base, region = "left_eye")`
+  builds the mask internally via `make_face_mask()` instead of
+  forcing the caller to construct it separately. A
+  `region_bounds =` pass-through arg is available for tuning
+  the rectangle regions in the same call.
+
+## Tests
+
+* New regression test `test-simulate-diagnostic-chain.R`
+  exercises `simulate_2ifc_data()` -> `diagnose_infoval()` /
+  `compute_infoval_summary()` / `check_rt_infoval_consistency()`
+  / `check_response_inversion()` / `run_diagnostics()` end-to-end
+  on the bundled simulator. Guards against recurrence of the
+  v0.1.1 rdata-env bugs (CLAUDE.md §11.21: `base_label` and
+  missing `noise_type` in the saved rdata file). Skip-gated on
+  the `rcicr` Suggests dep and on CRAN-style runs.
+
+## Documentation
+
+* `plot_ci_overlay()` second example switched from
+  `signal_region = "eyes"` to `signal_region = "left_eye"` to
+  surface the new rectangle eye regions on a frequently-read
+  help page (the right-eye rectangle and the rest of the face
+  stay untouched, illustrating regional independence).
+* Vignette §4.5 mentions of `plot_mask_overlay()` reworded for
+  the single-panel design ("overlay on the base image" rather
+  than "base alongside base + mask").
+* Vignette §4.5 mask-tuning section rewritten to use the new
+  exported `shift_mask()` directly instead of redefining it
+  inline (the previous copy-paste recipe is gone). The
+  `region_bounds` tuning subsection now demos
+  `region_bounds_from_pixels()` for the common case where the
+  rectangle's edges are eyeballed in pixel coordinates against
+  a zoomed-in base image, and points at the
+  `plot_mask_overlay(region = ..., region_bounds = ...)`
+  shortcut.
+
+## Tooling
+
+* `.gitignore` now excludes `tests/testthat/data`. `rcicr`'s
+  `computeInfoVal2IFC()` uses bare `write(...)` for status
+  strings, which writes to a file literally named `data` (R's
+  default destination for single-argument `write`). The new
+  simulate-diagnostic-chain regression test triggers this path
+  and would otherwise leave a dirty working tree after every
+  test run.
+
 # rcisignal 0.1.4
 
 ## Behavioural change
@@ -50,6 +128,21 @@
   column now reflects the wider rectangle geometry (computed on
   the same Oliveira-2019 Study 1 data, 1000 reference draws,
   matched trial counts). The other columns are unchanged.
+* Citation-accuracy sweep: removed several incorrect
+  attributions of `make_face_mask()` region geometries to
+  Schmitz, Rougier, & Yzerbyt (2024) across the vignette,
+  README pointer, and `make_face_mask()` roxygen. Schmitz et
+  al. (2024) used an oval mask for `infoval()` calculation but
+  did not specify the oval's parameters and did not define any
+  sub-region (eyes / nose / mouth / upper-face / lower-face)
+  geometry. The package's region defaults are now correctly
+  described as this package's own heuristics; the prior
+  practice of applying an oval before pixel-wise CI metrics
+  is credited to Oliveira et al. (2019), Ratner et al. (2014),
+  and Schmitz et al. (2024) jointly. Ratner et al. (2014)
+  added to the vignette bibliography. Schmitz et al. (2024) is
+  still cited where it applies (Brief-RC structure, `genMask()`
+  formula, Brief-RC 12 / 20 variants).
 
 # rcisignal 0.1.3
 

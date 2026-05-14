@@ -56,9 +56,15 @@ or discriminability on a single anatomical region.
 
 Eight regions are supported:
 \itemize{
-\item \code{"full"} (default): the full face oval. Defaults follow the
-geometry used by Schmitz, Rougier, & Yzerbyt (2024) and tunable
-via \code{centre} / \code{half_width} / \code{half_height}.
+\item \code{"full"} (default): the full face oval. Defaults are a
+typical centred-face oval (\code{half_width = 0.35},
+\code{half_height = 0.45}) and tunable via \code{centre} /
+\code{half_width} / \code{half_height}. Applying an oval mask to a CI
+before computing pixel-wise metrics follows the convention
+used by Oliveira et al. (2019), Ratner et al. (2014), and
+Schmitz, Rougier, & Yzerbyt (2024); the specific oval
+parameters are this package's defaults, not any of those
+papers'.
 \item \code{"eyes"}: a wide rectangle covering both eyes ear-to-ear and
 from the eyebrows down to just below the eye line. Independent
 of the full-oval geometry; tune via \code{region_bounds}.

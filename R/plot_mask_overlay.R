@@ -1,11 +1,11 @@
 #' Sanity-check a face mask against a base image
 #'
 #' @description
-#' Renders a base face next to (or under) a translucent mask overlay
-#' so you can verify the mask aligns with the anatomy you intended
-#' before feeding it into [infoval()], [run_reliability()], or any
-#' other downstream analysis. Avoids the usual hand-rolled
-#' `par(mfrow = c(1, 2)) + image() + adjustcolor()` workflow.
+#' Renders a base face with a translucent mask overlay so you can
+#' verify the mask aligns with the anatomy you intended before
+#' feeding it into [infoval()], [run_reliability()], or any other
+#' downstream analysis. Avoids the usual hand-rolled
+#' `image() + adjustcolor()` workflow.
 #'
 #' Companion to [plot_face_mask()] (mask alone, optional base) and
 #' [plot_ci_overlay()] (signal + base): use `plot_mask_overlay()`
@@ -22,18 +22,24 @@
 #'   numeric matrix of the same dimensions as `base_image`; or a
 #'   single character path to a PNG/JPEG mask file (resolved via
 #'   [read_face_mask()]). Numeric inputs are thresholded at `0.5`.
-#' @param side_by_side Logical. `TRUE` (default) draws the base on
-#'   the left and the base + mask overlay on the right. `FALSE`
-#'   draws only the overlay panel.
+#'   Pass `NULL` (the default) and a `region` to build the mask
+#'   internally via [make_face_mask()].
+#' @param region Optional character region name for the
+#'   convenience shortcut: passing e.g. `region = "left_eye"`
+#'   builds the mask via
+#'   `make_face_mask(dim(base_image), region, region_bounds)` and
+#'   skips the separate construction step. Mutually exclusive with
+#'   `mask`.
+#' @param region_bounds Optional length-4 numeric vector forwarded
+#'   to [make_face_mask()] when `region` is one of the rectangle
+#'   regions (`"eyes"`, `"left_eye"`, `"right_eye"`). Ignored
+#'   otherwise.
 #' @param alpha Numeric in `[0, 1]`. Opacity of the mask overlay.
 #'   Default `0.35`.
 #' @param overlay_col Single colour for the mask overlay. Default
 #'   `"red"`.
-#' @param main Optional plot title. When `NULL`, the panels are
-#'   titled `"Base face"` and `"Base + mask overlay"` for
-#'   `side_by_side = TRUE`, or just `"Base + mask overlay"` for
-#'   `side_by_side = FALSE`. When `side_by_side = TRUE`, you can
-#'   pass a length-2 character vector to override both titles.
+#' @param main Optional plot title (character of length 1). Default
+#'   `NULL` (no title).
 #' @return Invisibly `NULL`. Called for the side-effect of drawing
 #'   on the active graphics device.
 #' @seealso [plot_face_mask()], [plot_ci_overlay()],
@@ -48,35 +54,44 @@
 #' }
 #'
 #' \dontrun{
-#' # Use the simulator's base face and the eye sub-region to verify
-#' # that the parametric oval lands on the intended anatomy.
+#' # Use the simulator's base face and a sub-region to verify
+#' # that the parametric mask lands on the intended anatomy.
 #' sim   <- simulate_briefrc_data(
 #'   n_per_condition = 5, n_trials = 10, conditions = "target",
 #'   seed = 1
 #' )
 #' mouth <- make_face_mask(dim(sim$base_face), region = "mouth")
-#' plot_mask_overlay(sim$base_face, mouth,
-#'                   main = c("Base face", "Mouth region"))
+#' plot_mask_overlay(sim$base_face, mouth, main = "Mouth region")
 #' }
 #'
 #' \dontrun{
 #' # Mask loaded from a PNG file; pass both as paths.
-#' plot_mask_overlay("path/to/base.png", "path/to/mask.png",
-#'                   side_by_side = FALSE)
+#' plot_mask_overlay("path/to/base.png", "path/to/mask.png")
 #' }
+#'
+#' # Region shortcut: skip the make_face_mask() call.
+#' base <- matrix(0.5, 128L, 128L)
+#' plot_mask_overlay(base, region = "left_eye")
 #' @export
 plot_mask_overlay <- function(base_image,
-                              mask,
-                              side_by_side = TRUE,
-                              alpha        = 0.35,
-                              overlay_col  = "red",
-                              main         = NULL) {
+                              mask          = NULL,
+                              region        = NULL,
+                              region_bounds = NULL,
+                              alpha         = 0.35,
+                              overlay_col   = "red",
+                              main          = NULL) {
   if (!is.numeric(alpha) || length(alpha) != 1L ||
       !is.finite(alpha) || alpha < 0 || alpha > 1) {
     cli::cli_abort("{.arg alpha} must be a single number in [0, 1].")
   }
   if (!is.character(overlay_col) || length(overlay_col) != 1L) {
     cli::cli_abort("{.arg overlay_col} must be a single colour name.")
+  }
+  if (!is.null(main) &&
+      (!is.character(main) || length(main) != 1L)) {
+    cli::cli_abort(
+      "{.arg main} must be NULL or a single character string."
+    )
   }
 
   base <- resolve_base_for_overlay(base_image)
@@ -85,36 +100,48 @@ plot_mask_overlay <- function(base_image,
   base[base < 0] <- 0
   base[base > 1] <- 1
 
-  mask_mat <- resolve_mask_against_base(mask, nr, nc)
-
-  if (is.null(main)) {
-    titles <- if (isTRUE(side_by_side)) {
-      c("Base face", "Base + mask overlay")
-    } else {
-      "Base + mask overlay"
-    }
-  } else {
-    if (!is.character(main)) {
-      cli::cli_abort("{.arg main} must be NULL or a character vector.")
-    }
-    titles <- if (isTRUE(side_by_side) && length(main) == 1L) {
-      c(main, main)
-    } else {
-      main
-    }
+  if (!is.null(region) && !is.null(mask)) {
+    cli::cli_abort(
+      "Pass either {.arg mask} or {.arg region}, not both."
+    )
+  }
+  if (is.null(region) && is.null(mask)) {
+    cli::cli_abort(
+      "Supply one of {.arg mask} or {.arg region}."
+    )
+  }
+  if (!is.null(region)) {
+    mask <- make_face_mask(c(nr, nc), region = region,
+                           region_bounds = region_bounds)
+  } else if (!is.null(region_bounds)) {
+    cli::cli_abort(
+      "{.arg region_bounds} is only valid with {.arg region}."
+    )
   }
 
-  op <- graphics::par(no.readonly = TRUE)
+  mask_mat <- resolve_mask_against_base(mask, nr, nc)
+
+  op <- graphics::par(
+    mar = c(0.5, 0.5, if (is.null(main)) 0.5 else 2, 0.5),
+    pty = "s"
+  )
   on.exit(graphics::par(op), add = TRUE)
 
-  if (isTRUE(side_by_side)) {
-    graphics::par(mfrow = c(1L, 2L),
-                  mar   = c(0.5, 0.5, 2, 0.5))
-    draw_mask_panel(base, NULL,     nr, nc, titles[1L], alpha, overlay_col)
-    draw_mask_panel(base, mask_mat, nr, nc, titles[2L], alpha, overlay_col)
-  } else {
-    graphics::par(mar = c(0.5, 0.5, 2, 0.5))
-    draw_mask_panel(base, mask_mat, nr, nc, titles[1L], alpha, overlay_col)
+  graphics::plot.new()
+  graphics::plot.window(xlim = c(0, nc), ylim = c(0, nr),
+                        asp = 1, xaxs = "i", yaxs = "i")
+  graphics::rasterImage(base, 0, 0, nc, nr, interpolate = FALSE)
+
+  rgba <- grDevices::col2rgb(overlay_col) / 255
+  fill <- grDevices::rgb(rgba[1L], rgba[2L], rgba[3L], alpha = alpha)
+  overlay <- matrix(grDevices::rgb(0, 0, 0, 0), nr, nc)
+  overlay[mask_mat] <- fill
+  graphics::rasterImage(overlay, 0, 0, nc, nr, interpolate = FALSE)
+
+  graphics::rect(0, 0, nc, nr, border = "grey40", lwd = 1)
+  if (!is.null(main)) {
+    graphics::title(main = main, line = 0.5, cex.main = 1.0,
+                    font.main = 1)
   }
 
   invisible(NULL)
@@ -168,26 +195,4 @@ resolve_mask_against_base <- function(mask, nr, nc) {
   cli::cli_abort(
     "{.arg mask} must be a logical/numeric vector or matrix, or a file path."
   )
-}
-
-#' @keywords internal
-#' @noRd
-draw_mask_panel <- function(base, mask_mat, nr, nc, main,
-                            alpha, overlay_col) {
-  graphics::plot.new()
-  graphics::plot.window(xlim = c(0, nc), ylim = c(0, nr),
-                        asp = 1, xaxs = "i", yaxs = "i")
-  graphics::rasterImage(base, 0, 0, nc, nr, interpolate = FALSE)
-  if (!is.null(mask_mat)) {
-    rgba <- grDevices::col2rgb(overlay_col) / 255
-    fill <- grDevices::rgb(rgba[1L], rgba[2L], rgba[3L], alpha = alpha)
-    overlay <- matrix(grDevices::rgb(0, 0, 0, 0), nr, nc)
-    overlay[mask_mat] <- fill
-    graphics::rasterImage(overlay, 0, 0, nc, nr, interpolate = FALSE)
-  }
-  graphics::rect(0, 0, nc, nr, border = "grey40", lwd = 1)
-  if (!is.null(main) && !is.na(main) && nzchar(main)) {
-    graphics::title(main = main, line = 0.5, cex.main = 1.0,
-                    font.main = 1)
-  }
 }

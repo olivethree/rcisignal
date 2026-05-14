@@ -15,10 +15,19 @@
 #' @param mask One of: a logical or numeric vector of length
 #'   `prod(img_dims)` (column-major, as returned by [make_face_mask()] or
 #'   [read_face_mask()]); a logical or numeric matrix; or a path to
-#'   a PNG/JPEG mask file.
+#'   a PNG/JPEG mask file. Pass `NULL` and a `region` to build the
+#'   mask internally via [make_face_mask()].
 #' @param img_dims Integer `c(nrow, ncol)`, or a single integer for a
-#'   square image. Required when `mask` is a vector; ignored
-#'   otherwise.
+#'   square image. Required when `mask` is a vector or when
+#'   `region` is supplied; ignored otherwise.
+#' @param region Optional character region name (one of the
+#'   [make_face_mask()] choices) used as a convenience shortcut:
+#'   builds the mask internally via
+#'   `make_face_mask(img_dims, region, region_bounds)`. Mutually
+#'   exclusive with `mask`.
+#' @param region_bounds Optional length-4 numeric vector forwarded
+#'   to [make_face_mask()] when `region` is one of the rectangle
+#'   regions. Ignored otherwise.
 #' @param base_image Optional path to a PNG or JPEG base face. When
 #'   supplied, the mask is rendered as a translucent overlay on top.
 #' @param alpha Numeric in `[0, 1]`. Overlay opacity. Default `0.5`.
@@ -33,7 +42,7 @@
 #' @return Invisibly returns the resolved logical matrix
 #'   (`nrow` x `ncol`, top-left origin).
 #'
-#' @seealso [plot_mask_overlay()] (side-by-side base + overlay view),
+#' @seealso [plot_mask_overlay()] (overlay on a specific base image),
 #'   [make_face_mask()], [read_face_mask()], [diagnose_infoval()].
 #'
 #' @examples
@@ -41,17 +50,42 @@
 #' plot_face_mask(m, img_dims = c(128L, 128L), main = "eyes region")
 #'
 #' @export
-plot_face_mask <- function(mask,
-                           img_dims   = NULL,
-                           base_image = NULL,
-                           alpha      = 0.5,
-                           col        = "red",
-                           threshold  = 0.5,
-                           main       = NULL,
+plot_face_mask <- function(mask          = NULL,
+                           img_dims      = NULL,
+                           base_image    = NULL,
+                           alpha         = 0.5,
+                           col           = "red",
+                           threshold     = 0.5,
+                           main          = NULL,
+                           region        = NULL,
+                           region_bounds = NULL,
                            ...) {
   if (!is.numeric(alpha) || length(alpha) != 1L ||
       alpha < 0 || alpha > 1) {
     cli::cli_abort("{.arg alpha} must be a single number in [0, 1].")
+  }
+  if (!is.null(region) && !is.null(mask)) {
+    cli::cli_abort(
+      "Pass either {.arg mask} or {.arg region}, not both."
+    )
+  }
+  if (is.null(region) && is.null(mask)) {
+    cli::cli_abort(
+      "Supply one of {.arg mask} or {.arg region}."
+    )
+  }
+  if (!is.null(region)) {
+    if (is.null(img_dims)) {
+      cli::cli_abort(
+        "{.arg img_dims} is required when {.arg region} is supplied."
+      )
+    }
+    mask <- make_face_mask(img_dims, region = region,
+                           region_bounds = region_bounds)
+  } else if (!is.null(region_bounds)) {
+    cli::cli_abort(
+      "{.arg region_bounds} is only valid with {.arg region}."
+    )
   }
 
   mat <- resolve_mask_to_matrix(mask, img_dims, threshold = threshold)

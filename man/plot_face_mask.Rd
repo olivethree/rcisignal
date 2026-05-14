@@ -5,13 +5,15 @@
 \title{Plot a face mask for visual verification}
 \usage{
 plot_face_mask(
-  mask,
+  mask = NULL,
   img_dims = NULL,
   base_image = NULL,
   alpha = 0.5,
   col = "red",
   threshold = 0.5,
   main = NULL,
+  region = NULL,
+  region_bounds = NULL,
   ...
 )
 }
@@ -19,11 +21,12 @@ plot_face_mask(
 \item{mask}{One of: a logical or numeric vector of length
 \code{prod(img_dims)} (column-major, as returned by \code{\link[=make_face_mask]{make_face_mask()}} or
 \code{\link[=read_face_mask]{read_face_mask()}}); a logical or numeric matrix; or a path to
-a PNG/JPEG mask file.}
+a PNG/JPEG mask file. Pass \code{NULL} and a \code{region} to build the
+mask internally via \code{\link[=make_face_mask]{make_face_mask()}}.}
 
 \item{img_dims}{Integer \code{c(nrow, ncol)}, or a single integer for a
-square image. Required when \code{mask} is a vector; ignored
-otherwise.}
+square image. Required when \code{mask} is a vector or when
+\code{region} is supplied; ignored otherwise.}
 
 \item{base_image}{Optional path to a PNG or JPEG base face. When
 supplied, the mask is rendered as a translucent overlay on top.}
@@ -38,6 +41,16 @@ pixels strictly above this value are treated as inside the
 mask. Default \code{0.5}. Ignored for logical input.}
 
 \item{main}{Optional plot title.}
+
+\item{region}{Optional character region name (one of the
+\code{\link[=make_face_mask]{make_face_mask()}} choices) used as a convenience shortcut:
+builds the mask internally via
+\code{make_face_mask(img_dims, region, region_bounds)}. Mutually
+exclusive with \code{mask}.}
+
+\item{region_bounds}{Optional length-4 numeric vector forwarded
+to \code{\link[=make_face_mask]{make_face_mask()}} when \code{region} is one of the rectangle
+regions. Ignored otherwise.}
 
 \item{...}{Reserved for future use.}
 }
@@ -65,6 +78,6 @@ plot_face_mask(m, img_dims = c(128L, 128L), main = "eyes region")
 
 }
 \seealso{
-\code{\link[=plot_mask_overlay]{plot_mask_overlay()}} (side-by-side base + overlay view),
+\code{\link[=plot_mask_overlay]{plot_mask_overlay()}} (overlay on a specific base image),
 \code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=read_face_mask]{read_face_mask()}}, \code{\link[=diagnose_infoval]{diagnose_infoval()}}.
 }

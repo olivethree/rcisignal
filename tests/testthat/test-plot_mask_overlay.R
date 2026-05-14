@@ -42,9 +42,6 @@ test_that("plot_mask_overlay accepts a path base + path mask", {
                 mask_path)
 
   expect_no_error(plot_mask_overlay(fixture, mask_path))
-  expect_no_error(
-    plot_mask_overlay(fixture, mask_path, side_by_side = FALSE)
-  )
 })
 
 test_that("plot_mask_overlay aborts on dimension mismatch", {
@@ -77,16 +74,36 @@ test_that("plot_mask_overlay aborts on bad alpha / overlay_col / base", {
                "numeric matrix or a path")
 })
 
-test_that("plot_mask_overlay side_by_side toggles panel count and restores par()", {
+test_that("plot_mask_overlay accepts a region shortcut", {
+  open_null_device()
+  on.exit(grDevices::dev.off(), add = TRUE)
+  base <- matrix(0.5, 48L, 48L)
+  expect_no_error(plot_mask_overlay(base, region = "left_eye"))
+  expect_no_error(plot_mask_overlay(base, region = "eyes",
+                                    region_bounds = c(0.30, 0.50, 0.10, 0.90)))
+
+  expect_error(plot_mask_overlay(base), "Supply one of")
+  expect_error(
+    plot_mask_overlay(base, mask = rep(TRUE, 48L * 48L),
+                      region = "eyes"),
+    "either"
+  )
+  expect_error(
+    plot_mask_overlay(base, mask = rep(TRUE, 48L * 48L),
+                      region_bounds = c(0.30, 0.50, 0.10, 0.90)),
+    "only valid with"
+  )
+})
+
+test_that("plot_mask_overlay restores par() on exit", {
   open_null_device()
   on.exit(grDevices::dev.off(), add = TRUE)
   base <- matrix(0.5, 24L, 24L)
   mask <- make_face_mask(c(24L, 24L), region = "nose")
 
   mfrow_before <- graphics::par("mfrow")
-  plot_mask_overlay(base, mask, side_by_side = TRUE)
+  pty_before   <- graphics::par("pty")
+  plot_mask_overlay(base, mask)
   expect_identical(graphics::par("mfrow"), mfrow_before)
-
-  plot_mask_overlay(base, mask, side_by_side = FALSE)
-  expect_identical(graphics::par("mfrow"), mfrow_before)
+  expect_identical(graphics::par("pty"),   pty_before)
 })
