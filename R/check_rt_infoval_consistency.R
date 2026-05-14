@@ -69,7 +69,7 @@ check_rt_infoval_consistency <- function(responses,
       "skip", label,
       c(
         "RT x infoVal cross-validation is not supported for Brief-RC in",
-        "rcicrdiagnostics. It depends on compute_infoval_summary(), which",
+        "rcisignal. It depends on compute_infoval_summary(), which",
         "is not implemented for Brief-RC (see that function's help)."
       ),
       data = list(method = "briefrc")

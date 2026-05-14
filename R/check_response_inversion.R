@@ -68,7 +68,7 @@ check_response_inversion <- function(responses,
       "skip", label,
       c(
         "Response-inversion detection is not supported for Brief-RC in",
-        "rcicrdiagnostics. It depends on compute_infoval_summary(), which",
+        "rcisignal. It depends on compute_infoval_summary(), which",
         "is not implemented for Brief-RC (see that function's help)."
       ),
       data = list(method = "briefrc")

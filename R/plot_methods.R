@@ -1,4 +1,4 @@
-## S3 print / summary / plot methods for every rcicrely_* class.
+## S3 print / summary / plot methods for every rcisignal_* class.
 ##
 ## These are registered via roxygen @exportS3Method tags so R CMD
 ## check is happy even though none of the generics are imported from
@@ -7,7 +7,7 @@
 ## Plot methods aim for publication-grade base R aesthetics: minimal
 ## axis chrome, soft gridlines, viridis-friendly palettes, shaded
 ## confidence regions where applicable. The helpers below set these
-## defaults consistently across all `plot.rcicrely_*()` methods.
+## defaults consistently across all `plot.rcisignal_*()` methods.
 
 #' Set publication-style par() defaults. Use inside plot methods.
 #' @keywords internal
@@ -70,7 +70,7 @@ ci_shade <- function(xlo, xhi, col = "#377EB8", alpha = 0.15) {
 #' @export
 print.rcisignal_rel_split_half <- function(x, ...) {
   warn_known_regression(x)
-  cat("<rcicrely split-half reliability>\n")
+  cat("<rcisignal split-half reliability>\n")
   cat(sprintf("  N producers:          %d\n", x$n_participants))
   cat(sprintf("  n_permutations:       %d\n", x$n_permutations))
   cat(sprintf("  mean per-split r:     %.3f  [%.3f, %.3f]\n",
@@ -149,7 +149,7 @@ plot.rcisignal_rel_split_half <- function(x, ...,
 #' @export
 print.rcisignal_rel_loo <- function(x, ...) {
   warn_known_regression(x)
-  cat("<rcicrely leave-one-out influence screening>\n")
+  cat("<rcisignal leave-one-out influence screening>\n")
   cat(sprintf("  N producers:        %d\n", length(x$correlations)))
   cat(sprintf("  flag rule:          %s (threshold = %.2f)\n",
               x$flag_method, x$flag_threshold))
@@ -260,7 +260,7 @@ plot.rcisignal_rel_loo <- function(x, ...,
 #' @export
 print.rcisignal_rel_icc <- function(x, ...) {
   warn_known_regression(x)
-  cat("<rcicrely ICC>\n")
+  cat("<rcisignal ICC>\n")
   cat(sprintf("  model:        %s\n", x$model))
   cat(sprintf("  N targets:    %d pixels\n",       x$n_targets))
   cat(sprintf("  N raters:     %d participants\n", x$n_raters))
@@ -371,7 +371,7 @@ print.rcisignal_rel_cluster_test <- function(x, ...) {
   warn_known_regression(x)
   method <- if (is.null(x$method)) "threshold" else x$method
   if (method == "tfce") {
-    cat("<rcicrely cluster-based permutation test (TFCE)>\n")
+    cat("<rcisignal cluster-based permutation test (TFCE)>\n")
     cat(sprintf(
       "  N_A = %d, N_B = %d\n",
       x$n_participants_a, x$n_participants_b
@@ -390,7 +390,7 @@ print.rcisignal_rel_cluster_test <- function(x, ...) {
     }
     return(invisible(x))
   }
-  cat("<rcicrely cluster-based permutation test>\n")
+  cat("<rcisignal cluster-based permutation test>\n")
   cat(sprintf(
     "  N_A = %d, N_B = %d\n",
     x$n_participants_a, x$n_participants_b
@@ -522,7 +522,7 @@ plot.rcisignal_rel_cluster_test <- function(x, ...,
 #' @export
 print.rcisignal_rel_dissim <- function(x, ...) {
   warn_known_regression(x)
-  cat("<rcicrely representational dissimilarity>\n")
+  cat("<rcisignal representational dissimilarity>\n")
   cat(sprintf("  n_boot:               %d\n", x$n_boot))
   cat(sprintf("  CI level:             %.0f%%\n", x$ci_level * 100))
   cat(sprintf("  n_pixels:             %d\n",
@@ -738,7 +738,7 @@ plot_dissimilarity_grid <- function(...,
 print.rcisignal_rel_pairwise_report <- function(x, ...) {
   warn_known_regression(x)
   cat(sprintf(
-    "<rcicrely pairwise report: %d conditions, %d pairs, fwer = %s>\n",
+    "<rcisignal pairwise report: %d conditions, %d pairs, fwer = %s>\n",
     length(x$conditions), nrow(x$pairs), x$fwer
   ))
   cat(sprintf("  alpha (across pairs): %.3f\n", x$alpha))
@@ -822,7 +822,7 @@ plot.rcisignal_rel_pairwise_report <- function(x, ...,
 #' @export
 print.rcisignal_rel_report <- function(x, ...) {
   warn_known_regression(x)
-  cat(sprintf("<rcicrely report: %s>\n", x$method))
+  cat(sprintf("<rcisignal report: %s>\n", x$method))
   for (nm in names(x$results)) {
     cat("---\n")
     cat(sprintf("* $results$%s\n", nm))
@@ -833,7 +833,7 @@ print.rcisignal_rel_report <- function(x, ...) {
 
 #' @export
 summary.rcisignal_rel_report <- function(object, ...) {
-  cat(sprintf("<rcicrely report: %s>\n", object$method))
+  cat(sprintf("<rcisignal report: %s>\n", object$method))
   for (nm in names(object$results)) {
     cat(sprintf("\n-- $results$%s --\n", nm))
     summary(object$results[[nm]], ...)
@@ -859,7 +859,7 @@ plot.rcisignal_rel_report <- function(x, ...) {
 #' @export
 print.rcisignal_rel_infoval <- function(x, ...) {
   warn_known_regression(x)
-  cat("<rcicrely informational value>\n")
+  cat("<rcisignal informational value>\n")
   cat(sprintf("  producers:          %d\n", length(x$infoval)))
   cat(sprintf("  unique trial counts: %s\n",
               paste(sort(unique(x$trial_counts)), collapse = ", ")))
