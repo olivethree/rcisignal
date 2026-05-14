@@ -10,6 +10,18 @@
 skip_if_not_installed("rcicr")
 testthat::skip_on_cran()
 
+## rcicr's computeInfoVal2IFC() spawns 3 parallel processes via
+## generateReferenceDistribution2IFC(); when running under
+## `R CMD check`, `_R_CHECK_LIMIT_CORES_=TRUE` caps the limit at 2
+## and the three diagnostic calls that use that path abort with
+## "3 simultaneous processes spawned". Skip under that env var so
+## CI stays green; local `devtools::test()` runs the full chain.
+skip_if(
+  isTRUE(as.logical(Sys.getenv("_R_CHECK_LIMIT_CORES_"))),
+  "rcicr::computeInfoVal2IFC spawns 3 cores; \\
+   _R_CHECK_LIMIT_CORES_ caps at 2."
+)
+
 make_tiny_sim <- function(seed = 1L) {
   simulate_2ifc_data(
     n_per_condition = 5L,
