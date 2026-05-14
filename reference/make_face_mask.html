@@ -6,9 +6,15 @@ norms to the masked region; pass to any rel_*() function via
 row-subsetting (signal_matrix[mask, ]) to compute reliability
 or discriminability on a single anatomical region.
 Eight regions are supported:
-&quot;full&quot; (default): the full face oval. Defaults follow the
-geometry used by Schmitz, Rougier, &amp;amp; Yzerbyt (2024) and tunable
-via centre / half_width / half_height.
+&quot;full&quot; (default): the full face oval. Defaults are a
+typical centred-face oval (half_width = 0.35,
+half_height = 0.45) and tunable via centre /
+half_width / half_height. Applying an oval mask to a CI
+before computing pixel-wise metrics follows the convention
+used by Oliveira et al. (2019), Ratner et al. (2014), and
+Schmitz, Rougier, &amp;amp; Yzerbyt (2024); the specific oval
+parameters are this package's defaults, not any of those
+papers'.
 &quot;eyes&quot;: a wide rectangle covering both eyes ear-to-ear and
 from the eyebrows down to just below the eye line. Independent
 of the full-oval geometry; tune via region_bounds.
@@ -34,9 +40,15 @@ norms to the masked region; pass to any rel_*() function via
 row-subsetting (signal_matrix[mask, ]) to compute reliability
 or discriminability on a single anatomical region.
 Eight regions are supported:
-&quot;full&quot; (default): the full face oval. Defaults follow the
-geometry used by Schmitz, Rougier, &amp;amp; Yzerbyt (2024) and tunable
-via centre / half_width / half_height.
+&quot;full&quot; (default): the full face oval. Defaults are a
+typical centred-face oval (half_width = 0.35,
+half_height = 0.45) and tunable via centre /
+half_width / half_height. Applying an oval mask to a CI
+before computing pixel-wise metrics follows the convention
+used by Oliveira et al. (2019), Ratner et al. (2014), and
+Schmitz, Rougier, &amp;amp; Yzerbyt (2024); the specific oval
+parameters are this package's defaults, not any of those
+papers'.
 &quot;eyes&quot;: a wide rectangle covering both eyes ear-to-ear and
 from the eyebrows down to just below the eye line. Independent
 of the full-oval geometry; tune via region_bounds.
@@ -63,7 +75,7 @@ region_bounds."><meta property="og:image" content="https://olivethree.github.io/
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,7 +97,7 @@ region_bounds."><meta property="og:image" content="https://olivethree.github.io/
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Build an oval face-region mask for a square image</h1>
-      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/v0.1.4/R/face_mask.R" class="external-link"><code>R/face_mask.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/R/face_mask.R" class="external-link"><code>R/face_mask.R</code></a></small>
       <div class="d-none name"><code>make_face_mask.Rd</code></div>
     </div>
 
@@ -96,9 +108,15 @@ to <code><a href="infoval.html">infoval()</a></code> to restrict both observed a
 norms to the masked region; pass to any <code>rel_*()</code> function via
 row-subsetting (<code>signal_matrix[mask, ]</code>) to compute reliability
 or discriminability on a single anatomical region.</p>
-<p>Eight regions are supported:</p><ul><li><p><code>"full"</code> (default): the full face oval. Defaults follow the
-geometry used by Schmitz, Rougier, &amp; Yzerbyt (2024) and tunable
-via <code>centre</code> / <code>half_width</code> / <code>half_height</code>.</p></li>
+<p>Eight regions are supported:</p><ul><li><p><code>"full"</code> (default): the full face oval. Defaults are a
+typical centred-face oval (<code>half_width = 0.35</code>,
+<code>half_height = 0.45</code>) and tunable via <code>centre</code> /
+<code>half_width</code> / <code>half_height</code>. Applying an oval mask to a CI
+before computing pixel-wise metrics follows the convention
+used by Oliveira et al. (2019), Ratner et al. (2014), and
+Schmitz, Rougier, &amp; Yzerbyt (2024); the specific oval
+parameters are this package's defaults, not any of those
+papers'.</p></li>
 <li><p><code>"eyes"</code>: a wide rectangle covering both eyes ear-to-ear and
 from the eyebrows down to just below the eye line. Independent
 of the full-oval geometry; tune via <code>region_bounds</code>.</p></li>

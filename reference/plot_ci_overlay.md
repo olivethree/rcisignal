@@ -147,12 +147,16 @@ plot_ci_overlay(signal_matrix, base_image,
 } # }
 
 if (FALSE) { # \dontrun{
-# Same function, richer input: plant a signal in the eye region and
-# overlay it on the simulator's base face. The eye region should
-# light up against the anatomical context.
+# Same function, richer input: plant a signal in the viewer's
+# left-eye rectangle and overlay it on the simulator's base
+# face. That sub-region should light up against the anatomical
+# context, with the right-eye rectangle and the rest of the
+# face left untouched. (Swap signal_region for "right_eye",
+# "eyes", "mouth", etc. to demo any other region.)
 sim <- simulate_briefrc_data(
   n_per_condition = 20, n_trials = 60, conditions = "target",
-  signal_region = "eyes", signal_strength = "strong", seed = 1
+  signal_region = "left_eye", signal_strength = "strong",
+  seed = 1
 )
 cis  <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 plot_ci_overlay(cis$signal_matrix, sim$base_face)

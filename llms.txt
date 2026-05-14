@@ -268,6 +268,9 @@ enthusiasts out there! :)
 - [`read_signal_matrix()`](https://olivethree.github.io/rcisignal/reference/read_signal_matrix.md)
   : Read a directory of CI images and extract the base-subtracted signal
 
+- [`region_bounds_from_pixels()`](https://olivethree.github.io/rcisignal/reference/region_bounds_from_pixels.md)
+  : Convert pixel-coordinate rectangle bounds to 0-1 image fractions
+
 - [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
   : Cluster-based permutation test with family-wise error control
 
@@ -300,6 +303,9 @@ enthusiasts out there! :)
 
 - [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
   : Run every within-condition reliability metric
+
+- [`shift_mask()`](https://olivethree.github.io/rcisignal/reference/shift_mask.md)
+  : Shift a face-region mask by a number of pixels
 
 - [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
   : Simulate 2IFC reverse-correlation data

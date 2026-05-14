@@ -41,6 +41,7 @@
 <url><loc>https://olivethree.github.io/rcisignal/reference/read_noise_matrix.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/read_responses.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/read_signal_matrix.html</loc></url>
+<url><loc>https://olivethree.github.io/rcisignal/reference/region_bounds_from_pixels.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/rel_cluster_test.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/rel_icc.html</loc></url>
@@ -52,6 +53,7 @@
 <url><loc>https://olivethree.github.io/rcisignal/reference/run_discriminability.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/run_reliability.html</loc></url>
+<url><loc>https://olivethree.github.io/rcisignal/reference/shift_mask.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/validate_noise_matrix.html</loc></url>

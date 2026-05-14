@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@ Oliveira</h4>
             
             <h4 data-toc-skip class="date">2026-05-14</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/v0.1.4/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
       <div class="d-none name"><code>rcisignal.Rmd</code></div>
     </div>
 
@@ -1062,7 +1062,8 @@ area added.</p>
 <p>Three ways to obtain a mask:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1. Parametric, no extra dependencies. Default oval geometry</span></span>
-<span><span class="co">#    follows Schmitz, Rougier, &amp; Yzerbyt (2024).</span></span>
+<span><span class="co">#    is a typical centred-face oval; tune via centre,</span></span>
+<span><span class="co">#    half_width, half_height.</span></span>
 <span><span class="va">fm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_face_mask.html">make_face_mask</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>, region <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Sub-regions for region-restricted analyses. Three of these</span></span>
@@ -1095,13 +1096,17 @@ metric:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_face_mask.html">plot_face_mask</a></span><span class="op">(</span><span class="va">fm</span>, img_dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
 <span>               base_image <span class="op">=</span> <span class="st">"data/base.jpg"</span>,</span>
-<span>               main <span class="op">=</span> <span class="st">"Full face oval (Schmitz default)"</span><span class="op">)</span></span></code></pre></div>
-<p>For a side-by-side comparison of the base alone and the base with the
-mask overlaid (the workflow you want when the question is “does this
-mask cover the right region of this specific base image?”), use
-<code><a href="../reference/plot_mask_overlay.html">plot_mask_overlay()</a></code>:</p>
+<span>               main <span class="op">=</span> <span class="st">"Full face oval (package default)"</span><span class="op">)</span></span></code></pre></div>
+<p>To overlay the mask directly on a specific base image (the workflow
+you want when the question is “does this mask cover the right region of
+this specific base image?”), use <code><a href="../reference/plot_mask_overlay.html">plot_mask_overlay()</a></code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mask_overlay.html">plot_mask_overlay</a></span><span class="op">(</span>base_image <span class="op">=</span> <span class="st">"data/base.jpg"</span>, mask <span class="op">=</span> <span class="va">fm</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Either pass a prebuilt mask:</span></span>
+<span><span class="fu"><a href="../reference/plot_mask_overlay.html">plot_mask_overlay</a></span><span class="op">(</span>base_image <span class="op">=</span> <span class="st">"data/base.jpg"</span>, mask <span class="op">=</span> <span class="va">fm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Or use the `region =` shortcut to skip the make_face_mask()</span></span>
+<span><span class="co"># call. `region_bounds` is forwarded for rectangle-region tuning.</span></span>
+<span><span class="fu"><a href="../reference/plot_mask_overlay.html">plot_mask_overlay</a></span><span class="op">(</span>base_image <span class="op">=</span> <span class="st">"data/base.jpg"</span>, region <span class="op">=</span> <span class="st">"left_eye"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Apply masks symmetrically.</strong> When a mask enters the
 analysis, apply it to <em>every</em> term that goes into the statistic.
 For <code><a href="../reference/infoval.html">infoval()</a></code>, this means passing the mask to the function
@@ -1136,20 +1141,25 @@ parametrically, eight region presets are available. Imposed on the same
 base face (an artificial face generated with thispersondoesnotexist.com
 so no consent or licensing concerns apply), they look as follows. Five
 regions are ellipses (<code>full</code>, <code>nose</code>,
-<code>mouth</code>, <code>upper_face</code>, <code>lower_face</code>)
-following the Schmitz, Rougier, and Yzerbyt (2024) geometry; the three
-eye regions (<code>eyes</code>, <code>left_eye</code>,
+<code>mouth</code>, <code>upper_face</code>, <code>lower_face</code>);
+the three eye regions (<code>eyes</code>, <code>left_eye</code>,
 <code>right_eye</code>) are axis-aligned rectangles, tunable to a
 specific base via the <code>region_bounds</code> argument (see the
-tuning subsection below).</p>
+tuning subsection below). All eight region geometries are this package’s
+heuristics for a centred-portrait base; they are not taken from any
+specific published paper. The convention of applying a full-face oval
+before pixel-wise metrics follows prior practice in social-face RC
+(e.g., Oliveira et al., 2019; Ratner et al., 2014; Schmitz, Rougier,
+&amp; Yzerbyt, 2024).</p>
 <div class="figure">
-<img src="figures/face_masks/artificial_full.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024); the three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_upper_face.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024); the three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_lower_face.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024); the three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_nose.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024); the three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_mouth.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024); the three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_eyes.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024); the three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_left_eye.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024); the three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_right_eye.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. The five elliptical regions follow Schmitz, Rougier, and Yzerbyt (2024); the three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><p class="caption">
+<img src="figures/face_masks/artificial_full.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. All eight region geometries are this package's heuristics for a centred-portrait base. The three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_upper_face.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. All eight region geometries are this package's heuristics for a centred-portrait base. The three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_lower_face.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. All eight region geometries are this package's heuristics for a centred-portrait base. The three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_nose.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. All eight region geometries are this package's heuristics for a centred-portrait base. The three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_mouth.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. All eight region geometries are this package's heuristics for a centred-portrait base. The three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_eyes.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. All eight region geometries are this package's heuristics for a centred-portrait base. The three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_left_eye.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. All eight region geometries are this package's heuristics for a centred-portrait base. The three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><img src="figures/face_masks/artificial_right_eye.png" class="r-plt" alt="The eight built-in face-region masks rendered over the same artificial-person base face (256 x 256). Each translucent red overlay marks the pixels that pass through the mask; pixels outside are excluded from the analysis. All eight region geometries are this package's heuristics for a centred-portrait base. The three rectangle eye regions are independent of the full-oval geometry and tunable via `region_bounds`." width="24%"><p class="caption">
 The eight built-in face-region masks rendered over the same
 artificial-person base face (256 x 256). Each translucent red overlay
 marks the pixels that pass through the mask; pixels outside are excluded
-from the analysis. The five elliptical regions follow Schmitz, Rougier,
-and Yzerbyt (2024); the three rectangle eye regions are independent of
-the full-oval geometry and tunable via <code>region_bounds</code>.
+from the analysis. All eight region geometries are this package’s
+heuristics for a centred-portrait base. The three rectangle eye regions
+are independent of the full-oval geometry and tunable via
+<code>region_bounds</code>.
 </p>
 </div>
 <p>The default geometry assumes the eyes sit roughly in the upper third
@@ -1163,11 +1173,14 @@ framing.</p>
 <h4 id="tuning-a-sub-region-for-a-non-default-base-face">Tuning a sub-region for a non-default base face<a class="anchor" aria-label="anchor" href="#tuning-a-sub-region-for-a-non-default-base-face"></a>
 </h4>
 <p>The default sub-region geometry is calibrated for a centred, frontal
-base face that fills most of the frame, following Schmitz et al. (2024)
-for the elliptical regions and a matching heuristic for the rectangle
-eye regions. When the base image violates that assumption, the
-parametric overlay drifts off the intended feature and the metrics
-computed against it no longer mean what their name implies.</p>
+base face that fills most of the frame. The elliptical regions are
+positioned relative to the full-face oval (<code>centre</code>,
+<code>half_width</code>, <code>half_height</code>); the rectangle eye
+regions are independent of the oval and tuned via their own
+<code>region_bounds</code>. When the base image violates the
+centred-portrait assumption, the parametric overlay drifts off the
+intended feature and the metrics computed against it no longer mean what
+their name implies.</p>
 <p>There are two tuning routes, depending on the region’s shape:</p>
 <ul>
 <li>
@@ -1186,9 +1199,8 @@ into.</li>
 full-face oval and tuned via the global <code>centre</code>,
 <code>half_width</code>, <code>half_height</code>. For independent
 per-region adjustment of an ellipse (a common need with non-portrait or
-AI-generated bases), the simplest recipe is to reshape the returned
-vector back into a logical matrix and slide that grid by a few pixels
-with a small <code>shift_mask()</code> helper.</li>
+AI-generated bases), the exported <code><a href="../reference/shift_mask.html">shift_mask()</a></code> helper
+slides the mask by a number of pixels in any direction.</li>
 </ul>
 <div class="section level5">
 <h5 id="rectangle-regions-tune-region_bounds">Rectangle regions: tune <code>region_bounds</code><a class="anchor" aria-label="anchor" href="#rectangle-regions-tune-region_bounds"></a>
@@ -1209,8 +1221,25 @@ so each can be nudged separately to match a specific base.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Verify the alignment visually before passing to a metric.</span></span>
+<span><span class="co"># plot_mask_overlay() also accepts a `region =` shortcut that</span></span>
+<span><span class="co"># builds the mask internally; pass region_bounds the same way.</span></span>
 <span><span class="fu"><a href="../reference/plot_mask_overlay.html">plot_mask_overlay</a></span><span class="op">(</span>base_image <span class="op">=</span> <span class="st">"data/base.png"</span>,</span>
-<span>                  mask <span class="op">=</span> <span class="va">left_eye_tuned</span><span class="op">)</span></span></code></pre></div>
+<span>                  region <span class="op">=</span> <span class="st">"left_eye"</span>,</span>
+<span>                  region_bounds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.40</span>, <span class="fl">0.50</span>, <span class="fl">0.24</span>, <span class="fl">0.44</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>If you measured the rectangle’s edges in pixels (by zooming into the
+base image in your viewer or <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> window), use
+<code><a href="../reference/region_bounds_from_pixels.html">region_bounds_from_pixels()</a></code> to convert to the 0-1 fractions
+<code>region_bounds</code> expects:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># "The viewer's left eye sits in rows 100-130, cols 60-115 on</span></span>
+<span><span class="co"># this 256-pixel base." Convert once, pass straight through.</span></span>
+<span><span class="va">bounds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/region_bounds_from_pixels.html">region_bounds_from_pixels</a></span><span class="op">(</span></span>
+<span>  row_min <span class="op">=</span> <span class="fl">100</span>, row_max <span class="op">=</span> <span class="fl">130</span>,</span>
+<span>  col_min <span class="op">=</span> <span class="fl">60</span>,  col_max <span class="op">=</span> <span class="fl">115</span>,</span>
+<span>  img_dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/make_face_mask.html">make_face_mask</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>, region <span class="op">=</span> <span class="st">"left_eye"</span>,</span>
+<span>               region_bounds <span class="op">=</span> <span class="va">bounds</span><span class="op">)</span></span></code></pre></div>
 <p>Rendered over the artificial-person base used earlier, the default
 <code>left_eye</code> rectangle and the tuned variant look as
 follows:</p>
@@ -1233,19 +1262,16 @@ shift<a class="anchor" aria-label="anchor" href="#elliptical-regions-global-cent
 <p>If every feature is offset in the same direction, pass the global
 <code>centre</code> (and optionally <code>half_width</code>,
 <code>half_height</code>) to <code><a href="../reference/make_face_mask.html">make_face_mask()</a></code>:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Whole-face shift: nose, mouth, and the full oval all move</span></span>
 <span><span class="co"># together. Rectangle eye regions are unaffected.</span></span>
 <span><span class="fu"><a href="../reference/make_face_mask.html">make_face_mask</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>, region <span class="op">=</span> <span class="st">"mouth"</span>,</span>
 <span>               centre <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.55</span>, <span class="fl">0.50</span><span class="op">)</span><span class="op">)</span>   <span class="co"># 5% down</span></span></code></pre></div>
-<p>For independent per-region tuning of an ellipse, the simplest recipe
-is: take the default mask returned by <code><a href="../reference/make_face_mask.html">make_face_mask()</a></code>,
-reshape it back into a <code>nrow x ncol</code> logical matrix (so you
-can think of it as a grid of pixels), and slide that grid by a few
-pixels in any direction. A small helper does the slide; pixels shifted
-off the image are dropped, and the new edges are filled with
-<code>FALSE</code>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<p>For independent per-region tuning of an ellipse, the exported
+<code><a href="../reference/shift_mask.html">shift_mask()</a></code> helper slides the mask by a number of pixels
+in any direction. Pixels shifted off the image are dropped, and the
+newly exposed edge is filled with <code>FALSE</code>.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Default mouth mask, reshaped from a flat logical vector</span></span>
 <span><span class="co"># (pixels in column-by-column order) back into a 256 x 256</span></span>
 <span><span class="co"># grid.</span></span>
@@ -1254,30 +1280,18 @@ off the image are dropped, and the new edges are filled with
 <span>  nrow <span class="op">=</span> <span class="fl">256</span>, ncol <span class="op">=</span> <span class="fl">256</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Shift a logical mask by `down` and `right` pixels. Positive</span></span>
-<span><span class="co"># values move the mask down / right; negative values move it</span></span>
-<span><span class="co"># up / left. Pixels that land off the image are dropped; new</span></span>
-<span><span class="co"># edges are filled with FALSE.</span></span>
-<span><span class="va">shift_mask</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mask</span>, <span class="va">down</span> <span class="op">=</span> <span class="fl">0</span>, <span class="va">right</span> <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">src_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span> <span class="va">down</span></span>
-<span>  <span class="va">src_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span> <span class="va">right</span></span>
-<span>  <span class="va">keep_r</span>   <span class="op">&lt;-</span> <span class="va">src_rows</span> <span class="op">&gt;=</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">src_rows</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span></span>
-<span>  <span class="va">keep_c</span>   <span class="op">&lt;-</span> <span class="va">src_cols</span> <span class="op">&gt;=</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">src_cols</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span></span>
-<span>  <span class="va">out</span><span class="op">[</span><span class="va">keep_r</span>, <span class="va">keep_c</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">mask</span><span class="op">[</span><span class="va">src_rows</span><span class="op">[</span><span class="va">keep_r</span><span class="op">]</span>, <span class="va">src_cols</span><span class="op">[</span><span class="va">keep_c</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="va">out</span></span>
-<span><span class="op">}</span></span>
-<span></span>
 <span><span class="co"># Tune. On a 256-pixel image, 20 pixels is about 8 % of the</span></span>
 <span><span class="co"># height and 8 pixels is about 3 % of the width.</span></span>
-<span><span class="va">mouth_mask_v</span>  <span class="op">&lt;-</span> <span class="fu">shift_mask</span><span class="op">(</span><span class="va">mouth_mask_default</span>, down <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">mouth_mask_vh</span> <span class="op">&lt;-</span> <span class="fu">shift_mask</span><span class="op">(</span><span class="va">mouth_mask_default</span>, down <span class="op">=</span> <span class="fl">20</span>, right <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
-<p><code>shift_mask()</code> accepts both <code>down</code> and
+<span><span class="va">mouth_mask_v</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/shift_mask.html">shift_mask</a></span><span class="op">(</span><span class="va">mouth_mask_default</span>, down <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">mouth_mask_vh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/shift_mask.html">shift_mask</a></span><span class="op">(</span><span class="va">mouth_mask_default</span>, down <span class="op">=</span> <span class="fl">20</span>, right <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/shift_mask.html">shift_mask()</a></code> accepts both <code>down</code> and
 <code>right</code> and combines them in a single call, so vertical-only
-and vertical-plus-horizontal tuning share the same idiom. Both
-<code><a href="../reference/infoval.html">infoval()</a></code> and the <code>rel_*()</code> family accept a
-logical matrix as the <code>mask</code> argument, so the tuned grid can
-be passed in directly without flattening.</p>
+and vertical-plus-horizontal tuning share the same idiom. It works on
+either a column-major logical vector (pass <code>img_dims</code>) or a
+logical matrix (returned in the same shape). Both <code><a href="../reference/infoval.html">infoval()</a></code>
+and the <code>rel_*()</code> family accept a logical matrix as the
+<code>mask</code> argument, so the tuned grid can be passed in directly
+without flattening.</p>
 <p>Rendered over the same <code>artif_base.png</code> shown earlier
 (where the mouth sits noticeably below the default), the default mask
 and the two tuned variants look as follows:</p>
@@ -1287,14 +1301,14 @@ Elliptical mouth-region mask before and after shift-tuning on a base
 face whose mouth sits below the default. Left: default geometry. Middle:
 shifted down by ~20 pixels (about 8 percent of image height). Right:
 same vertical shift plus an ~8-pixel rightward shift. Each panel renders
-one of the matrices produced by <code>shift_mask()</code> above. The
+one of the matrices produced by <code><a href="../reference/shift_mask.html">shift_mask()</a></code> above. The
 same recipe works for <code>nose</code>, <code>upper_face</code>,
 <code>lower_face</code>, and the <code>full</code> oval; the three
 rectangle eye regions use <code>region_bounds</code> instead.
 </p>
 </div>
-<p>Iterate with <code><a href="../reference/plot_mask_overlay.html">plot_mask_overlay()</a></code> (base alongside base +
-mask) or <code><a href="../reference/plot_face_mask.html">plot_face_mask()</a></code> until the overlay sits where you
+<p>Iterate with <code><a href="../reference/plot_mask_overlay.html">plot_mask_overlay()</a></code> (overlay on the base
+image) or <code><a href="../reference/plot_face_mask.html">plot_face_mask()</a></code> until the overlay sits where you
 want, then pass the tuned mask to <code><a href="../reference/infoval.html">infoval()</a></code> or any
 <code>rel_*()</code> function exactly as you would a parametric mask.
 Useful shift magnitudes are typically a few pixels to a few dozen on a
@@ -1317,7 +1331,7 @@ one printable report.</p>
 </h3>
 <p>The smallest meaningful call needs only the response data and the
 method:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_diagnostics.html">run_diagnostics</a></span><span class="op">(</span><span class="va">responses</span>, method <span class="op">=</span> <span class="st">"2ifc"</span><span class="op">)</span></span>
 <span><span class="va">report</span></span></code></pre></div>
 <p>The output looks like:</p>
@@ -1441,8 +1455,8 @@ walk-through that catches every common low-infoVal cause:</p>
 trial count (closes the calibration gap in
 <code><a href="https://rdrr.io/pkg/rcicr/man/generateReferenceDistribution2IFC.html" class="external-link">rcicr::generateReferenceDistribution2IFC()</a></code>, which keys on
 pool size).</li>
-<li>Apply a face mask (default <code>"auto"</code> = Schmitz oval) and
-repeat.</li>
+<li>Apply a face mask (default <code>"auto"</code> = parametric
+full-face oval) and repeat.</li>
 <li>Compare unmasked vs masked z to see whether masking lifts or
 depresses signal.</li>
 <li>Sanity-check with a synthetic random responder (should land at
@@ -1450,7 +1464,7 @@ depresses signal.</li>
 <li>Report whether the group-mean CI clears z = 1.96 even when
 per-producer medians do not.</li>
 </ol>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">iv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/diagnose_infoval.html">diagnose_infoval</a></span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
 <span>  method    <span class="op">=</span> <span class="st">"2ifc"</span>,</span>
@@ -1551,7 +1565,7 @@ skipped. Each skipped check requires a specific additional argument:</p>
 <p><code>infoval_iter</code> defaults to <code>NULL</code> because the
 reference distribution simulation at 10,000 iterations takes minutes on
 first call. Opt in explicitly when you are ready to wait.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_diagnostics.html">run_diagnostics</a></span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
 <span>  method       <span class="op">=</span> <span class="st">"2ifc"</span>,</span>
@@ -1576,7 +1590,7 @@ first call. Opt in explicitly when you are ready to wait.</p>
 and returns a list with <code>$signal_matrix</code> (raw mask, ready for
 <code>rel_*</code>), optionally <code>$rendered_ci</code> for
 visualisation, plus metadata.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc</a></span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
 <span>  rdata_path    <span class="op">=</span> <span class="st">"rcic_stimuli.Rdata"</span>,</span>
@@ -1597,7 +1611,7 @@ rcicr expects (<code>foreach</code>, <code>tibble</code>,
 not include Brief-RC). The implementation follows Schmitz’s
 <code>genMask()</code> formula step for step, including the rule that
 collapses repeated stimulus ids by averaging their responses:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
 <span>  rdata_path <span class="op">=</span> <span class="st">"rcic_stimuli.Rdata"</span>,  <span class="co"># for the noise pool</span></span>
@@ -1614,7 +1628,7 @@ collapses repeated stimulus ids by averaging their responses:</p>
 <p>When you already have one CI image per producer on disk (PNG or
 JPEG), <code><a href="../reference/read_signal_matrix.html">read_signal_matrix()</a></code> reads them and subtracts the
 base image in one call:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">signal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_signal_matrix.html">read_signal_matrix</a></span><span class="op">(</span></span>
 <span>  dir             <span class="op">=</span> <span class="st">"data/cis_condition_A/"</span>,</span>
 <span>  base_image_path <span class="op">=</span> <span class="st">"data/base.jpg"</span></span>
@@ -1725,7 +1739,7 @@ per-permutation <code>r</code> (<code>r_hh</code>) and the
 Spearman-Brown projected full-sample reliability
 (<code>r_sb = (2 r_hh) / (1 + r_hh)</code>). The headline number is
 typically <code>r_sb</code>.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_split_half.html">rel_split_half</a></span><span class="op">(</span><span class="va">signal_matrix</span>,</span>
 <span>                     n_permutations <span class="op">=</span> <span class="fl">2000L</span>,</span>
 <span>                     seed           <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
@@ -1750,7 +1764,7 @@ This baseline preserves the pixel correlation structure of real noise
 patterns and tracks the empirical chance baseline of an actual RC
 experiment more closely. Requires <code>noise_matrix</code>.</li>
 </ul>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_split_half.html">rel_split_half</a></span><span class="op">(</span><span class="va">signal_matrix</span>,</span>
 <span>                     null          <span class="op">=</span> <span class="st">"random_responders"</span>,</span>
 <span>                     noise_matrix  <span class="op">=</span> <span class="va">nm</span>,</span>
@@ -1800,7 +1814,7 @@ CI as a noisy estimate of the group pattern?”.</li>
 <strong>ICC(3,k)</strong> answers “how stable is the group-mean CI
 across <code>k</code> producers?”. Usually the headline.</li>
 </ul>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_icc.html">rel_icc</a></span><span class="op">(</span><span class="va">signal_matrix</span><span class="op">)</span></span>
 <span><span class="va">ic</span>   <span class="co"># prints ICC(3,1), ICC(3,k), MS rows / cols / error</span></span></code></pre></div>
 <p>The function computes both quantities directly from ANOVA mean
@@ -1849,7 +1863,7 @@ as a robust z-score.</p>
 correlation between the full-sample group CI and the group CI recomputed
 without producer <code>i</code>. Producers whose <code>r_loo</code> sits
 well below the others are candidates for inspection.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_loo.html">rel_loo</a></span><span class="op">(</span><span class="va">signal_matrix</span><span class="op">)</span></span>
 <span><span class="va">lo</span>                       <span class="co"># raw cors + z-scores + flag column</span></span>
 <span><span class="fu"><a href="../reference/rel_loo_z.html">rel_loo_z</a></span><span class="op">(</span><span class="va">lo</span><span class="op">)</span>            <span class="co"># tidy data frame, sorted by z_score</span></span>
@@ -1880,7 +1894,7 @@ excluding any producer.</p>
 <code><a href="../reference/rel_split_half.html">rel_split_half()</a></code> and <code><a href="../reference/rel_icc.html">rel_icc()</a></code> on a single
 signal matrix and bundles both results into one
 <code>rcisignal_rel_report</code>:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">signal_matrix</span>,</span>
 <span>                       n_permutations <span class="op">=</span> <span class="fl">2000L</span>,</span>
 <span>                       seed           <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
@@ -1948,7 +1962,7 @@ per-pixel t-values into a permutation-based FWER procedure.</p>
 <p>In code:</p>
 <p>Vectorised Welch’s t (independent groups) or paired t (matched
 producers) per pixel:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">t_vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pixel_t_test.html">pixel_t_test</a></span><span class="op">(</span><span class="va">signal_a</span>, <span class="va">signal_b</span><span class="op">)</span>         <span class="co"># n_pixels long</span></span>
 <span><span class="va">t_vec_paired</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pixel_t_test.html">pixel_t_test</a></span><span class="op">(</span><span class="va">signal_a</span>, <span class="va">signal_b</span>,</span>
 <span>                             paired <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -2011,7 +2025,7 @@ stratified label permutation: every permutation preserves
 shuffled labels, and the maximum positive and maximum negative cluster
 masses are recorded. A cluster’s p-value is the fraction of null masses
 (matching sign) that exceed the observed.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ct</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_cluster_test.html">rel_cluster_test</a></span><span class="op">(</span></span>
 <span>  <span class="va">signal_a</span>, <span class="va">signal_b</span>,</span>
 <span>  img_dims          <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
@@ -2042,7 +2056,7 @@ positive and negative tails are enhanced separately and recombined with
 sign preserved. No free threshold parameter to choose. Per-pixel p-value
 =
 <code>(sum(null_max_abs_tfce &gt;= |observed_tfce|) + 1) / (n_perm + 1)</code>.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ct_tfce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_cluster_test.html">rel_cluster_test</a></span><span class="op">(</span></span>
 <span>  <span class="va">signal_a</span>, <span class="va">signal_b</span>,</span>
 <span>  img_dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
@@ -2086,7 +2100,7 @@ scaling conventions and the underlying base image.</p>
 <p>Pair the spatial cluster test with a single overall magnitude
 summary: Euclidean distance between the two group-mean CIs, with
 percentile bootstrap CIs.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_dissimilarity.html">rel_dissimilarity</a></span><span class="op">(</span></span>
 <span>  <span class="va">signal_a</span>, <span class="va">signal_b</span>,</span>
 <span>  n_boot   <span class="op">=</span> <span class="fl">2000L</span>,</span>
@@ -2121,7 +2135,7 @@ When set, the result includes <code>$d_null_p95</code>,
 </h3>
 <p>Orchestrator that runs <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code> and
 <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code> on a pair of signal matrices:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_discriminability.html">run_discriminability</a></span><span class="op">(</span><span class="va">signal_a</span>, <span class="va">signal_b</span>,</span>
 <span>                            img_dims          <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
 <span>                            cluster_threshold <span class="op">=</span> <span class="fl">2.0</span>,</span>
@@ -2133,7 +2147,7 @@ children <code>rep$results$cluster_test</code> and
 <code>rep$results$dissimilarity</code> are the standalone results,
 useful when you want a single panel with a custom title (for example to
 compare conditions named on a poster or a figure caption):</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rep</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">cluster_test</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"US vs PT - cluster test"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rep</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">dissimilarity</span>,</span>
@@ -2145,7 +2159,7 @@ compare conditions named on a poster or a figure caption):</p>
 <p>Generalises <code><a href="../reference/run_discriminability.html">run_discriminability()</a></code> to all K-choose-2
 pairs of K conditions, with a family-wise correction across pairs (Holm
 by default, Bonferroni or none also available):</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_discriminability_pairwise.html">run_discriminability_pairwise</a></span><span class="op">(</span></span>
 <span>  signal_matrices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    Trust    <span class="op">=</span> <span class="va">sm_trust</span>,</span>
@@ -2163,7 +2177,7 @@ because at that density the panels become illegible; subset
 <code>rep$results</code> and plot a slice, or call
 <code>plot(rep, max_pairs = Inf)</code> to silence the warning. To
 inspect a single pair on its own, or to override the title:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rep</span><span class="op">$</span><span class="va">results</span><span class="op">[[</span><span class="st">"Trust_vs_Dominant"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">cluster_test</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Trust vs Dominant"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rep</span><span class="op">$</span><span class="va">results</span><span class="op">[[</span><span class="st">"Trust_vs_Dominant"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">dissimilarity</span>,</span>
@@ -2218,7 +2232,7 @@ exploratory (§1.2).</p>
 <p><code><a href="../reference/infoval.html">infoval()</a></code> reports a per-producer Frobenius-norm z-score
 against a reference distribution matched to that producer’s actual trial
 count:</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">iv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/infoval.html">infoval</a></span><span class="op">(</span></span>
 <span>  <span class="va">signal_matrix</span>,</span>
 <span>  <span class="va">noise_matrix</span>,</span>
@@ -2290,7 +2304,7 @@ built by random sign-flip per producer (exact under the assumption that,
 under H0, the producer’s signal is symmetric around zero). Family-wise
 error is controlled by the maximum <code>|t|</code> statistic across
 pixels.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">am</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/agreement_map_test.html">agreement_map_test</a></span><span class="op">(</span><span class="va">signal_matrix</span>,</span>
 <span>                         n_permutations <span class="op">=</span> <span class="fl">5000L</span>,</span>
 <span>                         alpha          <span class="op">=</span> <span class="fl">0.05</span>,</span>
@@ -2303,7 +2317,7 @@ pixels.</p>
 </h3>
 <p>Renders the per-pixel one-sample t-map as a colour image, with
 optional thresholding:</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_agreement_map.html">plot_agreement_map</a></span><span class="op">(</span><span class="va">signal_matrix</span>,</span>
 <span>                   img_dims  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
 <span>                   threshold <span class="op">=</span> <span class="fl">2.0</span>,</span>
@@ -2316,7 +2330,7 @@ optional thresholding:</p>
 translucent layer over the base face, optionally restricted to the
 significant-pixel mask returned by
 <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ci_overlay.html">plot_ci_overlay</a></span><span class="op">(</span></span>
 <span>  <span class="va">signal_matrix</span>,</span>
 <span>  base_image <span class="op">=</span> <span class="st">"data/base.jpg"</span>,</span>
@@ -2331,7 +2345,7 @@ significant-pixel mask returned by
 side-by-side as labelled CI bars. Useful for paper figures showing
 whether two contrasts have overlapping CIs without forcing the reader to
 read four numbers from a table:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d_AB</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_dissimilarity.html">rel_dissimilarity</a></span><span class="op">(</span><span class="va">sm_a</span>, <span class="va">sm_b</span>, seed <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
 <span><span class="va">d_AC</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rel_dissimilarity.html">rel_dissimilarity</a></span><span class="op">(</span><span class="va">sm_a</span>, <span class="va">sm_c</span>, seed <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
 <span></span>
@@ -2367,7 +2381,7 @@ back into a full-image vector (NA outside the mask).</li>
 analysis. Mixing masked observed values with an unmasked reference
 yields a number with no defensible interpretation. To compare across
 regions, run the metric once per mask:</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">region</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"eyes"</span>, <span class="st">"nose"</span>, <span class="st">"mouth"</span>,</span>
 <span>                 <span class="st">"upper_face"</span>, <span class="st">"lower_face"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_face_mask.html">make_face_mask</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>, region <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span>
@@ -2409,7 +2423,7 @@ Re-run the precompute scripts to refresh after package changes.</p>
 <code><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv2()</a></code>, then rename <code>subject</code> to the column
 name the package expects, store the ids as text (so they are not treated
 as numeric), and lower-case the trait labels for consistency:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
@@ -2434,7 +2448,7 @@ and <code>s$sinIdx</code>, while current rcicr expects the
 <code>p$patches</code> and <code>p$patchIdx</code> schema introduced in
 v1.0.x. Patch the legacy file without re-running stimulus
 generation:</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"rcic_seed_1_time_fev_05_2015_03_17.Rdata"</span><span class="op">)</span>  <span class="co"># legacy file</span></span>
 <span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -2451,7 +2465,7 @@ will read.</p>
 <h3 id="diagnostics">12.3 Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
 </h3>
 <p>The diagnostic battery runs in one call:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_diagnostics.html">run_diagnostics</a></span><span class="op">(</span></span>
 <span>  <span class="va">raw</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"participant_id"</span>, <span class="st">"stimulus"</span>, <span class="st">"response"</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>  method     <span class="op">=</span> <span class="st">"2ifc"</span>,</span>
@@ -2506,7 +2520,7 @@ The basic mechanics are clean.</p>
 running <code><a href="../reference/check_response_bias.html">check_response_bias()</a></code> separately per condition is
 useful (a producer who looks balanced overall may still be heavily
 biased in one trait):</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trait_bias</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">tr</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">sub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">raw</span>, <span class="va">trait</span> <span class="op">==</span> <span class="va">tr</span>,</span>
@@ -2521,8 +2535,8 @@ biased in one trait):</p>
 </h3>
 <p><code><a href="../reference/infoval.html">infoval()</a></code> reports a per-producer Frobenius-norm z-score
 against a trial-count-matched reference. Running it on each of the ten
-trait conditions, masked with the Schmitz oval, gives the table below
-(precomputed):</p>
+trait conditions, masked with the package’s default full-face oval,
+gives the table below (precomputed):</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Trait</th>
@@ -2611,7 +2625,7 @@ understand the mask formula is to build one condition’s signal matrix by
 hand. We will do it for the Trust condition.</p>
 <p><strong>Step 1.</strong> Read the noise matrix once. Each column is
 the noise pattern shown on one trial out of the 300-stimulus pool.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">noise_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_noise_matrix.html">read_noise_matrix</a></span><span class="op">(</span><span class="st">"stimuli_modernised.RData"</span>,</span>
 <span>                                  baseimage <span class="op">=</span> <span class="st">"male"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">noise_matrix</span><span class="op">)</span></span>
@@ -2619,7 +2633,7 @@ the noise pattern shown on one trial out of the 300-stimulus pool.</p>
 <p><strong>Step 2.</strong> Subset the response data to the Trust
 condition, sort by producer and trial, and read out the producer
 ids.</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trust_trials</span> <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span> <span class="op">==</span> <span class="st">"trust"</span>, <span class="op">]</span></span>
 <span><span class="va">trust_trials</span> <span class="op">&lt;-</span> <span class="va">trust_trials</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">trust_trials</span><span class="op">$</span><span class="va">participant_id</span>,</span>
 <span>                                   <span class="va">trust_trials</span><span class="op">$</span><span class="va">trial</span><span class="op">)</span>, <span class="op">]</span></span>
@@ -2631,7 +2645,7 @@ patterns that producer saw (<code>noise_matrix[, p$stimulus]</code>),
 multiply each by their response (<code>+1</code> or <code>-1</code>) and
 divide by the trial count. The result is a numeric vector of length
 65,536 (the pixels in column-major order, i.e. column by column).</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="va">trust_trials</span><span class="op">[</span><span class="va">trust_trials</span><span class="op">$</span><span class="va">participant_id</span> <span class="op">==</span> <span class="va">trust_ids</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="op">]</span></span>
 <span></span>
 <span><span class="co"># One column of `noise_matrix` per trial that producer saw,</span></span>
@@ -2649,7 +2663,7 @@ stack the results column-wise. Tag the matrix with <code>img_dims</code>
 so plot helpers know it is 256 x 256, and with
 <code>source = "raw"</code> so variance-based metrics will accept it
 without complaint.</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Empty 65,536 x 20 matrix; one column per producer.</span></span>
 <span><span class="va">sm_trust</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA_real_</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">noise_matrix</span><span class="op">)</span>,</span>
 <span>                   ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">trust_ids</span><span class="op">)</span>,</span>
@@ -2673,7 +2687,7 @@ without complaint.</p>
 recipe with a different <code>trait</code> label. To produce all ten in
 one shot, wrap the four steps in a function and apply it across all the
 trait labels:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">build_signal_matrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">raw</span>, <span class="va">label</span>, <span class="va">noise_matrix</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">trials</span> <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span> <span class="op">==</span> <span class="va">label</span>, <span class="op">]</span></span>
 <span>  <span class="va">trials</span> <span class="op">&lt;-</span> <span class="va">trials</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">participant_id</span>, <span class="va">trials</span><span class="op">$</span><span class="va">trial</span><span class="op">)</span>, <span class="op">]</span></span>
@@ -2711,7 +2725,7 @@ can switch to <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_r
 <p><code><a href="../reference/run_reliability.html">run_reliability()</a></code> returns split-half (with
 Spearman-Brown projection) and ICC(3,*) on a single signal matrix. Run
 it on each per-trait signal matrix:</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rel_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>trait <span class="op">=</span> <span class="va">traits</span>,</span>
 <span>                        r_sb <span class="op">=</span> <span class="cn">NA_real_</span>, icc_3_k <span class="op">=</span> <span class="cn">NA_real_</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">traits</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -2907,7 +2921,7 @@ benchmark.</li>
 <p>Each contrast is a stratified cluster permutation test on the full
 face. We summarise the overall magnitude of each divergence with
 <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code> and lay them out side-by-side:</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">contrasts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Trust vs Friendly"</span>     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"trust"</span><span class="op">]</span><span class="op">]</span>,     b <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"friendly"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>  <span class="st">"Competent vs Dominant"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"competent"</span><span class="op">]</span><span class="op">]</span>, b <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"dominant"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
@@ -2965,7 +2979,7 @@ across the face or driven by specific anatomical regions. Run the
 cluster test once per region per contrast. The same three contrasts ×
 four regions (full, eyes, mouth, upper face) gives twelve cells, which
 is small enough to scan as a table:</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">regions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"full"</span>, <span class="st">"eyes"</span>, <span class="st">"mouth"</span>, <span class="st">"upper_face"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cluster_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
@@ -3112,7 +3126,7 @@ evidence for a localised contrast driven by one anatomical area.</p>
 group CI looks weak overall may carry stronger signal in one specific
 region, and vice versa. Run <code><a href="../reference/infoval.html">infoval()</a></code> per region per
 condition:</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Helper: for one trait label, return a named integer vector</span></span>
 <span><span class="co"># giving the trial count per producer.</span></span>
 <span><span class="va">trial_counts_for</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="op">{</span></span>
@@ -3314,7 +3328,7 @@ where the per-pixel Welch t exceeds the cluster-forming threshold, and
 (iv) overlay the same difference on the base face restricted to pixels
 belonging to a significant cluster (2000 stratified label permutations,
 max-mass null, cluster threshold |t| &gt; 2.0).</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Descriptive map: difference of group means, no significance filter.</span></span>
 <span><span class="va">diff_signal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="st">"trust"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="st">"friendly"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
@@ -3361,11 +3375,11 @@ max-mass null, cluster threshold |t| &gt; 2.0).</p>
 the display is restricted to the face oval so the colour scale is not
 dominated by hair/background pixels.</p>
 <div class="figure">
-<img src="figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png" class="r-plt" alt="Descriptive pairwise difference maps on the male base face. Left: Trust minus Friendly. Right: Dominant minus Competent. Blue = first condition stronger; red = second condition stronger; opacity = magnitude of the difference. The display covers every pixel in the Schmitz oval; no inferential filter is applied. These maps show the raw spatial pattern of agreement before any cluster-based permutation testing." width="48%"><img src="figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png" class="r-plt" alt="Descriptive pairwise difference maps on the male base face. Left: Trust minus Friendly. Right: Dominant minus Competent. Blue = first condition stronger; red = second condition stronger; opacity = magnitude of the difference. The display covers every pixel in the Schmitz oval; no inferential filter is applied. These maps show the raw spatial pattern of agreement before any cluster-based permutation testing." width="48%"><p class="caption">
+<img src="figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png" class="r-plt" alt="Descriptive pairwise difference maps on the male base face. Left: Trust minus Friendly. Right: Dominant minus Competent. Blue = first condition stronger; red = second condition stronger; opacity = magnitude of the difference. The display covers every pixel in the full-face oval; no inferential filter is applied. These maps show the raw spatial pattern of agreement before any cluster-based permutation testing." width="48%"><img src="figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png" class="r-plt" alt="Descriptive pairwise difference maps on the male base face. Left: Trust minus Friendly. Right: Dominant minus Competent. Blue = first condition stronger; red = second condition stronger; opacity = magnitude of the difference. The display covers every pixel in the full-face oval; no inferential filter is applied. These maps show the raw spatial pattern of agreement before any cluster-based permutation testing." width="48%"><p class="caption">
 Descriptive pairwise difference maps on the male base face. Left: Trust
 minus Friendly. Right: Dominant minus Competent. Blue = first condition
 stronger; red = second condition stronger; opacity = magnitude of the
-difference. The display covers every pixel in the Schmitz oval; no
+difference. The display covers every pixel in the full-face oval; no
 inferential filter is applied. These maps show the raw spatial pattern
 of agreement before any cluster-based permutation testing.
 </p>
@@ -3445,7 +3459,7 @@ result should be reported as exploratory.</p>
 <div class="section level3">
 <h3 id="end-to-end-brief-rc-example">13.2 End-to-end Brief-RC example<a class="anchor" aria-label="anchor" href="#end-to-end-brief-rc-example"></a>
 </h3>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 1. Read the Schmitz et al. 2024 noise matrix directly. You</span></span>
@@ -3575,11 +3589,14 @@ per-trial signal is on the order of 5% of per-trial noise,
 post-aggregation effective SNR is barely visible to a global energy
 measure.</p></li>
 <li><p><strong>Without a face mask, infoVal counts background.</strong>
-<code><a href="../reference/make_face_mask.html">make_face_mask()</a></code> ships an oval mask that approximates the
-Schmitz (2024) face region. Applying it
+<code><a href="../reference/make_face_mask.html">make_face_mask()</a></code> ships a parametric full-face oval that
+isolates the face region from background and hair. Applying it
 (<code>infoval(..., mask = make_face_mask(c(256, 256)))</code>)
 concentrates the norm on signal-bearing pixels and typically lifts
-z-scores noticeably.</p></li>
+z-scores noticeably. The convention of applying a full-face oval before
+computing pixel-wise CI metrics follows prior practice in social-face RC
+(e.g., Oliveira et al., 2019; Ratner et al., 2014; Schmitz, Rougier,
+&amp; Yzerbyt, 2024).</p></li>
 <li>
 <p><strong>Group-level CIs can show higher z than individual CIs,
 but the inflation is conditional, not structural.</strong> Two pieces of
@@ -3624,7 +3641,7 @@ Brinkman-style per- producer distribution.</p>
 </h3>
 <p>If a per-producer infoVal table looks worryingly low, work through
 these steps before reporting it:</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sm</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span></span>
 <span><span class="va">tc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">300L</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">sm</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sm</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -3700,7 +3717,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <div class="section level2">
 <h2 id="citation">16. Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"rcisignal"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"rcisignal"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
@@ -3713,7 +3730,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt; To cite package 'rcisignal' in publications use:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation</span></span>
-<span><span class="co">#&gt;   Data and Classification Images_. R package version 0.1.4,</span></span>
+<span><span class="co">#&gt;   Data and Classification Images_. R package version 0.1.5,</span></span>
 <span><span class="co">#&gt;   &lt;https://github.com/olivethree/rcisignal&gt;.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
@@ -3723,7 +3740,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt; Images},</span></span>
 <span><span class="co">#&gt;     author = {Manuel Oliveira},</span></span>
 <span><span class="co">#&gt;     year = {2026},</span></span>
-<span><span class="co">#&gt;     note = {R package version 0.1.4},</span></span>
+<span><span class="co">#&gt;     note = {R package version 0.1.5},</span></span>
 <span><span class="co">#&gt;     url = {https://github.com/olivethree/rcisignal},</span></span>
 <span><span class="co">#&gt;   }</span></span></code></pre></div>
 </div>
@@ -3769,6 +3786,11 @@ Brain Mapping</em>, 15(1), 1-25. <a href="https://doi.org/10.1002/hbm.1058" clas
 L. (2019). Dominance and competence face to face: Dissociations obtained
 with a reverse correlation approach. <em>European Journal of Social
 Psychology</em>. <a href="https://doi.org/10.1002/ejsp.2569" class="external-link uri">https://doi.org/10.1002/ejsp.2569</a></p>
+<p>Ratner, K. G., Dotsch, R., Wigboldus, D. H. J., van Knippenberg, A.,
+&amp; Amodio, D. M. (2014). Visualizing minimal ingroup and outgroup
+faces: implications for impressions, attitudes, and behavior.
+<em>Journal of Personality and Social Psychology</em>, 106(6), 897-911.
+<a href="https://doi.org/10.1037/a0036498" class="external-link uri">https://doi.org/10.1037/a0036498</a></p>
 <p>Schmitz, M., Rougier, M., &amp; Yzerbyt, V. (2020). Comment on
 “Quantifying the informational value of classification images”: A
 miscomputation of the infoVal metric. <em>Behavior Research

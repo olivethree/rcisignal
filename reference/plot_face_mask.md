@@ -13,13 +13,15 @@ logical/numeric matrix, or a path to a PNG/JPEG mask file.
 
 ``` r
 plot_face_mask(
-  mask,
+  mask = NULL,
   img_dims = NULL,
   base_image = NULL,
   alpha = 0.5,
   col = "red",
   threshold = 0.5,
   main = NULL,
+  region = NULL,
+  region_bounds = NULL,
   ...
 )
 ```
@@ -33,12 +35,15 @@ plot_face_mask(
   [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
   or
   [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md));
-  a logical or numeric matrix; or a path to a PNG/JPEG mask file.
+  a logical or numeric matrix; or a path to a PNG/JPEG mask file. Pass
+  `NULL` and a `region` to build the mask internally via
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md).
 
 - img_dims:
 
   Integer `c(nrow, ncol)`, or a single integer for a square image.
-  Required when `mask` is a vector; ignored otherwise.
+  Required when `mask` is a vector or when `region` is supplied; ignored
+  otherwise.
 
 - base_image:
 
@@ -63,6 +68,20 @@ plot_face_mask(
 
   Optional plot title.
 
+- region:
+
+  Optional character region name (one of the
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  choices) used as a convenience shortcut: builds the mask internally
+  via `make_face_mask(img_dims, region, region_bounds)`. Mutually
+  exclusive with `mask`.
+
+- region_bounds:
+
+  Optional length-4 numeric vector forwarded to
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  when `region` is one of the rectangle regions. Ignored otherwise.
+
 - ...:
 
   Reserved for future use.
@@ -83,7 +102,7 @@ warning.
 ## See also
 
 [`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
-(side-by-side base + overlay view),
+(overlay on a specific base image),
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md),
 [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md),
 [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md).

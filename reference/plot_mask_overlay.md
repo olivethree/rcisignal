@@ -1,12 +1,11 @@
 # Sanity-check a face mask against a base image
 
-Renders a base face next to (or under) a translucent mask overlay so you
-can verify the mask aligns with the anatomy you intended before feeding
-it into
+Renders a base face with a translucent mask overlay so you can verify
+the mask aligns with the anatomy you intended before feeding it into
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
 [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
 or any other downstream analysis. Avoids the usual hand-rolled
-`par(mfrow = c(1, 2)) + image() + adjustcolor()` workflow.
+`image() + adjustcolor()` workflow.
 
 Companion to
 [`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md)
@@ -20,8 +19,9 @@ the mask cover the right region of this specific base image?".
 ``` r
 plot_mask_overlay(
   base_image,
-  mask,
-  side_by_side = TRUE,
+  mask = NULL,
+  region = NULL,
+  region_bounds = NULL,
   alpha = 0.35,
   overlay_col = "red",
   main = NULL
@@ -47,12 +47,23 @@ plot_mask_overlay(
   a logical or numeric matrix of the same dimensions as `base_image`; or
   a single character path to a PNG/JPEG mask file (resolved via
   [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)).
-  Numeric inputs are thresholded at `0.5`.
+  Numeric inputs are thresholded at `0.5`. Pass `NULL` (the default) and
+  a `region` to build the mask internally via
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md).
 
-- side_by_side:
+- region:
 
-  Logical. `TRUE` (default) draws the base on the left and the base +
-  mask overlay on the right. `FALSE` draws only the overlay panel.
+  Optional character region name for the convenience shortcut: passing
+  e.g. `region = "left_eye"` builds the mask via
+  `make_face_mask(dim(base_image), region, region_bounds)` and skips the
+  separate construction step. Mutually exclusive with `mask`.
+
+- region_bounds:
+
+  Optional length-4 numeric vector forwarded to
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  when `region` is one of the rectangle regions (`"eyes"`, `"left_eye"`,
+  `"right_eye"`). Ignored otherwise.
 
 - alpha:
 
@@ -64,11 +75,8 @@ plot_mask_overlay(
 
 - main:
 
-  Optional plot title. When `NULL`, the panels are titled `"Base face"`
-  and `"Base + mask overlay"` for `side_by_side = TRUE`, or just
-  `"Base + mask overlay"` for `side_by_side = FALSE`. When
-  `side_by_side = TRUE`, you can pass a length-2 character vector to
-  override both titles.
+  Optional plot title (character of length 1). Default `NULL` (no
+  title).
 
 ## Value
 
@@ -94,20 +102,22 @@ plot_mask_overlay(base, eyes)
 } # }
 
 if (FALSE) { # \dontrun{
-# Use the simulator's base face and the eye sub-region to verify
-# that the parametric oval lands on the intended anatomy.
+# Use the simulator's base face and a sub-region to verify
+# that the parametric mask lands on the intended anatomy.
 sim   <- simulate_briefrc_data(
   n_per_condition = 5, n_trials = 10, conditions = "target",
   seed = 1
 )
 mouth <- make_face_mask(dim(sim$base_face), region = "mouth")
-plot_mask_overlay(sim$base_face, mouth,
-                  main = c("Base face", "Mouth region"))
+plot_mask_overlay(sim$base_face, mouth, main = "Mouth region")
 } # }
 
 if (FALSE) { # \dontrun{
 # Mask loaded from a PNG file; pass both as paths.
-plot_mask_overlay("path/to/base.png", "path/to/mask.png",
-                  side_by_side = FALSE)
+plot_mask_overlay("path/to/base.png", "path/to/mask.png")
 } # }
+
+# Region shortcut: skip the make_face_mask() call.
+base <- matrix(0.5, 128L, 128L)
+plot_mask_overlay(base, region = "left_eye")
 ```

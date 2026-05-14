@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,9 +29,40 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/olivethree/rcisignal/blob/v0.1.4/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/olivethree/rcisignal/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.5" id="rcisignal-015">rcisignal 0.1.5<a class="anchor" aria-label="anchor" href="#rcisignal-015"></a></h2>
+<div class="section level3">
+<h3 id="behavioural-change-0-1-5">Behavioural change<a class="anchor" aria-label="anchor" href="#behavioural-change-0-1-5"></a></h3>
+<ul><li>
+<code><a href="../reference/plot_mask_overlay.html">plot_mask_overlay()</a></code> now always renders a single panel (the base image with the mask overlaid). The <code>side_by_side =</code> argument is removed (the base-alongside-base layout duplicated the base image and added nothing beyond what the single overlay panel already shows). The plot region is now forced square (<code>pty = "s"</code>) to avoid the empty canvas that appeared around the image on wide / tall devices.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-1-5">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-5"></a></h3>
+<ul><li>New <code><a href="../reference/shift_mask.html">shift_mask()</a></code> exported helper. Slides a logical face-region mask by <code>down</code> and <code>right</code> pixels and returns the shifted mask in the same input shape (matrix or column-major vector). This was previously a copy-paste recipe in vignette §4.5; it is now a real API surface with help page and tests. Useful for fine-tuning the <em>elliptical</em> <code><a href="../reference/make_face_mask.html">make_face_mask()</a></code> regions on a non-default base; for the <em>rectangle</em> regions, prefer the <code>region_bounds</code> argument.</li>
+<li>New <code><a href="../reference/region_bounds_from_pixels.html">region_bounds_from_pixels()</a></code> exported helper. Converts pixel-coordinate rectangle bounds (<code>c(row_min, row_max, col_min, col_max)</code> in 1-indexed image pixels) to the 0-1 image fractions that <code>make_face_mask(region_bounds = ...)</code> expects. Bridges visual inspection of a base image (where users think in pixels) and the parametric API (which expects fractions).</li>
+<li>
+<code><a href="../reference/plot_mask_overlay.html">plot_mask_overlay()</a></code> and <code><a href="../reference/plot_face_mask.html">plot_face_mask()</a></code> gain a <code>region =</code> shortcut: <code>plot_mask_overlay(base, region = "left_eye")</code> builds the mask internally via <code><a href="../reference/make_face_mask.html">make_face_mask()</a></code> instead of forcing the caller to construct it separately. A <code>region_bounds =</code> pass-through arg is available for tuning the rectangle regions in the same call.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-0-1-5">Tests<a class="anchor" aria-label="anchor" href="#tests-0-1-5"></a></h3>
+<ul><li>New regression test <code>test-simulate-diagnostic-chain.R</code> exercises <code><a href="../reference/simulate_2ifc_data.html">simulate_2ifc_data()</a></code> -&gt; <code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code> / <code><a href="../reference/compute_infoval_summary.html">compute_infoval_summary()</a></code> / <code><a href="../reference/check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code> / <code><a href="../reference/check_response_inversion.html">check_response_inversion()</a></code> / <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code> end-to-end on the bundled simulator. Guards against recurrence of the v0.1.1 rdata-env bugs (CLAUDE.md §11.21: <code>base_label</code> and missing <code>noise_type</code> in the saved rdata file). Skip-gated on the <code>rcicr</code> Suggests dep and on CRAN-style runs.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-5">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-5"></a></h3>
+<ul><li>
+<code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code> second example switched from <code>signal_region = "eyes"</code> to <code>signal_region = "left_eye"</code> to surface the new rectangle eye regions on a frequently-read help page (the right-eye rectangle and the rest of the face stay untouched, illustrating regional independence).</li>
+<li>Vignette §4.5 mentions of <code><a href="../reference/plot_mask_overlay.html">plot_mask_overlay()</a></code> reworded for the single-panel design (“overlay on the base image” rather than “base alongside base + mask”).</li>
+<li>Vignette §4.5 mask-tuning section rewritten to use the new exported <code><a href="../reference/shift_mask.html">shift_mask()</a></code> directly instead of redefining it inline (the previous copy-paste recipe is gone). The <code>region_bounds</code> tuning subsection now demos <code><a href="../reference/region_bounds_from_pixels.html">region_bounds_from_pixels()</a></code> for the common case where the rectangle’s edges are eyeballed in pixel coordinates against a zoomed-in base image, and points at the <code>plot_mask_overlay(region = ..., region_bounds = ...)</code> shortcut.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tooling-0-1-5">Tooling<a class="anchor" aria-label="anchor" href="#tooling-0-1-5"></a></h3>
+<ul><li>
+<code>.gitignore</code> now excludes <code>tests/testthat/data</code>. <code>rcicr</code>’s <code>computeInfoVal2IFC()</code> uses bare <code>write(...)</code> for status strings, which writes to a file literally named <code>data</code> (R’s default destination for single-argument <code>write</code>). The new simulate-diagnostic-chain regression test triggers this path and would otherwise leave a dirty working tree after every test run.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.4" id="rcisignal-014">rcisignal 0.1.4<a class="anchor" aria-label="anchor" href="#rcisignal-014"></a></h2>
 <div class="section level3">
@@ -46,9 +77,10 @@
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-1-4">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-4"></a></h3>
-<ul><li>Vignette §4.5 (Face-region masks) rewritten to introduce the eight built-in regions (five ellipses + three rectangles) and the two tuning routes: <code>region_bounds</code> for rectangles vs <code>centre</code> / <code>shift_mask()</code> for ellipses. The manual-positioning example that used to slide both eye ovals via <code>shift_mask()</code> has been replaced by two examples: a <code>shift_mask()</code> demo on the mouth ellipse (where the slide workaround is still the right tool) and a <code>region_bounds</code> demo on the <code>left_eye</code> rectangle (showing the new precision-tuning knob).</li>
+<ul><li>Vignette §4.5 (Face-region masks) rewritten to introduce the eight built-in regions (five ellipses + three rectangles) and the two tuning routes: <code>region_bounds</code> for rectangles vs <code>centre</code> / <code><a href="../reference/shift_mask.html">shift_mask()</a></code> for ellipses. The manual-positioning example that used to slide both eye ovals via <code><a href="../reference/shift_mask.html">shift_mask()</a></code> has been replaced by two examples: a <code><a href="../reference/shift_mask.html">shift_mask()</a></code> demo on the mouth ellipse (where the slide workaround is still the right tool) and a <code>region_bounds</code> demo on the <code>left_eye</code> rectangle (showing the new precision-tuning knob).</li>
 <li>Vignette face-mask figures regenerated to include <code>left_eye</code> and <code>right_eye</code> panels and the new <code>mouth_demo_*</code> / <code>left_eye_demo_*</code> tuning panels. The old <code>artificial_eyes_demo_*</code> files were removed.</li>
 <li>README <code><a href="../reference/infoval.html">infoval()</a></code> per-region table refreshed: the “Eyes” column now reflects the wider rectangle geometry (computed on the same Oliveira-2019 Study 1 data, 1000 reference draws, matched trial counts). The other columns are unchanged.</li>
+<li>Citation-accuracy sweep: removed several incorrect attributions of <code><a href="../reference/make_face_mask.html">make_face_mask()</a></code> region geometries to Schmitz, Rougier, &amp; Yzerbyt (2024) across the vignette, README pointer, and <code><a href="../reference/make_face_mask.html">make_face_mask()</a></code> roxygen. Schmitz et al. (2024) used an oval mask for <code><a href="../reference/infoval.html">infoval()</a></code> calculation but did not specify the oval’s parameters and did not define any sub-region (eyes / nose / mouth / upper-face / lower-face) geometry. The package’s region defaults are now correctly described as this package’s own heuristics; the prior practice of applying an oval before pixel-wise CI metrics is credited to Oliveira et al. (2019), Ratner et al. (2014), and Schmitz et al. (2024) jointly. Ratner et al. (2014) added to the vignette bibliography. Schmitz et al. (2024) is still cited where it applies (Brief-RC structure, <code>genMask()</code> formula, Brief-RC 12 / 20 variants).</li>
 </ul></div>
 </div>
     <div class="section level2">
