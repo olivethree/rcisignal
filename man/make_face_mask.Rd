@@ -6,62 +6,95 @@
 \usage{
 make_face_mask(
   img_dims,
-  region = c("full", "eyes", "nose", "mouth", "upper_face", "lower_face"),
+  region = c("full", "eyes", "left_eye", "right_eye", "nose", "mouth", "upper_face",
+    "lower_face"),
   centre = c(0.5, 0.5),
   half_width = 0.35,
-  half_height = 0.45
+  half_height = 0.45,
+  region_bounds = NULL
 )
 }
 \arguments{
 \item{img_dims}{Integer \code{c(nrow, ncol)}.}
 
-\item{region}{Character. One of \code{"full"}, \code{"eyes"}, \code{"nose"},
-\code{"mouth"}, \code{"upper_face"}, \code{"lower_face"}.}
+\item{region}{Character. One of \code{"full"}, \code{"eyes"}, \code{"left_eye"},
+\code{"right_eye"}, \code{"nose"}, \code{"mouth"}, \code{"upper_face"},
+\code{"lower_face"}.}
 
 \item{centre}{Numeric \code{c(row, col)} in the 0-1 coordinate range.
-Default \code{c(0.5, 0.5)}.}
+Default \code{c(0.5, 0.5)}. Used by the elliptical regions only;
+the rectangle eye regions ignore this argument.}
 
 \item{half_width}{Full-face ellipse horizontal half-axis, as a
-fraction of image width. Default 0.35.}
+fraction of image width. Default 0.35. Used by the elliptical
+regions only.}
 
 \item{half_height}{Full-face ellipse vertical half-axis, as a
-fraction of image height. Default 0.45.}
+fraction of image height. Default 0.45. Used by the elliptical
+regions only.}
+
+\item{region_bounds}{Numeric vector
+\code{c(row_min, row_max, col_min, col_max)} in the 0-1 image
+fraction range, used to override the default rectangle bounds
+for the three rectangle regions (\code{"eyes"}, \code{"left_eye"},
+\code{"right_eye"}). Each pair must be ordered (\code{row_min < row_max},
+\code{col_min < col_max}) and lie within \verb{[0, 1]}. Default \code{NULL}
+uses the built-in defaults. Errors when supplied for a
+non-rectangle region.}
 }
 \value{
 Logical vector of length \code{prod(img_dims)}, column-major
 to match the package's image vectorisation convention.
 }
 \description{
-Returns a logical vector of length \code{prod(img_dims)} marking an
-elliptical face region (or a face sub-region) centred on the
-image. Pass to \code{\link[=infoval]{infoval()}} to restrict both observed and reference
-Frobenius norms to the masked region; pass to any \verb{rel_*()}
-function via row-subsetting (\code{signal_matrix[mask, ]}) to compute
-reliability or discriminability on a single anatomical region.
+Returns a logical vector of length \code{prod(img_dims)} marking a
+face region (or a face sub-region) centred on the image. Pass
+to \code{\link[=infoval]{infoval()}} to restrict both observed and reference Frobenius
+norms to the masked region; pass to any \verb{rel_*()} function via
+row-subsetting (\code{signal_matrix[mask, ]}) to compute reliability
+or discriminability on a single anatomical region.
 
-Six regions are supported:
+Eight regions are supported:
 \itemize{
 \item \code{"full"} (default): the full face oval. Defaults follow the
 geometry used by Schmitz, Rougier, & Yzerbyt (2024) and tunable
-via \code{half_width} / \code{half_height}.
-\item \code{"eyes"}: two small ellipses at the typical eye positions.
+via \code{centre} / \code{half_width} / \code{half_height}.
+\item \code{"eyes"}: a wide rectangle covering both eyes ear-to-ear and
+from the eyebrows down to just below the eye line. Independent
+of the full-oval geometry; tune via \code{region_bounds}.
+\item \code{"left_eye"}, \code{"right_eye"}: smaller rectangles around the
+viewer's left and right eye respectively. Independent of the
+full-oval geometry; tune via \code{region_bounds}.
 \item \code{"nose"}: a narrow vertical ellipse along the midline.
 \item \code{"mouth"}: a wide-and-short ellipse below centre.
 \item \code{"upper_face"}, \code{"lower_face"}: top and bottom halves of the
-full face oval, useful for crude top/bottom comparisons.
+full face oval.
 }
 
 Sub-region geometries are heuristic approximations matched to a
-typical centred face on a square base (e.g. 256x256 KDEF male).
-For non-default base images, tune \code{centre}, \code{half_width},
-\code{half_height}; sub-region positions scale relative to the
-full-face ellipse.
+typical centred face on a square base (e.g. 256x256). For
+non-default base images, the elliptical regions (\code{"nose"},
+\code{"mouth"}) scale with \code{centre} / \code{half_width} / \code{half_height};
+the three rectangle regions (\code{"eyes"}, \code{"left_eye"},
+\code{"right_eye"}) ignore those and are tuned directly via
+\code{region_bounds}.
 }
 \examples{
-full  <- make_face_mask(c(128L, 128L))
-eyes  <- make_face_mask(c(128L, 128L), region = "eyes")
-mouth <- make_face_mask(c(128L, 128L), region = "mouth")
-c(full = mean(full), eyes = mean(eyes), mouth = mean(mouth))
+full      <- make_face_mask(c(128L, 128L))
+eyes      <- make_face_mask(c(128L, 128L), region = "eyes")
+left_eye  <- make_face_mask(c(128L, 128L), region = "left_eye")
+right_eye <- make_face_mask(c(128L, 128L), region = "right_eye")
+mouth     <- make_face_mask(c(128L, 128L), region = "mouth")
+c(full = mean(full), eyes = mean(eyes),
+  left_eye = mean(left_eye), right_eye = mean(right_eye),
+  mouth = mean(mouth))
+
+# Tune a rectangle region by passing explicit bounds in 0-1
+# image fractions: c(row_min, row_max, col_min, col_max).
+left_eye_tuned <- make_face_mask(
+  c(256L, 256L), region = "left_eye",
+  region_bounds = c(0.40, 0.50, 0.24, 0.44)
+)
 }
 \references{
 Schmitz, M., Rougier, M., & Yzerbyt, V. (2024). Introducing the

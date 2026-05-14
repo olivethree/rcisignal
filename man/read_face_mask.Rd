@@ -16,9 +16,9 @@ this become \code{TRUE}. Default \code{0.5} (mid-grey).}
 black-on-white masks). Default \code{FALSE}.}
 
 \item{expected_dims}{Optional integer \code{c(nrow, ncol)}. When set,
-aborts if the loaded image's dimensions do not match — useful
-for catching a wrong-resolution mask before it silently corrupts
-a downstream computation.}
+aborts if the loaded image's dimensions do not match.
+Useful for catching a wrong-resolution mask before it silently
+corrupts a downstream computation.}
 }
 \value{
 Logical vector of length \code{prod(img_dims)}, column-major.

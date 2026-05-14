@@ -12,15 +12,64 @@ test_that("face_mask 'full' covers ~half the image at default geometry", {
   expect_lt(cov, 0.55)
 })
 
-test_that("face_mask sub-regions are subsets of the full oval", {
+test_that("elliptical sub-regions are subsets of the full oval", {
   full <- make_face_mask(c(128L, 128L), region = "full")
-  for (region in c("eyes", "nose", "mouth", "upper_face", "lower_face")) {
+  for (region in c("nose", "mouth", "upper_face", "lower_face")) {
     sub <- make_face_mask(c(128L, 128L), region = region)
     expect_true(all(sub <= full),
                 info = sprintf("region=%s leaks outside full oval", region))
     expect_true(any(sub),
                 info = sprintf("region=%s is empty", region))
   }
+})
+
+test_that("rectangle eye regions are non-empty and independent of oval", {
+  for (region in c("eyes", "left_eye", "right_eye")) {
+    sub <- make_face_mask(c(128L, 128L), region = region)
+    expect_true(any(sub),
+                info = sprintf("region=%s is empty", region))
+  }
+  # eyes covers (and union of left+right is a subset of) the wide band
+  eyes  <- make_face_mask(c(128L, 128L), region = "eyes")
+  left  <- make_face_mask(c(128L, 128L), region = "left_eye")
+  right <- make_face_mask(c(128L, 128L), region = "right_eye")
+  expect_true(all(left  <= eyes))
+  expect_true(all(right <= eyes))
+  expect_false(any(left & right))
+})
+
+test_that("region_bounds tunes rectangle regions and rejects misuse", {
+  m1 <- make_face_mask(c(64L, 64L), region = "left_eye")
+  m2 <- make_face_mask(c(64L, 64L), region = "left_eye",
+                       region_bounds = c(0.40, 0.50, 0.30, 0.50))
+  expect_false(identical(m1, m2))
+  expect_true(any(m2))
+
+  # rejects bounds on non-rectangle regions
+  expect_error(
+    make_face_mask(c(64L, 64L), region = "mouth",
+                   region_bounds = c(0.40, 0.50, 0.30, 0.50)),
+    "rectangle"
+  )
+
+  # validates shape
+  expect_error(
+    make_face_mask(c(64L, 64L), region = "eyes",
+                   region_bounds = c(0.40, 0.50, 0.30)),
+    "length 4"
+  )
+  # rejects out-of-range
+  expect_error(
+    make_face_mask(c(64L, 64L), region = "eyes",
+                   region_bounds = c(-0.10, 0.50, 0.30, 0.50)),
+    "\\[0, 1\\]"
+  )
+  # rejects unordered pairs
+  expect_error(
+    make_face_mask(c(64L, 64L), region = "eyes",
+                   region_bounds = c(0.50, 0.40, 0.30, 0.50)),
+    "row_min < row_max"
+  )
 })
 
 test_that("face_mask accepts a single integer for square images", {

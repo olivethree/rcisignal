@@ -1,3 +1,56 @@
+# rcisignal 0.1.4
+
+## Behavioural change
+
+* `make_face_mask(region = "eyes")` now returns a single wide
+  axis-aligned **rectangle** covering both eyes ear-to-ear and
+  from the eyebrows down to just below the eye line, instead of
+  the two small ellipses used in v0.1.0 - v0.1.3. The new
+  rectangle is independent of the full-face oval geometry
+  (`centre`, `half_width`, `half_height`); rectangle bounds are
+  set directly via the new `region_bounds` argument. This makes
+  per-eye-line tuning straightforward and removes the previous
+  "both eyes move together" coupling that made manual alignment
+  to a specific base image awkward. Reverse-correlation results
+  computed against the "eyes" region in earlier versions will
+  shift numerically because the masked pixel set is broader; the
+  Oliveira-2019 worked-example tables in vignette §12 were
+  refreshed with the new geometry.
+
+## New features
+
+* New `region = "left_eye"` and `region = "right_eye"` values for
+  `make_face_mask()`. Each returns an axis-aligned rectangle
+  around the viewer's left or right eye, independent of the
+  other eye and of the full-face oval. Bounds default to a
+  heuristic centred-face geometry and can be overridden via
+  `region_bounds`.
+* New `region_bounds = NULL` argument on `make_face_mask()`. Pass
+  a length-4 numeric vector `c(row_min, row_max, col_min, col_max)`
+  in 0-1 image fractions to override the default bounds for any
+  of the three rectangle regions (`"eyes"`, `"left_eye"`,
+  `"right_eye"`). Errors if supplied for an elliptical region.
+
+## Documentation
+
+* Vignette §4.5 (Face-region masks) rewritten to introduce the
+  eight built-in regions (five ellipses + three rectangles) and
+  the two tuning routes: `region_bounds` for rectangles vs
+  `centre` / `shift_mask()` for ellipses. The manual-positioning
+  example that used to slide both eye ovals via `shift_mask()`
+  has been replaced by two examples: a `shift_mask()` demo on
+  the mouth ellipse (where the slide workaround is still the
+  right tool) and a `region_bounds` demo on the `left_eye`
+  rectangle (showing the new precision-tuning knob).
+* Vignette face-mask figures regenerated to include `left_eye`
+  and `right_eye` panels and the new `mouth_demo_*` /
+  `left_eye_demo_*` tuning panels. The old
+  `artificial_eyes_demo_*` files were removed.
+* README `infoval()` per-region table refreshed: the "Eyes"
+  column now reflects the wider rectangle geometry (computed on
+  the same Oliveira-2019 Study 1 data, 1000 reference draws,
+  matched trial counts). The other columns are unchanged.
+
 # rcisignal 0.1.3
 
 ## New features

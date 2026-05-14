@@ -81,10 +81,10 @@ trial-count-matched reference distribution.
 
 | Trait       | Full face    | Upper face   | Eyes         | Mouth        |
 |-------------|--------------|--------------|--------------|--------------|
-| Trustworthy | +0.50 (3/20) | +0.30 (2/20) | +0.62 (0/20) | +0.53 (3/20) |
-| Friendly    | +0.97 (5/20) | +0.23 (2/20) | +0.09 (2/20) | +0.75 (4/20) |
-| Competent   | +0.70 (3/20) | +0.21 (3/20) | +0.24 (2/20) | +0.25 (5/20) |
-| Dominant    | +0.89 (6/20) | +0.37 (5/20) | +0.76 (3/20) | +0.38 (2/20) |
+| Trustworthy | +0.50 (3/20) | +0.30 (2/20) | +0.50 (1/20) | +0.53 (3/20) |
+| Friendly    | +0.97 (5/20) | +0.23 (2/20) | +0.34 (2/20) | +0.75 (4/20) |
+| Competent   | +0.70 (3/20) | +0.21 (3/20) | +0.36 (2/20) | +0.25 (5/20) |
+| Dominant    | +0.89 (6/20) | +0.37 (5/20) | +0.91 (3/20) | +0.38 (2/20) |
 
 The [**user guide**](https://olivethree.github.io/rcisignal/articles/rcisignal.html)
 walks through every exported function, the interpretation of these

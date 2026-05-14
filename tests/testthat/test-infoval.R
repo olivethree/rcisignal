@@ -186,26 +186,32 @@ test_that("face_mask produces a roughly elliptical logical vector", {
 
 test_that("face_mask region argument selects sub-regions correctly", {
   full   <- make_face_mask(c(128L, 128L), region = "full")
-  eyes   <- make_face_mask(c(128L, 128L), region = "eyes")
   mouth  <- make_face_mask(c(128L, 128L), region = "mouth")
   nose   <- make_face_mask(c(128L, 128L), region = "nose")
   upper  <- make_face_mask(c(128L, 128L), region = "upper_face")
   lower  <- make_face_mask(c(128L, 128L), region = "lower_face")
-  # Each sub-region is a strict subset of the full face
-  expect_true(all(eyes  <= full))
+  # Elliptical sub-regions are strict subsets of the full face
   expect_true(all(mouth <= full))
   expect_true(all(nose  <= full))
-  # Sub-regions are smaller than the full face
-  expect_lt(sum(eyes), sum(full))
+  # And smaller than it
   expect_lt(sum(mouth), sum(full))
   expect_lt(sum(nose), sum(full))
   # Upper / lower partition (approximately) the full face
   expect_equal(sum(upper) + sum(lower), sum(full),
                tolerance = sum(full) * 0.02)
-  # Eyes, mouth, nose are mutually disjoint
-  expect_false(any(eyes  & mouth))
-  expect_false(any(eyes  & nose))
+  # Mouth and nose are disjoint
   expect_false(any(mouth & nose))
+
+  # Rectangle eye regions are independent of the oval and not
+  # required to be subsets of `full`; left + right are disjoint
+  # and both fit inside the wider `eyes` band.
+  eyes   <- make_face_mask(c(128L, 128L), region = "eyes")
+  left   <- make_face_mask(c(128L, 128L), region = "left_eye")
+  right  <- make_face_mask(c(128L, 128L), region = "right_eye")
+  expect_true(any(eyes))
+  expect_true(all(left  <= eyes))
+  expect_true(all(right <= eyes))
+  expect_false(any(left & right))
 })
 
 test_that("read_face_mask reads a binary PNG into a logical vector", {

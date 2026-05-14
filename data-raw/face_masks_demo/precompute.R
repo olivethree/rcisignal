@@ -7,9 +7,15 @@
 ##
 ## Outputs (under vignettes/figures/face_masks/):
 ##   - fmnes_raw.png, fmnes_masked.png
-##   - artificial_full.png, artificial_eyes.png,
-##     artificial_nose.png, artificial_mouth.png,
-##     artificial_upper_face.png, artificial_lower_face.png
+##   - artificial_full.png, artificial_upper_face.png,
+##     artificial_lower_face.png, artificial_nose.png,
+##     artificial_mouth.png, artificial_eyes.png,
+##     artificial_left_eye.png, artificial_right_eye.png
+##   - artificial_mouth_demo_default.png,
+##     artificial_mouth_demo_shift_v.png,
+##     artificial_mouth_demo_shift_vh.png  (shift_mask demo)
+##   - artificial_left_eye_demo_default.png,
+##     artificial_left_eye_demo_tuned.png  (region_bounds demo)
 
 suppressPackageStartupMessages({
   library(devtools)
@@ -100,8 +106,8 @@ artif_raw <- read_gray_resized(
 artif_path <- file.path(out_dir, "artif_base.png")
 png::writePNG(artif_raw, artif_path)
 
-regions <- c("full", "eyes", "nose",
-             "mouth", "upper_face", "lower_face")
+regions <- c("full", "upper_face", "lower_face", "nose",
+             "mouth", "eyes", "left_eye", "right_eye")
 
 for (region in regions) {
   m <- make_face_mask(img_dims, region = region)
@@ -113,6 +119,73 @@ for (region in regions) {
     img_dims   = img_dims,
     base_image = artif_path,
     main       = paste0("region = \"", region, "\"")
+  )
+  grDevices::dev.off()
+}
+
+# ---- shift_mask tuning demo on the ELLIPTICAL mouth region ----
+
+message("Rendering shift_mask demo on the mouth region ...")
+shift_mask <- function(mask, down = 0, right = 0) {
+  out <- matrix(FALSE, nrow(mask), ncol(mask))
+  src_rows <- seq_len(nrow(mask)) - down
+  src_cols <- seq_len(ncol(mask)) - right
+  keep_r   <- src_rows >= 1 & src_rows <= nrow(mask)
+  keep_c   <- src_cols >= 1 & src_cols <= ncol(mask)
+  out[keep_r, keep_c] <- mask[src_rows[keep_r], src_cols[keep_c]]
+  out
+}
+
+mouth_default <- matrix(
+  make_face_mask(img_dims, region = "mouth"),
+  nrow = img_dims[1L], ncol = img_dims[2L]
+)
+mouth_v  <- shift_mask(mouth_default, down = 20)
+mouth_vh <- shift_mask(mouth_default, down = 20, right = 8)
+
+mouth_panels <- list(
+  artificial_mouth_demo_default  = list(mask = mouth_default,
+                                        main = "mouth: default"),
+  artificial_mouth_demo_shift_v  = list(mask = mouth_v,
+                                        main = "mouth: down 20 px"),
+  artificial_mouth_demo_shift_vh = list(mask = mouth_vh,
+                                        main = "mouth: down 20 + right 8 px")
+)
+for (nm in names(mouth_panels)) {
+  out <- file.path(out_dir, sprintf("%s.png", nm))
+  grDevices::png(out, width = 600, height = 600, res = 100)
+  plot_face_mask(
+    mouth_panels[[nm]]$mask,
+    img_dims   = img_dims,
+    base_image = artif_path,
+    main       = mouth_panels[[nm]]$main
+  )
+  grDevices::dev.off()
+}
+
+# ---- region_bounds tuning demo on the left_eye rectangle ------
+
+message("Rendering region_bounds demo on the left_eye region ...")
+le_default <- make_face_mask(img_dims, region = "left_eye")
+le_tuned   <- make_face_mask(
+  img_dims, region = "left_eye",
+  region_bounds = c(0.40, 0.50, 0.24, 0.44)
+)
+
+le_panels <- list(
+  artificial_left_eye_demo_default = list(mask = le_default,
+                                          main = "left_eye: default"),
+  artificial_left_eye_demo_tuned   = list(mask = le_tuned,
+                                          main = "left_eye: tuned bounds")
+)
+for (nm in names(le_panels)) {
+  out <- file.path(out_dir, sprintf("%s.png", nm))
+  grDevices::png(out, width = 600, height = 600, res = 100)
+  plot_face_mask(
+    le_panels[[nm]]$mask,
+    img_dims   = img_dims,
+    base_image = artif_path,
+    main       = le_panels[[nm]]$main
   )
   grDevices::dev.off()
 }
