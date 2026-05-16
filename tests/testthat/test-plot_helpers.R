@@ -21,14 +21,67 @@ test_that("plot_agreement_map runs and returns t_map of right length", {
   on.exit(grDevices::dev.off(), add = TRUE)
   out <- suppressWarnings(plot_agreement_map(signal))
   expect_type(out, "list")
-  expect_named(out, c("t_map", "n", "img_dims", "mask"))
+  expect_named(out,
+               c("t_map", "n", "img_dims", "mask", "zlim", "palette"))
   expect_length(out$t_map, n_pix)
   expect_equal(out$n, 20L)
+  expect_equal(out$palette, "diverging")
+  # Default diverging palette uses symmetric zlim around zero
+  expect_equal(out$zlim[1L], -out$zlim[2L])
   # Signal pixels (centre) should have higher t than periphery
   centre_idx     <- which(mask_vec > 0.5)
   periphery_idx  <- which(mask_vec == 0)
   expect_gt(mean(out$t_map[centre_idx]),
             mean(out$t_map[periphery_idx]))
+})
+
+test_that("plot_agreement_map fire palette uses |t| and asymmetric zlim", {
+  set.seed(3)
+  n_side <- 32L
+  n_pix  <- n_side * n_side
+  signal <- matrix(rnorm(n_pix * 20L), n_pix, 20L)
+  # Plant strong positive signal in one region, strong negative in another
+  signal[1:200,         ] <- signal[1:200,         ] + 3
+  signal[(n_pix - 199):n_pix, ] <- signal[(n_pix - 199):n_pix, ] - 3
+  attr(signal, "img_dims") <- c(n_side, n_side)
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  out <- suppressWarnings(
+    plot_agreement_map(signal, palette = "fire")
+  )
+  expect_equal(out$palette, "fire")
+  # Asymmetric zlim starting at 0
+  expect_equal(out$zlim[1L], 0)
+  expect_gt(out$zlim[2L], 0)
+  # The returned t_map is still SIGNED (display abs is only for plotting)
+  expect_true(any(out$t_map > 0))
+  expect_true(any(out$t_map < 0))
+})
+
+test_that("plot_agreement_map fire palette respects threshold and mask", {
+  set.seed(4)
+  signal <- matrix(rnorm(64L * 10L), 64L, 10L)
+  attr(signal, "img_dims") <- c(8L, 8L)
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  m <- rep(c(TRUE, FALSE), each = 32L)
+  expect_no_error(
+    plot_agreement_map(signal, palette = "fire",
+                       mask = m, threshold = 0.5)
+  )
+})
+
+test_that("plot_agreement_map rejects removed `viridis` palette option", {
+  signal <- matrix(rnorm(64L * 10L), 64L, 10L)
+  attr(signal, "img_dims") <- c(8L, 8L)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_error(
+    plot_agreement_map(signal, palette = "viridis"),
+    "should be one of"
+  )
 })
 
 test_that("plot_agreement_map respects mask and threshold args", {

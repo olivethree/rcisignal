@@ -10,7 +10,7 @@ plot_agreement_map(
   mask = NULL,
   threshold = NULL,
   zlim = NULL,
-  palette = c("diverging", "viridis"),
+  palette = c("diverging", "fire"),
   main = "Per-pixel producer agreement (t-map)",
   ...
 )
@@ -34,13 +34,21 @@ pixels with \verb{|t| < threshold} are rendered in the neutral
 (white) colour, making clusters of agreement stand out.
 Default \code{NULL} (full continuous map).}
 
-\item{zlim}{Numeric \code{c(low, high)} for the colour scale. Default
-is symmetric around zero at \verb{c(-max(|t|), max(|t|))} so the
-neutral colour aligns with t = 0.}
+\item{zlim}{Numeric \code{c(low, high)} for the colour scale. For
+\code{palette = "diverging"} (default), defaults to
+\verb{c(-max(|t|), max(|t|))} so the neutral colour aligns with
+\code{t = 0}. For \code{palette = "fire"}, defaults to \verb{c(0, max(|t|))}
+so pale yellow aligns with \verb{|t| = 0}.}
 
 \item{palette}{Character. \code{"diverging"} (default; positive =
-blue, negative = red, neutral = white) or \code{"viridis"} (no
-neutral; for absolute-magnitude views).}
+blue, negative = red, neutral = white) encodes sign in hue and
+magnitude in saturation. \code{"fire"} encodes \verb{|t|} only on a
+single-hue ramp (pale yellow at zero -> deep red at large
+\verb{|t|}); use this when the question is "where do producers have
+a consistent opinion" and direction is not needed. The \code{"fire"}
+view discards sign; pair with \code{palette = "diverging"} or with
+\code{\link[=plot_ci_overlay]{plot_ci_overlay()}} to recover direction at a region of
+interest.}
 
 \item{main}{Title.}
 
@@ -48,8 +56,9 @@ neutral; for absolute-magnitude views).}
 }
 \value{
 Invisibly, a list with \code{t_map} (numeric vector of t values
-per pixel), \code{n} (producer count), \code{img_dims}, and \code{mask} (if
-supplied) — useful for further analysis or replotting.
+per pixel; always signed regardless of palette), \code{n} (producer
+count), \code{img_dims}, \code{mask} (if supplied), \code{zlim} (the colour
+scale used), and \code{palette} (the palette name).
 }
 \description{
 Visualises where producers in a single condition agree on the
@@ -77,25 +86,57 @@ counterpart for a single condition.
 }
 \section{Reading the plot}{
 
+Two palettes are available; pick by what question you are
+asking the data.
+
+\strong{\code{palette = "diverging"} (default).} Encodes sign and
+magnitude together. Both deep red and deep blue indicate
+\strong{strong} agreement among producers; only the \strong{direction}
+differs. "No agreement" is the neutral colour (white), not red.
 \itemize{
-\item \strong{Colour} encodes the sign of the per-pixel one-sample t.
+\item \strong{Hue} encodes the sign of the per-pixel one-sample \code{t}.
 Blue = producers consistently \emph{add} to the base at that pixel
-(positive agreement); red = consistently \emph{subtract} (negative
-agreement); white = no agreement (t near zero).
-\item \strong{Saturation} encodes \verb{|t|}: deeper colour means the agreement
-among producers is both large and consistent in sign. The
-colourbar on the right reads in \code{t} units (one-sample vs 0).
+(positive agreement, producers chose noise that lightens the
+region); red = consistently \emph{subtract} (negative agreement,
+producers chose noise that darkens the region).
+\item \strong{Saturation} encodes \verb{|t|}. Deep colour at either end means
+strong, consistent agreement; pale colour means weak or
+inconsistent. The colourbar on the right reads in \code{t} units.
 \item \strong{\code{zlim}} is symmetric around zero by default so the neutral
 colour aligns with \code{t = 0}. Pass \code{zlim = c(-z, z)} to fix the
 scale across panels for direct comparison.
-\item \strong{\code{threshold}} clips colour to white below \verb{|t| < threshold},
-making strong-agreement clusters stand out. This is descriptive
-only; it does not provide FWER control. For inferential pixel
-significance, use \code{\link[=agreement_map_test]{agreement_map_test()}} and overlay the
-contours via \code{\link[=plot_ci_overlay]{plot_ci_overlay()}}.
-\item Colour convention matches \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} and the
+}
+
+\strong{\code{palette = "fire"}.} Encodes \verb{|t|} only on a single-hue ramp
+(pale yellow at zero -> deep red at large \verb{|t|}). Use when the
+question is \emph{where} producers have a consistent opinion and the
+direction is not needed. The \code{"fire"} view \strong{discards sign by
+design}; it cannot distinguish "producers consistently added"
+from "producers consistently subtracted". To recover direction at
+any region of interest, view the same data with
+\code{palette = "diverging"} or pair with \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} of the
+group-mean CI.
+\itemize{
+\item \strong{Hue intensity} encodes \verb{|t|}. Pale yellow / near-white at
+low \verb{|t|} (so the underlying base face shows through low-
+agreement regions); orange at moderate \verb{|t|}; deep red at
+large \verb{|t|}. The colourbar reads in \verb{|t|} units.
+\item \strong{\code{zlim}} defaults to \verb{c(0, max(|t|))} and is asymmetric.
+}
+
+\strong{Common to both palettes.}
+\itemize{
+\item \strong{\code{threshold}} clips colour to the neutral end below
+\verb{|t| < threshold}, making strong-agreement clusters stand out.
+This is descriptive only; it does not provide FWER control. For
+inferential pixel significance, use \code{\link[=agreement_map_test]{agreement_map_test()}} and
+overlay the contours via \code{\link[=plot_ci_overlay]{plot_ci_overlay()}}.
+\item The diverging colour convention (blue = positive,
+red = negative) matches \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} and the
 cluster-test plots so the same group CI reads consistently
-across the package.
+across the package. The \code{"fire"} option is unique to this
+function; the CI-overlay and cluster-test plots need to show
+direction, so they do not provide a magnitude-only view.
 }
 }
 

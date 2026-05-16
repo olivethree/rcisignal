@@ -49,8 +49,8 @@ delegates to the upstream
 2016, 2023). `ci_from_responses_2ifc()` is a small convenience
 function around `rcicr::batchGenerateCI2IFC()` that takes care
 of the integration quirks. Brief-RC support (Schmitz, Rougier, &
-Yzerbyt, 2024) is built into rcisignal directly, because rcicr
-does not yet provide it.
+Yzerbyt, 2024) is provided directly by rcisignal via
+`ci_from_responses_briefrc()`.
 
 The metrics in this package quantify whether a CI is stable
 (within-condition) and separable (between-condition). Whether
@@ -323,11 +323,10 @@ visualisation (`scaling = "matched"`).
 #### A note on speed
 
 Noise generation is the dominant cost (about 0.4-0.5 s per trial at
-256 pixels with default basis settings, in pure R). With default
-parameters expect roughly 1-3 minutes per call. A future release may
-provide an `Rcpp` accelerator; for now the function is intentionally
-single-shot ("generate once, reuse the `rcisignal_sim` object across
-many analyses").
+256 pixels with default basis settings). With default parameters
+expect roughly 1-3 minutes per call. The function is single-shot
+by design: generate once, then reuse the returned `rcisignal_sim`
+object across as many downstream analyses as you like.
 
 To pay the cost only once across R sessions (`saveRDS()` /
 `readRDS()`, knitr `cache = TRUE`, sharing with a collaborator),
@@ -650,9 +649,10 @@ the analysis actually uses are:
   Reconstruct trial `i`'s noise via
   `rcicr::generateNoiseImage(stimuli_params[[base]][i, ], p)`.
 
-`n_trials`, `seed`, `label`, `stimulus_path`, `trial`,
-`generator_version`, and `use_same_parameters` are bookkeeping
-fields, not consumed by analysis. `reference_norms` is created
+Several other fields (`n_trials`, `seed`, `label`,
+`generator_version`, and so on) are bookkeeping carried by
+rcicr; analysis functions in this package ignore them.
+`reference_norms` is created
 and inserted in place by `rcicr::computeInfoVal2IFC()` on its
 first call; copy the rdata first if you want it untouched.
 
@@ -1255,10 +1255,9 @@ checks that responses are coded `{-1, +1}`, runs single-threaded
 by default, and matches the `.Rdata` filename in a case-
 insensitive way.
 
-Brief-RC support is built into rcisignal directly (rcicr v1.0.1
-does not include Brief-RC). The implementation follows Schmitz's
-`genMask()` formula step for step, including the rule that
-collapses repeated stimulus ids by averaging their responses:
+The Brief-RC implementation follows Schmitz's `genMask()`
+formula step for step, including the rule that collapses
+repeated stimulus ids by averaging their responses:
 
 ```{r ci-briefrc, eval = FALSE}
 res <- ci_from_responses_briefrc(
@@ -1682,12 +1681,12 @@ candidate cluster is tested against the *maximum* under the
 null, this controls the family-wise error rate in the strong
 sense (Nichols & Holmes, 2002).
 
-A note of self-criticism: the cluster-forming threshold is the
-one knob without a fully principled choice. Lower thresholds
-favour broad and diffuse effects; higher thresholds favour
-focal and intense ones (Smith & Nichols, 2009). When you do not
-have prior intuition about the spatial scale of your effect,
-TFCE (below) avoids having to choose.
+One caveat: the cluster-forming threshold does not have a
+fully principled default. Lower thresholds favour broad and
+diffuse effects; higher thresholds favour focal and intense
+ones (Smith & Nichols, 2009). When you do not have prior
+intuition about the spatial scale of your effect, TFCE (below)
+avoids having to choose.
 
 In code, `rel_cluster_test()` exposes both methods.
 
@@ -1773,12 +1772,12 @@ is for. Reported together, the two metrics complement each
 other: the cluster test localises the difference, the
 dissimilarity quantifies its overall size.
 
-A self-critical note: Euclidean distance scales with image size
-and with whatever absolute units the CI carries. The
-`$euclidean_normalised` field divides by `sqrt(n_pixels)` to make
-distances comparable across resolutions, but cross-study
-comparison still requires care about scaling conventions and the
-underlying base image.
+One caveat: Euclidean distance scales with image size and
+with whatever absolute units the CI carries. The
+`$euclidean_normalised` field divides by `sqrt(n_pixels)` to
+make distances comparable across resolutions, but cross-study
+comparison still requires care about scaling conventions and
+the underlying base image.
 
 In code:
 
@@ -2032,6 +2031,20 @@ plot_agreement_map(signal_matrix,
                    palette   = "diverging")
 ```
 
+On the default diverging palette, both deep red and deep blue
+indicate **strong** producer agreement; only the direction differs
+(blue = producers consistently added to the base, red = consistently
+subtracted). "No agreement" is the neutral colour (white), not red.
+
+If the question is "where do producers have any consistent opinion"
+rather than "in which direction do they agree", pass
+`palette = "fire"` for a single-hue `|t|` view (pale yellow at low
+`|t|` -> deep red at large `|t|`). This drops the sign channel by
+design; the default diverging palette stays preferable when
+direction matters. To recover direction at a region of interest from
+a `"fire"` map, re-render the same data with `palette = "diverging"`
+or pair with `plot_ci_overlay()` of the group-mean CI.
+
 ### 10.3 `plot_ci_overlay()`
 
 The headline figure for most papers. Renders the group-mean CI
@@ -2120,12 +2133,11 @@ Friendly, Unfriendly, Intelligent, Unintelligent, Competent,
 Incompetent.
 
 The R code chunks below are shown for reading and adaptation;
-they are marked `eval = FALSE` to keep the vignette quick to
-render. The numbers and figures shown alongside each chunk were
-precomputed by the `data-raw/oliveira_2019/precompute*.R`
-scripts on the open OSF data and are loaded into the vignette
-via `readRDS()` and `knitr::include_graphics()`. Re-run the
-precompute scripts to refresh after package changes.
+they are marked `eval = FALSE` so the vignette renders quickly.
+The numbers and figures shown alongside each chunk were computed
+on the open OSF data for this study. Copy the chunks into a
+fresh R session and run them on your own data to reproduce the
+analysis pattern.
 
 ```{r olv-cache-setup, include = FALSE, eval = TRUE}
 suppressPackageStartupMessages(library(rcisignal))
@@ -2165,7 +2177,7 @@ head(raw)
 
 The 2015 rdata stores its noise basis under `s$sinusoids` and
 `s$sinIdx`, while current rcicr expects the `p$patches` and
-`p$patchIdx` schema introduced in v1.0.x. Patch the legacy file
+`p$patchIdx` schema that current rcicr uses. Patch the legacy file
 without re-running stimulus generation:
 
 ```{r olv-modernise, eval = FALSE}
@@ -2197,7 +2209,7 @@ report <- run_diagnostics(
 print(report)
 ```
 
-Loaded from cache, the report's summary on this dataset:
+On this dataset, the report's summary is:
 
 ```{r olv-diag-show, eval = TRUE, echo = FALSE, results = "asis"}
 if (olv_have_cache) {
@@ -2232,8 +2244,8 @@ For this dataset, all ten trait conditions return PASS.
 
 `infoval()` reports a per-producer Frobenius-norm z-score against
 a trial-count-matched reference. Running it on each of the ten
-trait conditions, masked with the package's default full-face oval, gives the table
-below (precomputed):
+trait conditions, masked with the package's default full-face
+oval, gives the table below:
 
 ```{r olv-infoval-show, eval = TRUE, echo = FALSE, results = "asis"}
 if (olv_have_cache) {
@@ -2393,7 +2405,7 @@ for (i in seq_along(traits)) {
 rel_table
 ```
 
-Loaded from cache, the resulting table on this dataset:
+On this dataset, the resulting table is:
 
 ```{r olv-rel-show, eval = TRUE, echo = FALSE, results = "asis"}
 if (olv_have_cache) {
@@ -2520,7 +2532,7 @@ plot_dissimilarity_grid(
 )
 ```
 
-Loaded from cache, the dissimilarity grid on this dataset:
+On this dataset, the dissimilarity grid is:
 
 ```{r olv-dissim-grid-fig, eval = TRUE, echo = FALSE, out.width = "90%", fig.cap = "Between-condition Euclidean distance for the three contrasts on the Oliveira et al. (2019) Study 1 data. Each row is one contrast. The white-bordered point is the observed Euclidean distance between the two group-mean CIs, computed across all 65,536 pixels of the 256 x 256 image. The bar around it is the 95% percentile bootstrap CI from 2000 producer-level resamples (each condition resampled independently with replacement, distance recomputed on the resample). The shaded silhouette is the kernel density of the bootstrap distribution, scaled to the row height for visual comparison; its width does not encode units. Larger values mean the two group CIs sit farther apart in pixel space; bars whose left end is well above zero indicate that the separation is robust to producer-level variability."}
 if (olv_have_cache && file.exists(file.path(olv_fig, "dissim_grid.png")))
@@ -2579,7 +2591,7 @@ for (i in seq_len(nrow(cluster_grid))) {
 cluster_grid
 ```
 
-Loaded from cache, the resulting grid on this dataset:
+On this dataset, the resulting grid is:
 
 ```{r olv-cluster-grid-show, eval = TRUE, echo = FALSE, results = "asis"}
 if (olv_have_cache) {
@@ -2646,7 +2658,7 @@ for (i in seq_len(nrow(iv_grid))) {
 iv_grid
 ```
 
-Loaded from cache, the resulting grid on this dataset:
+On this dataset, the resulting grid is:
 
 ```{r olv-iv-grid-show, eval = TRUE, echo = FALSE, results = "asis"}
 if (olv_have_cache) {
@@ -2958,8 +2970,9 @@ condition for stable assessment.
 
 **Pre-1.0 status.** The package is not yet at version 1.0;
 argument names and defaults may change between minor versions,
-particularly when the change makes a sharp edge less easy to
-cut yourself on. NEWS.md documents every breaking change.
+particularly when a change makes a sharp edge less easy to
+cut yourself on. The release notes
+(`news(package = "rcisignal")`) list every breaking change.
 
 ## 15. Appendix: troubleshooting low or negative infoVal
 

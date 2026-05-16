@@ -1,6 +1,6 @@
 Package: rcisignal
 Title: Quality Checks for Reverse-Correlation Data and Classification Images
-Version: 0.1.5
+Version: 0.1.6
 Authors@R:
     person("Manuel", "Oliveira",
            email   = "m.j.barbosa.de.oliveira@tue.nl",
