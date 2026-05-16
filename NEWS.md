@@ -30,6 +30,27 @@
 * Vignette §10.2 gains a one-paragraph aside introducing the
   fire option and reiterating the two-channel reading of the
   diverging palette.
+* `rel_dissimilarity()`: the Pearson correlation fields
+  (`$correlation`, `$boot_cor`, `$ci_cor`, `$boot_se_cor`) are
+  reframed as a **secondary** summary instead of being slated
+  for removal. They stay in the API. The help page, `print()`
+  output, plot panel title ("Pearson r (secondary)"), and
+  vignette §8.3 now explain (a) why Euclidean distance is the
+  recommended primary statistic (image-domain scaffolding gives
+  `r` a positive chance baseline that does not cleanly mean
+  "similar"), and (b) how to use `r` carefully if it must be
+  reported (relative comparisons across pairs against a
+  permutation null, not absolute values against zero). The prior
+  "will be removed in v0.2.0" wording is withdrawn.
+* Vignette: editorial sweep of dev-facing prose. Replaced
+  "Loaded from cache, ... on this dataset:" lead-ins (five
+  occurrences) with neutral "On this dataset, ... :" framing.
+  Removed roadmap aside about a possible future Rcpp accelerator
+  for `simulate_*_data()`. Condensed the §4.2 list of rdata
+  bookkeeping fields. Replaced two "self-critical note" author
+  asides in §8.2 and §8.3 with neutral "one caveat" framing.
+  Dropped a `v1.0.x` version label in §12.2. Rephrased the §14
+  pointer at NEWS.md as `news(package = "rcisignal")`.
 
 ## Internal
 

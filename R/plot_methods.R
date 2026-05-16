@@ -549,14 +549,18 @@ print.rcisignal_rel_dissim <- function(x, ...) {
     cat(sprintf("    z-equivalent          = %+.2f\n", x$d_z))
     cat(sprintf("    observed / null med   = %.2fx\n", x$d_ratio))
   }
-  cat("\n  [Deprecated - will be removed in v0.2.0]\n")
+  cat("\n  Secondary: Pearson r (not recommended as a similarity score)\n")
   cat(sprintf(
     "    Pearson r             = %.3f   [%.3f, %.3f]   SE = %.3f\n",
     x$correlation, x$ci_cor[1], x$ci_cor[2], x$boot_se_cor
   ))
-  cat("    Note: correlation between two base-subtracted CIs has a\n")
-  cat("    positive baseline from shared image-domain structure and is\n")
-  cat("    not a clean similarity score. Prefer Euclidean distance.\n")
+  cat("    Note: two base-subtracted CIs share image-domain structure\n")
+  cat("    (face shape, signal support) that pushes r above zero even\n")
+  cat("    when the underlying representations are unrelated, so a high\n")
+  cat("    r does not by itself mean the conditions are similar. Use\n")
+  cat("    Euclidean distance for the primary claim. If reporting r,\n")
+  cat("    prefer relative comparisons across pairs and benchmark\n")
+  cat("    against a permutation null, not against zero.\n")
   invisible(x)
 }
 
@@ -601,7 +605,7 @@ plot.rcisignal_rel_dissim <- function(x, ...,
           col_band = "#08519C")
   hist_ci(x$boot_cor, x$correlation, x$ci_cor,
           xlab = "Pearson r",
-          panel_title = "Pearson r (deprecated)",
+          panel_title = "Pearson r (secondary)",
           col_band = "#969696")
 
   graphics::mtext(

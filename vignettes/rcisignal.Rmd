@@ -1802,13 +1802,24 @@ comparisons. `$boot_dist` is the full bootstrap distribution;
 `$ci_dist` and `$boot_se_dist` are the standard summaries.
 
 The Pearson correlation fields (`$correlation`, `$boot_cor`,
-`$ci_cor`, `$boot_se_cor`) are kept for compatibility with
-earlier versions but are no longer recommended. Two
-base-subtracted CIs share image-domain spatial
+`$ci_cor`, `$boot_se_cor`) are returned as a **secondary**
+summary; they are not recommended as a standalone similarity
+score. Two base-subtracted CIs share image-domain spatial
 structure (face shape, oval signal support) that pushes their
 correlation above zero even when the underlying mental
-representations are unrelated; absolute correlation values do not
-cleanly mean "these conditions are similar".
+representations are unrelated, so a "high" absolute *r* can
+reflect shared image scaffolding rather than shared mental
+content. Euclidean distance does not share this baseline issue
+and is the primary metric here.
+
+If you do report *r* (for comparability with prior literature
+or with another analysis pipeline), interpret it **relatively**
+rather than absolutely: the ordering of *r* across multiple
+condition pairs is more defensible than any single value, and
+the right reference point is a **permutation null** (e.g.,
+permute participant labels between conditions and recompute
+*r*) rather than zero. The image-domain scaffolding shifts the
+chance baseline upward, so "*r* > 0" is not the right test.
 
 A `null = "permutation"` argument adds a chance baseline for the
 Euclidean distance: stratified condition-label permutation

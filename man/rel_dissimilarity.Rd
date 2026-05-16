@@ -85,19 +85,34 @@ structure (face shape, oval signal support, low-frequency
 Gaussian-noise smoothness) that pushes their correlation above
 zero even when the underlying mental representations are
 unrelated. Absolute correlation values therefore do not cleanly
-mean "these conditions are similar". Euclidean distance does
-not share this failure mode. The Pearson correlation fields
-(\verb{$correlation}, \verb{$boot_cor}, \verb{$ci_cor}, \verb{$boot_se_cor}) are
-retained for backwards compatibility and slated for removal in
-a future release.
+mean "these conditions are similar": two unrelated traits can
+easily produce \code{r} well above zero from the shared image
+scaffolding alone, so a "high" correlation does not by itself
+license a similarity claim. Euclidean distance does not share
+this baseline issue, which is why it is the primary statistic
+here.
+
+The Pearson correlation fields (\verb{$correlation}, \verb{$boot_cor},
+\verb{$ci_cor}, \verb{$boot_se_cor}) are returned alongside it as a
+secondary summary, for users who need to report \code{r} for
+comparability with prior literature or with another analysis
+pipeline. They are not recommended as a standalone similarity
+score. If you do report \code{r}, interpret it \strong{relatively} (the
+ordering of \code{r} across multiple condition pairs is more
+defensible than any single absolute value) and \strong{benchmark
+against a permutation null} rather than against zero. The
+image-domain scaffolding shifts the chance baseline upward;
+"above zero" is not the right comparison.
 }
 
 \section{Reading the plot}{
 
 \code{plot()} on the returned object renders the bootstrap
 distributions as two side-by-side histograms (Euclidean
-distance on the left, Pearson r on the right; the latter is
-deprecated and shown in grey).
+distance on the left, Pearson r on the right). The Pearson
+panel is rendered in grey because it is a secondary summary,
+not recommended as a standalone similarity score; see the
+description for why and how to use it carefully if needed.
 \itemize{
 \item The shaded vertical band marks the percentile CI at
 \code{ci_level}.
@@ -133,7 +148,11 @@ of per-iteration Euclidean distances under the chosen null.
 \code{(observed_d - mean(null)) / sd(null)}.
 \item \verb{$d_ratio}, observed Euclidean over the null median.
 \item \verb{$correlation}, \verb{$boot_cor}, \verb{$ci_cor}, \verb{$boot_se_cor}:
-Pearson correlation of the group means. Deprecated; see above.
+Pearson correlation of the group means and its bootstrap
+summaries. Secondary; not recommended as a standalone
+similarity score (see the "Why Euclidean" section). If
+reporting, prefer relative comparisons across pairs against
+a permutation null.
 \item \verb{$n_boot}, \verb{$ci_level}, \verb{$paired}, metadata.
 }
 }
