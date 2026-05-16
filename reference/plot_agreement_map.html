@@ -29,7 +29,7 @@ side by side.'><meta property="og:image" content="https://olivethree.github.io/r
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,7 @@ side by side.</p>
 <span>  mask <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  zlim <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  palette <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"diverging"</span>, <span class="st">"viridis"</span><span class="op">)</span>,</span>
+<span>  palette <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"diverging"</span>, <span class="st">"fire"</span><span class="op">)</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"Per-pixel producer agreement (t-map)"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -115,15 +115,23 @@ Default <code>NULL</code> (full continuous map).</p></dd>
 
 
 <dt id="arg-zlim">zlim<a class="anchor" aria-label="anchor" href="#arg-zlim"></a></dt>
-<dd><p>Numeric <code>c(low, high)</code> for the colour scale. Default
-is symmetric around zero at <code>c(-max(|t|), max(|t|))</code> so the
-neutral colour aligns with t = 0.</p></dd>
+<dd><p>Numeric <code>c(low, high)</code> for the colour scale. For
+<code>palette = "diverging"</code> (default), defaults to
+<code>c(-max(|t|), max(|t|))</code> so the neutral colour aligns with
+<code>t = 0</code>. For <code>palette = "fire"</code>, defaults to <code>c(0, max(|t|))</code>
+so pale yellow aligns with <code>|t| = 0</code>.</p></dd>
 
 
 <dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
 <dd><p>Character. <code>"diverging"</code> (default; positive =
-blue, negative = red, neutral = white) or <code>"viridis"</code> (no
-neutral; for absolute-magnitude views).</p></dd>
+blue, negative = red, neutral = white) encodes sign in hue and
+magnitude in saturation. <code>"fire"</code> encodes <code>|t|</code> only on a
+single-hue ramp (pale yellow at zero -&gt; deep red at large
+<code>|t|</code>); use this when the question is "where do producers have
+a consistent opinion" and direction is not needed. The <code>"fire"</code>
+view discards sign; pair with <code>palette = "diverging"</code> or with
+<code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code> to recover direction at a region of
+interest.</p></dd>
 
 
 <dt id="arg-main">main<a class="anchor" aria-label="anchor" href="#arg-main"></a></dt>
@@ -137,8 +145,9 @@ neutral; for absolute-magnitude views).</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Invisibly, a list with <code>t_map</code> (numeric vector of t values
-per pixel), <code>n</code> (producer count), <code>img_dims</code>, and <code>mask</code> (if
-supplied) — useful for further analysis or replotting.</p>
+per pixel; always signed regardless of palette), <code>n</code> (producer
+count), <code>img_dims</code>, <code>mask</code> (if supplied), <code>zlim</code> (the colour
+scale used), and <code>palette</code> (the palette name).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -154,24 +163,46 @@ counterpart for a single condition.</p>
     <h2 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a></h2>
 
 
-<ul><li><p><strong>Colour</strong> encodes the sign of the per-pixel one-sample t.
+<p>Two palettes are available; pick by what question you are
+asking the data.</p>
+<p><strong><code>palette = "diverging"</code> (default).</strong> Encodes sign and
+magnitude together. Both deep red and deep blue indicate
+<strong>strong</strong> agreement among producers; only the <strong>direction</strong>
+differs. "No agreement" is the neutral colour (white), not red.</p><ul><li><p><strong>Hue</strong> encodes the sign of the per-pixel one-sample <code>t</code>.
 Blue = producers consistently <em>add</em> to the base at that pixel
-(positive agreement); red = consistently <em>subtract</em> (negative
-agreement); white = no agreement (t near zero).</p></li>
-<li><p><strong>Saturation</strong> encodes <code>|t|</code>: deeper colour means the agreement
-among producers is both large and consistent in sign. The
-colourbar on the right reads in <code>t</code> units (one-sample vs 0).</p></li>
+(positive agreement, producers chose noise that lightens the
+region); red = consistently <em>subtract</em> (negative agreement,
+producers chose noise that darkens the region).</p></li>
+<li><p><strong>Saturation</strong> encodes <code>|t|</code>. Deep colour at either end means
+strong, consistent agreement; pale colour means weak or
+inconsistent. The colourbar on the right reads in <code>t</code> units.</p></li>
 <li><p><strong><code>zlim</code></strong> is symmetric around zero by default so the neutral
 colour aligns with <code>t = 0</code>. Pass <code>zlim = c(-z, z)</code> to fix the
 scale across panels for direct comparison.</p></li>
-<li><p><strong><code>threshold</code></strong> clips colour to white below <code>|t| &lt; threshold</code>,
-making strong-agreement clusters stand out. This is descriptive
-only; it does not provide FWER control. For inferential pixel
-significance, use <code><a href="agreement_map_test.html">agreement_map_test()</a></code> and overlay the
-contours via <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code>.</p></li>
-<li><p>Colour convention matches <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code> and the
+</ul><p><strong><code>palette = "fire"</code>.</strong> Encodes <code>|t|</code> only on a single-hue ramp
+(pale yellow at zero -&gt; deep red at large <code>|t|</code>). Use when the
+question is <em>where</em> producers have a consistent opinion and the
+direction is not needed. The <code>"fire"</code> view <strong>discards sign by
+design</strong>; it cannot distinguish "producers consistently added"
+from "producers consistently subtracted". To recover direction at
+any region of interest, view the same data with
+<code>palette = "diverging"</code> or pair with <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code> of the
+group-mean CI.</p><ul><li><p><strong>Hue intensity</strong> encodes <code>|t|</code>. Pale yellow / near-white at
+low <code>|t|</code> (so the underlying base face shows through low-
+agreement regions); orange at moderate <code>|t|</code>; deep red at
+large <code>|t|</code>. The colourbar reads in <code>|t|</code> units.</p></li>
+<li><p><strong><code>zlim</code></strong> defaults to <code>c(0, max(|t|))</code> and is asymmetric.</p></li>
+</ul><p><strong>Common to both palettes.</strong></p><ul><li><p><strong><code>threshold</code></strong> clips colour to the neutral end below
+<code>|t| &lt; threshold</code>, making strong-agreement clusters stand out.
+This is descriptive only; it does not provide FWER control. For
+inferential pixel significance, use <code><a href="agreement_map_test.html">agreement_map_test()</a></code> and
+overlay the contours via <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code>.</p></li>
+<li><p>The diverging colour convention (blue = positive,
+red = negative) matches <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code> and the
 cluster-test plots so the same group CI reads consistently
-across the package.</p></li>
+across the package. The <code>"fire"</code> option is unique to this
+function; the CI-overlay and cluster-test plots need to show
+direction, so they do not provide a magnitude-only view.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -34,8 +34,8 @@ to the upstream [`rcicr`](https://github.com/rdotsch/rcicr) package
 is a small convenience function around
 [`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html)
 that takes care of the integration quirks. Brief-RC support (Schmitz,
-Rougier, & Yzerbyt, 2024) is built into rcisignal directly, because
-rcicr does not yet provide it.
+Rougier, & Yzerbyt, 2024) is provided directly by rcisignal via
+[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md).
 
 The metrics in this package quantify whether a CI is stable
 (within-condition) and separable (between-condition). Whether the CI
@@ -322,11 +322,10 @@ visualisation (`scaling = "matched"`).
 #### A note on speed
 
 Noise generation is the dominant cost (about 0.4-0.5 s per trial at 256
-pixels with default basis settings, in pure R). With default parameters
-expect roughly 1-3 minutes per call. A future release may provide an
-`Rcpp` accelerator; for now the function is intentionally single-shot
-(“generate once, reuse the `rcisignal_sim` object across many
-analyses”).
+pixels with default basis settings). With default parameters expect
+roughly 1-3 minutes per call. The function is single-shot by design:
+generate once, then reuse the returned `rcisignal_sim` object across as
+many downstream analyses as you like.
 
 To pay the cost only once across R sessions
 ([`saveRDS()`](https://rdrr.io/r/base/readRDS.html) /
@@ -697,10 +696,10 @@ The objects in this file that the analysis actually uses are:
   each row carries one trial’s contrast weights. Reconstruct trial `i`’s
   noise via `rcicr::generateNoiseImage(stimuli_params[[base]][i, ], p)`.
 
-`n_trials`, `seed`, `label`, `stimulus_path`, `trial`,
-`generator_version`, and `use_same_parameters` are bookkeeping fields,
-not consumed by analysis. `reference_norms` is created and inserted in
-place by
+Several other fields (`n_trials`, `seed`, `label`, `generator_version`,
+and so on) are bookkeeping carried by rcicr; analysis functions in this
+package ignore them. `reference_norms` is created and inserted in place
+by
 [`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
 on its first call; copy the rdata first if you want it untouched.
 
@@ -1433,10 +1432,9 @@ rcicr expects (`foreach`, `tibble`, `dplyr`), checks that responses are
 coded `{-1, +1}`, runs single-threaded by default, and matches the
 `.Rdata` filename in a case- insensitive way.
 
-Brief-RC support is built into rcisignal directly (rcicr v1.0.1 does not
-include Brief-RC). The implementation follows Schmitz’s `genMask()`
-formula step for step, including the rule that collapses repeated
-stimulus ids by averaging their responses:
+The Brief-RC implementation follows Schmitz’s `genMask()` formula step
+for step, including the rule that collapses repeated stimulus ids by
+averaging their responses:
 
 ``` r
 
@@ -1864,11 +1862,11 @@ fraction of null max-masses that exceed it. Because every candidate
 cluster is tested against the *maximum* under the null, this controls
 the family-wise error rate in the strong sense (Nichols & Holmes, 2002).
 
-A note of self-criticism: the cluster-forming threshold is the one knob
-without a fully principled choice. Lower thresholds favour broad and
-diffuse effects; higher thresholds favour focal and intense ones (Smith
-& Nichols, 2009). When you do not have prior intuition about the spatial
-scale of your effect, TFCE (below) avoids having to choose.
+One caveat: the cluster-forming threshold does not have a fully
+principled default. Lower thresholds favour broad and diffuse effects;
+higher thresholds favour focal and intense ones (Smith & Nichols, 2009).
+When you do not have prior intuition about the spatial scale of your
+effect, TFCE (below) avoids having to choose.
 
 In code,
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
@@ -1953,11 +1951,11 @@ of spatial detail, which is exactly what
 the cluster test localises the difference, the dissimilarity quantifies
 its overall size.
 
-A self-critical note: Euclidean distance scales with image size and with
-whatever absolute units the CI carries. The `$euclidean_normalised`
-field divides by `sqrt(n_pixels)` to make distances comparable across
-resolutions, but cross-study comparison still requires care about
-scaling conventions and the underlying base image.
+One caveat: Euclidean distance scales with image size and with whatever
+absolute units the CI carries. The `$euclidean_normalised` field divides
+by `sqrt(n_pixels)` to make distances comparable across resolutions, but
+cross-study comparison still requires care about scaling conventions and
+the underlying base image.
 
 In code:
 
@@ -2225,6 +2223,21 @@ plot_agreement_map(signal_matrix,
                    palette   = "diverging")
 ```
 
+On the default diverging palette, both deep red and deep blue indicate
+**strong** producer agreement; only the direction differs (blue =
+producers consistently added to the base, red = consistently
+subtracted). “No agreement” is the neutral colour (white), not red.
+
+If the question is “where do producers have any consistent opinion”
+rather than “in which direction do they agree”, pass `palette = "fire"`
+for a single-hue `|t|` view (pale yellow at low `|t|` -\> deep red at
+large `|t|`). This drops the sign channel by design; the default
+diverging palette stays preferable when direction matters. To recover
+direction at a region of interest from a `"fire"` map, re-render the
+same data with `palette = "diverging"` or pair with
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+of the group-mean CI.
+
 ### 10.3 `plot_ci_overlay()`
 
 The headline figure for most papers. Renders the group-mean CI as a
@@ -2319,13 +2332,10 @@ Dominant, Submissive, Trust, Untrust, Friendly, Unfriendly, Intelligent,
 Unintelligent, Competent, Incompetent.
 
 The R code chunks below are shown for reading and adaptation; they are
-marked `eval = FALSE` to keep the vignette quick to render. The numbers
-and figures shown alongside each chunk were precomputed by the
-`data-raw/oliveira_2019/precompute*.R` scripts on the open OSF data and
-are loaded into the vignette via
-[`readRDS()`](https://rdrr.io/r/base/readRDS.html) and
-[`knitr::include_graphics()`](https://rdrr.io/pkg/knitr/man/include_graphics.html).
-Re-run the precompute scripts to refresh after package changes.
+marked `eval = FALSE` so the vignette renders quickly. The numbers and
+figures shown alongside each chunk were computed on the open OSF data
+for this study. Copy the chunks into a fresh R session and run them on
+your own data to reproduce the analysis pattern.
 
 ### 12.1 Loading the data
 
@@ -2358,7 +2368,7 @@ head(raw)
 
 The 2015 rdata stores its noise basis under `s$sinusoids` and
 `s$sinIdx`, while current rcicr expects the `p$patches` and `p$patchIdx`
-schema introduced in v1.0.x. Patch the legacy file without re-running
+schema that current rcicr uses. Patch the legacy file without re-running
 stimulus generation:
 
 ``` r
@@ -2391,7 +2401,7 @@ report <- run_diagnostics(
 print(report)
 ```
 
-Loaded from cache, the report’s summary on this dataset:
+On this dataset, the report’s summary is:
 
 | check              | status | label                       |
 |:-------------------|:-------|:----------------------------|
@@ -2430,7 +2440,7 @@ For this dataset, all ten trait conditions return PASS.
 reports a per-producer Frobenius-norm z-score against a
 trial-count-matched reference. Running it on each of the ten trait
 conditions, masked with the package’s default full-face oval, gives the
-table below (precomputed):
+table below:
 
 | Trait         | Median producer z | n above 1.96 (of 20) | Group-mean z |
 |:--------------|:------------------|---------------------:|:-------------|
@@ -2596,7 +2606,7 @@ for (i in seq_along(traits)) {
 rel_table
 ```
 
-Loaded from cache, the resulting table on this dataset:
+On this dataset, the resulting table is:
 
 | Trait         | r_sb | ICC(3,1) | ICC(3,k) |
 |:--------------|:-----|:---------|:---------|
@@ -2724,7 +2734,7 @@ plot_dissimilarity_grid(
 )
 ```
 
-Loaded from cache, the dissimilarity grid on this dataset:
+On this dataset, the dissimilarity grid is:
 
 ![Between-condition Euclidean distance for the three contrasts on the
 Oliveira et al. (2019) Study 1 data. Each row is one contrast. The
@@ -2804,7 +2814,7 @@ for (i in seq_len(nrow(cluster_grid))) {
 cluster_grid
 ```
 
-Loaded from cache, the resulting grid on this dataset:
+On this dataset, the resulting grid is:
 
 | Contrast              | Region     | n clusters | n significant | min p  |
 |:----------------------|:-----------|-----------:|--------------:|:-------|
@@ -2875,7 +2885,7 @@ for (i in seq_len(nrow(iv_grid))) {
 iv_grid
 ```
 
-Loaded from cache, the resulting grid on this dataset:
+On this dataset, the resulting grid is:
 
 | Trait     | Region     | Median producer z | n above 1.96 (of 20) |
 |:----------|:-----------|:------------------|---------------------:|
@@ -3220,8 +3230,8 @@ aborts at N \< 4. Aim for N \>= 60 per condition for stable assessment.
 
 **Pre-1.0 status.** The package is not yet at version 1.0; argument
 names and defaults may change between minor versions, particularly when
-the change makes a sharp edge less easy to cut yourself on. NEWS.md
-documents every breaking change.
+a change makes a sharp edge less easy to cut yourself on. The release
+notes (`news(package = "rcisignal")`) list every breaking change.
 
 ## 15. Appendix: troubleshooting low or negative infoVal
 
@@ -3400,7 +3410,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation
-#>   Data and Classification Images_. R package version 0.1.5,
+#>   Data and Classification Images_. R package version 0.1.6,
 #>   <https://github.com/olivethree/rcisignal>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -3410,7 +3420,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> Images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.1.5},
+#>     note = {R package version 0.1.6},
 #>     url = {https://github.com/olivethree/rcisignal},
 #>   }
 ```

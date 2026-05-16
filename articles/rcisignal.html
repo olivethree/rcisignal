@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@
                         <h4 data-toc-skip class="author">Manuel
 Oliveira</h4>
             
-            <h4 data-toc-skip class="date">2026-05-14</h4>
+            <h4 data-toc-skip class="date">2026-05-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
       <div class="d-none name"><code>rcisignal.Rmd</code></div>
@@ -90,8 +90,8 @@ the lower-level building blocks <code>rel_*()</code> and
 (Dotsch, 2016, 2023). <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> is a small
 convenience function around <code><a href="https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html" class="external-link">rcicr::batchGenerateCI2IFC()</a></code>
 that takes care of the integration quirks. Brief-RC support (Schmitz,
-Rougier, &amp; Yzerbyt, 2024) is built into rcisignal directly, because
-rcicr does not yet provide it.</p>
+Rougier, &amp; Yzerbyt, 2024) is provided directly by rcisignal via
+<code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>.</p>
 <p>The metrics in this package quantify whether a CI is stable
 (within-condition) and separable (between-condition). Whether the CI
 accurately reflects the producer’s mental representation of the target
@@ -471,11 +471,10 @@ rendered visualisation (<code>scaling = "matched"</code>).</p>
 <h4 id="a-note-on-speed">A note on speed<a class="anchor" aria-label="anchor" href="#a-note-on-speed"></a>
 </h4>
 <p>Noise generation is the dominant cost (about 0.4-0.5 s per trial at
-256 pixels with default basis settings, in pure R). With default
-parameters expect roughly 1-3 minutes per call. A future release may
-provide an <code>Rcpp</code> accelerator; for now the function is
-intentionally single-shot (“generate once, reuse the
-<code>rcisignal_sim</code> object across many analyses”).</p>
+256 pixels with default basis settings). With default parameters expect
+roughly 1-3 minutes per call. The function is single-shot by design:
+generate once, then reuse the returned <code>rcisignal_sim</code> object
+across as many downstream analyses as you like.</p>
 <p>To pay the cost only once across R sessions (<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> /
 <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code>, knitr <code>cache = TRUE</code>, sharing with a
 collaborator), use one of two portable routes. Pass
@@ -958,11 +957,10 @@ label) where each row carries one trial’s contrast weights. Reconstruct
 trial <code>i</code>’s noise via
 <code>rcicr::generateNoiseImage(stimuli_params[[base]][i, ], p)</code>.</li>
 </ul>
-<p><code>n_trials</code>, <code>seed</code>, <code>label</code>,
-<code>stimulus_path</code>, <code>trial</code>,
-<code>generator_version</code>, and <code>use_same_parameters</code> are
-bookkeeping fields, not consumed by analysis.
-<code>reference_norms</code> is created and inserted in place by
+<p>Several other fields (<code>n_trials</code>, <code>seed</code>,
+<code>label</code>, <code>generator_version</code>, and so on) are
+bookkeeping carried by rcicr; analysis functions in this package ignore
+them. <code>reference_norms</code> is created and inserted in place by
 <code><a href="https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html" class="external-link">rcicr::computeInfoVal2IFC()</a></code> on its first call; copy the
 rdata first if you want it untouched.</p>
 <p>The actual per-trial noise patterns are <strong>not stored</strong>
@@ -1607,10 +1605,9 @@ rcicr expects (<code>foreach</code>, <code>tibble</code>,
 <code>dplyr</code>), checks that responses are coded
 <code>{-1, +1}</code>, runs single-threaded by default, and matches the
 <code>.Rdata</code> filename in a case- insensitive way.</p>
-<p>Brief-RC support is built into rcisignal directly (rcicr v1.0.1 does
-not include Brief-RC). The implementation follows Schmitz’s
-<code>genMask()</code> formula step for step, including the rule that
-collapses repeated stimulus ids by averaging their responses:</p>
+<p>The Brief-RC implementation follows Schmitz’s <code>genMask()</code>
+formula step for step, including the rule that collapses repeated
+stimulus ids by averaging their responses:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span></span>
 <span>  <span class="va">responses</span>,</span>
@@ -2007,12 +2004,11 @@ real cluster’s p-value is the fraction of null max-masses that exceed
 it. Because every candidate cluster is tested against the
 <em>maximum</em> under the null, this controls the family-wise error
 rate in the strong sense (Nichols &amp; Holmes, 2002).</p>
-<p>A note of self-criticism: the cluster-forming threshold is the one
-knob without a fully principled choice. Lower thresholds favour broad
-and diffuse effects; higher thresholds favour focal and intense ones
-(Smith &amp; Nichols, 2009). When you do not have prior intuition about
-the spatial scale of your effect, TFCE (below) avoids having to
-choose.</p>
+<p>One caveat: the cluster-forming threshold does not have a fully
+principled default. Lower thresholds favour broad and diffuse effects;
+higher thresholds favour focal and intense ones (Smith &amp; Nichols,
+2009). When you do not have prior intuition about the spatial scale of
+your effect, TFCE (below) avoids having to choose.</p>
 <p>In code, <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code> exposes both methods.</p>
 <p><strong><code>method = "threshold"</code></strong> (default; Maris
 &amp; Oostenveld 2007): threshold
@@ -2090,8 +2086,8 @@ uncertainty. The trade-off is loss of spatial detail, which is exactly
 what <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code> (§8.2) is for. Reported together,
 the two metrics complement each other: the cluster test localises the
 difference, the dissimilarity quantifies its overall size.</p>
-<p>A self-critical note: Euclidean distance scales with image size and
-with whatever absolute units the CI carries. The
+<p>One caveat: Euclidean distance scales with image size and with
+whatever absolute units the CI carries. The
 <code>$euclidean_normalised</code> field divides by
 <code>sqrt(n_pixels)</code> to make distances comparable across
 resolutions, but cross-study comparison still requires care about
@@ -2322,6 +2318,20 @@ optional thresholding:</p>
 <span>                   img_dims  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
 <span>                   threshold <span class="op">=</span> <span class="fl">2.0</span>,</span>
 <span>                   palette   <span class="op">=</span> <span class="st">"diverging"</span><span class="op">)</span></span></code></pre></div>
+<p>On the default diverging palette, both deep red and deep blue
+indicate <strong>strong</strong> producer agreement; only the direction
+differs (blue = producers consistently added to the base, red =
+consistently subtracted). “No agreement” is the neutral colour (white),
+not red.</p>
+<p>If the question is “where do producers have any consistent opinion”
+rather than “in which direction do they agree”, pass
+<code>palette = "fire"</code> for a single-hue <code>|t|</code> view
+(pale yellow at low <code>|t|</code> -&gt; deep red at large
+<code>|t|</code>). This drops the sign channel by design; the default
+diverging palette stays preferable when direction matters. To recover
+direction at a region of interest from a <code>"fire"</code> map,
+re-render the same data with <code>palette = "diverging"</code> or pair
+with <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code> of the group-mean CI.</p>
 </div>
 <div class="section level3">
 <h3 id="plot_ci_overlay">10.3 <code>plot_ci_overlay()</code><a class="anchor" aria-label="anchor" href="#plot_ci_overlay"></a>
@@ -2410,12 +2420,10 @@ across 10 trait conditions in a between-subjects design (20 producers
 per trait): Dominant, Submissive, Trust, Untrust, Friendly, Unfriendly,
 Intelligent, Unintelligent, Competent, Incompetent.</p>
 <p>The R code chunks below are shown for reading and adaptation; they
-are marked <code>eval = FALSE</code> to keep the vignette quick to
-render. The numbers and figures shown alongside each chunk were
-precomputed by the <code>data-raw/oliveira_2019/precompute*.R</code>
-scripts on the open OSF data and are loaded into the vignette via
-<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code> and <code><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">knitr::include_graphics()</a></code>.
-Re-run the precompute scripts to refresh after package changes.</p>
+are marked <code>eval = FALSE</code> so the vignette renders quickly.
+The numbers and figures shown alongside each chunk were computed on the
+open OSF data for this study. Copy the chunks into a fresh R session and
+run them on your own data to reproduce the analysis pattern.</p>
 <div class="section level3">
 <h3 id="loading-the-data">12.1 Loading the data<a class="anchor" aria-label="anchor" href="#loading-the-data"></a>
 </h3>
@@ -2445,8 +2453,8 @@ as numeric), and lower-case the trait labels for consistency:</p>
 </h3>
 <p>The 2015 rdata stores its noise basis under <code>s$sinusoids</code>
 and <code>s$sinIdx</code>, while current rcicr expects the
-<code>p$patches</code> and <code>p$patchIdx</code> schema introduced in
-v1.0.x. Patch the legacy file without re-running stimulus
+<code>p$patches</code> and <code>p$patchIdx</code> schema that current
+rcicr uses. Patch the legacy file without re-running stimulus
 generation:</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"rcic_seed_1_time_fev_05_2015_03_17.Rdata"</span><span class="op">)</span>  <span class="co"># legacy file</span></span>
@@ -2473,7 +2481,7 @@ will read.</p>
 <span>  expected_n <span class="op">=</span> <span class="fl">300L</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span></code></pre></div>
-<p>Loaded from cache, the report’s summary on this dataset:</p>
+<p>On this dataset, the report’s summary is:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">check</th>
@@ -2536,7 +2544,7 @@ biased in one trait):</p>
 <p><code><a href="../reference/infoval.html">infoval()</a></code> reports a per-producer Frobenius-norm z-score
 against a trial-count-matched reference. Running it on each of the ten
 trait conditions, masked with the package’s default full-face oval,
-gives the table below (precomputed):</p>
+gives the table below:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Trait</th>
@@ -2736,7 +2744,7 @@ it on each per-trait signal matrix:</p>
 <span>  <span class="va">rel_table</span><span class="op">$</span><span class="va">icc_3_k</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">rep</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">icc</span><span class="op">$</span><span class="va">icc_3_k</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">rel_table</span></span></code></pre></div>
-<p>Loaded from cache, the resulting table on this dataset:</p>
+<p>On this dataset, the resulting table is:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Trait</th>
@@ -2949,7 +2957,7 @@ face. We summarise the overall magnitude of each divergence with
 <span>  <span class="st">"Competent vs Dominant"</span> <span class="op">=</span> <span class="va">dissim_full</span><span class="op">[[</span><span class="st">"Competent vs Dominant"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>  <span class="st">"Trust vs Dominant"</span>     <span class="op">=</span> <span class="va">dissim_full</span><span class="op">[[</span><span class="st">"Trust vs Dominant"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Loaded from cache, the dissimilarity grid on this dataset:</p>
+<p>On this dataset, the dissimilarity grid is:</p>
 <div class="figure">
 <img src="figures/oliveira_2019/dissim_grid.png" class="r-plt" alt="Between-condition Euclidean distance for the three contrasts on the Oliveira et al. (2019) Study 1 data. Each row is one contrast. The white-bordered point is the observed Euclidean distance between the two group-mean CIs, computed across all 65,536 pixels of the 256 x 256 image. The bar around it is the 95% percentile bootstrap CI from 2000 producer-level resamples (each condition resampled independently with replacement, distance recomputed on the resample). The shaded silhouette is the kernel density of the bootstrap distribution, scaled to the row height for visual comparison; its width does not encode units. Larger values mean the two group CIs sit farther apart in pixel space; bars whose left end is well above zero indicate that the separation is robust to producer-level variability." width="90%"><p class="caption">
 Between-condition Euclidean distance for the three contrasts on the
@@ -3015,7 +3023,7 @@ is small enough to scan as a table:</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">cluster_grid</span></span></code></pre></div>
-<p>Loaded from cache, the resulting grid on this dataset:</p>
+<p>On this dataset, the resulting grid is:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Contrast</th>
@@ -3161,7 +3169,7 @@ condition:</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">iv_grid</span></span></code></pre></div>
-<p>Loaded from cache, the resulting grid on this dataset:</p>
+<p>On this dataset, the resulting grid is:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Trait</th>
@@ -3553,8 +3561,9 @@ N &lt; 30 and aborts at N &lt; 4. Aim for N &gt;= 60 per condition for
 stable assessment.</p>
 <p><strong>Pre-1.0 status.</strong> The package is not yet at version
 1.0; argument names and defaults may change between minor versions,
-particularly when the change makes a sharp edge less easy to cut
-yourself on. NEWS.md documents every breaking change.</p>
+particularly when a change makes a sharp edge less easy to cut yourself
+on. The release notes (<code>news(package = "rcisignal")</code>) list
+every breaking change.</p>
 </div>
 <div class="section level2">
 <h2 id="appendix-troubleshooting-low-or-negative-infoval">15. Appendix: troubleshooting low or negative infoVal<a class="anchor" aria-label="anchor" href="#appendix-troubleshooting-low-or-negative-infoval"></a>
@@ -3730,7 +3739,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt; To cite package 'rcisignal' in publications use:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation</span></span>
-<span><span class="co">#&gt;   Data and Classification Images_. R package version 0.1.5,</span></span>
+<span><span class="co">#&gt;   Data and Classification Images_. R package version 0.1.6,</span></span>
 <span><span class="co">#&gt;   &lt;https://github.com/olivethree/rcisignal&gt;.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
@@ -3740,7 +3749,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt; Images},</span></span>
 <span><span class="co">#&gt;     author = {Manuel Oliveira},</span></span>
 <span><span class="co">#&gt;     year = {2026},</span></span>
-<span><span class="co">#&gt;     note = {R package version 0.1.5},</span></span>
+<span><span class="co">#&gt;     note = {R package version 0.1.6},</span></span>
 <span><span class="co">#&gt;     url = {https://github.com/olivethree/rcisignal},</span></span>
 <span><span class="co">#&gt;   }</span></span></code></pre></div>
 </div>

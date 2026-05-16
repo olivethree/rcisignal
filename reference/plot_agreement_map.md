@@ -21,7 +21,7 @@ plot_agreement_map(
   mask = NULL,
   threshold = NULL,
   zlim = NULL,
-  palette = c("diverging", "viridis"),
+  palette = c("diverging", "fire"),
   main = "Per-pixel producer agreement (t-map)",
   ...
 )
@@ -60,15 +60,22 @@ plot_agreement_map(
 
 - zlim:
 
-  Numeric `c(low, high)` for the colour scale. Default is symmetric
-  around zero at `c(-max(|t|), max(|t|))` so the neutral colour aligns
-  with t = 0.
+  Numeric `c(low, high)` for the colour scale. For
+  `palette = "diverging"` (default), defaults to
+  `c(-max(|t|), max(|t|))` so the neutral colour aligns with `t = 0`.
+  For `palette = "fire"`, defaults to `c(0, max(|t|))` so pale yellow
+  aligns with `|t| = 0`.
 
 - palette:
 
   Character. `"diverging"` (default; positive = blue, negative = red,
-  neutral = white) or `"viridis"` (no neutral; for absolute-magnitude
-  views).
+  neutral = white) encodes sign in hue and magnitude in saturation.
+  `"fire"` encodes `|t|` only on a single-hue ramp (pale yellow at zero
+  -\> deep red at large `|t|`); use this when the question is "where do
+  producers have a consistent opinion" and direction is not needed. The
+  `"fire"` view discards sign; pair with `palette = "diverging"` or with
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  to recover direction at a region of interest.
 
 - main:
 
@@ -81,9 +88,10 @@ plot_agreement_map(
 
 ## Value
 
-Invisibly, a list with `t_map` (numeric vector of t values per pixel),
-`n` (producer count), `img_dims`, and `mask` (if supplied) — useful for
-further analysis or replotting.
+Invisibly, a list with `t_map` (numeric vector of t values per pixel;
+always signed regardless of palette), `n` (producer count), `img_dims`,
+`mask` (if supplied), `zlim` (the colour scale used), and `palette` (the
+palette name).
 
 ## Details
 
@@ -98,30 +106,62 @@ condition.
 
 ## Reading the plot
 
-- **Colour** encodes the sign of the per-pixel one-sample t. Blue =
-  producers consistently *add* to the base at that pixel (positive
-  agreement); red = consistently *subtract* (negative agreement); white
-  = no agreement (t near zero).
+Two palettes are available; pick by what question you are asking the
+data.
 
-- **Saturation** encodes `|t|`: deeper colour means the agreement among
-  producers is both large and consistent in sign. The colourbar on the
-  right reads in `t` units (one-sample vs 0).
+**`palette = "diverging"` (default).** Encodes sign and magnitude
+together. Both deep red and deep blue indicate **strong** agreement
+among producers; only the **direction** differs. "No agreement" is the
+neutral colour (white), not red.
+
+- **Hue** encodes the sign of the per-pixel one-sample `t`. Blue =
+  producers consistently *add* to the base at that pixel (positive
+  agreement, producers chose noise that lightens the region); red =
+  consistently *subtract* (negative agreement, producers chose noise
+  that darkens the region).
+
+- **Saturation** encodes `|t|`. Deep colour at either end means strong,
+  consistent agreement; pale colour means weak or inconsistent. The
+  colourbar on the right reads in `t` units.
 
 - **`zlim`** is symmetric around zero by default so the neutral colour
   aligns with `t = 0`. Pass `zlim = c(-z, z)` to fix the scale across
   panels for direct comparison.
 
-- **`threshold`** clips colour to white below `|t| < threshold`, making
-  strong-agreement clusters stand out. This is descriptive only; it does
-  not provide FWER control. For inferential pixel significance, use
+**`palette = "fire"`.** Encodes `|t|` only on a single-hue ramp (pale
+yellow at zero -\> deep red at large `|t|`). Use when the question is
+*where* producers have a consistent opinion and the direction is not
+needed. The `"fire"` view **discards sign by design**; it cannot
+distinguish "producers consistently added" from "producers consistently
+subtracted". To recover direction at any region of interest, view the
+same data with `palette = "diverging"` or pair with
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+of the group-mean CI.
+
+- **Hue intensity** encodes `|t|`. Pale yellow / near-white at low `|t|`
+  (so the underlying base face shows through low- agreement regions);
+  orange at moderate `|t|`; deep red at large `|t|`. The colourbar reads
+  in `|t|` units.
+
+- **`zlim`** defaults to `c(0, max(|t|))` and is asymmetric.
+
+**Common to both palettes.**
+
+- **`threshold`** clips colour to the neutral end below
+  `|t| < threshold`, making strong-agreement clusters stand out. This is
+  descriptive only; it does not provide FWER control. For inferential
+  pixel significance, use
   [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
   and overlay the contours via
   [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md).
 
-- Colour convention matches
+- The diverging colour convention (blue = positive, red = negative)
+  matches
   [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
   and the cluster-test plots so the same group CI reads consistently
-  across the package.
+  across the package. The `"fire"` option is unique to this function;
+  the CI-overlay and cluster-test plots need to show direction, so they
+  do not provide a magnitude-only view.
 
 ## See also
 

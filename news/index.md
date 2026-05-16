@@ -1,5 +1,45 @@
 # Changelog
 
+## rcisignal 0.1.6
+
+### New features
+
+- [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  gains a unipolar `palette = "fire"` option that displays `|t|` on a
+  single-hue (pale yellow to deep red) ramp. Use when the question is
+  “where do producers have a consistent opinion” and direction is not
+  needed; the `"fire"` view discards sign by design. The default
+  `palette = "diverging"` is unchanged.
+
+### Breaking change
+
+- `plot_agreement_map(palette = "viridis")` is removed. The previous
+  viridis branch plotted signed `t` against a palette with no neutral
+  midpoint, so zero rendered at a perceptually arbitrary colour. The new
+  `"fire"` option supersedes that use case correctly. The argument is
+  now `palette = c("diverging", "fire")`.
+
+### Documentation
+
+- [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  help page rewritten to be explicit that on the default diverging
+  palette both deep red and deep blue indicate **strong** agreement
+  (sign in hue, magnitude in saturation); “no agreement” is the neutral
+  colour (white), not red. The new `"fire"` palette is documented as a
+  sign-discarding magnitude-only view with explicit pointers to recover
+  direction via the diverging palette or
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md).
+- Vignette §10.2 gains a one-paragraph aside introducing the fire option
+  and reiterating the two-channel reading of the diverging palette.
+
+### Internal
+
+- [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  invisibly returns two new fields: `zlim` (the colour scale used) and
+  `palette` (the palette name). Backwards compatible only in the sense
+  that no caller was relying on the prior list having exactly four
+  names; tests that asserted on `names(...)` were updated.
+
 ## rcisignal 0.1.5
 
 ### Behavioural change
