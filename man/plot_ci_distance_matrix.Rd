@@ -10,7 +10,7 @@ plot_ci_distance_matrix(
   mask = c("none", "face", "upper_face", "lower_face"),
   method = c("raw", "normalised"),
   triangle = c("full", "upper", "lower"),
-  palette = c("viridis", "magma", "plasma", "rocket"),
+  palette = c("viridis", "inferno", "plasma", "rocket"),
   show_values = TRUE,
   value_digits = NULL,
   main = NULL,
@@ -42,7 +42,7 @@ distance computation via \code{\link[=make_face_mask]{make_face_mask()}}.}
 lower triangle and diagonal; CI labels on the diagonal
 cells), or \code{"lower"}.}
 
-\item{palette}{One of \code{"viridis"} (default), \code{"magma"},
+\item{palette}{One of \code{"viridis"} (default), \code{"inferno"},
 \code{"plasma"}, or \code{"rocket"}. All four are sequential,
 colorblind-friendly palettes appropriate for non-negative
 distances.}
