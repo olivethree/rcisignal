@@ -7,7 +7,35 @@
   ramp. Use when the question is "where do producers have a
   consistent opinion" and direction is not needed; the `"fire"`
   view discards sign by design. The default `palette = "diverging"`
-  is unchanged.
+  is unchanged in API; see the colour-direction fix below.
+* `plot_ci_correlogram()` (new exported function). Renders a
+  publication-ready Pearson-`r` matrix across multiple group-mean
+  CIs. Inputs: a named list of CIs (vectors or per-producer
+  signal matrices; group means computed automatically). Options:
+  full / upper / lower triangle, optional face / upper-face /
+  lower-face masking via `make_face_mask()`, three diverging
+  palettes (RdBu / PuOr / BrBG), direct save to PNG (600 dpi) or
+  PDF via the `file = ` argument with extension auto-detection.
+  The §12.6 worked-example figure is now produced by this
+  function.
+
+## Behavioural change
+
+* Colour direction fixed on the diverging-palette plots that use
+  `hcl.colors("RdBu", ...)`. `plot_agreement_map(palette =
+  "diverging")` and `plot.rcisignal_rel_cluster_test()` previously
+  rendered positive values as red and negative as blue, opposite
+  to what their help pages and to `plot_ci_overlay()` documented.
+  Both now render positive = blue, negative = red, matching every
+  other diverging plot in the package and matching the
+  long-standing help-page docs. Visual effect: rendered figures
+  from prior versions of these two functions look like their
+  colours have been swapped. The new `plot_ci_correlogram()`
+  follows the same convention from the start.
+* The worked-example correlogram figure
+  (`vignettes/figures/oliveira_2019/trait_ci_correlogram.png`)
+  is regenerated to match the corrected convention. Same data,
+  flipped colours.
 
 ## Breaking change
 

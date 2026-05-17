@@ -187,7 +187,7 @@ plot_agreement_map <- function(signal_matrix,
   }
 
   col_vec <- if (palette == "diverging") {
-    grDevices::hcl.colors(256L, "RdBu", rev = TRUE)
+    grDevices::hcl.colors(256L, "RdBu")
   } else {
     grDevices::hcl.colors(256L, "YlOrRd", rev = TRUE)
   }

@@ -46,73 +46,29 @@ trait_cor <- trait_cor[trait_order, trait_order]
 
 # ---- 2. Upper-triangle correlogram PNG -----------------------------
 
-message("Rendering trait-CI correlogram ...")
+message("Rendering trait-CI correlogram via plot_ci_correlogram() ...")
 
-correlogram_upper <- function(M, out_path,
-                              palette = grDevices::hcl.colors(
-                                256L, "RdBu")) {
-  n <- nrow(M)
-  display <- M
-  display[lower.tri(display, diag = TRUE)] <- NA_real_
+# Feed the four full-image group-mean CI vectors to the exported
+# helper. mask = "face" applies the same full-oval mask the script
+# used above when caching trait_cor, so the rendered correlation
+# values match the cached matrix to floating-point precision.
+ci_vectors <- list(
+  Trust     = rowMeans(sm[["trust"]]),
+  Friendly  = rowMeans(sm[["friendly"]]),
+  Competent = rowMeans(sm[["competent"]]),
+  Dominant  = rowMeans(sm[["dominant"]])
+)
 
-  grDevices::png(out_path, width = 1200, height = 1200, res = 180)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  graphics::par(mar = c(0.5, 7.5, 7.5, 6.5) + 0.1)
-
-  graphics::image(
-    1:n, 1:n, t(display[n:1, ]),
-    col       = palette, zlim = c(-1, 1),
-    axes      = FALSE, xlab = "", ylab = "",
-    asp       = 1, useRaster = TRUE
-  )
-
-  # Numbers in upper-triangle cells.
-  for (i in seq_len(n)) {
-    for (j in seq_len(n)) {
-      v <- display[i, j]
-      if (!is.na(v)) {
-        graphics::text(
-          x = j, y = n - i + 1L,
-          labels = sprintf("%+.2f", v),
-          col = if (abs(v) > 0.6) "white" else "grey20",
-          cex = 0.8
-        )
-      }
-    }
-  }
-
-  # Trait labels.
-  graphics::axis(3, at = seq_len(n), labels = colnames(M),
-                 las = 2, tick = FALSE, line = -0.5, cex.axis = 0.85)
-  graphics::axis(2, at = rev(seq_len(n)), labels = rownames(M),
-                 las = 1, tick = FALSE, line = -0.5, cex.axis = 0.85)
-
-  # Colour bar in right margin.
-  usr <- graphics::par("usr")
-  x_left  <- usr[2] + (usr[2] - usr[1]) * 0.02
-  x_right <- usr[2] + (usr[2] - usr[1]) * 0.06
-  y_bot   <- usr[3]; y_top <- usr[4]
-  ys      <- seq(y_bot, y_top, length.out = length(palette) + 1L)
-  graphics::par(xpd = TRUE)
-  for (i in seq_along(palette)) {
-    graphics::rect(x_left, ys[i], x_right, ys[i + 1L],
-                   col = palette[i], border = NA)
-  }
-  graphics::rect(x_left, y_bot, x_right, y_top,
-                 border = "grey60", lwd = 0.5)
-  ticks <- seq(-1, 1, by = 0.5)
-  tick_y <- y_bot + (ticks + 1) / 2 * (y_top - y_bot)
-  graphics::segments(x_right, tick_y,
-                     x_right + (usr[2] - usr[1]) * 0.01,
-                     tick_y, col = "grey60", lwd = 0.5)
-  graphics::text(x_right + (usr[2] - usr[1]) * 0.015, tick_y,
-                 labels = format(ticks), pos = 4, cex = 0.7,
-                 col = "grey20")
-  graphics::par(xpd = FALSE)
-}
-
-correlogram_upper(trait_cor,
-                  file.path(fig_dir, "trait_ci_correlogram.png"))
+plot_ci_correlogram(
+  ci_vectors,
+  img_dims = c(256L, 256L),
+  mask     = "face",
+  triangle = "upper",
+  palette  = "diverging",
+  file     = file.path(fig_dir, "trait_ci_correlogram.png"),
+  width    = 6.7,
+  height   = 6.7
+)
 
 # ---- 3. ICC(3,k) vs group-mean z lm fit ----------------------------
 

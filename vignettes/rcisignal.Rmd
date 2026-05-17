@@ -2090,6 +2090,46 @@ plot_dissimilarity_grid(
 )
 ```
 
+### 10.5 `plot_ci_correlogram()`
+
+A publication-ready Pearson-*r* matrix across multiple group-mean
+CIs. Pass a named list of CIs (vectors of length
+`prod(img_dims)`, or `$signal_matrix` objects from
+`ci_from_responses_*()` — per-producer matrices are reduced to
+group means automatically). Useful as a compact visual summary
+of which conditions covary across the image.
+
+```{r plot-correlogram, eval = FALSE}
+plot_ci_correlogram(
+  list(
+    "Trust"     = trust_cis$signal_matrix,
+    "Friendly"  = friendly_cis$signal_matrix,
+    "Competent" = competent_cis$signal_matrix,
+    "Dominant"  = dominant_cis$signal_matrix
+  ),
+  mask     = "face",       # also "none", "upper_face", "lower_face"
+  triangle = "upper",      # also "full", "lower"
+  palette  = "diverging",  # also "diverging_puor", "diverging_brbg"
+  file     = "fig3.pdf"    # also "fig3.png" (600 dpi); omit to plot only
+)
+```
+
+Same diverging convention as the rest of the package's
+direction-bearing plots: positive `r` = blue, negative = red;
+saturation encodes magnitude. The colour scale is fixed at
+`c(-1, 1)` so panels are comparable across runs and across
+paper figures. The §12.6 worked example uses this function on
+the four-trait subset.
+
+Read the result carefully: Pearson `r` between two
+base-subtracted CIs has a positive chance baseline from shared
+image-domain structure (face shape, signal support); a high
+absolute `r` does not by itself license a similarity claim. Use
+the correlogram for **relative** comparisons (which pairs
+covary more than others) rather than absolute claims. For a
+baseline-free magnitude summary, pair with
+[`rel_dissimilarity()`](#83-rel_dissimilarity).
+
 ## 11. Region-restricted analyses
 
 Every `rel_*()` and `infoval()` accepts a `mask` argument. When

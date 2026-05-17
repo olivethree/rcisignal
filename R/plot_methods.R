@@ -426,7 +426,7 @@ plot.rcisignal_rel_cluster_test <- function(x, ...,
   bar_mar <- if (isTRUE(colour_bar)) 6 else 1
   set_pub_par(mar = c(1, 1, 3, bar_mar) + 0.1)
 
-  pal <- grDevices::hcl.colors(256L, "RdBu", rev = TRUE)
+  pal <- grDevices::hcl.colors(256L, "RdBu")
 
   if (method == "tfce") {
     if (is.null(main)) main <- "TFCE map (signed, FWE-corrected)"
