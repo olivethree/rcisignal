@@ -22,8 +22,7 @@ knitr::opts_chunk$set(
 
 ## 1. Overview
 
-`rcisignal` consolidates the quality-assurance workflow for
-reverse-correlation (RC) experiments into one toolkit. It
+`rcisignal` is a toolkit offering functions to examine and diagnose the data quality of reverse-correlation (RC) experiments, as well as a variety of analytical tools to detect and triangulate any signal captured in the dataset (e.g., signal of a hypothesized mental representation of a friendly face). It
 addresses three questions, in order. First, are the inputs
 clean (response coding, trial counts, response bias, stimulus-
 pool alignment)? Second, is the signal informative and stable
@@ -2141,7 +2140,7 @@ baseline-free magnitude summary, pair with
 ### 10.6 `plot_ci_distance_matrix()`
 
 A publication-ready Euclidean distance matrix across multiple
-group-mean CIs. Same beginner ergonomics as
+group-mean CIs. Same data input logic as that iused for
 `plot_ci_correlogram()` (a named list of CIs in any of three
 shapes; per-producer matrices are reduced to group means
 automatically), but uses the magnitude metric recommended by
