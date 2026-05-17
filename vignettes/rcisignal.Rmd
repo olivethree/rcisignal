@@ -2660,12 +2660,18 @@ distances 0.21–0.24, while Friendly–Dominant tops the matrix at
 `plot_ci_mds()` projects all ten conditions into a low-
 dimensional Euclidean scatter where distances between points
 reproduce the pairwise distances between CIs as faithfully as
-the chosen number of dimensions allows. The function fits
-classical MDS at every dimensionality from 2 up to `k_max`
-(default 4) and auto-selects the smallest `k` whose Kruskal
-stress-1 against the original distances reaches the "good" band
-(0.05). When the auto-selected `k > 2`, the figure becomes a
-grid of all `choose(k, 2)` pairwise dimension panels.
+the chosen number of dimensions allows. By default the function
+fits classical MDS at every `k` from 2 to `k_max` and auto-
+selects the smallest `k` whose Kruskal stress-1 reaches the
+"good" band (0.05). When the data have a theoretical reason to
+be plotted in a specific number of dimensions — for example, a
+two-axis hypothesis like warmth vs dominance — pass an integer
+`k` to override the auto-selection.
+
+The Oliveira et al. (2019) trait-rating literature works with a
+two-dimensional theoretical structure (warmth and competence
+families, with dominance as a separate axis when split). The
+2D paper figure for that hypothesis uses `k = 2L`:
 
 ```{r plot-trait-mds, eval = FALSE}
 plot_ci_mds(
@@ -2674,35 +2680,61 @@ plot_ci_mds(
   }), trait_pretty),
   img_dims = c(256L, 256L),
   mask     = "face",
+  k        = 2L,              # theory-driven: 2D paper figure
   groups   = trait_family,    # "warmth" / "dominance" / "competence"
   shapes   = trait_valence    # "positive" / "negative" pole
 )
 ```
 
-```{r olv-trait-mds-fig, eval = TRUE, echo = FALSE, out.width = "95%", fig.cap = "Classical MDS projection of all ten trait CIs in the Oliveira et al. (2019) data, fit to face-masked raw Euclidean distances. Auto-selection lands at k = 4 because no smaller dimensionality reaches Kruskal stress <= 0.05 within the default k_max; the actual stress at k = 4 is 0.142 (Kruskal's 'poor' band), so the 4D projection still distorts the underlying distance structure. The first four axes capture 57.8% / 13.1% / 6.9% / 5.4% of the absolute eigenmass. Points colour by trait family (warmth / dominance / competence); triangles mark the positive pole within each family, circles the negative pole. The 10-condition CI space is genuinely high-dimensional in this dataset; report the printed `$stress_by_k` trace alongside any 2D paper figure so readers can see what is being hidden."}
+```{r olv-trait-mds-fig, eval = TRUE, echo = FALSE, out.width = "80%", fig.cap = "Classical MDS projection of all ten trait CIs in the Oliveira et al. (2019) data, fit to face-masked raw Euclidean distances and forced to k = 2 dimensions for theory-driven plotting. The Kruskal stress at k = 2 is 0.223 (Kruskal's 'very poor' band); the first two axes capture 57.8% and 13.1% of the absolute eigenmass. Points colour by trait family (warmth / dominance / competence); triangles mark the positive pole within each family, circles the negative pole."}
 if (olv_have_cache &&
     file.exists(file.path(olv_fig, "trait_ci_mds.png")))
   knitr::include_graphics(file.path(olv_fig,
                                     "trait_ci_mds.png"))
 ```
 
-Two reading notes for this kind of map.
+Three reading notes.
 
-First, the auto-selector's warning is doing real work here. Even
-at k = 4 the stress is 0.142 ("poor"); compressing this 10-trait
-set into a single 2D paper panel would imply a fidelity the data
-do not support. Report the per-`k` stress trace
-(`out$stress_by_k`) and the cumulative variance
-(`out$variance_pct_by_k`) alongside any single-panel figure so
-the reader can audit the projection.
+First, the GOF header reports `k = 2 (user) stress = 0.223
+very poor`. Forcing 2D here means accepting Kruskal's "very
+poor" band; the 2D projection genuinely distorts the underlying
+distance structure. The auto-selector would have escalated to
+`k = k_max = 4` and rendered a 6-panel pair-grid because no
+tested `k` reaches the "good" threshold (stress at k=3 is 0.175,
+at k=4 is 0.142, all "poor"). The theory-driven 2D figure is
+the right paper figure when the *hypothesis* is two-dimensional,
+but readers should be told what the 2D projection is hiding.
 
-Second, despite the modest fidelity, the figure recovers
-intuitive substructure on the first two dimensions: warmth-
-positive traits (Trust, Friendly) sit on the left; warmth-
-negative (Untrust, Unfriendly) on the right; the dominance and
-competence families occupy the centre. The relative *ordering*
-of points on each axis carries more interpretive weight than
-the absolute distances when stress is this high.
+Second, report the per-`k` stress trace alongside any single-
+panel MDS figure. For this dataset the trace is
+
+| k | stress-1 | Kruskal band | cumulative variance |
+|---|---------|--------------|---------------------|
+| 2 | 0.223   | very poor    | 70.9%               |
+| 3 | 0.175   | poor         | 77.7%               |
+| 4 | 0.142   | poor         | 83.1%               |
+
+so the 2D figure preserves 71% of the absolute eigenmass but
+distorts the distance structure enough to fall in the "very
+poor" Kruskal band. The 3D and 4D projections recover more
+fidelity but never reach the "good" threshold within `k_max = 4`;
+the trait space in this dataset is genuinely high-dimensional.
+Interpret point positions in the 2D figure in *relative* terms
+(which conditions cluster together, which families separate)
+rather than as absolute distances.
+
+Third, despite the modest fidelity, the 2D figure recovers
+intuitive substructure. Warmth-positive traits (Trust, Friendly)
+sit on the left; warmth-negative (Untrust, Unfriendly) on the
+right. The competence family (Competent / Intelligent /
+Incompetent / Unintelligent) occupies the centre, with the
+positive-pole traits to the left and the negative-pole traits
+slightly to the right. Dominance is split: Dominant sits on the
+right with the warmth-negative cluster while Submissive sits on
+its own at the top. Higher-dimensional projections (`k = 3L`,
+`k = 4L`, or letting auto-selection escalate) separate the
+competence axis from the warmth axis more clearly, at the cost
+of more panels to read.
 
 #### ICC and group-mean infoVal z track each other across traits
 

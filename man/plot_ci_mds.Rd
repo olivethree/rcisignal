@@ -135,16 +135,37 @@ When the selected \code{k > 2}, the figure becomes a grid of all
 vs 3, Dim 2 vs 3, ...) so no information is hidden by a
 premature flattening to 2D.
 
-Force a specific dimensionality with \code{k = 2L} for a final
-single-panel paper figure (use when you have already audited
-the fidelity and want a clean publication scatter).
-
 The companion goodness-of-fit metric (Mardia's GOF1,
 cumulative eigenvalue variance) is reported alongside stress
 in \verb{$variance_pct_by_k}. Values near 100\% mean the kD map
 captures essentially all of the positive eigenmass; below
 ~60\% the kD map is hiding more than it shows. Stress is
 usually the more interpretable of the two.
+}
+
+\section{Theory-driven dimensionality}{
+
+Real research often has a theoretical reason to fix \code{k} to a
+specific number (typically 2, for a paper-style scatter that
+matches a two-axis hypothesis like warmth/dominance, or a
+single panel for visual comparison with prior work). Pass an
+integer \code{k} to bypass auto-selection:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{plot_ci_mds(ci_list, mask = "face", k = 2L)
+}\if{html}{\out{</div>}}
+
+The function still computes stress at every \code{k} in
+\verb{[2, k_max]} and exposes the trace via \verb{$stress_by_k}. When
+the forced dimensionality has high stress, report
+\code{out$stress_by_k} alongside the 2D figure in the paper so
+readers see what the theory-driven projection is hiding;
+interpret point positions in \emph{relative} terms (which
+conditions cluster together) rather than as absolute
+distances.
+
+Force a higher specific \code{k} (e.g., \code{k = 3L}) when a richer
+projection is theoretically motivated; the function will
+render the corresponding \code{choose(k, 2)}-panel grid.
 }
 
 \section{Reading the plot}{

@@ -31,16 +31,36 @@
 #' vs 3, Dim 2 vs 3, ...) so no information is hidden by a
 #' premature flattening to 2D.
 #'
-#' Force a specific dimensionality with `k = 2L` for a final
-#' single-panel paper figure (use when you have already audited
-#' the fidelity and want a clean publication scatter).
-#'
 #' The companion goodness-of-fit metric (Mardia's GOF1,
 #' cumulative eigenvalue variance) is reported alongside stress
 #' in `$variance_pct_by_k`. Values near 100% mean the kD map
 #' captures essentially all of the positive eigenmass; below
 #' ~60% the kD map is hiding more than it shows. Stress is
 #' usually the more interpretable of the two.
+#'
+#' @section Theory-driven dimensionality:
+#' Real research often has a theoretical reason to fix `k` to a
+#' specific number (typically 2, for a paper-style scatter that
+#' matches a two-axis hypothesis like warmth/dominance, or a
+#' single panel for visual comparison with prior work). Pass an
+#' integer `k` to bypass auto-selection:
+#'
+#' ```r
+#' plot_ci_mds(ci_list, mask = "face", k = 2L)
+#' ```
+#'
+#' The function still computes stress at every `k` in
+#' `[2, k_max]` and exposes the trace via `$stress_by_k`. When
+#' the forced dimensionality has high stress, report
+#' `out$stress_by_k` alongside the 2D figure in the paper so
+#' readers see what the theory-driven projection is hiding;
+#' interpret point positions in *relative* terms (which
+#' conditions cluster together) rather than as absolute
+#' distances.
+#'
+#' Force a higher specific `k` (e.g., `k = 3L`) when a richer
+#' projection is theoretically motivated; the function will
+#' render the corresponding `choose(k, 2)`-panel grid.
 #'
 #' @section Reading the plot:
 #' Each panel is a scatter of CIs in two MDS dimensions. Points
@@ -345,7 +365,9 @@ plot_ci_mds <- function(cis,
         ),
         "i" = paste0(
           "Falling back to k = ", k_use,
-          ". Consider raising {.arg k_max} or accepting the projection."
+          ". For a theory-driven 2D figure, pass {.code k = 2L} ",
+          "explicitly and report {.code out$stress_by_k} alongside ",
+          "the figure. Alternatively raise {.arg k_max}."
         )
       ))
     }

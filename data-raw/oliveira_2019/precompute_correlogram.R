@@ -124,21 +124,25 @@ trait_valence <- c(
   Intelligent   = "positive",    Unintelligent = "negative"
 )
 
+# Theory-driven 2D map matching the warmth / dominance / competence
+# axes the trait-rating literature works with. The stress at k = 2 is
+# in Kruskal's "poor" band on this dataset, which is honest about
+# what 2D is hiding; the full per-k stress trace is reported in the
+# vignette prose so readers can audit what higher dimensions add.
 trait_mds <- plot_ci_mds(
   ci_vectors_full,
   img_dims         = c(256L, 256L),
   mask             = "face",
   distance         = "euclidean_raw",
-  k                = "auto",
-  stress_threshold = 0.05,
+  k                = 2L,
   groups           = trait_family,
   shapes           = trait_valence,
-  point_size       = 2.2,
-  label_cex        = 0.72,
+  point_size       = 2.4,
+  label_cex        = 0.78,
   main             = "Trait CI map (Oliveira et al. 2019)",
   file             = file.path(fig_dir, "trait_ci_mds.png"),
-  width            = 9,
-  height           = 9
+  width            = 7.5,
+  height           = 7.5
 )
 
 saveRDS(trait_mds, file.path(cache_dir, "trait_ci_mds.rds"))
