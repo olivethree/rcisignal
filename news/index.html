@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,25 @@
       <small>Source: <a href="https://github.com/olivethree/rcisignal/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.7" id="rcisignal-017">rcisignal 0.1.7<a class="anchor" aria-label="anchor" href="#rcisignal-017"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-1-7">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-7"></a></h3>
+<ul><li><p><code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code> gains <code>base_image</code> and <code>alpha_max</code> arguments. When <code>base_image</code> is supplied (numeric matrix or PNG/JPEG path), the t-map is composited on top of the grayscale base; out-of-mask and subthreshold pixels render fully transparent, and the per-pixel opacity scales <code>|t| / zlim_max</code> up to <code>alpha_max</code>. Works for both <code>palette = "diverging"</code> and <code>palette = "fire"</code>. With <code>base_image = NULL</code> (default) the existing flat-panel rendering is unchanged.</p></li>
+<li><p><code>plot.rcisignal_rel_cluster_test()</code> gains the same <code>base_image</code> and <code>alpha_max</code> arguments, so the between-condition t-map (or TFCE map) can be rendered with anatomical context in one call. Diverging palette only; the cluster t-map is intrinsically signed and is not given a <code>|t|</code>-only view.</p></li>
+<li><p><code><a href="../reference/plot.rcisignal_rel_pairwise_report.html">plot.rcisignal_rel_pairwise_report()</a></code> gains <code>base_image</code> and <code>alpha_max</code>, threaded through to each per-pair cluster-test plot. When <code>base_image</code> is a path string it is read once and reused for every panel.</p></li>
+<li><p><code><a href="../reference/plot.rcisignal_rel_agreement_map_test.html">plot.rcisignal_rel_agreement_map_test()</a></code> (new S3 method). <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> of an <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code> result now renders the observed t-map directly, with the FWE-significant pixel boundary outlined in black by default. Accepts <code>palette</code>, <code>threshold</code>, <code>zlim</code>, <code>base_image</code>, <code>alpha_max</code>, and a <code>show_contour</code> toggle. To support this, the <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code> result gains an <code>$img_dims</code> field (additive; existing fields unchanged).</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-7">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-7"></a></h3>
+<ul><li><p>Reciprocal <code>@seealso</code> cross-links between <code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code> and <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code>; both now point at each other and at <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>. Vignette §10 reframed around the three composable surfaces (<code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code> / <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code> / cluster-test plot) so the symmetric <code>base_image</code> workflow is visible from the start of the section.</p></li>
+<li><p><code><a href="../reference/make_face_mask.html">make_face_mask()</a></code> and <code><a href="../reference/read_face_mask.html">read_face_mask()</a></code> <code>@seealso</code> blocks expanded to list every mask-accepting consumer (<code><a href="../reference/infoval.html">infoval()</a></code>, <code><a href="../reference/pixel_t_test.html">pixel_t_test()</a></code>, <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>, <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code>, <code><a href="../reference/rel_icc.html">rel_icc()</a></code>, <code><a href="../reference/rel_split_half.html">rel_split_half()</a></code>, <code><a href="../reference/rel_loo.html">rel_loo()</a></code>, <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code>, <code><a href="../reference/run_reliability.html">run_reliability()</a></code>, <code><a href="../reference/run_discriminability.html">run_discriminability()</a></code>, <code><a href="../reference/run_discriminability_pairwise.html">run_discriminability_pairwise()</a></code>, <code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code>, <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code>). Discoverability is now complete from either constructor.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal-0-1-7">Internal<a class="anchor" aria-label="anchor" href="#internal-0-1-7"></a></h3>
+<ul><li>Private helpers <code>resolve_base_for_overlay()</code> and <code>composite_rgb_over_gray()</code> factored into <code>R/utils.R</code> so <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code>, <code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code>, and the cluster-test plot method share one base-loading and compositing path. No user-visible signature change.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.6" id="rcisignal-016">rcisignal 0.1.6<a class="anchor" aria-label="anchor" href="#rcisignal-016"></a></h2>
 <div class="section level3">

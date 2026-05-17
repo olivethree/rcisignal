@@ -1,5 +1,84 @@
 # Changelog
 
+## rcisignal 0.1.7
+
+### New features
+
+- [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  gains `base_image` and `alpha_max` arguments. When `base_image` is
+  supplied (numeric matrix or PNG/JPEG path), the t-map is composited on
+  top of the grayscale base; out-of-mask and subthreshold pixels render
+  fully transparent, and the per-pixel opacity scales `|t| / zlim_max`
+  up to `alpha_max`. Works for both `palette = "diverging"` and
+  `palette = "fire"`. With `base_image = NULL` (default) the existing
+  flat-panel rendering is unchanged.
+
+- `plot.rcisignal_rel_cluster_test()` gains the same `base_image` and
+  `alpha_max` arguments, so the between-condition t-map (or TFCE map)
+  can be rendered with anatomical context in one call. Diverging palette
+  only; the cluster t-map is intrinsically signed and is not given a
+  `|t|`-only view.
+
+- [`plot.rcisignal_rel_pairwise_report()`](https://olivethree.github.io/rcisignal/reference/plot.rcisignal_rel_pairwise_report.md)
+  gains `base_image` and `alpha_max`, threaded through to each per-pair
+  cluster-test plot. When `base_image` is a path string it is read once
+  and reused for every panel.
+
+- [`plot.rcisignal_rel_agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/plot.rcisignal_rel_agreement_map_test.md)
+  (new S3 method).
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of an
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+  result now renders the observed t-map directly, with the
+  FWE-significant pixel boundary outlined in black by default. Accepts
+  `palette`, `threshold`, `zlim`, `base_image`, `alpha_max`, and a
+  `show_contour` toggle. To support this, the
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+  result gains an `$img_dims` field (additive; existing fields
+  unchanged).
+
+### Documentation
+
+- Reciprocal `@seealso` cross-links between
+  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  and
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md);
+  both now point at each other and at
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md).
+  Vignette §10 reframed around the three composable surfaces
+  ([`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  /
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  / cluster-test plot) so the symmetric `base_image` workflow is visible
+  from the start of the section.
+
+- [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+  and
+  [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+  `@seealso` blocks expanded to list every mask-accepting consumer
+  ([`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
+  [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md),
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
+  [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
+  [`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md),
+  [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md),
+  [`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md),
+  [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
+  [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
+  [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
+  [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md),
+  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md),
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)).
+  Discoverability is now complete from either constructor.
+
+### Internal
+
+- Private helpers `resolve_base_for_overlay()` and
+  `composite_rgb_over_gray()` factored into `R/utils.R` so
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md),
+  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md),
+  and the cluster-test plot method share one base-loading and
+  compositing path. No user-visible signature change.
+
 ## rcisignal 0.1.6
 
 ### New features

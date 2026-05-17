@@ -128,8 +128,15 @@ the active device as a side effect.
 
 ## See also
 
-[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
+[`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+for the producer-agreement counterpart (signed t or `|t|`, optionally
+over the same base);
+[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+for FWE-controlled significance contours;
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+/
+[`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+for the optional `mask`.
 
 ## Examples
 

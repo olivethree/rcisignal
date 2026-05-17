@@ -22,6 +22,8 @@ plot_agreement_map(
   threshold = NULL,
   zlim = NULL,
   palette = c("diverging", "fire"),
+  base_image = NULL,
+  alpha_max = 0.7,
   main = "Per-pixel producer agreement (t-map)",
   ...
 )
@@ -76,6 +78,22 @@ plot_agreement_map(
   `"fire"` view discards sign; pair with `palette = "diverging"` or with
   [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
   to recover direction at a region of interest.
+
+- base_image:
+
+  Optional. Either a numeric matrix (`nrow x ncol`, grayscale, values in
+  0-1) or a path to a PNG/JPEG file. When supplied, the t-map is
+  composited on top of the grayscale base; out-of-mask and subthreshold
+  pixels render fully transparent. When `NULL` (default), the map is
+  drawn on a flat panel via
+  [`graphics::image()`](https://rdrr.io/r/graphics/image.html) (the
+  historical behaviour).
+
+- alpha_max:
+
+  Numeric in `[0, 1]`. Maximum opacity of the heatmap at the
+  colour-scale top (`zlim_max`) when `base_image` is supplied. Ignored
+  otherwise. Default 0.7.
 
 - main:
 
@@ -152,8 +170,16 @@ of the group-mean CI.
   descriptive only; it does not provide FWER control. For inferential
   pixel significance, use
   [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
-  and overlay the contours via
+  and render its result directly via `plot(agreement_map_test(...))`, or
+  overlay the contours via
   [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md).
+
+- **`base_image`** composites the heatmap on top of a grayscale base
+  face so anatomical context shows through. Out-of-mask and subthreshold
+  pixels render fully transparent; the per-pixel opacity scales
+  `|t| / zlim_max` up to `alpha_max`. Works for both palettes. The
+  colour bar still shows the full scale so magnitudes are readable off
+  the rendered overlay.
 
 - The diverging colour convention (blue = positive, red = negative)
   matches
@@ -165,9 +191,19 @@ of the group-mean CI.
 
 ## See also
 
-[`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md),
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+for the producer-mean counterpart (signed CI, optionally with FWE
+contours);
+[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+for FWE-controlled significance, and its
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) method for a
+one-call agreement map with contours;
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
-for inferential between-condition tests.
+for inferential between-condition tests;
+[`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+/
+[`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md)
+for the optional `mask`.
 
 ## Examples
 
@@ -192,5 +228,20 @@ sim <- simulate_briefrc_data(
 )
 cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 plot_agreement_map(cis$signal_matrix)
+} # }
+
+if (FALSE) { # \dontrun{
+# Composite the agreement map on the base face for a single
+# publication-grade figure. Works for both palettes; the
+# "diverging" branch matches plot_ci_overlay()'s colour mapping.
+sim <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "target",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+plot_agreement_map(cis$signal_matrix,
+                   base_image = sim$base_face,
+                   threshold  = 2.0,
+                   main       = "Agreement t-map over base face")
 } # }
 ```

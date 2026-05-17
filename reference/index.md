@@ -61,6 +61,9 @@
 - [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md)
   : Vectorised pixel-wise t-test (independent or paired)
 
+- [`plot(`*`<rcisignal_rel_agreement_map_test>`*`)`](https://olivethree.github.io/rcisignal/reference/plot.rcisignal_rel_agreement_map_test.md)
+  : Plot an agreement-map test result
+
 - [`plot(`*`<rcisignal_rel_pairwise_report>`*`)`](https://olivethree.github.io/rcisignal/reference/plot.rcisignal_rel_pairwise_report.md)
   : Plot the cluster-test grid for a pairwise discriminability report
 

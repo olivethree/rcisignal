@@ -2215,6 +2215,15 @@ it recomputes.
 
 Three plot helpers turn results into publication-grade figures.
 
+Three composable plot surfaces share one base-overlay convention:
+[`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+shows the per-pixel one-sample t (signed or `|t|`),
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+shows the producer-mean CI (signed), and the cluster-test plot method
+shows between-condition t-maps. All three accept a `base_image` argument
+with the same semantics, so any of them can be rendered as a flat panel
+or composited on the base face with one call.
+
 ### 10.1 `agreement_map_test()`
 
 Within a single condition, tests at each pixel whether the
@@ -2233,17 +2242,32 @@ am <- agreement_map_test(signal_matrix,
 am$significant_mask  # logical vector: which pixels survive FWER
 ```
 
-### 10.2 `plot_agreement_map()`
+The result has its own
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) method that
+renders the observed t-map with FWE-significant pixels outlined in
+black. This is the one-call form of the canonical pairing; see §10.2 for
+what it does and the colour conventions it inherits.
+
+### 10.2 `plot_agreement_map()` and `plot(agreement_map_test_result)`
 
 Renders the per-pixel one-sample t-map as a colour image, with optional
-thresholding:
+thresholding and an optional base-face overlay:
 
 ``` r
 
+# Flat panel (the historical form).
 plot_agreement_map(signal_matrix,
                    img_dims  = c(256L, 256L),
                    threshold = 2.0,
                    palette   = "diverging")
+
+# Same map composited on the base face (recommended for figures).
+plot_agreement_map(signal_matrix,
+                   img_dims   = c(256L, 256L),
+                   threshold  = 2.0,
+                   palette    = "diverging",
+                   base_image = "data/base.jpg",
+                   alpha_max  = 0.7)
 ```
 
 On the default diverging palette, both deep red and deep blue indicate
@@ -2261,22 +2285,48 @@ same data with `palette = "diverging"` or pair with
 [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
 of the group-mean CI.
 
+For the inferential variant in one call, pass the
+[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+result straight to
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html). The method
+reads `observed_t`, `significant_mask`, and `img_dims` from the result,
+so the source `signal_matrix` does not need to be re-threaded:
+
+``` r
+
+plot(am,
+     threshold  = 2.0,
+     base_image = "data/base.jpg",
+     palette    = "diverging")  # FWE-significant pixels outlined
+```
+
 ### 10.3 `plot_ci_overlay()`
 
 The headline figure for most papers. Renders the group-mean CI as a
 translucent layer over the base face, optionally restricted to the
 significant-pixel mask returned by
-[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md):
+[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+or tracing its boundary as black contours:
 
 ``` r
 
 plot_ci_overlay(
   signal_matrix,
   base_image = "data/base.jpg",
-  mask       = am$significant_mask,
+  test       = am,            # contours significant pixels
   alpha_max  = 0.7
 )
 ```
+
+[`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+and
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+are now cognate surfaces: the agreement map shows the inferential
+`t`-statistic (signed or `|t|`), the CI overlay shows the producer-mean
+signal (signed), and both can be composited on the same base face. Use
+the agreement map when the question is “where do producers *agree*”; use
+the CI overlay when the question is “what does the group mean look like
+in the face”.
 
 ### 10.4 `plot_dissimilarity_grid()`
 
@@ -3719,7 +3769,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation
-#>   Data and Classification Images_. R package version 0.1.6,
+#>   Data and Classification Images_. R package version 0.1.7,
 #>   <https://github.com/olivethree/rcisignal>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -3729,7 +3779,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> Images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.1.6},
+#>     note = {R package version 0.1.7},
 #>     url = {https://github.com/olivethree/rcisignal},
 #>   }
 ```

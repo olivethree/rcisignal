@@ -10,7 +10,7 @@ first condition larger, red = second condition larger.
 
 ``` r
 # S3 method for class 'rcisignal_rel_pairwise_report'
-plot(x, ..., ncol = NULL, max_pairs = 12L)
+plot(x, ..., ncol = NULL, max_pairs = 12L, base_image = NULL, alpha_max = 0.7)
 ```
 
 ## Arguments
@@ -35,6 +35,18 @@ plot(x, ..., ncol = NULL, max_pairs = 12L)
   Integer. Above this many pairs a warning is emitted (panels become
   illegible). Default `12L`. The grid is still drawn; pass
   `max_pairs = Inf` to silence the warning.
+
+- base_image:
+
+  Optional. Either a numeric matrix (`nrow x ncol`, grayscale, values in
+  0-1) or a path to a PNG/JPEG file. When supplied, each per-pair t-map
+  is composited on top of the grayscale base; otherwise panels render on
+  a flat background.
+
+- alpha_max:
+
+  Numeric in `[0, 1]`. Maximum opacity of the t-map overlay at the
+  colour-scale top when `base_image` is supplied. Default 0.7.
 
 ## Value
 

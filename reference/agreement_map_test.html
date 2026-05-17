@@ -25,7 +25,7 @@ on top of the observed group CI."><meta property="og:image" content="https://oli
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,6 +123,10 @@ oval and sub-regions) or <code><a href="read_face_mask.html">read_face_mask()</a
 <li><p><code>$significant_mask</code>: logical, <code>pmap &lt; alpha</code>.</p></li>
 <li><p><code>$null_distribution</code>: numeric vector of <code>max_abs_t</code> per
 permutation.</p></li>
+<li><p><code>$img_dims</code>: <code>c(nrow, ncol)</code> inferred from
+<code>attr(signal_matrix, "img_dims")</code> or, when absent, from a
+square pixel count. Used by the S3 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method to reshape
+the per-pixel vectors back to an image.</p></li>
 <li><p><code>$alpha</code>, <code>$n_permutations</code>, <code>$n_participants</code>, <code>$mask</code>.</p></li>
 </ul></div>
     <div class="section level2">

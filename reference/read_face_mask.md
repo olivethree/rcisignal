@@ -49,8 +49,22 @@ Logical vector of length `prod(img_dims)`, column-major.
 
 ## See also
 
-[`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md),
+[`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
+for the parametric oval / sub-region constructor. Mask consumers:
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
+[`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md),
+[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
+[`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
+[`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md),
+[`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md),
+[`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md),
+[`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
+[`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
+[`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
+[`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md),
+[`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md),
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md).
+Plot helpers:
 [`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md),
 [`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md).
 

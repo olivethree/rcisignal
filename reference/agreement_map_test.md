@@ -76,6 +76,12 @@ Object of class `rcisignal_rel_agreement_map_test` with:
 
 - `$null_distribution`: numeric vector of `max_abs_t` per permutation.
 
+- `$img_dims`: `c(nrow, ncol)` inferred from
+  `attr(signal_matrix, "img_dims")` or, when absent, from a square pixel
+  count. Used by the S3
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method to
+  reshape the per-pixel vectors back to an image.
+
 - `$alpha`, `$n_permutations`, `$n_participants`, `$mask`.
 
 ## Reading the result and the paired plot
