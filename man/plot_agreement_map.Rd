@@ -11,6 +11,8 @@ plot_agreement_map(
   threshold = NULL,
   zlim = NULL,
   palette = c("diverging", "fire"),
+  base_image = NULL,
+  alpha_max = 0.7,
   main = "Per-pixel producer agreement (t-map)",
   ...
 )
@@ -49,6 +51,17 @@ a consistent opinion" and direction is not needed. The \code{"fire"}
 view discards sign; pair with \code{palette = "diverging"} or with
 \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} to recover direction at a region of
 interest.}
+
+\item{base_image}{Optional. Either a numeric matrix
+(\verb{nrow x ncol}, grayscale, values in 0-1) or a path to a
+PNG/JPEG file. When supplied, the t-map is composited on top of
+the grayscale base; out-of-mask and subthreshold pixels render
+fully transparent. When \code{NULL} (default), the map is drawn on a
+flat panel via \code{graphics::image()} (the historical behaviour).}
+
+\item{alpha_max}{Numeric in \verb{[0, 1]}. Maximum opacity of the
+heatmap at the colour-scale top (\code{zlim_max}) when \code{base_image}
+is supplied. Ignored otherwise. Default 0.7.}
 
 \item{main}{Title.}
 
@@ -130,7 +143,15 @@ large \verb{|t|}. The colourbar reads in \verb{|t|} units.
 \verb{|t| < threshold}, making strong-agreement clusters stand out.
 This is descriptive only; it does not provide FWER control. For
 inferential pixel significance, use \code{\link[=agreement_map_test]{agreement_map_test()}} and
-overlay the contours via \code{\link[=plot_ci_overlay]{plot_ci_overlay()}}.
+render its result directly via
+\code{plot(agreement_map_test(...))}, or overlay the contours via
+\code{\link[=plot_ci_overlay]{plot_ci_overlay()}}.
+\item \strong{\code{base_image}} composites the heatmap on top of a grayscale
+base face so anatomical context shows through. Out-of-mask and
+subthreshold pixels render fully transparent; the per-pixel
+opacity scales \verb{|t| / zlim_max} up to \code{alpha_max}. Works for
+both palettes. The colour bar still shows the full scale so
+magnitudes are readable off the rendered overlay.
 \item The diverging colour convention (blue = positive,
 red = negative) matches \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} and the
 cluster-test plots so the same group CI reads consistently
@@ -162,8 +183,27 @@ sim <- simulate_briefrc_data(
 cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 plot_agreement_map(cis$signal_matrix)
 }
+
+\dontrun{
+# Composite the agreement map on the base face for a single
+# publication-grade figure. Works for both palettes; the
+# "diverging" branch matches plot_ci_overlay()'s colour mapping.
+sim <- simulate_briefrc_data(
+  n_per_condition = 20, n_trials = 60, conditions = "target",
+  signal_region = "eyes", signal_strength = "strong", seed = 1
+)
+cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+plot_agreement_map(cis$signal_matrix,
+                   base_image = sim$base_face,
+                   threshold  = 2.0,
+                   main       = "Agreement t-map over base face")
+}
 }
 \seealso{
-\code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=rel_cluster_test]{rel_cluster_test()}} for inferential
-between-condition tests.
+\code{\link[=plot_ci_overlay]{plot_ci_overlay()}} for the producer-mean counterpart
+(signed CI, optionally with FWE contours); \code{\link[=agreement_map_test]{agreement_map_test()}}
+for FWE-controlled significance, and its \code{plot()} method for a
+one-call agreement map with contours; \code{\link[=rel_cluster_test]{rel_cluster_test()}} for
+inferential between-condition tests; \code{\link[=make_face_mask]{make_face_mask()}} /
+\code{\link[=read_face_mask]{read_face_mask()}} for the optional \code{mask}.
 }

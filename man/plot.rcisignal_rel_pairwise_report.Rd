@@ -4,7 +4,7 @@
 \alias{plot.rcisignal_rel_pairwise_report}
 \title{Plot the cluster-test grid for a pairwise discriminability report}
 \usage{
-\method{plot}{rcisignal_rel_pairwise_report}(x, ..., ncol = NULL, max_pairs = 12L)
+\method{plot}{rcisignal_rel_pairwise_report}(x, ..., ncol = NULL, max_pairs = 12L, base_image = NULL, alpha_max = 0.7)
 }
 \arguments{
 \item{x}{A \code{\link[=run_discriminability_pairwise]{run_discriminability_pairwise()}} result.}
@@ -17,6 +17,15 @@
 \item{max_pairs}{Integer. Above this many pairs a warning is
 emitted (panels become illegible). Default \code{12L}. The grid is
 still drawn; pass \code{max_pairs = Inf} to silence the warning.}
+
+\item{base_image}{Optional. Either a numeric matrix (\verb{nrow x ncol},
+grayscale, values in 0-1) or a path to a PNG/JPEG file. When
+supplied, each per-pair t-map is composited on top of the
+grayscale base; otherwise panels render on a flat background.}
+
+\item{alpha_max}{Numeric in \verb{[0, 1]}. Maximum opacity of the t-map
+overlay at the colour-scale top when \code{base_image} is supplied.
+Default 0.7.}
 }
 \value{
 Invisibly the input \code{x}.

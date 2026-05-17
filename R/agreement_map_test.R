@@ -52,6 +52,10 @@
 #' * `$significant_mask`: logical, `pmap < alpha`.
 #' * `$null_distribution`: numeric vector of `max_abs_t` per
 #'   permutation.
+#' * `$img_dims`: `c(nrow, ncol)` inferred from
+#'   `attr(signal_matrix, "img_dims")` or, when absent, from a
+#'   square pixel count. Used by the S3 `plot()` method to reshape
+#'   the per-pixel vectors back to an image.
 #' * `$alpha`, `$n_permutations`, `$n_participants`, `$mask`.
 #' @seealso [plot_ci_overlay()], [plot_agreement_map()],
 #'   [rel_cluster_test()]
@@ -103,6 +107,16 @@ agreement_map_test <- function(signal_matrix,
   validate_signal_matrix(signal_matrix)
   assert_raw_signal(signal_matrix, acknowledge_scaling)
   n_pix_full <- nrow(signal_matrix)
+
+  img_dims <- attr(signal_matrix, "img_dims")
+  if (is.null(img_dims)) {
+    side <- sqrt(n_pix_full)
+    if (side == as.integer(side)) {
+      img_dims <- c(as.integer(side), as.integer(side))
+    }
+  } else {
+    img_dims <- as.integer(img_dims)
+  }
   if (!is.null(mask)) {
     if (!is.logical(mask) || length(mask) != n_pix_full) {
       cli::cli_abort(c(
@@ -190,7 +204,8 @@ agreement_map_test <- function(signal_matrix,
       alpha             = alpha,
       n_permutations    = n_permutations,
       n_participants    = n_p,
-      mask              = mask
+      mask              = mask,
+      img_dims          = img_dims
     ),
     class            = c("rcisignal_rel_agreement_map_test",
                          "rcisignal_result"),
@@ -215,5 +230,99 @@ print.rcisignal_rel_agreement_map_test <- function(x, ...) {
   cat(sprintf("  observed |t| range:   [%.2f, %.2f]\n",
               min(abs(x$observed_t), na.rm = TRUE),
               max(abs(x$observed_t), na.rm = TRUE)))
+  invisible(x)
+}
+
+#' Plot an agreement-map test result
+#'
+#' @description
+#' Renders the observed per-pixel t-map from [agreement_map_test()]
+#' with the same colour conventions as [plot_agreement_map()], and
+#' overlays the FWE-significant pixel boundary as black contours
+#' when `show_contour = TRUE` (the default). Optionally composites
+#' the map on a grayscale base face.
+#'
+#' This is the one-call form of the canonical pairing
+#' `plot_agreement_map(signal, ...) + agreement_map_test(...)`:
+#' the test object carries everything the renderer needs
+#' (`observed_t`, `significant_mask`, `img_dims`), so users do not
+#' have to re-thread the source `signal_matrix`.
+#'
+#' @param x A [agreement_map_test()] result.
+#' @param palette `"diverging"` (default; signed t, blue =
+#'   positive, red = negative) or `"fire"` (`|t|` on a single-hue
+#'   ramp). See [plot_agreement_map()] for the full Reading-the-plot
+#'   discussion; the same conventions apply here.
+#' @param threshold Optional positive numeric. Pixels with
+#'   `|t| < threshold` render as the neutral colour (descriptive
+#'   only; FWE control is already in `significant_mask`).
+#' @param zlim Numeric `c(low, high)` for the colour scale.
+#'   Defaults to a symmetric `c(-max|t|, max|t|)` for diverging or
+#'   `c(0, max|t|)` for fire.
+#' @param base_image Optional. Numeric matrix or path to PNG/JPEG.
+#'   When supplied, the t-map is composited on top of the grayscale
+#'   base; out-of-mask and subthreshold pixels render fully
+#'   transparent.
+#' @param alpha_max Numeric in `[0, 1]`. Maximum opacity at the
+#'   colour-scale top when `base_image` is supplied. Default 0.7.
+#' @param show_contour Logical. Draw the FWE-significant pixel
+#'   boundary as black contours on top of the t-map. Default `TRUE`.
+#' @param contour_col,contour_lwd Significance-contour colour and
+#'   line width.
+#' @param main Plot title.
+#' @param ... Reserved for future use.
+#' @return Invisibly the input `x`.
+#' @seealso [plot_agreement_map()], [plot_ci_overlay()],
+#'   [agreement_map_test()].
+#' @export
+plot.rcisignal_rel_agreement_map_test <- function(x,
+                                                  palette      = c("diverging", "fire"),
+                                                  threshold    = NULL,
+                                                  zlim         = NULL,
+                                                  base_image   = NULL,
+                                                  alpha_max    = 0.7,
+                                                  show_contour = TRUE,
+                                                  contour_col  = "black",
+                                                  contour_lwd  = 1.0,
+                                                  main         = "Agreement t-map (FWE contours)",
+                                                  ...) {
+  palette <- match.arg(palette)
+  if (is.null(x$img_dims) || length(x$img_dims) != 2L) {
+    cli::cli_abort(c(
+      "Test result is missing {.field img_dims}.",
+      "i" = "Re-run {.fn agreement_map_test} on a current rcisignal \\
+             version; older cached results predate the \\
+             {.field img_dims} field."
+    ))
+  }
+  img_dims <- as.integer(x$img_dims)
+
+  observed_t <- x$observed_t
+  observed_t[!is.finite(observed_t)] <- 0
+
+  render_agreement_t_map(
+    t_map      = observed_t,
+    img_dims   = img_dims,
+    mask       = NULL,
+    threshold  = threshold,
+    zlim       = zlim,
+    palette    = palette,
+    base_image = base_image,
+    alpha_max  = alpha_max,
+    main       = main,
+    sub_n      = x$n_participants
+  )
+
+  if (isTRUE(show_contour) && any(x$significant_mask, na.rm = TRUE)) {
+    sig_mat <- matrix(as.numeric(x$significant_mask),
+                      nrow = img_dims[1L], ncol = img_dims[2L])
+    graphics::contour(
+      x = seq_len(img_dims[2L]),
+      y = seq_len(img_dims[1L]),
+      z = t(sig_mat[nrow(sig_mat):1L, , drop = FALSE]),
+      levels = 0.5, drawlabels = FALSE, add = TRUE,
+      col = contour_col, lwd = contour_lwd
+    )
+  }
   invisible(x)
 }

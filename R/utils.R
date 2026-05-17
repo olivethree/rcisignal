@@ -576,3 +576,91 @@ read_image_as_gray <- function(path) {
     img[, , 1]
   }
 }
+
+#' Resolve a base-image argument (matrix or path) to a grayscale matrix
+#'
+#' @keywords internal
+#' @noRd
+resolve_base_for_overlay <- function(base_image) {
+  if (is.character(base_image) && length(base_image) == 1L) {
+    return(read_image_as_gray(base_image))
+  }
+  if (is.matrix(base_image) && is.numeric(base_image)) {
+    return(base_image)
+  }
+  cli::cli_abort(
+    "{.arg base_image} must be a numeric matrix or a path to PNG/JPEG."
+  )
+}
+
+#' Build a sign-based diverging-palette RGB array
+#'
+#' Positive entries map to blue, negative to red, zero to (0, 0, 0).
+#' Caller multiplies the result by an alpha raster when compositing.
+#' Matches the colour convention of `plot_ci_overlay()` and the
+#' cluster-test plots (positive = blue, negative = red).
+#'
+#' @keywords internal
+#' @noRd
+diverging_rgb_array <- function(signed_mat) {
+  pos <- signed_mat > 0
+  neg <- signed_mat < 0
+  nr  <- nrow(signed_mat)
+  nc  <- ncol(signed_mat)
+  fg  <- array(0, dim = c(nr, nc, 3L))
+  fg[, , 1] <- ifelse(pos, 0.10, ifelse(neg, 0.85, 0))
+  fg[, , 2] <- ifelse(pos, 0.20, ifelse(neg, 0.10, 0))
+  fg[, , 3] <- ifelse(pos, 0.85, ifelse(neg, 0.10, 0))
+  fg
+}
+
+#' Build a YlOrRd-sampled RGB array from a non-negative magnitude matrix
+#'
+#' `mag_mat` must be non-negative (typically `abs(t)` after thresholding).
+#' Values are scaled by `max_mag` (the colour-scale top) and sampled from
+#' the reversed `YlOrRd` ramp. Pixels at zero get the pale-yellow end of
+#' the ramp, which is intentionally near-white so the base shows through
+#' when the alpha is also low.
+#'
+#' @keywords internal
+#' @noRd
+fire_rgb_array <- function(mag_mat, max_mag) {
+  if (!is.finite(max_mag) || max_mag <= 0) max_mag <- 1
+  nr <- nrow(mag_mat)
+  nc <- ncol(mag_mat)
+  ramp <- grDevices::hcl.colors(256L, "YlOrRd", rev = TRUE)
+  idx  <- floor(pmin(pmax(mag_mat / max_mag, 0), 1) * 255) + 1L
+  idx[is.na(idx)] <- 1L
+  rgb_mat <- grDevices::col2rgb(ramp[idx]) / 255
+  fg <- array(0, dim = c(nr, nc, 3L))
+  fg[, , 1] <- matrix(rgb_mat[1L, ], nrow = nr, ncol = nc)
+  fg[, , 2] <- matrix(rgb_mat[2L, ], nrow = nr, ncol = nc)
+  fg[, , 3] <- matrix(rgb_mat[3L, ], nrow = nr, ncol = nc)
+  fg
+}
+
+#' Alpha-over composite a foreground RGB raster onto a grayscale base
+#'
+#' Standard over-compositing: per-pixel
+#' `out = (1 - alpha) * base + alpha * fg`, replicated across the
+#' three RGB channels and clamped to `[0, 1]`. Used by
+#' `plot_ci_overlay()`, `plot_agreement_map()`, and the cluster-test
+#' plot methods so they share a single composition path.
+#'
+#' @keywords internal
+#' @noRd
+composite_rgb_over_gray <- function(base_gray, fg_rgb_array, alpha_raster) {
+  nr <- nrow(base_gray)
+  nc <- ncol(base_gray)
+  base_layer <- array(rep(as.vector(base_gray), 3L), dim = c(nr, nc, 3L))
+  composed <- array(0, dim = c(nr, nc, 3L))
+  composed[, , 1] <- (1 - alpha_raster) * base_layer[, , 1] +
+    alpha_raster * fg_rgb_array[, , 1]
+  composed[, , 2] <- (1 - alpha_raster) * base_layer[, , 2] +
+    alpha_raster * fg_rgb_array[, , 2]
+  composed[, , 3] <- (1 - alpha_raster) * base_layer[, , 3] +
+    alpha_raster * fg_rgb_array[, , 3]
+  composed[composed < 0] <- 0
+  composed[composed > 1] <- 1
+  composed
+}

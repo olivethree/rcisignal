@@ -66,7 +66,10 @@
 #' @param main Optional plot title.
 #' @return Invisibly the composed `nrow x ncol x 3` raster. The
 #'   plot is drawn on the active device as a side effect.
-#' @seealso [agreement_map_test()], [make_face_mask()]
+#' @seealso [plot_agreement_map()] for the producer-agreement
+#'   counterpart (signed t or `|t|`, optionally over the same base);
+#'   [agreement_map_test()] for FWE-controlled significance contours;
+#'   [make_face_mask()] / [read_face_mask()] for the optional `mask`.
 #' @examples
 #' \dontrun{
 #' # Minimal call-signature demo with synthetic inputs and a flat base.
@@ -126,15 +129,7 @@ plot_ci_overlay <- function(signal_matrix,
   palette <- match.arg(palette)
 
   # ---- resolve base image ---------------------------------------------
-  if (is.character(base_image) && length(base_image) == 1L) {
-    base_mat <- read_image_as_gray(base_image)
-  } else if (is.matrix(base_image) && is.numeric(base_image)) {
-    base_mat <- base_image
-  } else {
-    cli::cli_abort(
-      "{.arg base_image} must be a numeric matrix or a path to PNG/JPEG."
-    )
-  }
+  base_mat  <- resolve_base_for_overlay(base_image)
   base_dims <- as.integer(dim(base_mat))
 
   # ---- resolve signal vector + dims -----------------------------------
@@ -185,26 +180,11 @@ plot_ci_overlay <- function(signal_matrix,
 
   # ---- diverging palette: blue (positive), red (negative) -------------
   # Convention matches plot_agreement_map() and the cluster-test plots:
-  # positive = blue, negative = red, neutral = bare base. Output is a
-  # nrow x ncol x 3 numeric raster in [0, 1].
-  base_layer <- array(rep(as.vector(base_mat), 3L),
-                      dim = c(img_dims[1], img_dims[2], 3L))
+  # positive = blue, negative = red, neutral = bare base.
   norm_mat <- matrix(norm_vec, nrow = img_dims[1], ncol = img_dims[2])
+  fg_rgb   <- diverging_rgb_array(norm_mat)
   alpha    <- abs(norm_mat) * alpha_max
-
-  pos <- norm_mat > 0
-  neg <- norm_mat < 0
-  fg_r <- ifelse(pos, 0.10, ifelse(neg, 0.85, 0))
-  fg_g <- ifelse(pos, 0.20, ifelse(neg, 0.10, 0))
-  fg_b <- ifelse(pos, 0.85, ifelse(neg, 0.10, 0))
-
-  composed <- array(0, dim = c(img_dims[1], img_dims[2], 3L))
-  composed[, , 1] <- (1 - alpha) * base_layer[, , 1] + alpha * fg_r
-  composed[, , 2] <- (1 - alpha) * base_layer[, , 2] + alpha * fg_g
-  composed[, , 3] <- (1 - alpha) * base_layer[, , 3] + alpha * fg_b
-  # pmax/pmin drop the array dim; clamp without flattening.
-  composed[composed < 0] <- 0
-  composed[composed > 1] <- 1
+  composed <- composite_rgb_over_gray(base_mat, fg_rgb, alpha)
 
   # ---- draw -----------------------------------------------------------
   op <- graphics::par(no.readonly = TRUE)

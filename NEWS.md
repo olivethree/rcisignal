@@ -1,3 +1,62 @@
+# rcisignal 0.1.7
+
+## New features
+
+* `plot_agreement_map()` gains `base_image` and `alpha_max`
+  arguments. When `base_image` is supplied (numeric matrix or
+  PNG/JPEG path), the t-map is composited on top of the grayscale
+  base; out-of-mask and subthreshold pixels render fully
+  transparent, and the per-pixel opacity scales `|t| / zlim_max`
+  up to `alpha_max`. Works for both `palette = "diverging"` and
+  `palette = "fire"`. With `base_image = NULL` (default) the
+  existing flat-panel rendering is unchanged.
+
+* `plot.rcisignal_rel_cluster_test()` gains the same `base_image`
+  and `alpha_max` arguments, so the between-condition t-map (or
+  TFCE map) can be rendered with anatomical context in one call.
+  Diverging palette only; the cluster t-map is intrinsically
+  signed and is not given a `|t|`-only view.
+
+* `plot.rcisignal_rel_pairwise_report()` gains `base_image` and
+  `alpha_max`, threaded through to each per-pair cluster-test
+  plot. When `base_image` is a path string it is read once and
+  reused for every panel.
+
+* `plot.rcisignal_rel_agreement_map_test()` (new S3 method).
+  `plot()` of an `agreement_map_test()` result now renders the
+  observed t-map directly, with the FWE-significant pixel
+  boundary outlined in black by default. Accepts `palette`,
+  `threshold`, `zlim`, `base_image`, `alpha_max`, and a
+  `show_contour` toggle. To support this, the
+  `agreement_map_test()` result gains an `$img_dims` field
+  (additive; existing fields unchanged).
+
+## Documentation
+
+* Reciprocal `@seealso` cross-links between `plot_agreement_map()`
+  and `plot_ci_overlay()`; both now point at each other and at
+  `agreement_map_test()`. Vignette §10 reframed around the three
+  composable surfaces (`plot_agreement_map()` /
+  `plot_ci_overlay()` / cluster-test plot) so the symmetric
+  `base_image` workflow is visible from the start of the section.
+
+* `make_face_mask()` and `read_face_mask()` `@seealso` blocks
+  expanded to list every mask-accepting consumer
+  (`infoval()`, `pixel_t_test()`, `agreement_map_test()`,
+  `rel_cluster_test()`, `rel_icc()`, `rel_split_half()`,
+  `rel_loo()`, `rel_dissimilarity()`, `run_reliability()`,
+  `run_discriminability()`, `run_discriminability_pairwise()`,
+  `plot_agreement_map()`, `plot_ci_overlay()`). Discoverability
+  is now complete from either constructor.
+
+## Internal
+
+* Private helpers `resolve_base_for_overlay()` and
+  `composite_rgb_over_gray()` factored into `R/utils.R` so
+  `plot_ci_overlay()`, `plot_agreement_map()`, and the
+  cluster-test plot method share one base-loading and
+  compositing path. No user-visible signature change.
+
 # rcisignal 0.1.6
 
 ## New features

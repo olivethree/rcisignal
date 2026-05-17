@@ -149,20 +149,6 @@ plot_mask_overlay <- function(base_image,
 
 #' @keywords internal
 #' @noRd
-resolve_base_for_overlay <- function(base_image) {
-  if (is.character(base_image) && length(base_image) == 1L) {
-    return(read_image_as_gray(base_image))
-  }
-  if (is.matrix(base_image) && is.numeric(base_image)) {
-    return(base_image)
-  }
-  cli::cli_abort(
-    "{.arg base_image} must be a numeric matrix or a path to PNG/JPEG."
-  )
-}
-
-#' @keywords internal
-#' @noRd
 resolve_mask_against_base <- function(mask, nr, nc) {
   n_pix <- nr * nc
   if (is.character(mask) && length(mask) == 1L) {

@@ -45,6 +45,12 @@ iv <- infoval(signal_matrix, noise_matrix, trial_counts,
 }
 }
 \seealso{
-\code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=infoval]{infoval()}}, \code{\link[=plot_face_mask]{plot_face_mask()}},
+\code{\link[=make_face_mask]{make_face_mask()}} for the parametric oval / sub-region
+constructor. Mask consumers: \code{\link[=infoval]{infoval()}}, \code{\link[=pixel_t_test]{pixel_t_test()}},
+\code{\link[=agreement_map_test]{agreement_map_test()}}, \code{\link[=rel_cluster_test]{rel_cluster_test()}}, \code{\link[=rel_icc]{rel_icc()}},
+\code{\link[=rel_split_half]{rel_split_half()}}, \code{\link[=rel_loo]{rel_loo()}}, \code{\link[=rel_dissimilarity]{rel_dissimilarity()}},
+\code{\link[=run_reliability]{run_reliability()}}, \code{\link[=run_discriminability]{run_discriminability()}},
+\code{\link[=run_discriminability_pairwise]{run_discriminability_pairwise()}}, \code{\link[=plot_agreement_map]{plot_agreement_map()}},
+\code{\link[=plot_ci_overlay]{plot_ci_overlay()}}. Plot helpers: \code{\link[=plot_face_mask]{plot_face_mask()}},
 \code{\link[=plot_mask_overlay]{plot_mask_overlay()}}.
 }

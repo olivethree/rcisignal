@@ -64,7 +64,15 @@
 #'   `|t| < threshold`, making strong-agreement clusters stand out.
 #'   This is descriptive only; it does not provide FWER control. For
 #'   inferential pixel significance, use [agreement_map_test()] and
-#'   overlay the contours via [plot_ci_overlay()].
+#'   render its result directly via
+#'   `plot(agreement_map_test(...))`, or overlay the contours via
+#'   [plot_ci_overlay()].
+#' * **`base_image`** composites the heatmap on top of a grayscale
+#'   base face so anatomical context shows through. Out-of-mask and
+#'   subthreshold pixels render fully transparent; the per-pixel
+#'   opacity scales `|t| / zlim_max` up to `alpha_max`. Works for
+#'   both palettes. The colour bar still shows the full scale so
+#'   magnitudes are readable off the rendered overlay.
 #' * The diverging colour convention (blue = positive,
 #'   red = negative) matches [plot_ci_overlay()] and the
 #'   cluster-test plots so the same group CI reads consistently
@@ -100,14 +108,27 @@
 #'   view discards sign; pair with `palette = "diverging"` or with
 #'   [plot_ci_overlay()] to recover direction at a region of
 #'   interest.
+#' @param base_image Optional. Either a numeric matrix
+#'   (`nrow x ncol`, grayscale, values in 0-1) or a path to a
+#'   PNG/JPEG file. When supplied, the t-map is composited on top of
+#'   the grayscale base; out-of-mask and subthreshold pixels render
+#'   fully transparent. When `NULL` (default), the map is drawn on a
+#'   flat panel via `graphics::image()` (the historical behaviour).
+#' @param alpha_max Numeric in `[0, 1]`. Maximum opacity of the
+#'   heatmap at the colour-scale top (`zlim_max`) when `base_image`
+#'   is supplied. Ignored otherwise. Default 0.7.
 #' @param main Title.
 #' @param ... Passed to `graphics::image()`.
 #' @return Invisibly, a list with `t_map` (numeric vector of t values
 #'   per pixel; always signed regardless of palette), `n` (producer
 #'   count), `img_dims`, `mask` (if supplied), `zlim` (the colour
 #'   scale used), and `palette` (the palette name).
-#' @seealso [make_face_mask()], [rel_cluster_test()] for inferential
-#'   between-condition tests.
+#' @seealso [plot_ci_overlay()] for the producer-mean counterpart
+#'   (signed CI, optionally with FWE contours); [agreement_map_test()]
+#'   for FWE-controlled significance, and its `plot()` method for a
+#'   one-call agreement map with contours; [rel_cluster_test()] for
+#'   inferential between-condition tests; [make_face_mask()] /
+#'   [read_face_mask()] for the optional `mask`.
 #' @export
 #' @examples
 #' \dontrun{
@@ -131,12 +152,29 @@
 #' cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
 #' plot_agreement_map(cis$signal_matrix)
 #' }
+#'
+#' \dontrun{
+#' # Composite the agreement map on the base face for a single
+#' # publication-grade figure. Works for both palettes; the
+#' # "diverging" branch matches plot_ci_overlay()'s colour mapping.
+#' sim <- simulate_briefrc_data(
+#'   n_per_condition = 20, n_trials = 60, conditions = "target",
+#'   signal_region = "eyes", signal_strength = "strong", seed = 1
+#' )
+#' cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
+#' plot_agreement_map(cis$signal_matrix,
+#'                    base_image = sim$base_face,
+#'                    threshold  = 2.0,
+#'                    main       = "Agreement t-map over base face")
+#' }
 plot_agreement_map <- function(signal_matrix,
                                img_dims  = NULL,
                                mask      = NULL,
                                threshold = NULL,
                                zlim      = NULL,
                                palette   = c("diverging", "fire"),
+                               base_image = NULL,
+                               alpha_max  = 0.7,
                                main      = "Per-pixel producer agreement (t-map)",
                                ...) {
   if (!is.matrix(signal_matrix) || !is.numeric(signal_matrix)) {
@@ -167,6 +205,49 @@ plot_agreement_map <- function(signal_matrix,
   t_map <- m / se
   t_map[!is.finite(t_map)] <- 0
 
+  res <- render_agreement_t_map(
+    t_map      = t_map,
+    img_dims   = img_dims,
+    mask       = mask,
+    threshold  = threshold,
+    zlim       = zlim,
+    palette    = palette,
+    base_image = base_image,
+    alpha_max  = alpha_max,
+    main       = main,
+    sub_n      = n,
+    ...
+  )
+  invisible(list(t_map = t_map, n = n,
+                 img_dims = img_dims, mask = mask,
+                 zlim = res$zlim, palette = palette))
+}
+
+#' Render an agreement-style t-map to the active device
+#'
+#' Internal renderer shared by `plot_agreement_map()` and
+#' `plot.rcisignal_rel_agreement_map_test()`. Takes a pre-computed
+#' per-pixel t-vector rather than a producer x pixel matrix so the
+#' inferential plot method can pass `observed_t` straight through
+#' without re-running the one-sample t-statistics.
+#'
+#' @keywords internal
+#' @noRd
+render_agreement_t_map <- function(t_map,
+                                   img_dims,
+                                   mask       = NULL,
+                                   threshold  = NULL,
+                                   zlim       = NULL,
+                                   palette    = c("diverging", "fire"),
+                                   base_image = NULL,
+                                   alpha_max  = 0.7,
+                                   main       = NULL,
+                                   sub_n      = NULL,
+                                   ...) {
+  palette <- match.arg(palette)
+  img_dims <- as.integer(img_dims)
+  n_pix <- length(t_map)
+
   display <- if (palette == "fire") abs(t_map) else t_map
   if (!is.null(mask)) {
     if (!is.logical(mask) || length(mask) != n_pix) {
@@ -181,7 +262,7 @@ plot_agreement_map <- function(signal_matrix,
   }
 
   if (is.null(zlim)) {
-    rng  <- max(abs(display), na.rm = TRUE)
+    rng <- max(abs(display), na.rm = TRUE)
     if (!is.finite(rng) || rng == 0) rng <- 1
     zlim <- if (palette == "fire") c(0, rng) else c(-rng, rng)
   }
@@ -191,7 +272,6 @@ plot_agreement_map <- function(signal_matrix,
   } else {
     grDevices::hcl.colors(256L, "YlOrRd", rev = TRUE)
   }
-
   bar_label <- if (palette == "fire") {
     "|t-value| (one-sample vs 0)"
   } else {
@@ -203,34 +283,72 @@ plot_agreement_map <- function(signal_matrix,
   graphics::par(mar = c(1, 1, 3, 6) + 0.1)
   mat <- matrix(display, img_dims[1L], img_dims[2L])
 
-  graphics::image(
-    seq_len(img_dims[2L]), seq_len(img_dims[1L]),
-    t(mat[nrow(mat):1L, ]),
-    col       = col_vec,
-    zlim      = zlim,
-    main      = main,
-    axes      = FALSE,
-    xlab      = "", ylab = "",
-    asp       = img_dims[1L] / img_dims[2L],
-    useRaster = TRUE,
-    ...
-  )
-  graphics::box(col = "grey80", lwd = 0.5)
+  if (is.null(base_image)) {
+    graphics::image(
+      seq_len(img_dims[2L]), seq_len(img_dims[1L]),
+      t(mat[nrow(mat):1L, ]),
+      col       = col_vec,
+      zlim      = zlim,
+      main      = main,
+      axes      = FALSE,
+      xlab      = "", ylab = "",
+      asp       = img_dims[1L] / img_dims[2L],
+      useRaster = TRUE,
+      ...
+    )
+    graphics::box(col = "grey80", lwd = 0.5)
+  } else {
+    base_mat <- resolve_base_for_overlay(base_image)
+    if (!identical(as.integer(dim(base_mat)), as.integer(img_dims))) {
+      cli::cli_abort(c(
+        "{.arg base_image} dimensions do not match {.arg img_dims}.",
+        "*" = "base_image: {dim(base_mat)[1L]} x {dim(base_mat)[2L]}",
+        "*" = "img_dims:   {img_dims[1L]} x {img_dims[2L]}"
+      ))
+    }
+    zlim_max <- max(abs(zlim))
+    if (!is.finite(zlim_max) || zlim_max == 0) zlim_max <- 1
+
+    display_alpha <- display
+    display_alpha[is.na(display_alpha)] <- 0
+    alpha_raster <- pmin(abs(display_alpha) / zlim_max, 1) * alpha_max
+    alpha_raster <- matrix(alpha_raster, img_dims[1L], img_dims[2L])
+
+    if (palette == "fire") {
+      mag_mat <- matrix(abs(display_alpha), img_dims[1L], img_dims[2L])
+      fg_rgb  <- fire_rgb_array(mag_mat, max_mag = zlim_max)
+    } else {
+      signed_mat <- matrix(display_alpha, img_dims[1L], img_dims[2L])
+      fg_rgb     <- diverging_rgb_array(signed_mat)
+    }
+    composed <- composite_rgb_over_gray(base_mat, fg_rgb, alpha_raster)
+
+    graphics::plot.new()
+    graphics::plot.window(xlim = c(0, img_dims[2L]),
+                          ylim = c(0, img_dims[1L]),
+                          asp = 1, xaxs = "i", yaxs = "i")
+    graphics::rasterImage(composed, 0, 0, img_dims[2L], img_dims[1L],
+                          interpolate = FALSE)
+    graphics::box(col = "grey80", lwd = 0.5)
+    if (!is.null(main)) {
+      graphics::title(main = main, line = 1, cex.main = 1.0,
+                      font.main = 1)
+    }
+  }
 
   add_colour_bar(zlim, col_vec, label = bar_label)
 
-  graphics::mtext(
-    sprintf("N = %d producers,  %d x %d pixels%s",
-            n, img_dims[1L], img_dims[2L],
-            if (!is.null(threshold))
-              sprintf(",  thresholded at |t| > %.2f", threshold)
-            else ""),
-    side = 3, line = 0.3, cex = 0.85, col = "grey30"
-  )
-
-  invisible(list(t_map = t_map, n = n,
-                 img_dims = img_dims, mask = mask,
-                 zlim = zlim, palette = palette))
+  if (!is.null(sub_n)) {
+    graphics::mtext(
+      sprintf("N = %d producers,  %d x %d pixels%s",
+              sub_n, img_dims[1L], img_dims[2L],
+              if (!is.null(threshold))
+                sprintf(",  thresholded at |t| > %.2f", threshold)
+              else ""),
+      side = 3, line = 0.3, cex = 0.85, col = "grey30"
+    )
+  }
+  invisible(list(zlim = zlim, palette = palette))
 }
 
 #' Add a vertical colour bar in the right margin of the active plot

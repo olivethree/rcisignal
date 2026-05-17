@@ -146,5 +146,8 @@ plot_ci_overlay(cis$signal_matrix, sim$base_face,
 }
 }
 \seealso{
-\code{\link[=agreement_map_test]{agreement_map_test()}}, \code{\link[=make_face_mask]{make_face_mask()}}
+\code{\link[=plot_agreement_map]{plot_agreement_map()}} for the producer-agreement
+counterpart (signed t or \verb{|t|}, optionally over the same base);
+\code{\link[=agreement_map_test]{agreement_map_test()}} for FWE-controlled significance contours;
+\code{\link[=make_face_mask]{make_face_mask()}} / \code{\link[=read_face_mask]{read_face_mask()}} for the optional \code{mask}.
 }

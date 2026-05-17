@@ -75,6 +75,55 @@ test_that("plot.rcisignal_rel_pairwise_report draws a grid", {
   expect_identical(graphics::par("mfrow"), mfrow_before)
 })
 
+test_that("cluster_test plot() accepts base_image overlay (item B)", {
+  pair <- make_sig_pair(64L, 8L)
+  ct <- suppressWarnings(
+    rel_cluster_test(pair$a, pair$b, img_dims = pair$img_dims,
+                     n_permutations = 30L, progress = FALSE)
+  )
+  base <- matrix(0.5, ct$img_dims[1L], ct$img_dims[2L])
+  grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(plot(ct, base_image = base))
+  expect_no_error(plot(ct, base_image = base, alpha_max = 0.5,
+                       colour_bar = FALSE))
+  # Dim mismatch aborts.
+  expect_error(plot(ct, base_image = matrix(0.5, 4L, 4L)),
+               "do not match")
+})
+
+test_that("plot.rcisignal_rel_pairwise_report threads base_image to panels (item C)", {
+  pa <- make_sig_pair(64L, 6L, seed = 1L)
+  pb <- make_sig_pair(64L, 6L, seed = 2L)
+  sigs <- list(A = pa$a, B = pa$b, C = pb$b)
+  for (nm in names(sigs)) {
+    attr(sigs[[nm]], "img_dims") <- pa$img_dims
+  }
+  pw <- suppressWarnings(
+    run_discriminability_pairwise(
+      sigs, n_permutations = 30L, n_boot = 50L,
+      seed = 1L, progress = FALSE
+    )
+  )
+  base <- matrix(0.5, pa$img_dims[1L], pa$img_dims[2L])
+  grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(plot(pw, base_image = base))
+})
+
+test_that("plot.rcisignal_rel_agreement_map_test renders (item F)", {
+  sig <- raw_pure_signal(n_pix = 256L, n_p = 12L)
+  res <- suppressWarnings(
+    agreement_map_test(sig, n_permutations = 100L,
+                       seed = 1L, progress = FALSE)
+  )
+  grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(plot(res))
+  expect_no_error(plot(res, show_contour = FALSE))
+  expect_no_error(plot(res, palette = "fire"))
+  expect_no_error(
+    plot(res, base_image = matrix(0.5, res$img_dims[1L], res$img_dims[2L]))
+  )
+})
+
 test_that("plot.rcisignal_rel_pairwise_report warns when many pairs", {
   fake_child <- list(cluster_test = structure(
     list(

@@ -11,6 +11,7 @@ test_that("agreement_map_test returns the expected shape", {
   expect_length(res$pmap, 256L)
   expect_length(res$significant_mask, 256L)
   expect_length(res$null_distribution, 200L)
+  expect_equal(as.integer(res$img_dims), c(16L, 16L))
 })
 
 test_that("agreement_map_test detects planted signal", {

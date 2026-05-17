@@ -419,7 +419,9 @@ summary.rcisignal_rel_cluster_test <- function(object, ...) {
 #' @export
 plot.rcisignal_rel_cluster_test <- function(x, ...,
                                        main       = NULL,
-                                       colour_bar = TRUE) {
+                                       colour_bar = TRUE,
+                                       base_image = NULL,
+                                       alpha_max  = 0.7) {
   op <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(op), add = TRUE)
   method <- if (is.null(x$method)) "threshold" else x$method
@@ -427,25 +429,63 @@ plot.rcisignal_rel_cluster_test <- function(x, ...,
   set_pub_par(mar = c(1, 1, 3, bar_mar) + 0.1)
 
   pal <- grDevices::hcl.colors(256L, "RdBu")
+  has_overlay <- !is.null(base_image)
+  base_mat <- if (has_overlay) {
+    bm <- resolve_base_for_overlay(base_image)
+    if (!identical(as.integer(dim(bm)), as.integer(x$img_dims))) {
+      cli::cli_abort(c(
+        "{.arg base_image} dimensions do not match {.arg img_dims}.",
+        "*" = "base_image: {dim(bm)[1L]} x {dim(bm)[2L]}",
+        "*" = "img_dims:   {x$img_dims[1L]} x {x$img_dims[2L]}"
+      ))
+    }
+    bm
+  } else NULL
+
+  draw_heatmap <- function(signed_vec, zlim, title) {
+    mat <- matrix(signed_vec, x$img_dims[1L], x$img_dims[2L])
+    if (has_overlay) {
+      zlim_max <- max(abs(zlim))
+      if (!is.finite(zlim_max) || zlim_max == 0) zlim_max <- 1
+      signed_disp <- signed_vec
+      signed_disp[!is.finite(signed_disp)] <- 0
+      signed_mat <- matrix(signed_disp, x$img_dims[1L], x$img_dims[2L])
+      fg_rgb <- diverging_rgb_array(signed_mat)
+      alpha  <- pmin(abs(signed_mat) / zlim_max, 1) * alpha_max
+      composed <- composite_rgb_over_gray(base_mat, fg_rgb, alpha)
+      graphics::plot.new()
+      graphics::plot.window(xlim = c(0, x$img_dims[2L]),
+                            ylim = c(0, x$img_dims[1L]),
+                            asp = 1, xaxs = "i", yaxs = "i")
+      graphics::rasterImage(composed, 0, 0,
+                            x$img_dims[2L], x$img_dims[1L],
+                            interpolate = FALSE)
+      if (!is.null(title)) {
+        graphics::title(main = title, line = 1, cex.main = 1.0,
+                        font.main = 1)
+      }
+    } else {
+      graphics::image(
+        seq_len(x$img_dims[2L]), seq_len(x$img_dims[1L]),
+        t(mat[nrow(mat):1L, ]),
+        col       = pal,
+        zlim      = zlim,
+        main      = title, axes = FALSE,
+        xlab      = "", ylab = "",
+        asp       = x$img_dims[1L] / x$img_dims[2L],
+        useRaster = TRUE
+      )
+    }
+    graphics::box(col = "grey80", lwd = 0.5)
+  }
 
   if (method == "tfce") {
     if (is.null(main)) main <- "TFCE map (signed, FWE-corrected)"
-    tfce_mat <- matrix(x$tfce_map, x$img_dims[1L], x$img_dims[2L])
     rng <- max(abs(x$tfce_map), na.rm = TRUE)
     if (!is.finite(rng) || rng == 0) rng <- 1
     zlim <- c(-rng, rng)
 
-    graphics::image(
-      seq_len(x$img_dims[2L]), seq_len(x$img_dims[1L]),
-      t(tfce_mat[nrow(tfce_mat):1L, ]),
-      col       = pal,
-      zlim      = zlim,
-      main      = main, axes = FALSE,
-      xlab      = "", ylab = "",
-      asp       = x$img_dims[1L] / x$img_dims[2L],
-      useRaster = TRUE
-    )
-    graphics::box(col = "grey80", lwd = 0.5)
+    draw_heatmap(x$tfce_map, zlim, main)
 
     sig_mat <- matrix(x$tfce_significant_mask,
                       x$img_dims[1L], x$img_dims[2L])
@@ -469,21 +509,11 @@ plot.rcisignal_rel_cluster_test <- function(x, ...,
   }
 
   if (is.null(main)) main <- "Cluster-based permutation t-map"
-  tmap <- matrix(x$observed_t, x$img_dims[1L], x$img_dims[2L])
   rng  <- max(abs(x$observed_t), na.rm = TRUE)
+  if (!is.finite(rng) || rng == 0) rng <- 1
   zlim <- c(-rng, rng)
 
-  graphics::image(
-    seq_len(x$img_dims[2L]), seq_len(x$img_dims[1L]),
-    t(tmap[nrow(tmap):1L, ]),
-    col       = pal,
-    zlim      = zlim,
-    main      = main, axes = FALSE,
-    xlab      = "", ylab = "",
-    asp       = x$img_dims[1L] / x$img_dims[2L],
-    useRaster = TRUE
-  )
-  graphics::box(col = "grey80", lwd = 0.5)
+  draw_heatmap(x$observed_t, zlim, main)
 
   sig_pos_ids <- x$clusters$cluster_id[
     x$clusters$direction == "pos" & x$clusters$significant
@@ -787,13 +817,22 @@ print.rcisignal_rel_pairwise_report <- function(x, ...) {
 #' @param max_pairs Integer. Above this many pairs a warning is
 #'   emitted (panels become illegible). Default `12L`. The grid is
 #'   still drawn; pass `max_pairs = Inf` to silence the warning.
+#' @param base_image Optional. Either a numeric matrix (`nrow x ncol`,
+#'   grayscale, values in 0-1) or a path to a PNG/JPEG file. When
+#'   supplied, each per-pair t-map is composited on top of the
+#'   grayscale base; otherwise panels render on a flat background.
+#' @param alpha_max Numeric in `[0, 1]`. Maximum opacity of the t-map
+#'   overlay at the colour-scale top when `base_image` is supplied.
+#'   Default 0.7.
 #' @return Invisibly the input `x`.
 #' @seealso [plot_dissimilarity_grid()] for a shared-axis comparison
 #'   of bootstrap dissimilarity distances across pairs.
 #' @export
 plot.rcisignal_rel_pairwise_report <- function(x, ...,
-                                               ncol      = NULL,
-                                               max_pairs = 12L) {
+                                               ncol       = NULL,
+                                               max_pairs  = 12L,
+                                               base_image = NULL,
+                                               alpha_max  = 0.7) {
   pair_ids <- names(x$results)
   n_pairs  <- length(pair_ids)
   if (n_pairs == 0L) {
@@ -809,6 +848,10 @@ plot.rcisignal_rel_pairwise_report <- function(x, ...,
   if (is.null(ncol)) ncol <- as.integer(ceiling(sqrt(n_pairs)))
   nrow_grid <- as.integer(ceiling(n_pairs / ncol))
 
+  base_resolved <- if (is.null(base_image)) NULL else {
+    resolve_base_for_overlay(base_image)
+  }
+
   op <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(op), add = TRUE)
   graphics::par(mfrow = c(nrow_grid, ncol),
@@ -818,7 +861,8 @@ plot.rcisignal_rel_pairwise_report <- function(x, ...,
   for (pid in pair_ids) {
     child <- x$results[[pid]]$cluster_test
     pretty_title <- gsub("_vs_", " vs ", pid, fixed = TRUE)
-    plot(child, main = pretty_title, colour_bar = FALSE)
+    plot(child, main = pretty_title, colour_bar = FALSE,
+         base_image = base_resolved, alpha_max = alpha_max)
   }
   invisible(x)
 }

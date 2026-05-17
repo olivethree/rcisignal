@@ -44,6 +44,10 @@ Object of class \code{rcisignal_rel_agreement_map_test} with:
 \item \verb{$significant_mask}: logical, \code{pmap < alpha}.
 \item \verb{$null_distribution}: numeric vector of \code{max_abs_t} per
 permutation.
+\item \verb{$img_dims}: \code{c(nrow, ncol)} inferred from
+\code{attr(signal_matrix, "img_dims")} or, when absent, from a
+square pixel count. Used by the S3 \code{plot()} method to reshape
+the per-pixel vectors back to an image.
 \item \verb{$alpha}, \verb{$n_permutations}, \verb{$n_participants}, \verb{$mask}.
 }
 }

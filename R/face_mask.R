@@ -60,8 +60,13 @@
 #'   non-rectangle region.
 #' @return Logical vector of length `prod(img_dims)`, column-major
 #'   to match the package's image vectorisation convention.
-#' @seealso [read_face_mask()], [infoval()], [plot_agreement_map()],
-#'   [plot_face_mask()], [plot_mask_overlay()]
+#' @seealso [read_face_mask()] for the PNG/JPEG path. Mask
+#'   consumers: [infoval()], [pixel_t_test()], [agreement_map_test()],
+#'   [rel_cluster_test()], [rel_icc()], [rel_split_half()],
+#'   [rel_loo()], [rel_dissimilarity()], [run_reliability()],
+#'   [run_discriminability()], [run_discriminability_pairwise()],
+#'   [plot_agreement_map()], [plot_ci_overlay()]. Plot helpers:
+#'   [plot_face_mask()], [plot_mask_overlay()].
 #' @references
 #' Schmitz, M., Rougier, M., & Yzerbyt, V. (2024). Introducing the
 #' brief reverse correlation: an improved tool to assess visual
@@ -178,7 +183,13 @@ make_face_mask <- function(img_dims,
 #'   Useful for catching a wrong-resolution mask before it silently
 #'   corrupts a downstream computation.
 #' @return Logical vector of length `prod(img_dims)`, column-major.
-#' @seealso [make_face_mask()], [infoval()], [plot_face_mask()],
+#' @seealso [make_face_mask()] for the parametric oval / sub-region
+#'   constructor. Mask consumers: [infoval()], [pixel_t_test()],
+#'   [agreement_map_test()], [rel_cluster_test()], [rel_icc()],
+#'   [rel_split_half()], [rel_loo()], [rel_dissimilarity()],
+#'   [run_reliability()], [run_discriminability()],
+#'   [run_discriminability_pairwise()], [plot_agreement_map()],
+#'   [plot_ci_overlay()]. Plot helpers: [plot_face_mask()],
 #'   [plot_mask_overlay()].
 #' @export
 #' @examples

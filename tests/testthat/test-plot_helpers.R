@@ -124,6 +124,81 @@ test_that("plot_dissimilarity_grid returns a tidy table and runs", {
             out$observed[out$label == "A vs B"])
 })
 
+test_that("plot_agreement_map base_image = NULL keeps existing return shape", {
+  set.seed(11)
+  signal <- matrix(rnorm(64L * 10L), 64L, 10L)
+  attr(signal, "img_dims") <- c(8L, 8L)
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  out <- suppressWarnings(plot_agreement_map(signal))
+  expect_named(out,
+               c("t_map", "n", "img_dims", "mask", "zlim", "palette"))
+  expect_null(out$mask)
+})
+
+test_that("plot_agreement_map base_image as matrix runs and returns expected fields", {
+  set.seed(12)
+  signal <- matrix(rnorm(64L * 10L), 64L, 10L)
+  attr(signal, "img_dims") <- c(8L, 8L)
+  base <- matrix(0.5, 8L, 8L)
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  out <- suppressWarnings(
+    plot_agreement_map(signal, base_image = base, threshold = 0.5)
+  )
+  expect_named(out,
+               c("t_map", "n", "img_dims", "mask", "zlim", "palette"))
+  expect_length(out$t_map, 64L)
+  expect_equal(out$zlim[1L], -out$zlim[2L])
+
+  # Same again on the fire palette to confirm both branches run.
+  out2 <- suppressWarnings(
+    plot_agreement_map(signal, base_image = base, palette = "fire",
+                       threshold = 0.5)
+  )
+  expect_equal(out2$palette, "fire")
+  expect_equal(out2$zlim[1L], 0)
+})
+
+test_that("plot_agreement_map base_image as PNG path runs", {
+  skip_if_not_installed("png")
+  png_path <- system.file("extdata", "sim_base_face.png",
+                          package = "rcisignal")
+  if (!nzchar(png_path) || !file.exists(png_path)) {
+    skip("sim_base_face.png fixture not installed")
+  }
+  dims  <- dim(png::readPNG(png_path))[1:2]
+  n_pix <- prod(dims)
+  set.seed(13)
+  signal <- matrix(rnorm(n_pix * 8L), n_pix, 8L)
+  attr(signal, "img_dims") <- as.integer(dims)
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(
+    suppressWarnings(
+      plot_agreement_map(signal, base_image = png_path)
+    )
+  )
+})
+
+test_that("plot_agreement_map errors when base_image dims disagree", {
+  signal <- matrix(rnorm(64L * 10L), 64L, 10L)
+  attr(signal, "img_dims") <- c(8L, 8L)
+  bad_base <- matrix(0.5, 10L, 10L)
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_error(
+    suppressWarnings(
+      plot_agreement_map(signal, base_image = bad_base)
+    ),
+    "do not match"
+  )
+})
+
 test_that("plot_dissimilarity_grid errors on missing names or wrong class", {
   pair <- make_sig_pair(n_pix = 64L, n_p = 5L, seed = 1L)
   d <- suppressWarnings(rel_dissimilarity(pair$a, pair$b,
