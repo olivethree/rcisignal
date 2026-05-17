@@ -70,6 +70,79 @@ plot_ci_correlogram(
   height   = 6.7
 )
 
+# ---- 2b. Distance matrix on the same 4-trait subset ----------------
+
+message("Rendering trait-CI Euclidean distance matrix ...")
+
+plot_ci_distance_matrix(
+  ci_vectors,
+  img_dims     = c(256L, 256L),
+  mask         = "face",
+  method       = "raw",
+  value_digits = 3L,
+  triangle     = "upper",
+  palette      = "viridis",
+  file         = file.path(fig_dir, "trait_ci_distance_matrix.png"),
+  width        = 6.7,
+  height       = 6.7
+)
+
+# ---- 2c. MDS on all 10 traits, grouped by family --------------------
+
+message("Rendering trait-CI MDS on all 10 traits ...")
+
+trait_order_full <- c("dominant", "submissive",
+                      "trust", "untrust",
+                      "friendly", "unfriendly",
+                      "competent", "incompetent",
+                      "intelligent", "unintelligent")
+
+trait_pretty <- c(dominant = "Dominant", submissive = "Submissive",
+                  trust = "Trust", untrust = "Untrust",
+                  friendly = "Friendly", unfriendly = "Unfriendly",
+                  competent = "Competent", incompetent = "Incompetent",
+                  intelligent = "Intelligent",
+                  unintelligent = "Unintelligent")
+
+ci_vectors_full <- setNames(
+  lapply(trait_order_full, function(tr) rowMeans(sm[[tr]])),
+  trait_pretty[trait_order_full]
+)
+
+trait_family <- c(
+  Dominant      = "dominance",   Submissive    = "dominance",
+  Trust         = "warmth",      Untrust       = "warmth",
+  Friendly      = "warmth",      Unfriendly    = "warmth",
+  Competent     = "competence",  Incompetent   = "competence",
+  Intelligent   = "competence",  Unintelligent = "competence"
+)
+trait_valence <- c(
+  Dominant      = "positive",    Submissive    = "negative",
+  Trust         = "positive",    Untrust       = "negative",
+  Friendly      = "positive",    Unfriendly    = "negative",
+  Competent     = "positive",    Incompetent   = "negative",
+  Intelligent   = "positive",    Unintelligent = "negative"
+)
+
+trait_mds <- plot_ci_mds(
+  ci_vectors_full,
+  img_dims         = c(256L, 256L),
+  mask             = "face",
+  distance         = "euclidean_raw",
+  k                = "auto",
+  stress_threshold = 0.05,
+  groups           = trait_family,
+  shapes           = trait_valence,
+  point_size       = 2.2,
+  label_cex        = 0.72,
+  main             = "Trait CI map (Oliveira et al. 2019)",
+  file             = file.path(fig_dir, "trait_ci_mds.png"),
+  width            = 9,
+  height           = 9
+)
+
+saveRDS(trait_mds, file.path(cache_dir, "trait_ci_mds.rds"))
+
 # ---- 3. ICC(3,k) vs group-mean z lm fit ----------------------------
 
 message("Fitting linear model: group_z ~ ICC(3,k) across the 10 traits ...")
