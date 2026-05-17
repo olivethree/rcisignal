@@ -19,6 +19,41 @@
   The §12.6 worked-example figure is now produced by this
   function.
 
+* `plot_ci_distance_matrix()` (new exported function). All-vs-all
+  pairwise Euclidean distance matrix across a named list of
+  group-mean CIs. Same beginner-friendly input format as
+  `plot_ci_correlogram()`; the magnitude metric recommended by
+  §8.3 instead of Pearson `r`. Supports raw (`method = "raw"`,
+  default) or resolution-normalised (`method = "normalised"`)
+  distance, optional face / upper-face / lower-face masking, four
+  sequential colorblind-safe palettes (viridis / inferno /
+  plasma / rocket), full / upper / lower triangle rendering, and
+  direct PNG (600 dpi) / PDF save.
+
+* `plot_ci_mds()` (new exported function). Classical
+  multidimensional-scaling projection of a named list of
+  group-mean CIs (`stats::cmdscale()`). Auto-selects the smallest
+  dimensionality whose Kruskal stress-1 against the original
+  Euclidean distances reaches the "good" band (default threshold
+  `0.05`, Kruskal 1964); renders a grid of all `choose(k, 2)`
+  pairwise dimension panels when the auto-selected `k > 2`.
+  Users can force a specific `k` (e.g., `k = 2L` for a single
+  paper-figure panel). Returns an S3 object (`rcisignal_mds`)
+  with a one-screen `print()` method; `$mds_points` exposes the
+  `n_cis x k_selected` coordinate matrix in the Euclidean MDS
+  space, `$stress_by_k` and `$variance_pct_by_k` expose the
+  full dimensionality-selection trace. Supports optional
+  categorical `groups` (point colour) and `shapes` (point pch)
+  arguments for grouped scatters in multi-condition designs.
+  Same masking and PNG/PDF save options as the other plot
+  helpers.
+
+* New private helper `prepare_ci_matrix()` (internal, not
+  exported) centralises the named-list-of-CIs validation and
+  per-producer reduction across `plot_ci_correlogram()`,
+  `plot_ci_distance_matrix()`, and `plot_ci_mds()`. No
+  user-visible behaviour change to `plot_ci_correlogram()`.
+
 ## Behavioural change
 
 * Colour direction fixed on the diverging-palette plots that use

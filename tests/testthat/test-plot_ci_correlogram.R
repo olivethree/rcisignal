@@ -131,7 +131,7 @@ test_that("plot_ci_correlogram errors on bad input", {
   expect_error(plot_ci_correlogram("not a list"),
                "named list")
   expect_error(plot_ci_correlogram(list(A = rnorm(n_pix))),
-               "at least two")
+               "at least")
   expect_error(plot_ci_correlogram(list(rnorm(n_pix), rnorm(n_pix))),
                "fully named")
 
