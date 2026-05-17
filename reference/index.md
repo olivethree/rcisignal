@@ -67,6 +67,15 @@
 - [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
   : Per-pixel agreement heatmap for a producer signal matrix
 
+- [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
+  : Pairwise Pearson-r correlogram across multiple group-mean CIs
+
+- [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
+  : Pairwise Euclidean distance matrix across multiple group-mean CIs
+
+- [`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+  : Multidimensional-scaling (MDS) projection of multiple CIs
+
 - [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
   : Render a group CI as a translucent agreement-map overlay on a base
   image

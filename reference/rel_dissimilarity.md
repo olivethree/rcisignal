@@ -106,18 +106,30 @@ Two base-subtracted CIs share systematic image-domain spatial structure
 (face shape, oval signal support, low-frequency Gaussian-noise
 smoothness) that pushes their correlation above zero even when the
 underlying mental representations are unrelated. Absolute correlation
-values therefore do not cleanly mean "these conditions are similar".
-Euclidean distance does not share this failure mode. The Pearson
-correlation fields (`$correlation`, `$boot_cor`, `$ci_cor`,
-`$boot_se_cor`) are retained for backwards compatibility and slated for
-removal in a future release.
+values therefore do not cleanly mean "these conditions are similar": two
+unrelated traits can easily produce `r` well above zero from the shared
+image scaffolding alone, so a "high" correlation does not by itself
+license a similarity claim. Euclidean distance does not share this
+baseline issue, which is why it is the primary statistic here.
+
+The Pearson correlation fields (`$correlation`, `$boot_cor`, `$ci_cor`,
+`$boot_se_cor`) are returned alongside it as a secondary summary, for
+users who need to report `r` for comparability with prior literature or
+with another analysis pipeline. They are not recommended as a standalone
+similarity score. If you do report `r`, interpret it **relatively** (the
+ordering of `r` across multiple condition pairs is more defensible than
+any single absolute value) and **benchmark against a permutation null**
+rather than against zero. The image-domain scaffolding shifts the chance
+baseline upward; "above zero" is not the right comparison.
 
 ## Reading the plot
 
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on the returned
 object renders the bootstrap distributions as two side-by-side
-histograms (Euclidean distance on the left, Pearson r on the right; the
-latter is deprecated and shown in grey).
+histograms (Euclidean distance on the left, Pearson r on the right). The
+Pearson panel is rendered in grey because it is a secondary summary, not
+recommended as a standalone similarity score; see the description for
+why and how to use it carefully if needed.
 
 - The shaded vertical band marks the percentile CI at `ci_level`.
 
@@ -165,7 +177,10 @@ latter is deprecated and shown in grey).
 - `$d_ratio`, observed Euclidean over the null median.
 
 - `$correlation`, `$boot_cor`, `$ci_cor`, `$boot_se_cor`: Pearson
-  correlation of the group means. Deprecated; see above.
+  correlation of the group means and its bootstrap summaries. Secondary;
+  not recommended as a standalone similarity score (see the "Why
+  Euclidean" section). If reporting, prefer relative comparisons across
+  pairs against a permutation null.
 
 - `$n_boot`, `$ci_level`, `$paired`, metadata.
 

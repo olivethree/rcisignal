@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>rcisignal: User's Guide • rcisignal</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="rcisignal: User's Guide">
 </head>
@@ -54,7 +54,7 @@
                         <h4 data-toc-skip class="author">Manuel
 Oliveira</h4>
             
-            <h4 data-toc-skip class="date">2026-05-16</h4>
+            <h4 data-toc-skip class="date">2026-05-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
       <div class="d-none name"><code>rcisignal.Rmd</code></div>
@@ -2113,12 +2113,23 @@ comparisons. <code>$boot_dist</code> is the full bootstrap distribution;
 summaries.</p>
 <p>The Pearson correlation fields (<code>$correlation</code>,
 <code>$boot_cor</code>, <code>$ci_cor</code>, <code>$boot_se_cor</code>)
-are kept for compatibility with earlier versions but are no longer
-recommended. Two base-subtracted CIs share image-domain spatial
-structure (face shape, oval signal support) that pushes their
-correlation above zero even when the underlying mental representations
-are unrelated; absolute correlation values do not cleanly mean “these
-conditions are similar”.</p>
+are returned as a <strong>secondary</strong> summary; they are not
+recommended as a standalone similarity score. Two base-subtracted CIs
+share image-domain spatial structure (face shape, oval signal support)
+that pushes their correlation above zero even when the underlying mental
+representations are unrelated, so a “high” absolute <em>r</em> can
+reflect shared image scaffolding rather than shared mental content.
+Euclidean distance does not share this baseline issue and is the primary
+metric here.</p>
+<p>If you do report <em>r</em> (for comparability with prior literature
+or with another analysis pipeline), interpret it
+<strong>relatively</strong> rather than absolutely: the ordering of
+<em>r</em> across multiple condition pairs is more defensible than any
+single value, and the right reference point is a <strong>permutation
+null</strong> (e.g., permute participant labels between conditions and
+recompute <em>r</em>) rather than zero. The image-domain scaffolding
+shifts the chance baseline upward, so “<em>r</em> &gt; 0” is not the
+right test.</p>
 <p>A <code>null = "permutation"</code> argument adds a chance baseline
 for the Euclidean distance: stratified condition-label permutation
 (between-subjects) or sign-flip on per-producer differences (paired).
@@ -2181,6 +2192,12 @@ inspect a single pair on its own, or to override the title:</p>
 <p>For a shared-axis comparison of bootstrap distances across pairs,
 pass each pair’s dissimilarity child to
 <code><a href="../reference/plot_dissimilarity_grid.html">plot_dissimilarity_grid()</a></code>.</p>
+<p>When the comparison is many conditions at once (rather than a short
+list of pairs), the all-vs-all summaries in §10.6 and §10.7 are the
+natural tools: <code><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix()</a></code> for a pairwise
+Euclidean-distance heatmap across N conditions, and
+<code><a href="../reference/plot_ci_mds.html">plot_ci_mds()</a></code> to project the same N CIs into a 2D / 3D / kD
+map with automatic Kruskal-stress-driven dimensionality selection.</p>
 <p>The per-pair statistic carried into the across-pairs adjustment is
 the <strong>minimum cluster-level p-value within each pair</strong>;
 within-pair cluster p-values are not re-adjusted (they retain the
@@ -2365,6 +2382,139 @@ read four numbers from a table:</p>
 <span>  metric <span class="op">=</span> <span class="st">"euclidean_normalised"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="plot_ci_correlogram">10.5 <code>plot_ci_correlogram()</code><a class="anchor" aria-label="anchor" href="#plot_ci_correlogram"></a>
+</h3>
+<p>A publication-ready Pearson-<em>r</em> matrix across multiple
+group-mean CIs. Pass a named list of CIs (vectors of length
+<code>prod(img_dims)</code>, or <code>$signal_matrix</code> objects from
+<code>ci_from_responses_*()</code> — per-producer matrices are reduced
+to group means automatically). Useful as a compact visual summary of
+which conditions covary across the image.</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ci_correlogram.html">plot_ci_correlogram</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Trust"</span>     <span class="op">=</span> <span class="va">trust_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>    <span class="st">"Friendly"</span>  <span class="op">=</span> <span class="va">friendly_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>    <span class="st">"Competent"</span> <span class="op">=</span> <span class="va">competent_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>    <span class="st">"Dominant"</span>  <span class="op">=</span> <span class="va">dominant_cis</span><span class="op">$</span><span class="va">signal_matrix</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  mask     <span class="op">=</span> <span class="st">"face"</span>,       <span class="co"># also "none", "upper_face", "lower_face"</span></span>
+<span>  triangle <span class="op">=</span> <span class="st">"upper"</span>,      <span class="co"># also "full", "lower"</span></span>
+<span>  palette  <span class="op">=</span> <span class="st">"diverging"</span>,  <span class="co"># also "diverging_puor", "diverging_brbg"</span></span>
+<span>  file     <span class="op">=</span> <span class="st">"fig3.pdf"</span>    <span class="co"># also "fig3.png" (600 dpi); omit to plot only</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Same diverging convention as the rest of the package’s
+direction-bearing plots: positive <code>r</code> = blue, negative = red;
+saturation encodes magnitude. The colour scale is fixed at
+<code>c(-1, 1)</code> so panels are comparable across runs and across
+paper figures. The §12.6 worked example uses this function on the
+four-trait subset.</p>
+<p>Read the result carefully: Pearson <code>r</code> between two
+base-subtracted CIs has a positive chance baseline from shared
+image-domain structure (face shape, signal support); a high absolute
+<code>r</code> does not by itself license a similarity claim. Use the
+correlogram for <strong>relative</strong> comparisons (which pairs
+covary more than others) rather than absolute claims. For a
+baseline-free magnitude summary, pair with <a href="#id_83-rel_dissimilarity"><code>rel_dissimilarity()</code></a>.</p>
+</div>
+<div class="section level3">
+<h3 id="plot_ci_distance_matrix">10.6 <code>plot_ci_distance_matrix()</code><a class="anchor" aria-label="anchor" href="#plot_ci_distance_matrix"></a>
+</h3>
+<p>A publication-ready Euclidean distance matrix across multiple
+group-mean CIs. Same beginner ergonomics as
+<code><a href="../reference/plot_ci_correlogram.html">plot_ci_correlogram()</a></code> (a named list of CIs in any of three
+shapes; per-producer matrices are reduced to group means automatically),
+but uses the magnitude metric recommended by §8.3 instead of Pearson
+correlation. Useful when the question is “how <em>far apart</em> are
+these CIs in pixel space?” rather than “how do they covary?”.</p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Trust"</span>     <span class="op">=</span> <span class="va">trust_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>    <span class="st">"Friendly"</span>  <span class="op">=</span> <span class="va">friendly_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>    <span class="st">"Competent"</span> <span class="op">=</span> <span class="va">competent_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>    <span class="st">"Dominant"</span>  <span class="op">=</span> <span class="va">dominant_cis</span><span class="op">$</span><span class="va">signal_matrix</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  mask     <span class="op">=</span> <span class="st">"face"</span>,        <span class="co"># also "none", "upper_face", "lower_face"</span></span>
+<span>  method   <span class="op">=</span> <span class="st">"normalised"</span>,  <span class="co"># also "raw" (default); normalised divides</span></span>
+<span>                            <span class="co"># by sqrt(n_pixels_used) for cross-mask</span></span>
+<span>                            <span class="co"># comparability</span></span>
+<span>  triangle <span class="op">=</span> <span class="st">"upper"</span>,       <span class="co"># also "full", "lower"</span></span>
+<span>  palette  <span class="op">=</span> <span class="st">"viridis"</span>,     <span class="co"># also "inferno", "plasma", "rocket"</span></span>
+<span>  file     <span class="op">=</span> <span class="st">"fig_distance.pdf"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Distance is non-negative and unbounded, so the colour scale adapts to
+the data range (unlike the correlogram’s fixed <code>c(-1, 1)</code>).
+Pale yellow at small distances, deep dark at large distances. The
+returned object exposes both <code>$distance_matrix</code> (raw or
+normalised per <code>method</code>) and <code>$distance_raw</code>
+(always raw, useful for downstream <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">hclust()</a></code> or MDS).</p>
+</div>
+<div class="section level3">
+<h3 id="plot_ci_mds">10.7 <code>plot_ci_mds()</code><a class="anchor" aria-label="anchor" href="#plot_ci_mds"></a>
+</h3>
+<p>Projects multiple CIs into a low-dimensional Euclidean scatter where
+distances between points reproduce the Euclidean distances between CIs
+as faithfully as the chosen number of dimensions allows. Useful for
+spotting clusters of similar conditions and for showing the relative
+positions of many group means in one figure.</p>
+<p>By default the function fits classical MDS at
+<code>k = 2, 3, ..., k_max</code> (default <code>k_max = 4</code>) and
+picks the <strong>smallest</strong> <code>k</code> whose Kruskal
+stress-1 against the original distances falls at or below
+<code>stress_threshold</code> (default <code>0.05</code>, Kruskal’s
+“good” interpretive band). When the auto-selected <code>k &gt; 2</code>,
+the figure becomes a grid of all <code>choose(k, 2)</code> pairwise
+dimension panels so no information is hidden by a premature flattening
+to 2D.</p>
+<p>Kruskal’s (1964) interpretive bands for stress-1:</p>
+<ul>
+<li>
+<code>0.025</code> excellent (the kD map is essentially exact)</li>
+<li>
+<code>0.05</code> good (small distortions; safe to interpret)</li>
+<li>
+<code>0.10</code> fair (interpret carefully; check the trace)</li>
+<li>
+<code>0.20</code> poor (the projection is hiding more than it
+shows)</li>
+<li>
+<code>&gt; 0.20</code> very poor</li>
+</ul>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Minimal call: auto-selects k, prints a one-screen summary.</span></span>
+<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_ci_mds.html">plot_ci_mds</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Trust"</span>     <span class="op">=</span> <span class="va">trust_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>       <span class="st">"Friendly"</span>  <span class="op">=</span> <span class="va">friendly_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>       <span class="st">"Competent"</span> <span class="op">=</span> <span class="va">competent_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>       <span class="st">"Dominant"</span>  <span class="op">=</span> <span class="va">dominant_cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
+<span>       <span class="st">"Submissive"</span> <span class="op">=</span> <span class="va">submissive_cis</span><span class="op">$</span><span class="va">signal_matrix</span><span class="op">)</span>,</span>
+<span>  mask <span class="op">=</span> <span class="st">"face"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span>            <span class="co"># one-screen view of dimensionality selection</span></span>
+<span></span>
+<span><span class="co"># The coordinates of each CI in the Euclidean MDS space:</span></span>
+<span><span class="va">out</span><span class="op">$</span><span class="va">mds_points</span></span>
+<span></span>
+<span><span class="co"># Per-k stress (was the auto-choice sensible?):</span></span>
+<span><span class="va">out</span><span class="op">$</span><span class="va">stress_by_k</span></span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># A grouped scatter for a multi-condition design. `groups`</span></span>
+<span><span class="co"># colours points; `shapes` adds a second categorical level.</span></span>
+<span><span class="co"># Force a single 2D paper panel once fidelity has been audited.</span></span>
+<span><span class="fu"><a href="../reference/plot_ci_mds.html">plot_ci_mds</a></span><span class="op">(</span></span>
+<span>  <span class="va">ci_list_country_trait</span>,</span>
+<span>  mask     <span class="op">=</span> <span class="st">"face"</span>,</span>
+<span>  k        <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  groups   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">country_codes</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ci_list_country_trait</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  shapes   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">trait_family</span>,  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ci_list_country_trait</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  file     <span class="op">=</span> <span class="st">"fig_mds.pdf"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>See §8.3 for <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code> (the two-condition
+Euclidean distance with bootstrap CI) and §10.6 for the all-vs-all
+distance matrix <code><a href="../reference/plot_ci_mds.html">plot_ci_mds()</a></code> projects internally.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="region-restricted-analyses">11. Region-restricted analyses<a class="anchor" aria-label="anchor" href="#region-restricted-analyses"></a>
@@ -2391,7 +2541,7 @@ back into a full-image vector (NA outside the mask).</li>
 analysis. Mixing masked observed values with an unmasked reference
 yields a number with no defensible interpretation. To compare across
 regions, run the metric once per mask:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">region</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"eyes"</span>, <span class="st">"nose"</span>, <span class="st">"mouth"</span>,</span>
 <span>                 <span class="st">"upper_face"</span>, <span class="st">"lower_face"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_face_mask.html">make_face_mask</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>, region <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span>
@@ -2431,7 +2581,7 @@ run them on your own data to reproduce the analysis pattern.</p>
 <code><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv2()</a></code>, then rename <code>subject</code> to the column
 name the package expects, store the ids as text (so they are not treated
 as numeric), and lower-case the trait labels for consistency:</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
@@ -2456,7 +2606,7 @@ and <code>s$sinIdx</code>, while current rcicr expects the
 <code>p$patches</code> and <code>p$patchIdx</code> schema that current
 rcicr uses. Patch the legacy file without re-running stimulus
 generation:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"rcic_seed_1_time_fev_05_2015_03_17.Rdata"</span><span class="op">)</span>  <span class="co"># legacy file</span></span>
 <span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -2473,7 +2623,7 @@ will read.</p>
 <h3 id="diagnostics">12.3 Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
 </h3>
 <p>The diagnostic battery runs in one call:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_diagnostics.html">run_diagnostics</a></span><span class="op">(</span></span>
 <span>  <span class="va">raw</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"participant_id"</span>, <span class="st">"stimulus"</span>, <span class="st">"response"</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>  method     <span class="op">=</span> <span class="st">"2ifc"</span>,</span>
@@ -2528,7 +2678,7 @@ The basic mechanics are clean.</p>
 running <code><a href="../reference/check_response_bias.html">check_response_bias()</a></code> separately per condition is
 useful (a producer who looks balanced overall may still be heavily
 biased in one trait):</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trait_bias</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">tr</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">sub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">raw</span>, <span class="va">trait</span> <span class="op">==</span> <span class="va">tr</span>,</span>
@@ -2633,7 +2783,7 @@ understand the mask formula is to build one condition’s signal matrix by
 hand. We will do it for the Trust condition.</p>
 <p><strong>Step 1.</strong> Read the noise matrix once. Each column is
 the noise pattern shown on one trial out of the 300-stimulus pool.</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">noise_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_noise_matrix.html">read_noise_matrix</a></span><span class="op">(</span><span class="st">"stimuli_modernised.RData"</span>,</span>
 <span>                                  baseimage <span class="op">=</span> <span class="st">"male"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">noise_matrix</span><span class="op">)</span></span>
@@ -2641,7 +2791,7 @@ the noise pattern shown on one trial out of the 300-stimulus pool.</p>
 <p><strong>Step 2.</strong> Subset the response data to the Trust
 condition, sort by producer and trial, and read out the producer
 ids.</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trust_trials</span> <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span> <span class="op">==</span> <span class="st">"trust"</span>, <span class="op">]</span></span>
 <span><span class="va">trust_trials</span> <span class="op">&lt;-</span> <span class="va">trust_trials</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">trust_trials</span><span class="op">$</span><span class="va">participant_id</span>,</span>
 <span>                                   <span class="va">trust_trials</span><span class="op">$</span><span class="va">trial</span><span class="op">)</span>, <span class="op">]</span></span>
@@ -2653,7 +2803,7 @@ patterns that producer saw (<code>noise_matrix[, p$stimulus]</code>),
 multiply each by their response (<code>+1</code> or <code>-1</code>) and
 divide by the trial count. The result is a numeric vector of length
 65,536 (the pixels in column-major order, i.e. column by column).</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="va">trust_trials</span><span class="op">[</span><span class="va">trust_trials</span><span class="op">$</span><span class="va">participant_id</span> <span class="op">==</span> <span class="va">trust_ids</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="op">]</span></span>
 <span></span>
 <span><span class="co"># One column of `noise_matrix` per trial that producer saw,</span></span>
@@ -2671,7 +2821,7 @@ stack the results column-wise. Tag the matrix with <code>img_dims</code>
 so plot helpers know it is 256 x 256, and with
 <code>source = "raw"</code> so variance-based metrics will accept it
 without complaint.</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Empty 65,536 x 20 matrix; one column per producer.</span></span>
 <span><span class="va">sm_trust</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA_real_</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">noise_matrix</span><span class="op">)</span>,</span>
 <span>                   ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">trust_ids</span><span class="op">)</span>,</span>
@@ -2695,7 +2845,7 @@ without complaint.</p>
 recipe with a different <code>trait</code> label. To produce all ten in
 one shot, wrap the four steps in a function and apply it across all the
 trait labels:</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">build_signal_matrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">raw</span>, <span class="va">label</span>, <span class="va">noise_matrix</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">trials</span> <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span> <span class="op">==</span> <span class="va">label</span>, <span class="op">]</span></span>
 <span>  <span class="va">trials</span> <span class="op">&lt;-</span> <span class="va">trials</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">participant_id</span>, <span class="va">trials</span><span class="op">$</span><span class="va">trial</span><span class="op">)</span>, <span class="op">]</span></span>
@@ -2733,7 +2883,7 @@ can switch to <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_r
 <p><code><a href="../reference/run_reliability.html">run_reliability()</a></code> returns split-half (with
 Spearman-Brown projection) and ICC(3,*) on a single signal matrix. Run
 it on each per-trait signal matrix:</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rel_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>trait <span class="op">=</span> <span class="va">traits</span>,</span>
 <span>                        r_sb <span class="op">=</span> <span class="cn">NA_real_</span>, icc_3_k <span class="op">=</span> <span class="cn">NA_real_</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">traits</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -2885,6 +3035,139 @@ are redundant.
 </div>
 </div>
 <div class="section level4">
+<h4 id="cross-trait-distances-euclidean">Cross-trait distances (Euclidean)<a class="anchor" aria-label="anchor" href="#cross-trait-distances-euclidean"></a>
+</h4>
+<p>Per §8.3, Pearson <code>r</code> between base-subtracted CIs carries
+a positive baseline from shared image-domain structure and is not a
+clean similarity score; Euclidean distance does not share this baseline
+issue. <code><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix()</a></code> produces the companion
+magnitude view on the same four traits:</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Trust     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">signal_matrices</span><span class="op">$</span><span class="va">trust</span><span class="op">)</span>,</span>
+<span>       Friendly  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">signal_matrices</span><span class="op">$</span><span class="va">friendly</span><span class="op">)</span>,</span>
+<span>       Competent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">signal_matrices</span><span class="op">$</span><span class="va">competent</span><span class="op">)</span>,</span>
+<span>       Dominant  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">signal_matrices</span><span class="op">$</span><span class="va">dominant</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  img_dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
+<span>  mask     <span class="op">=</span> <span class="st">"face"</span>,</span>
+<span>  method   <span class="op">=</span> <span class="st">"raw"</span>,        <span class="co"># "normalised" for cross-mask comparability</span></span>
+<span>  triangle <span class="op">=</span> <span class="st">"upper"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="figures/oliveira_2019/trait_ci_distance_matrix.png" class="r-plt" alt="Pairwise Euclidean distances between the same four group-mean CIs, restricted to the face oval. Sequential viridis palette: pale yellow at small distances, deep purple at large distances. Cell values are raw distances in CI units. The ordering mirrors the correlation story (prosocial pairs closer; pairs crossing into dominance farther apart) but on a baseline-free magnitude scale." width="70%"><p class="caption">
+Pairwise Euclidean distances between the same four group-mean CIs,
+restricted to the face oval. Sequential viridis palette: pale yellow at
+small distances, deep purple at large distances. Cell values are raw
+distances in CI units. The ordering mirrors the correlation story
+(prosocial pairs closer; pairs crossing into dominance farther apart)
+but on a baseline-free magnitude scale.
+</p>
+</div>
+<p>Pairs that the correlogram flagged as prosocially-aligned
+(Trust–Friendly, Trust–Competent, Friendly–Competent) sit at distances
+0.21–0.24, while Friendly–Dominant tops the matrix at 0.40. Same
+qualitative story, no positive-baseline confound.</p>
+</div>
+<div class="section level4">
+<h4 id="trait-ci-map-mds-on-all-10-conditions">Trait-CI map (MDS on all 10 conditions)<a class="anchor" aria-label="anchor" href="#trait-ci-map-mds-on-all-10-conditions"></a>
+</h4>
+<p><code><a href="../reference/plot_ci_mds.html">plot_ci_mds()</a></code> projects all ten conditions into a low-
+dimensional Euclidean scatter where distances between points reproduce
+the pairwise distances between CIs as faithfully as the chosen number of
+dimensions allows. By default the function fits classical MDS at every
+<code>k</code> from 2 to <code>k_max</code> and auto- selects the
+smallest <code>k</code> whose Kruskal stress-1 reaches the “good” band
+(0.05). When the data have a theoretical reason to be plotted in a
+specific number of dimensions — for example, a two-axis hypothesis like
+warmth vs dominance — pass an integer <code>k</code> to override the
+auto-selection.</p>
+<p>The Oliveira et al. (2019) trait-rating literature works with a
+two-dimensional theoretical structure (warmth and competence families,
+with dominance as a separate axis when split). The 2D paper figure for
+that hypothesis uses <code>k = 2L</code>:</p>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ci_mds.html">plot_ci_mds</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">trait_order_full</span>, <span class="kw">function</span><span class="op">(</span><span class="va">tr</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">signal_matrices</span><span class="op">[[</span><span class="va">tr</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span>, <span class="va">trait_pretty</span><span class="op">)</span>,</span>
+<span>  img_dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
+<span>  mask     <span class="op">=</span> <span class="st">"face"</span>,</span>
+<span>  k        <span class="op">=</span> <span class="fl">2L</span>,              <span class="co"># theory-driven: 2D paper figure</span></span>
+<span>  groups   <span class="op">=</span> <span class="va">trait_family</span>,    <span class="co"># "warmth" / "dominance" / "competence"</span></span>
+<span>  shapes   <span class="op">=</span> <span class="va">trait_valence</span>    <span class="co"># "positive" / "negative" pole</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="figures/oliveira_2019/trait_ci_mds.png" class="r-plt" alt="Classical MDS projection of all ten trait CIs in the Oliveira et al. (2019) data, fit to face-masked raw Euclidean distances and forced to k = 2 dimensions for theory-driven plotting. The Kruskal stress at k = 2 is 0.223 (Kruskal's 'very poor' band); the first two axes capture 57.8% and 13.1% of the absolute eigenmass. Points colour by trait family (warmth / dominance / competence); triangles mark the positive pole within each family, circles the negative pole." width="80%"><p class="caption">
+Classical MDS projection of all ten trait CIs in the Oliveira et
+al. (2019) data, fit to face-masked raw Euclidean distances and forced
+to k = 2 dimensions for theory-driven plotting. The Kruskal stress at k
+= 2 is 0.223 (Kruskal’s ‘very poor’ band); the first two axes capture
+57.8% and 13.1% of the absolute eigenmass. Points colour by trait family
+(warmth / dominance / competence); triangles mark the positive pole
+within each family, circles the negative pole.
+</p>
+</div>
+<p>Three reading notes.</p>
+<p>First, the GOF header reports
+<code>k = 2 (user) stress = 0.223 very poor</code>. Forcing 2D here
+means accepting Kruskal’s “very poor” band; the 2D projection genuinely
+distorts the underlying distance structure. The auto-selector would have
+escalated to <code>k = k_max = 4</code> and rendered a 6-panel pair-grid
+because no tested <code>k</code> reaches the “good” threshold (stress at
+k=3 is 0.175, at k=4 is 0.142, all “poor”). The theory-driven 2D figure
+is the right paper figure when the <em>hypothesis</em> is
+two-dimensional, but readers should be told what the 2D projection is
+hiding.</p>
+<p>Second, report the per-<code>k</code> stress trace alongside any
+single- panel MDS figure. For this dataset the trace is</p>
+<table class="table">
+<thead><tr class="header">
+<th>k</th>
+<th>stress-1</th>
+<th>Kruskal band</th>
+<th>cumulative variance</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>0.223</td>
+<td>very poor</td>
+<td>70.9%</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0.175</td>
+<td>poor</td>
+<td>77.7%</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0.142</td>
+<td>poor</td>
+<td>83.1%</td>
+</tr>
+</tbody>
+</table>
+<p>so the 2D figure preserves 71% of the absolute eigenmass but distorts
+the distance structure enough to fall in the “very poor” Kruskal band.
+The 3D and 4D projections recover more fidelity but never reach the
+“good” threshold within <code>k_max = 4</code>; the trait space in this
+dataset is genuinely high-dimensional. Interpret point positions in the
+2D figure in <em>relative</em> terms (which conditions cluster together,
+which families separate) rather than as absolute distances.</p>
+<p>Third, despite the modest fidelity, the 2D figure recovers intuitive
+substructure. Warmth-positive traits (Trust, Friendly) sit on the left;
+warmth-negative (Untrust, Unfriendly) on the right. The competence
+family (Competent / Intelligent / Incompetent / Unintelligent) occupies
+the centre, with the positive-pole traits to the left and the
+negative-pole traits slightly to the right. Dominance is split: Dominant
+sits on the right with the warmth-negative cluster while Submissive sits
+on its own at the top. Higher-dimensional projections
+(<code>k = 3L</code>, <code>k = 4L</code>, or letting auto-selection
+escalate) separate the competence axis from the warmth axis more
+clearly, at the cost of more panels to read.</p>
+</div>
+<div class="section level4">
 <h4 id="icc-and-group-mean-infoval-z-track-each-other-across-traits">ICC and group-mean infoVal z track each other across traits<a class="anchor" aria-label="anchor" href="#icc-and-group-mean-infoval-z-track-each-other-across-traits"></a>
 </h4>
 <p>Per-trait reliability and per-trait group-mean infoVal z (see §9) are
@@ -2929,7 +3212,7 @@ benchmark.</li>
 <p>Each contrast is a stratified cluster permutation test on the full
 face. We summarise the overall magnitude of each divergence with
 <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code> and lay them out side-by-side:</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">contrasts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Trust vs Friendly"</span>     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"trust"</span><span class="op">]</span><span class="op">]</span>,     b <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"friendly"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>  <span class="st">"Competent vs Dominant"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"competent"</span><span class="op">]</span><span class="op">]</span>, b <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"dominant"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
@@ -2987,7 +3270,7 @@ across the face or driven by specific anatomical regions. Run the
 cluster test once per region per contrast. The same three contrasts ×
 four regions (full, eyes, mouth, upper face) gives twelve cells, which
 is small enough to scan as a table:</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">regions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"full"</span>, <span class="st">"eyes"</span>, <span class="st">"mouth"</span>, <span class="st">"upper_face"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cluster_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
@@ -3134,7 +3417,7 @@ evidence for a localised contrast driven by one anatomical area.</p>
 group CI looks weak overall may carry stronger signal in one specific
 region, and vice versa. Run <code><a href="../reference/infoval.html">infoval()</a></code> per region per
 condition:</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Helper: for one trait label, return a named integer vector</span></span>
 <span><span class="co"># giving the trial count per producer.</span></span>
 <span><span class="va">trial_counts_for</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="op">{</span></span>
@@ -3336,7 +3619,7 @@ where the per-pixel Welch t exceeds the cluster-forming threshold, and
 (iv) overlay the same difference on the base face restricted to pixels
 belonging to a significant cluster (2000 stratified label permutations,
 max-mass null, cluster threshold |t| &gt; 2.0).</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Descriptive map: difference of group means, no significance filter.</span></span>
 <span><span class="va">diff_signal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="st">"trust"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="st">"friendly"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
@@ -3467,7 +3750,7 @@ result should be reported as exploratory.</p>
 <div class="section level3">
 <h3 id="end-to-end-brief-rc-example">13.2 End-to-end Brief-RC example<a class="anchor" aria-label="anchor" href="#end-to-end-brief-rc-example"></a>
 </h3>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 1. Read the Schmitz et al. 2024 noise matrix directly. You</span></span>
@@ -3559,6 +3842,16 @@ interpretation.</p>
 unreliable below N approximately 30 per condition. The package warns at
 N &lt; 30 and aborts at N &lt; 4. Aim for N &gt;= 60 per condition for
 stable assessment.</p>
+<p><strong>Many-condition summary figures.</strong>
+<code><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix()</a></code> and <code><a href="../reference/plot_ci_mds.html">plot_ci_mds()</a></code>
+share the same baseline-aware framing as
+<code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code>: prefer Euclidean magnitude over
+absolute Pearson <code>r</code> for similarity claims, and report the
+per-<code>k</code> Kruskal stress trace from <code><a href="../reference/plot_ci_mds.html">plot_ci_mds()</a></code>
+alongside any 2D paper panel so readers can audit how much the
+projection is hiding. A 2D MDS map with stress &gt; 0.10 should be read
+for relative <em>ordering</em> of points rather than absolute
+distances.</p>
 <p><strong>Pre-1.0 status.</strong> The package is not yet at version
 1.0; argument names and defaults may change between minor versions,
 particularly when a change makes a sharp edge less easy to cut yourself
@@ -3650,7 +3943,7 @@ Brinkman-style per- producer distribution.</p>
 </h3>
 <p>If a per-producer infoVal table looks worryingly low, work through
 these steps before reporting it:</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sm</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span></span>
 <span><span class="va">tc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">300L</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">sm</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sm</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -3726,7 +4019,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <div class="section level2">
 <h2 id="citation">16. Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"rcisignal"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"rcisignal"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>

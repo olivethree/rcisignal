@@ -9,7 +9,79 @@
   single-hue (pale yellow to deep red) ramp. Use when the question is
   “where do producers have a consistent opinion” and direction is not
   needed; the `"fire"` view discards sign by design. The default
-  `palette = "diverging"` is unchanged.
+  `palette = "diverging"` is unchanged in API; see the colour-direction
+  fix below.
+
+- [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
+  (new exported function). Renders a publication-ready Pearson-`r`
+  matrix across multiple group-mean CIs. Inputs: a named list of CIs
+  (vectors or per-producer signal matrices; group means computed
+  automatically). Options: full / upper / lower triangle, optional face
+  / upper-face / lower-face masking via
+  [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md),
+  three diverging palettes (RdBu / PuOr / BrBG), direct save to PNG (600
+  dpi) or PDF via the `file =` argument with extension auto-detection.
+  The §12.6 worked-example figure is now produced by this function.
+
+- [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
+  (new exported function). All-vs-all pairwise Euclidean distance matrix
+  across a named list of group-mean CIs. Same beginner-friendly input
+  format as
+  [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md);
+  the magnitude metric recommended by §8.3 instead of Pearson `r`.
+  Supports raw (`method = "raw"`, default) or resolution-normalised
+  (`method = "normalised"`) distance, optional face / upper-face /
+  lower-face masking, four sequential colorblind-safe palettes (viridis
+  / inferno / plasma / rocket), full / upper / lower triangle rendering,
+  and direct PNG (600 dpi) / PDF save.
+
+- [`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+  (new exported function). Classical multidimensional-scaling projection
+  of a named list of group-mean CIs
+  ([`stats::cmdscale()`](https://rdrr.io/r/stats/cmdscale.html)).
+  Auto-selects the smallest dimensionality whose Kruskal stress-1
+  against the original Euclidean distances reaches the “good” band
+  (default threshold `0.05`, Kruskal 1964); renders a grid of all
+  `choose(k, 2)` pairwise dimension panels when the auto-selected
+  `k > 2`. Users can force a specific `k` (e.g., `k = 2L` for a single
+  paper-figure panel). Returns an S3 object (`rcisignal_mds`) with a
+  one-screen [`print()`](https://rdrr.io/r/base/print.html) method;
+  `$mds_points` exposes the `n_cis x k_selected` coordinate matrix in
+  the Euclidean MDS space, `$stress_by_k` and `$variance_pct_by_k`
+  expose the full dimensionality-selection trace. Supports optional
+  categorical `groups` (point colour) and `shapes` (point pch) arguments
+  for grouped scatters in multi-condition designs. Same masking and
+  PNG/PDF save options as the other plot helpers.
+
+- New private helper `prepare_ci_matrix()` (internal, not exported)
+  centralises the named-list-of-CIs validation and per-producer
+  reduction across
+  [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md),
+  [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
+  and
+  [`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md).
+  No user-visible behaviour change to
+  [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md).
+
+### Behavioural change
+
+- Colour direction fixed on the diverging-palette plots that use
+  `hcl.colors("RdBu", ...)`. `plot_agreement_map(palette = "diverging")`
+  and `plot.rcisignal_rel_cluster_test()` previously rendered positive
+  values as red and negative as blue, opposite to what their help pages
+  and to
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  documented. Both now render positive = blue, negative = red, matching
+  every other diverging plot in the package and matching the
+  long-standing help-page docs. Visual effect: rendered figures from
+  prior versions of these two functions look like their colours have
+  been swapped. The new
+  [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
+  follows the same convention from the start.
+- The worked-example correlogram figure
+  (`vignettes/figures/oliveira_2019/trait_ci_correlogram.png`) is
+  regenerated to match the corrected convention. Same data, flipped
+  colours.
 
 ### Breaking change
 
@@ -31,6 +103,26 @@
   [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md).
 - Vignette §10.2 gains a one-paragraph aside introducing the fire option
   and reiterating the two-channel reading of the diverging palette.
+- [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md):
+  the Pearson correlation fields (`$correlation`, `$boot_cor`,
+  `$ci_cor`, `$boot_se_cor`) are reframed as a **secondary** summary
+  instead of being slated for removal. They stay in the API. The help
+  page, [`print()`](https://rdrr.io/r/base/print.html) output, plot
+  panel title (“Pearson r (secondary)”), and vignette §8.3 now
+  explain (a) why Euclidean distance is the recommended primary
+  statistic (image-domain scaffolding gives `r` a positive chance
+  baseline that does not cleanly mean “similar”), and (b) how to use `r`
+  carefully if it must be reported (relative comparisons across pairs
+  against a permutation null, not absolute values against zero). The
+  prior “will be removed in v0.2.0” wording is withdrawn.
+- Vignette: editorial sweep of dev-facing prose. Replaced “Loaded from
+  cache, … on this dataset:” lead-ins (five occurrences) with neutral
+  “On this dataset, … :” framing. Removed roadmap aside about a possible
+  future Rcpp accelerator for `simulate_*_data()`. Condensed the §4.2
+  list of rdata bookkeeping fields. Replaced two “self-critical note”
+  author asides in §8.2 and §8.3 with neutral “one caveat” framing.
+  Dropped a `v1.0.x` version label in §12.2. Rephrased the §14 pointer
+  at NEWS.md as `news(package = "rcisignal")`.
 
 ### Internal
 

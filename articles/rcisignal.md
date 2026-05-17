@@ -1981,12 +1981,23 @@ plot(dr)
 `$boot_se_dist` are the standard summaries.
 
 The Pearson correlation fields (`$correlation`, `$boot_cor`, `$ci_cor`,
-`$boot_se_cor`) are kept for compatibility with earlier versions but are
-no longer recommended. Two base-subtracted CIs share image-domain
-spatial structure (face shape, oval signal support) that pushes their
-correlation above zero even when the underlying mental representations
-are unrelated; absolute correlation values do not cleanly mean “these
-conditions are similar”.
+`$boot_se_cor`) are returned as a **secondary** summary; they are not
+recommended as a standalone similarity score. Two base-subtracted CIs
+share image-domain spatial structure (face shape, oval signal support)
+that pushes their correlation above zero even when the underlying mental
+representations are unrelated, so a “high” absolute *r* can reflect
+shared image scaffolding rather than shared mental content. Euclidean
+distance does not share this baseline issue and is the primary metric
+here.
+
+If you do report *r* (for comparability with prior literature or with
+another analysis pipeline), interpret it **relatively** rather than
+absolutely: the ordering of *r* across multiple condition pairs is more
+defensible than any single value, and the right reference point is a
+**permutation null** (e.g., permute participant labels between
+conditions and recompute *r*) rather than zero. The image-domain
+scaffolding shifts the chance baseline upward, so “*r* \> 0” is not the
+right test.
 
 A `null = "permutation"` argument adds a chance baseline for the
 Euclidean distance: stratified condition-label permutation
@@ -2065,6 +2076,15 @@ plot(rep$results[["Trust_vs_Dominant"]]$dissimilarity,
 For a shared-axis comparison of bootstrap distances across pairs, pass
 each pair’s dissimilarity child to
 [`plot_dissimilarity_grid()`](https://olivethree.github.io/rcisignal/reference/plot_dissimilarity_grid.md).
+
+When the comparison is many conditions at once (rather than a short list
+of pairs), the all-vs-all summaries in §10.6 and §10.7 are the natural
+tools:
+[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
+for a pairwise Euclidean-distance heatmap across N conditions, and
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+to project the same N CIs into a 2D / 3D / kD map with automatic
+Kruskal-stress-driven dimensionality selection.
 
 The per-pair statistic carried into the across-pairs adjustment is the
 **minimum cluster-level p-value within each pair**; within-pair cluster
@@ -2274,6 +2294,147 @@ plot_dissimilarity_grid(
   metric = "euclidean_normalised"
 )
 ```
+
+### 10.5 `plot_ci_correlogram()`
+
+A publication-ready Pearson-*r* matrix across multiple group-mean CIs.
+Pass a named list of CIs (vectors of length `prod(img_dims)`, or
+`$signal_matrix` objects from `ci_from_responses_*()` — per-producer
+matrices are reduced to group means automatically). Useful as a compact
+visual summary of which conditions covary across the image.
+
+``` r
+
+plot_ci_correlogram(
+  list(
+    "Trust"     = trust_cis$signal_matrix,
+    "Friendly"  = friendly_cis$signal_matrix,
+    "Competent" = competent_cis$signal_matrix,
+    "Dominant"  = dominant_cis$signal_matrix
+  ),
+  mask     = "face",       # also "none", "upper_face", "lower_face"
+  triangle = "upper",      # also "full", "lower"
+  palette  = "diverging",  # also "diverging_puor", "diverging_brbg"
+  file     = "fig3.pdf"    # also "fig3.png" (600 dpi); omit to plot only
+)
+```
+
+Same diverging convention as the rest of the package’s direction-bearing
+plots: positive `r` = blue, negative = red; saturation encodes
+magnitude. The colour scale is fixed at `c(-1, 1)` so panels are
+comparable across runs and across paper figures. The §12.6 worked
+example uses this function on the four-trait subset.
+
+Read the result carefully: Pearson `r` between two base-subtracted CIs
+has a positive chance baseline from shared image-domain structure (face
+shape, signal support); a high absolute `r` does not by itself license a
+similarity claim. Use the correlogram for **relative** comparisons
+(which pairs covary more than others) rather than absolute claims. For a
+baseline-free magnitude summary, pair with
+[`rel_dissimilarity()`](#id_83-rel_dissimilarity).
+
+### 10.6 `plot_ci_distance_matrix()`
+
+A publication-ready Euclidean distance matrix across multiple group-mean
+CIs. Same beginner ergonomics as
+[`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
+(a named list of CIs in any of three shapes; per-producer matrices are
+reduced to group means automatically), but uses the magnitude metric
+recommended by §8.3 instead of Pearson correlation. Useful when the
+question is “how *far apart* are these CIs in pixel space?” rather than
+“how do they covary?”.
+
+``` r
+
+plot_ci_distance_matrix(
+  list(
+    "Trust"     = trust_cis$signal_matrix,
+    "Friendly"  = friendly_cis$signal_matrix,
+    "Competent" = competent_cis$signal_matrix,
+    "Dominant"  = dominant_cis$signal_matrix
+  ),
+  mask     = "face",        # also "none", "upper_face", "lower_face"
+  method   = "normalised",  # also "raw" (default); normalised divides
+                            # by sqrt(n_pixels_used) for cross-mask
+                            # comparability
+  triangle = "upper",       # also "full", "lower"
+  palette  = "viridis",     # also "inferno", "plasma", "rocket"
+  file     = "fig_distance.pdf"
+)
+```
+
+Distance is non-negative and unbounded, so the colour scale adapts to
+the data range (unlike the correlogram’s fixed `c(-1, 1)`). Pale yellow
+at small distances, deep dark at large distances. The returned object
+exposes both `$distance_matrix` (raw or normalised per `method`) and
+`$distance_raw` (always raw, useful for downstream
+[`hclust()`](https://rdrr.io/r/stats/hclust.html) or MDS).
+
+### 10.7 `plot_ci_mds()`
+
+Projects multiple CIs into a low-dimensional Euclidean scatter where
+distances between points reproduce the Euclidean distances between CIs
+as faithfully as the chosen number of dimensions allows. Useful for
+spotting clusters of similar conditions and for showing the relative
+positions of many group means in one figure.
+
+By default the function fits classical MDS at `k = 2, 3, ..., k_max`
+(default `k_max = 4`) and picks the **smallest** `k` whose Kruskal
+stress-1 against the original distances falls at or below
+`stress_threshold` (default `0.05`, Kruskal’s “good” interpretive band).
+When the auto-selected `k > 2`, the figure becomes a grid of all
+`choose(k, 2)` pairwise dimension panels so no information is hidden by
+a premature flattening to 2D.
+
+Kruskal’s (1964) interpretive bands for stress-1:
+
+- `0.025` excellent (the kD map is essentially exact)
+- `0.05` good (small distortions; safe to interpret)
+- `0.10` fair (interpret carefully; check the trace)
+- `0.20` poor (the projection is hiding more than it shows)
+- `> 0.20` very poor
+
+``` r
+
+# Minimal call: auto-selects k, prints a one-screen summary.
+out <- plot_ci_mds(
+  list("Trust"     = trust_cis$signal_matrix,
+       "Friendly"  = friendly_cis$signal_matrix,
+       "Competent" = competent_cis$signal_matrix,
+       "Dominant"  = dominant_cis$signal_matrix,
+       "Submissive" = submissive_cis$signal_matrix),
+  mask = "face"
+)
+print(out)            # one-screen view of dimensionality selection
+
+# The coordinates of each CI in the Euclidean MDS space:
+out$mds_points
+
+# Per-k stress (was the auto-choice sensible?):
+out$stress_by_k
+```
+
+``` r
+
+# A grouped scatter for a multi-condition design. `groups`
+# colours points; `shapes` adds a second categorical level.
+# Force a single 2D paper panel once fidelity has been audited.
+plot_ci_mds(
+  ci_list_country_trait,
+  mask     = "face",
+  k        = 2L,
+  groups   = setNames(country_codes, names(ci_list_country_trait)),
+  shapes   = setNames(trait_family,  names(ci_list_country_trait)),
+  file     = "fig_mds.pdf"
+)
+```
+
+See §8.3 for
+[`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
+(the two-condition Euclidean distance with bootstrap CI) and §10.6 for
+the all-vs-all distance matrix
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+projects internally.
 
 ## 11. Region-restricted analyses
 
@@ -2661,6 +2822,138 @@ friendly, competent, dominant) in the Oliveira et al. (2019) Study 1
 data. Diverging palette; blue = positive, red = negative; saturation
 indicates magnitude. Lower triangle and diagonal omitted because they
 are redundant.
+
+#### Cross-trait distances (Euclidean)
+
+Per §8.3, Pearson `r` between base-subtracted CIs carries a positive
+baseline from shared image-domain structure and is not a clean
+similarity score; Euclidean distance does not share this baseline issue.
+[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
+produces the companion magnitude view on the same four traits:
+
+``` r
+
+plot_ci_distance_matrix(
+  list(Trust     = rowMeans(signal_matrices$trust),
+       Friendly  = rowMeans(signal_matrices$friendly),
+       Competent = rowMeans(signal_matrices$competent),
+       Dominant  = rowMeans(signal_matrices$dominant)),
+  img_dims = c(256L, 256L),
+  mask     = "face",
+  method   = "raw",        # "normalised" for cross-mask comparability
+  triangle = "upper"
+)
+```
+
+![Pairwise Euclidean distances between the same four group-mean CIs,
+restricted to the face oval. Sequential viridis palette: pale yellow at
+small distances, deep purple at large distances. Cell values are raw
+distances in CI units. The ordering mirrors the correlation story
+(prosocial pairs closer; pairs crossing into dominance farther apart)
+but on a baseline-free magnitude
+scale.](figures/oliveira_2019/trait_ci_distance_matrix.png)
+
+Pairwise Euclidean distances between the same four group-mean CIs,
+restricted to the face oval. Sequential viridis palette: pale yellow at
+small distances, deep purple at large distances. Cell values are raw
+distances in CI units. The ordering mirrors the correlation story
+(prosocial pairs closer; pairs crossing into dominance farther apart)
+but on a baseline-free magnitude scale.
+
+Pairs that the correlogram flagged as prosocially-aligned
+(Trust–Friendly, Trust–Competent, Friendly–Competent) sit at distances
+0.21–0.24, while Friendly–Dominant tops the matrix at 0.40. Same
+qualitative story, no positive-baseline confound.
+
+#### Trait-CI map (MDS on all 10 conditions)
+
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+projects all ten conditions into a low- dimensional Euclidean scatter
+where distances between points reproduce the pairwise distances between
+CIs as faithfully as the chosen number of dimensions allows. By default
+the function fits classical MDS at every `k` from 2 to `k_max` and auto-
+selects the smallest `k` whose Kruskal stress-1 reaches the “good” band
+(0.05). When the data have a theoretical reason to be plotted in a
+specific number of dimensions — for example, a two-axis hypothesis like
+warmth vs dominance — pass an integer `k` to override the
+auto-selection.
+
+The Oliveira et al. (2019) trait-rating literature works with a
+two-dimensional theoretical structure (warmth and competence families,
+with dominance as a separate axis when split). The 2D paper figure for
+that hypothesis uses `k = 2L`:
+
+``` r
+
+plot_ci_mds(
+  setNames(lapply(trait_order_full, function(tr) {
+    rowMeans(signal_matrices[[tr]])
+  }), trait_pretty),
+  img_dims = c(256L, 256L),
+  mask     = "face",
+  k        = 2L,              # theory-driven: 2D paper figure
+  groups   = trait_family,    # "warmth" / "dominance" / "competence"
+  shapes   = trait_valence    # "positive" / "negative" pole
+)
+```
+
+![Classical MDS projection of all ten trait CIs in the Oliveira et al.
+(2019) data, fit to face-masked raw Euclidean distances and forced to k
+= 2 dimensions for theory-driven plotting. The Kruskal stress at k = 2
+is 0.223 (Kruskal's 'very poor' band); the first two axes capture 57.8%
+and 13.1% of the absolute eigenmass. Points colour by trait family
+(warmth / dominance / competence); triangles mark the positive pole
+within each family, circles the negative
+pole.](figures/oliveira_2019/trait_ci_mds.png)
+
+Classical MDS projection of all ten trait CIs in the Oliveira et
+al. (2019) data, fit to face-masked raw Euclidean distances and forced
+to k = 2 dimensions for theory-driven plotting. The Kruskal stress at k
+= 2 is 0.223 (Kruskal’s ‘very poor’ band); the first two axes capture
+57.8% and 13.1% of the absolute eigenmass. Points colour by trait family
+(warmth / dominance / competence); triangles mark the positive pole
+within each family, circles the negative pole.
+
+Three reading notes.
+
+First, the GOF header reports `k = 2 (user) stress = 0.223 very poor`.
+Forcing 2D here means accepting Kruskal’s “very poor” band; the 2D
+projection genuinely distorts the underlying distance structure. The
+auto-selector would have escalated to `k = k_max = 4` and rendered a
+6-panel pair-grid because no tested `k` reaches the “good” threshold
+(stress at k=3 is 0.175, at k=4 is 0.142, all “poor”). The theory-driven
+2D figure is the right paper figure when the *hypothesis* is
+two-dimensional, but readers should be told what the 2D projection is
+hiding.
+
+Second, report the per-`k` stress trace alongside any single- panel MDS
+figure. For this dataset the trace is
+
+| k   | stress-1 | Kruskal band | cumulative variance |
+|-----|----------|--------------|---------------------|
+| 2   | 0.223    | very poor    | 70.9%               |
+| 3   | 0.175    | poor         | 77.7%               |
+| 4   | 0.142    | poor         | 83.1%               |
+
+so the 2D figure preserves 71% of the absolute eigenmass but distorts
+the distance structure enough to fall in the “very poor” Kruskal band.
+The 3D and 4D projections recover more fidelity but never reach the
+“good” threshold within `k_max = 4`; the trait space in this dataset is
+genuinely high-dimensional. Interpret point positions in the 2D figure
+in *relative* terms (which conditions cluster together, which families
+separate) rather than as absolute distances.
+
+Third, despite the modest fidelity, the 2D figure recovers intuitive
+substructure. Warmth-positive traits (Trust, Friendly) sit on the left;
+warmth-negative (Untrust, Unfriendly) on the right. The competence
+family (Competent / Intelligent / Incompetent / Unintelligent) occupies
+the centre, with the positive-pole traits to the left and the
+negative-pole traits slightly to the right. Dominance is split: Dominant
+sits on the right with the warmth-negative cluster while Submissive sits
+on its own at the top. Higher-dimensional projections (`k = 3L`,
+`k = 4L`, or letting auto-selection escalate) separate the competence
+axis from the warmth axis more clearly, at the cost of more panels to
+read.
 
 #### ICC and group-mean infoVal z track each other across traits
 
@@ -3227,6 +3520,19 @@ vice versa) yields a number with no defensible interpretation.
 **Sample size.** Reliability estimates themselves become unreliable
 below N approximately 30 per condition. The package warns at N \< 30 and
 aborts at N \< 4. Aim for N \>= 60 per condition for stable assessment.
+
+**Many-condition summary figures.**
+[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
+and
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+share the same baseline-aware framing as
+[`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md):
+prefer Euclidean magnitude over absolute Pearson `r` for similarity
+claims, and report the per-`k` Kruskal stress trace from
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+alongside any 2D paper panel so readers can audit how much the
+projection is hiding. A 2D MDS map with stress \> 0.10 should be read
+for relative *ordering* of points rather than absolute distances.
 
 **Pre-1.0 status.** The package is not yet at version 1.0; argument
 names and defaults may change between minor versions, particularly when
