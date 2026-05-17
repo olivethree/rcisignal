@@ -56,7 +56,7 @@ Oliveira</h4>
             
             <h4 data-toc-skip class="date">2026-05-17</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/v0.1.6/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
       <div class="d-none name"><code>rcisignal.Rmd</code></div>
     </div>
 
@@ -65,11 +65,14 @@ Oliveira</h4>
 <div class="section level2">
 <h2 id="overview">1. Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><code>rcisignal</code> consolidates the quality-assurance workflow
-for reverse-correlation (RC) experiments into one toolkit. It addresses
-three questions, in order. First, are the inputs clean (response coding,
-trial counts, response bias, stimulus- pool alignment)? Second, is the
-signal informative and stable (does each condition’s group CI carry more
+<p><code>rcisignal</code> is a toolkit offering functions to examine and
+diagnose the data quality of reverse-correlation (RC) experiments, as
+well as a variety of analytical tools to detect and triangulate any
+signal captured in the dataset (e.g., signal of a hypothesized mental
+representation of a friendly face). It addresses three questions, in
+order. First, are the inputs clean (response coding, trial counts,
+response bias, stimulus- pool alignment)? Second, is the signal
+informative and stable (does each condition’s group CI carry more
 pattern than chance, and would the pattern replicate on a different half
 of the producers)? Third, when there is more than one condition, are the
 conditions distinguishable, both in overall magnitude and in spatial
@@ -2422,7 +2425,7 @@ baseline-free magnitude summary, pair with <a href="#id_83-rel_dissimilarity"><c
 <h3 id="plot_ci_distance_matrix">10.6 <code>plot_ci_distance_matrix()</code><a class="anchor" aria-label="anchor" href="#plot_ci_distance_matrix"></a>
 </h3>
 <p>A publication-ready Euclidean distance matrix across multiple
-group-mean CIs. Same beginner ergonomics as
+group-mean CIs. Same data input logic as that iused for
 <code><a href="../reference/plot_ci_correlogram.html">plot_ci_correlogram()</a></code> (a named list of CIs in any of three
 shapes; per-producer matrices are reduced to group means automatically),
 but uses the magnitude metric recommended by §8.3 instead of Pearson

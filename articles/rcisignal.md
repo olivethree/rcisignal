@@ -2,11 +2,14 @@
 
 ## 1. Overview
 
-`rcisignal` consolidates the quality-assurance workflow for
-reverse-correlation (RC) experiments into one toolkit. It addresses
-three questions, in order. First, are the inputs clean (response coding,
-trial counts, response bias, stimulus- pool alignment)? Second, is the
-signal informative and stable (does each condition’s group CI carry more
+`rcisignal` is a toolkit offering functions to examine and diagnose the
+data quality of reverse-correlation (RC) experiments, as well as a
+variety of analytical tools to detect and triangulate any signal
+captured in the dataset (e.g., signal of a hypothesized mental
+representation of a friendly face). It addresses three questions, in
+order. First, are the inputs clean (response coding, trial counts,
+response bias, stimulus- pool alignment)? Second, is the signal
+informative and stable (does each condition’s group CI carry more
 pattern than chance, and would the pattern replicate on a different half
 of the producers)? Third, when there is more than one condition, are the
 conditions distinguishable, both in overall magnitude and in spatial
@@ -2336,7 +2339,7 @@ baseline-free magnitude summary, pair with
 ### 10.6 `plot_ci_distance_matrix()`
 
 A publication-ready Euclidean distance matrix across multiple group-mean
-CIs. Same beginner ergonomics as
+CIs. Same data input logic as that iused for
 [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
 (a named list of CIs in any of three shapes; per-producer matrices are
 reduced to group means automatically), but uses the magnitude metric
