@@ -129,6 +129,64 @@ report them as exploratory and indicate the package version. If
 you are aware of validation studies I have missed, I would be
 glad to update this section (m.j.barbosa.de.oliveira@tue.nl).
 
+### 1.3 The two-stage pattern
+
+rcisignal pipelines have two stages. Knowing which stage you are
+in tells you which functions are available, and the package will
+tell you (with a teaching error) if you try to cross the line.
+
+**Stage 1 — per-producer CIs.** Computed by
+`ci_from_responses_briefrc()` or `ci_from_responses_2ifc()`.
+The output `$signal_matrix` is a numeric matrix of
+`pixels x n_producers`. Every reliability, discriminability, and
+informational-value function takes this object as its primary
+input: `infoval()`, `rel_split_half()`, `rel_icc()`, `rel_loo()`,
+`rel_cluster_test()`, `rel_dissimilarity()`,
+`agreement_map_test()`, `pixel_t_test()`, plus the three `run_*`
+orchestrators. Anything that needs producer-level information
+(reference distributions, permutations across producers,
+bootstrap of pairwise distances, agreement maps) lives here.
+
+```{r stage1, eval = FALSE}
+cis <- ci_from_responses_briefrc(responses,
+                                 noise_matrix = noise_matrix)
+cis$signal_matrix          # pixels x n_producers
+run_reliability(cis$signal_matrix, n_permutations = 200L)
+infoval(cis$signal_matrix, noise_matrix, trial_counts,
+        iter = 500L)
+```
+
+**Stage 2 — group-averaged CIs (optional).** Computed by
+`group_ci()`. The output is a numeric matrix of
+`pixels x n_groups`, classed `rcisignal_group_ci`. Use it for
+side-by-side group plots, pairwise distance matrices
+(`plot_ci_distance_matrix()`), correlogram views
+(`plot_ci_correlogram()`), and MDS projections (`plot_ci_mds()`).
+The function does not accept `trial_counts`, `noise_matrix`, or
+`mask` — anything that needs producer-level information has to
+happen in stage 1.
+
+```{r stage2, eval = FALSE}
+# Pass one label per producer (matching columns of signal_matrix).
+gcis <- group_ci(cis$signal_matrix,
+                 by = participant_condition)
+gcis                       # pixels x n_groups, with attr "n"
+plot_ci_distance_matrix(gcis)
+```
+
+The two stages are named contracts, not just a convention. If
+you hand a `group_ci()` result to a stage-1 function (eg
+`rel_split_half(gcis)`), the function aborts with a message
+that names the issue and points back at this section. This is
+deliberate: a stage-2 matrix has no producer-level spread for
+reliability, no producer-level reference for infoVal, and no
+producer-level grouping for permutation testing. The error
+message is the cheapest way to teach the architecture at the
+moment of confusion.
+
+The metric sections that follow are stage-1 functions unless
+they say otherwise.
+
 ## 2. Installation
 
 ```{r install, eval = FALSE}

@@ -104,6 +104,7 @@ agreement_map_test <- function(signal_matrix,
                                seed                = NULL,
                                progress            = TRUE,
                                acknowledge_scaling = FALSE) {
+  abort_if_group_ci(signal_matrix, fn = "agreement_map_test")
   validate_signal_matrix(signal_matrix)
   assert_raw_signal(signal_matrix, acknowledge_scaling)
   n_pix_full <- nrow(signal_matrix)

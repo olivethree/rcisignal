@@ -187,6 +187,10 @@ rel_cluster_test <- function(signal_matrix_a,
                              seed                = NULL,
                              progress            = TRUE,
                              acknowledge_scaling = FALSE) {
+  abort_if_group_ci(signal_matrix_a, fn = "rel_cluster_test",
+                    arg = "signal_matrix_a")
+  abort_if_group_ci(signal_matrix_b, fn = "rel_cluster_test",
+                    arg = "signal_matrix_b")
   method <- match.arg(method)
   validate_two_signal_matrices(signal_matrix_a, signal_matrix_b)
   if (isTRUE(paired)) {

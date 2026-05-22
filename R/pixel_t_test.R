@@ -75,6 +75,10 @@ pixel_t_test <- function(signal_matrix_a, signal_matrix_b,
                          paired              = FALSE,
                          mask                = NULL,
                          acknowledge_scaling = FALSE) {
+  abort_if_group_ci(signal_matrix_a, fn = "pixel_t_test",
+                    arg = "signal_matrix_a")
+  abort_if_group_ci(signal_matrix_b, fn = "pixel_t_test",
+                    arg = "signal_matrix_b")
   validate_two_signal_matrices(signal_matrix_a, signal_matrix_b)
   assert_raw_signal(signal_matrix_a, acknowledge_scaling,
                     name = "signal_matrix_a")

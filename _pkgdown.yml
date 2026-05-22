@@ -2,3 +2,73 @@ url: https://olivethree.github.io/rcisignal/
 template:
   bootstrap: 5
 
+reference:
+- title: Stage 1 — Per-producer CIs
+  desc: >
+    Build per-producer signal matrices and run every reliability,
+    discriminability, and informational-value analysis on them.
+    Every function in this group takes a pixels x n_producers
+    `signal_matrix` (or two of them) as its primary input.
+  contents:
+  - ci_from_responses_briefrc
+  - ci_from_responses_2ifc
+  - infoval
+  - rel_split_half
+  - rel_split_half_null
+  - rel_icc
+  - rel_loo
+  - rel_loo_z
+  - rel_cluster_test
+  - rel_dissimilarity
+  - agreement_map_test
+  - pixel_t_test
+  - run_reliability
+  - run_discriminability
+  - run_discriminability_pairwise
+  - compute_infoval_summary
+  - diagnose_infoval
+
+- title: Stage 2 — Group-averaged CIs
+  desc: >
+    Collapse a per-producer signal matrix to per-group means for
+    side-by-side comparison, RDM-style distance matrices, MDS,
+    and correlogram views.
+  contents:
+  - group_ci
+  - plot_ci_distance_matrix
+  - plot_ci_mds
+  - plot_ci_correlogram
+
+- title: I/O and simulation
+  contents:
+  - read_responses
+  - read_noise_matrix
+  - read_cis
+  - read_signal_matrix
+  - extract_signal
+  - simulate_briefrc_data
+  - simulate_2ifc_data
+
+- title: Data-quality diagnostics
+  contents:
+  - run_diagnostics
+  - starts_with("check_")
+  - validate_noise_matrix
+
+- title: Plotting
+  contents:
+  - plot_ci_overlay
+  - plot_agreement_map
+  - plot_mask_overlay
+  - plot_face_mask
+  - plot_dissimilarity_grid
+
+- title: Helpers
+  contents:
+  - make_face_mask
+  - read_face_mask
+  - shift_mask
+  - region_bounds_from_pixels
+  - is_rcisignal_diag_result
+  - rcisignal_diag_result
+  - rcisignal_diag_report

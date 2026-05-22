@@ -97,6 +97,10 @@ run_discriminability <- function(signal_matrix_a,
                                  seed                = NULL,
                                  progress            = TRUE,
                                  acknowledge_scaling = FALSE) {
+  abort_if_group_ci(signal_matrix_a, fn = "run_discriminability",
+                    arg = "signal_matrix_a")
+  abort_if_group_ci(signal_matrix_b, fn = "run_discriminability",
+                    arg = "signal_matrix_b")
   validate_two_signal_matrices(signal_matrix_a, signal_matrix_b)
   if (is.null(img_dims)) {
     img_dims <- attr(signal_matrix_a, "img_dims")

@@ -102,6 +102,7 @@ rel_icc <- function(signal_matrix,
                     variants            = c("3_1", "3_k"),
                     mask                = NULL,
                     acknowledge_scaling = FALSE) {
+  abort_if_group_ci(signal_matrix, fn = "rel_icc")
   validate_signal_matrix(signal_matrix)
   assert_raw_signal(signal_matrix, acknowledge_scaling)
   signal_matrix <- apply_mask_to_signal(signal_matrix, mask)

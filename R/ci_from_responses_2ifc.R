@@ -77,7 +77,8 @@
 #' @return A list with `signal_matrix`, optionally `rendered_ci`,
 #'   `participants`, `img_dims`, `scaling`, and `rcicr_result`.
 #' @seealso [ci_from_responses_briefrc()],
-#'   [rcicr::batchGenerateCI2IFC()]
+#'   [rcicr::batchGenerateCI2IFC()],
+#'   [group_ci()] (stage 2, optional)
 #' @export
 #' @examples
 #' \dontrun{

@@ -147,5 +147,5 @@ representations. \emph{European Journal of Social Psychology}.
 }
 \seealso{
 \code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}}, \code{\link[=run_reliability]{run_reliability()}},
-\code{\link[=run_discriminability]{run_discriminability()}}
+\code{\link[=run_discriminability]{run_discriminability()}}, \code{\link[=group_ci]{group_ci()}} (stage 2, optional)
 }

@@ -1,3 +1,63 @@
+# rcisignal 0.1.8
+
+## New features
+
+* `group_ci()` (new exported function). Stage-2 aggregator that
+  collapses a per-producer `signal_matrix` (pixels x n_producers,
+  as returned by `ci_from_responses_briefrc()` /
+  `ci_from_responses_2ifc()`) into a per-group matrix (pixels x
+  n_groups) suitable for the existing distance-matrix, MDS, and
+  correlogram plot functions. Accepts an atomic grouping vector
+  or a named list of vectors (factorial grouping). Returns a
+  numeric matrix classed `c("rcisignal_group_ci", "matrix",
+  "array")` with per-group producer counts in `attr(., "n")` and
+  `img_dims` inherited from the input. Replaces the hand-rolled
+  `rowMeans(signal_matrix[, group_idx])` users were writing.
+
+* New S3 class `rcisignal_group_ci` with `print()` and
+  `as.list()` methods. The print method surfaces per-group
+  producer counts and reminds the reader that per-producer
+  information has been averaged out.
+
+## Robustness
+
+* The stage-1 functions now error with a teaching message when
+  handed a `group_ci()` result instead of a per-producer
+  `signal_matrix`. The message names the two-stage pattern and
+  points at `vignette("rcisignal")`. Affected functions:
+  `infoval()`, `rel_split_half()`, `rel_icc()`, `rel_loo()`,
+  `rel_cluster_test()` (both `_a` / `_b`), `rel_dissimilarity()`
+  (both), `agreement_map_test()`, `pixel_t_test()` (both),
+  `run_reliability()`, `run_discriminability()` (both), and
+  `run_discriminability_pairwise()` (any list element). The
+  internal `group_mean_z()` gets the same guard. Pre-existing
+  behaviour for legitimate per-producer matrices is unchanged.
+
+## Documentation
+
+* New "Two-stage pattern" section in `vignette("rcisignal")`,
+  placed immediately after the Overview. The package now names
+  the two stages: stage 1 (per-producer `signal_matrix`,
+  produced by `ci_from_responses_*()`, consumed by every
+  reliability / discriminability / infoVal function) and stage 2
+  (group-averaged matrix, produced by `group_ci()`, consumed by
+  the distance-matrix / MDS / correlogram plots).
+
+* pkgdown reference index regrouped to mirror the two stages.
+  Visitors to the package website now see "Stage 1 —
+  per-producer CIs" and "Stage 2 — group CIs" as the first two
+  reference sections.
+
+* README gains a small two-stage diagram showing how `responses`
+  + `noise_matrix` + `base_image` flow through stage 1 into the
+  reliability / infoVal / discriminability surfaces, and
+  optionally into stage 2 via `group_ci()` for RDM / MDS /
+  correlogram analyses.
+
+* `@seealso` on `ci_from_responses_briefrc()` and
+  `ci_from_responses_2ifc()` now points at `group_ci()` as the
+  optional stage-2 follow-on.
+
 # rcisignal 0.1.7
 
 ## New features

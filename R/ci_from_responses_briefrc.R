@@ -83,7 +83,7 @@
 #'   `participants`, `img_dims`, `scaling`, and `method` (the
 #'   Brief-RC variant the call was made with).
 #' @seealso [ci_from_responses_2ifc()], [run_reliability()],
-#'   [run_discriminability()]
+#'   [run_discriminability()], [group_ci()] (stage 2, optional)
 #' @references
 #' Schmitz, M., Rougier, M., & Yzerbyt, V. (2024). Introducing the
 #' brief reverse correlation: an improved tool to assess visual

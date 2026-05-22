@@ -136,5 +136,6 @@ res2 <- ci_from_responses_2ifc(sim$data, stimuli = sim$stimuli)
 }
 \seealso{
 \code{\link[=ci_from_responses_briefrc]{ci_from_responses_briefrc()}},
-\code{\link[rcicr:batchGenerateCI2IFC]{rcicr::batchGenerateCI2IFC()}}
+\code{\link[rcicr:batchGenerateCI2IFC]{rcicr::batchGenerateCI2IFC()}},
+\code{\link[=group_ci]{group_ci()}} (stage 2, optional)
 }
