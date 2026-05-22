@@ -2,10 +2,11 @@
 #'
 #' @description
 #' Renders a publication-ready Euclidean distance matrix across
-#' two or more classification images (CIs). The same beginner-
-#' friendly input format as [plot_ci_correlogram()] (a named list
-#' of CIs in any of three shapes); per-producer matrices are
-#' reduced to group means automatically.
+#' two or more classification images (CIs). A stage-2 consumer:
+#' accepts a [group_ci()] result directly, a named numeric matrix
+#' of `pixels x n_groups`, or the same named-list-of-CIs format as
+#' [plot_ci_correlogram()] (per-producer matrices reduced to group
+#' means internally).
 #'
 #' Use this when the question is "how *far apart* are these CIs in
 #' pixel space?" rather than "how do they covary?". Euclidean
@@ -56,12 +57,15 @@
 #' * `$method`, `$n_pixels_used`, `$mask`, `$palette`,
 #'   `$triangle`, `$file`: bookkeeping.
 #'
-#' @param cis Named list of CIs to compare. Each element may be a
-#'   numeric vector of length `prod(img_dims)`, a numeric matrix
-#'   `n_pixels x 1`, or a per-producer `signal_matrix` of shape
-#'   `n_pixels x n_producers` (reduced to a group mean via
-#'   `rowMeans()`). Names become the row / column / diagonal
-#'   labels in the figure. At least two elements required.
+#' @param cis CIs to compare, in any of three forms:
+#'   - a [group_ci()] result (an [rcisignal_group_ci] matrix);
+#'   - a numeric matrix `n_pixels x n_groups` with named columns;
+#'   - a named list of CIs (each element a vector of length
+#'     `prod(img_dims)`, a single-column matrix, or a per-producer
+#'     `signal_matrix` from `ci_from_responses_*()` which is
+#'     reduced to a group mean internally).
+#'   Names become the row / column / diagonal labels in the
+#'   figure. At least two CIs are required.
 #' @param img_dims Integer `c(nrow, ncol)`. If `NULL`, inferred
 #'   from `attr(cis[[1]], "img_dims")` or from `sqrt(n_pixels)`.
 #' @param mask One of `"none"` (default), `"face"`, `"upper_face"`,

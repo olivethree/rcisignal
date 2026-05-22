@@ -28,12 +28,17 @@ plot_ci_mds(
 )
 }
 \arguments{
-\item{cis}{Named list of CIs to project. Each element may be a
-numeric vector of length \code{prod(img_dims)}, a numeric matrix
-\verb{n_pixels x 1}, or a per-producer \code{signal_matrix} of shape
-\verb{n_pixels x n_producers} (reduced to a group mean via
-\code{rowMeans()}). At least three elements are required for a
-meaningful 2D projection.}
+\item{cis}{CIs to project, in any of three forms:
+\itemize{
+\item a \code{\link[=group_ci]{group_ci()}} result (an \link{rcisignal_group_ci} matrix);
+\item a numeric matrix \verb{n_pixels x n_groups} with named columns;
+\item a named list of CIs (each element a vector of length
+\code{prod(img_dims)}, a single-column matrix, or a per-producer
+\code{signal_matrix} from \verb{ci_from_responses_*()} which is
+reduced to a group mean internally).
+At least three CIs are required for a meaningful 2D
+projection.
+}}
 
 \item{img_dims}{Integer \code{c(nrow, ncol)}. If \code{NULL}, inferred
 from \code{attr(cis[[1]], "img_dims")} or from \code{sqrt(n_pixels)}.}

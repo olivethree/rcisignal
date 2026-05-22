@@ -97,12 +97,15 @@
 #' Call `print()` or `summary()` on the returned object for a
 #' one-screen human-readable view.
 #'
-#' @param cis Named list of CIs to project. Each element may be a
-#'   numeric vector of length `prod(img_dims)`, a numeric matrix
-#'   `n_pixels x 1`, or a per-producer `signal_matrix` of shape
-#'   `n_pixels x n_producers` (reduced to a group mean via
-#'   `rowMeans()`). At least three elements are required for a
-#'   meaningful 2D projection.
+#' @param cis CIs to project, in any of three forms:
+#'   - a [group_ci()] result (an [rcisignal_group_ci] matrix);
+#'   - a numeric matrix `n_pixels x n_groups` with named columns;
+#'   - a named list of CIs (each element a vector of length
+#'     `prod(img_dims)`, a single-column matrix, or a per-producer
+#'     `signal_matrix` from `ci_from_responses_*()` which is
+#'     reduced to a group mean internally).
+#'   At least three CIs are required for a meaningful 2D
+#'   projection.
 #' @param img_dims Integer `c(nrow, ncol)`. If `NULL`, inferred
 #'   from `attr(cis[[1]], "img_dims")` or from `sqrt(n_pixels)`.
 #' @param mask One of `"none"` (default), `"face"`, `"upper_face"`,

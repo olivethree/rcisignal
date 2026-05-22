@@ -187,6 +187,17 @@ moment of confusion.
 The metric sections that follow are stage-1 functions unless
 they say otherwise.
 
+The three stage-2 plot functions (`plot_ci_distance_matrix()`,
+`plot_ci_mds()`, `plot_ci_correlogram()`) are flexible about
+input shape: they accept a `group_ci()` result directly, a
+named numeric matrix of `pixels x n_groups`, or the historical
+named-list form (per-producer matrices, single-column matrices,
+or pixel vectors mixed in one list). The reduction to group
+means happens inside the plot function in every case. Use
+`group_ci()` whenever you have a single per-producer matrix and
+a labels vector; use the list form when your data already lives
+as a named collection of per-condition `signal_matrix` objects.
+
 ## 2. Installation
 
 ```{r install, eval = FALSE}
@@ -2241,10 +2252,11 @@ baseline-free magnitude summary, pair with
 ### 10.6 `plot_ci_distance_matrix()`
 
 A publication-ready Euclidean distance matrix across multiple
-group-mean CIs. Same data input logic as that iused for
-`plot_ci_correlogram()` (a named list of CIs in any of three
-shapes; per-producer matrices are reduced to group means
-automatically), but uses the magnitude metric recommended by
+group-mean CIs. Same data input logic as that used for
+`plot_ci_correlogram()`: accepts a [`group_ci()`](#13-the-two-stage-pattern)
+result directly, a named numeric matrix of `pixels x n_groups`,
+or a named list of CIs (per-producer matrices reduced to group
+means internally). Uses the magnitude metric recommended by
 §8.3 instead of Pearson correlation. Useful when the question is
 "how *far apart* are these CIs in pixel space?" rather than
 "how do they covary?".
@@ -2731,11 +2743,14 @@ this baseline issue. `plot_ci_distance_matrix()` produces the
 companion magnitude view on the same four traits:
 
 ```{r plot-trait-distmat, eval = FALSE}
+# `signal_matrices` is a list of per-producer matrices, one per
+# trait. `plot_ci_distance_matrix()` reduces each matrix to its
+# group mean internally, so no rowMeans() wrapping is needed.
 plot_ci_distance_matrix(
-  list(Trust     = rowMeans(signal_matrices$trust),
-       Friendly  = rowMeans(signal_matrices$friendly),
-       Competent = rowMeans(signal_matrices$competent),
-       Dominant  = rowMeans(signal_matrices$dominant)),
+  list(Trust     = signal_matrices$trust,
+       Friendly  = signal_matrices$friendly,
+       Competent = signal_matrices$competent,
+       Dominant  = signal_matrices$dominant),
   img_dims = c(256L, 256L),
   mask     = "face",
   method   = "raw",        # "normalised" for cross-mask comparability
@@ -2774,10 +2789,10 @@ families, with dominance as a separate axis when split). The
 2D paper figure for that hypothesis uses `k = 2L`:
 
 ```{r plot-trait-mds, eval = FALSE}
+# Per-producer matrices are reduced to group means inside the
+# plot function, so the lapply can return them as-is.
 plot_ci_mds(
-  setNames(lapply(trait_order_full, function(tr) {
-    rowMeans(signal_matrices[[tr]])
-  }), trait_pretty),
+  setNames(signal_matrices[trait_order_full], trait_pretty),
   img_dims = c(256L, 256L),
   mask     = "face",
   k        = 2L,              # theory-driven: 2D paper figure

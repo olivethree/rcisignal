@@ -2,6 +2,7 @@
 % Please edit documentation in R/group_ci.R
 \name{group_ci}
 \alias{group_ci}
+\alias{rcisignal_group_ci}
 \title{Collapse a per-producer signal matrix into per-group means}
 \usage{
 group_ci(signal_matrix, by, drop = TRUE)

@@ -21,12 +21,17 @@ plot_ci_distance_matrix(
 )
 }
 \arguments{
-\item{cis}{Named list of CIs to compare. Each element may be a
-numeric vector of length \code{prod(img_dims)}, a numeric matrix
-\verb{n_pixels x 1}, or a per-producer \code{signal_matrix} of shape
-\verb{n_pixels x n_producers} (reduced to a group mean via
-\code{rowMeans()}). Names become the row / column / diagonal
-labels in the figure. At least two elements required.}
+\item{cis}{CIs to compare, in any of three forms:
+\itemize{
+\item a \code{\link[=group_ci]{group_ci()}} result (an \link{rcisignal_group_ci} matrix);
+\item a numeric matrix \verb{n_pixels x n_groups} with named columns;
+\item a named list of CIs (each element a vector of length
+\code{prod(img_dims)}, a single-column matrix, or a per-producer
+\code{signal_matrix} from \verb{ci_from_responses_*()} which is
+reduced to a group mean internally).
+Names become the row / column / diagonal labels in the
+figure. At least two CIs are required.
+}}
 
 \item{img_dims}{Integer \code{c(nrow, ncol)}. If \code{NULL}, inferred
 from \code{attr(cis[[1]], "img_dims")} or from \code{sqrt(n_pixels)}.}
@@ -74,10 +79,11 @@ Invisibly, a list with \code{distance_matrix},
 }
 \description{
 Renders a publication-ready Euclidean distance matrix across
-two or more classification images (CIs). The same beginner-
-friendly input format as \code{\link[=plot_ci_correlogram]{plot_ci_correlogram()}} (a named list
-of CIs in any of three shapes); per-producer matrices are
-reduced to group means automatically.
+two or more classification images (CIs). A stage-2 consumer:
+accepts a \code{\link[=group_ci]{group_ci()}} result directly, a named numeric matrix
+of \verb{pixels x n_groups}, or the same named-list-of-CIs format as
+\code{\link[=plot_ci_correlogram]{plot_ci_correlogram()}} (per-producer matrices reduced to group
+means internally).
 
 Use this when the question is "how \emph{far apart} are these CIs in
 pixel space?" rather than "how do they covary?". Euclidean

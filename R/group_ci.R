@@ -53,6 +53,8 @@
 #' Downstream (stage 2): [plot_ci_distance_matrix()],
 #'   [plot_ci_mds()], [plot_ci_correlogram()].
 #'
+#' @aliases rcisignal_group_ci
+#'
 #' @examples
 #' set.seed(1)
 #' n_pix  <- 32L * 32L
