@@ -275,6 +275,7 @@ print.rcisignal_rel_agreement_map_test <- function(x, ...) {
 #' @return Invisibly the input `x`.
 #' @seealso [plot_agreement_map()], [plot_ci_overlay()],
 #'   [agreement_map_test()].
+#' @keywords internal
 #' @export
 plot.rcisignal_rel_agreement_map_test <- function(x,
                                                   palette      = c("diverging", "fire"),

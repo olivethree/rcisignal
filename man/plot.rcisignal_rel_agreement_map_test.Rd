@@ -72,3 +72,4 @@ have to re-thread the source \code{signal_matrix}.
 \code{\link[=plot_agreement_map]{plot_agreement_map()}}, \code{\link[=plot_ci_overlay]{plot_ci_overlay()}},
 \code{\link[=agreement_map_test]{agreement_map_test()}}.
 }
+\keyword{internal}

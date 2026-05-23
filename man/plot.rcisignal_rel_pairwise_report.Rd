@@ -47,3 +47,4 @@ pass the per-pair \verb{$dissimilarity} children to
 \code{\link[=plot_dissimilarity_grid]{plot_dissimilarity_grid()}} for a shared-axis comparison
 of bootstrap dissimilarity distances across pairs.
 }
+\keyword{internal}

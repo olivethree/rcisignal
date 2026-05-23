@@ -827,6 +827,7 @@ print.rcisignal_rel_pairwise_report <- function(x, ...) {
 #' @return Invisibly the input `x`.
 #' @seealso [plot_dissimilarity_grid()] for a shared-axis comparison
 #'   of bootstrap dissimilarity distances across pairs.
+#' @keywords internal
 #' @export
 plot.rcisignal_rel_pairwise_report <- function(x, ...,
                                                ncol       = NULL,
