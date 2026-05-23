@@ -23,41 +23,6 @@ designs.
 
 **[User guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html) · [Installation](#installation) · [Showcase](#showcase-oliveira-et-al-2019) · [Citation](#citation)**
 
-## The two-stage pattern
-
-rcisignal pipelines have two stages, and the function you reach
-for depends on which stage you are in.
-
-```
-        responses
-            +
-  noise_matrix / .Rdata       Stage 1                    Stage 2
-            +              (per-producer)            (group-averaged)
-       base_image                |                          |
-                                 v                          v
-                        ci_from_responses_*()        group_ci(by = ...)
-                                 |                          |
-                          signal_matrix              rcisignal_group_ci
-                          (n_pix x n_p)              (n_pix x n_groups)
-                                 |                          |
-                                 v                          v
-                          reliability,                 RDM,
-                          infoVal,                     MDS,
-                          discriminability,            correlogram,
-                          agreement maps               side-by-side plots
-```
-
-Stage-1 functions (`infoval()`, `rel_split_half()`, `rel_icc()`,
-`rel_cluster_test()`, `rel_dissimilarity()`,
-`agreement_map_test()`, the `run_*` orchestrators) require the
-per-producer `signal_matrix` from stage 1; they reject a
-`group_ci()` result with a teaching message. Stage-2 functions
-(`plot_ci_distance_matrix()`, `plot_ci_mds()`,
-`plot_ci_correlogram()`) accept either, since they take the
-column-wise mean internally. See [*§1.3 The two-stage
-pattern*](https://olivethree.github.io/rcisignal/articles/rcisignal.html)
-in the user guide for the full narrative.
-
 ## Installation
 
 From GitHub:
@@ -141,7 +106,7 @@ If `rcisignal` helps your research, please cite it:
 
 ```
 Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
-data and classification images (Version 0.1.8) [R package]. Zenodo.
+data and classification images (Version 0.1.1) [R package]. Zenodo.
 https://doi.org/10.5281/zenodo.19961180
 ```
 
