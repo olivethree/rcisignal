@@ -112,6 +112,90 @@ as exploratory and indicate the package version. If you are aware of
 validation studies I have missed, I would be glad to update this section
 (<m.j.barbosa.de.oliveira@tue.nl>).
 
+### 1.3 The two-stage pattern
+
+rcisignal pipelines have two stages. Knowing which stage you are in
+tells you which functions are available, and the package will tell you
+(with a teaching error) if you try to cross the line.
+
+**Stage 1 — per-producer CIs.** Computed by
+[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+or
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md).
+The output `$signal_matrix` is a numeric matrix of
+`pixels x n_producers`. Every reliability, discriminability, and
+informational-value function takes this object as its primary input:
+[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
+[`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md),
+[`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md),
+[`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md),
+[`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
+[`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
+[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
+[`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md),
+plus the three `run_*` orchestrators. Anything that needs producer-level
+information (reference distributions, permutations across producers,
+bootstrap of pairwise distances, agreement maps) lives here.
+
+``` r
+
+cis <- ci_from_responses_briefrc(responses,
+                                 noise_matrix = noise_matrix)
+cis$signal_matrix          # pixels x n_producers
+run_reliability(cis$signal_matrix, n_permutations = 200L)
+infoval(cis$signal_matrix, noise_matrix, trial_counts,
+        iter = 500L)
+```
+
+**Stage 2 — group-averaged CIs (optional).** Computed by
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md).
+The output is a numeric matrix of `pixels x n_groups`, classed
+`rcisignal_group_ci`. Use it for side-by-side group plots, pairwise
+distance matrices
+([`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)),
+correlogram views
+([`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)),
+and MDS projections
+([`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)).
+The function does not accept `trial_counts`, `noise_matrix`, or `mask` —
+anything that needs producer-level information has to happen in stage 1.
+
+``` r
+
+# Pass one label per producer (matching columns of signal_matrix).
+gcis <- group_ci(cis$signal_matrix,
+                 by = participant_condition)
+gcis                       # pixels x n_groups, with attr "n"
+plot_ci_distance_matrix(gcis)
+```
+
+The two stages are named contracts, not just a convention. If you hand a
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+result to a stage-1 function (eg `rel_split_half(gcis)`), the function
+aborts with a message that names the issue and points back at this
+section. This is deliberate: a stage-2 matrix has no producer-level
+spread for reliability, no producer-level reference for infoVal, and no
+producer-level grouping for permutation testing. The error message is
+the cheapest way to teach the architecture at the moment of confusion.
+
+The metric sections that follow are stage-1 functions unless they say
+otherwise.
+
+The three stage-2 plot functions
+([`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md),
+[`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md))
+are flexible about input shape: they accept a
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+result directly, a named numeric matrix of `pixels x n_groups`, or the
+historical named-list form (per-producer matrices, single-column
+matrices, or pixel vectors mixed in one list). The reduction to group
+means happens inside the plot function in every case. Use
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+whenever you have a single per-producer matrix and a labels vector; use
+the list form when your data already lives as a named collection of
+per-condition `signal_matrix` objects.
+
 ## 2. Installation
 
 ``` r
@@ -514,6 +598,126 @@ Hand-rolled implementations (including
 [`rcisignal::infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
 which has to support Brief-RC where no upstream function exists) require
 the raw mask explicitly.
+
+### 3.3 Inside `ci_from_responses_*()`: the signal-matrix recipe
+
+You usually do not need to look inside the CI builder. The one-liner in
+§3.1
+([`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+for 2IFC,
+[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+for Brief-RC) does the work in both pipelines:
+
+``` r
+
+cis <- ci_from_responses_2ifc(
+  responses,
+  rdata_path = "stimuli.RData",
+  baseimage  = "base"
+)
+cis$signal_matrix       # n_pixels x n_producers
+```
+
+The rest of this subsection shows the same operation broken into four
+short steps, so the mask formula is concrete if you ever need to debug
+it or hand-roll a custom version. Skip it if you only want to use the
+package.
+
+The recipe assumes you have:
+
+- a data frame `responses` with one row per trial and columns
+  `participant_id`, `trial`, `stimulus`, `response` (the `+1 / -1`
+  value, with the same coding the package expects);
+- a `noise_matrix` with one row per pixel and one column per pool
+  stimulus (loaded once via
+  [`read_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/read_noise_matrix.md)).
+
+**Step 1 — load the noise matrix once.** Each column is the noise
+pattern shown on one trial out of the pool (300 stimuli is a typical
+pool size for 2IFC).
+
+``` r
+
+noise_matrix <- read_noise_matrix("stimuli.RData",
+                                  baseimage = "base")
+dim(noise_matrix)
+#> 65536 x 300    # n_pixels x pool_size
+```
+
+**Step 2 — sort responses by producer and trial, and read out the
+producer ids.** Sorting is not strictly required for the maths, but it
+makes the recipe easier to follow.
+
+``` r
+
+responses <- responses[order(responses$participant_id,
+                             responses$trial), ]
+participants <- unique(responses$participant_id)
+length(participants)
+#> 20
+```
+
+**Step 3 — compute one producer’s mask.** Pick the noise patterns that
+producer saw (`noise_matrix[, p1$stimulus]`), multiply each column by
+their response (`+1` or `-1`), and divide by the number of trials.
+
+``` r
+
+p1 <- responses[responses$participant_id == participants[1], ]
+
+# One column of `noise_matrix` per trial that producer saw,
+# in trial order:
+selected_noise <- noise_matrix[, p1$stimulus]
+
+# `%*%` is R's matrix-multiplication operator (different from
+# `*`, which is element-wise). Here it multiplies the
+# `n_pixels x n_trials` noise matrix by the length-`n_trials`
+# response vector and returns a length-`n_pixels` column: for
+# each pixel, the sum across trials of the noise value weighted
+# by the +/- 1 response. Dividing by the trial count turns that
+# sum into a mean.
+mask_1 <- (selected_noise %*% p1$response) / nrow(p1)
+length(mask_1)
+#> 65536
+```
+
+**Step 4 — repeat for all producers and stack into a matrix.** Tag the
+result with `img_dims` so plotting helpers know it is 256 x 256, and
+with `source = "raw"` so variance-based metrics accept it.
+
+``` r
+
+# Empty 65,536 x 20 matrix; one column per producer.
+signal_matrix <- matrix(
+  NA_real_,
+  nrow     = nrow(noise_matrix),
+  ncol     = length(participants),
+  dimnames = list(NULL, participants)
+)
+
+# Fill in one column per producer using the same recipe as
+# Step 3.
+for (i in seq_along(participants)) {
+  p_i <- responses[responses$participant_id == participants[i], ]
+  selected_noise <- noise_matrix[, p_i$stimulus]
+  signal_matrix[, i] <- (selected_noise %*% p_i$response) / nrow(p_i)
+}
+
+attr(signal_matrix, "img_dims") <- c(256L, 256L)
+attr(signal_matrix, "source")   <- "raw"
+
+dim(signal_matrix)
+#> 65536 x 20
+```
+
+That is the full recipe.
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+and
+[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+do this for you in one call, and also validate the inputs, handle
+response column names, and thread `img_dims` and `source` onto the
+result. Use the one-liner in your real analyses; the four-step view is
+only for understanding what the function does internally.
 
 ## 4. Data preparation
 
@@ -2389,13 +2593,14 @@ baseline-free magnitude summary, pair with
 ### 10.6 `plot_ci_distance_matrix()`
 
 A publication-ready Euclidean distance matrix across multiple group-mean
-CIs. Same data input logic as that iused for
-[`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
-(a named list of CIs in any of three shapes; per-producer matrices are
-reduced to group means automatically), but uses the magnitude metric
-recommended by §8.3 instead of Pearson correlation. Useful when the
-question is “how *far apart* are these CIs in pixel space?” rather than
-“how do they covary?”.
+CIs. Same data input logic as that used for
+[`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md):
+accepts a [`group_ci()`](#id_13-the-two-stage-pattern) result directly,
+a named numeric matrix of `pixels x n_groups`, or a named list of CIs
+(per-producer matrices reduced to group means internally). Uses the
+magnitude metric recommended by §8.3 instead of Pearson correlation.
+Useful when the question is “how *far apart* are these CIs in pixel
+space?” rather than “how do they covary?”.
 
 ``` r
 
@@ -2472,12 +2677,22 @@ out$stress_by_k
 # A grouped scatter for a multi-condition design. `groups`
 # colours points; `shapes` adds a second categorical level.
 # Force a single 2D paper panel once fidelity has been audited.
+
+# Name the colour / shape vectors so each value lines up with the
+# matching CI in `ci_list_country_trait`. We just copy the CI
+# list's names onto each vector in turn.
+group_labels <- country_codes
+names(group_labels) <- names(ci_list_country_trait)
+
+shape_labels <- trait_family
+names(shape_labels) <- names(ci_list_country_trait)
+
 plot_ci_mds(
   ci_list_country_trait,
   mask     = "face",
   k        = 2L,
-  groups   = setNames(country_codes, names(ci_list_country_trait)),
-  shapes   = setNames(trait_family,  names(ci_list_country_trait)),
+  groups   = group_labels,
+  shapes   = shape_labels,
   file     = "fig_mds.pdf"
 )
 ```
@@ -2677,128 +2892,55 @@ signal, so individual z values are systematically smaller than the
 group-mean equivalent on the same data. Brinkman et al. (2019) report
 the same general pattern for trait inferences.
 
-### 12.5 Building one signal matrix, step by step
+### 12.5 Building the per-trait signal matrices
 
-A signal matrix has one row per pixel and one column per producer. Each
-column is that producer’s mean noise pattern, sign-weighted by their
-responses across the trials they saw. The fastest way to understand the
-mask formula is to build one condition’s signal matrix by hand. We will
-do it for the Trust condition.
-
-**Step 1.** Read the noise matrix once. Each column is the noise pattern
-shown on one trial out of the 300-stimulus pool.
-
-``` r
-
-noise_matrix <- read_noise_matrix("stimuli_modernised.RData",
-                                  baseimage = "male")
-dim(noise_matrix)
-#> 65536 x 300        # n_pixels x pool_size
-```
-
-**Step 2.** Subset the response data to the Trust condition, sort by
-producer and trial, and read out the producer ids.
+The package builds the signal matrix for one trait in a single call. The
+output is a list whose `$signal_matrix` is what every downstream metric
+needs:
 
 ``` r
 
 trust_trials <- raw[raw$trait == "trust", ]
-trust_trials <- trust_trials[order(trust_trials$participant_id,
-                                   trust_trials$trial), ]
-trust_ids <- unique(trust_trials$participant_id)
-length(trust_ids)
-#> 20
+trust_cis    <- ci_from_responses_2ifc(
+  trust_trials,
+  rdata_path = "stimuli_modernised.RData",
+  baseimage  = "male"
+)
+trust_cis$signal_matrix     # n_pixels x n_producers
 ```
 
-**Step 3.** Compute one producer’s mask. Take the noise patterns that
-producer saw (`noise_matrix[, p$stimulus]`), multiply each by their
-response (`+1` or `-1`) and divide by the trial count. The result is a
-numeric vector of length 65,536 (the pixels in column-major order,
-i.e. column by column).
+To get signal matrices for all ten traits at once, loop the call and
+collect the results in a named list:
 
 ``` r
 
-p1 <- trust_trials[trust_trials$participant_id == trust_ids[1], ]
-
-# One column of `noise_matrix` per trial that producer saw,
-# in trial order:
-selected_noise <- noise_matrix[, p1$stimulus]
-
-# Sum each pixel across trials weighted by the +/- 1 response,
-# then divide by the trial count. The result is the producer's
-# mean noise pattern, sign-weighted by their responses.
-mask_1 <- (selected_noise %*% p1$response) / nrow(p1)
-length(mask_1)
-#> 65536
-```
-
-**Step 4.** Repeat across all 20 Trust producers and stack the results
-column-wise. Tag the matrix with `img_dims` so plot helpers know it is
-256 x 256, and with `source = "raw"` so variance-based metrics will
-accept it without complaint.
-
-``` r
-
-# Empty 65,536 x 20 matrix; one column per producer.
-sm_trust <- matrix(NA_real_, nrow = nrow(noise_matrix),
-                   ncol = length(trust_ids),
-                   dimnames = list(NULL, trust_ids))
-
-# Fill in one column per producer using the same recipe as Step 3.
-for (i in seq_along(trust_ids)) {
-  p_i <- trust_trials[trust_trials$participant_id == trust_ids[i], ]
-  selected_noise <- noise_matrix[, p_i$stimulus]
-  sm_trust[, i]  <- (selected_noise %*% p_i$response) / nrow(p_i)
-}
-
-# Tag image dimensions (so plot helpers know it is 256 x 256) and
-# mark the matrix as a raw mask (so variance-based metrics accept it).
-attr(sm_trust, "img_dims") <- c(256L, 256L)
-attr(sm_trust, "source")   <- "raw"
-
-dim(sm_trust)
-#> 65536 x 20
-```
-
-That is the full recipe. The other nine conditions use the same recipe
-with a different `trait` label. To produce all ten in one shot, wrap the
-four steps in a function and apply it across all the trait labels:
-
-``` r
-
-build_signal_matrix <- function(raw, label, noise_matrix) {
-  trials <- raw[raw$trait == label, ]
-  trials <- trials[order(trials$participant_id, trials$trial), ]
-  ids <- unique(trials$participant_id)
-  m <- matrix(NA_real_, nrow = nrow(noise_matrix),
-              ncol = length(ids),
-              dimnames = list(NULL, ids))
-  for (i in seq_along(ids)) {
-    p_i <- trials[trials$participant_id == ids[i], ]
-    selected_noise <- noise_matrix[, p_i$stimulus]
-    m[, i] <- (selected_noise %*% p_i$response) / nrow(p_i)
-  }
-  attr(m, "img_dims") <- c(256L, 256L)
-  attr(m, "source")   <- "raw"
-  m
-}
-
-traits <- sort(unique(raw$trait))
-sm <- lapply(traits, function(tr)
-  build_signal_matrix(raw, tr, noise_matrix))
+traits    <- sort(unique(raw$trait))
+sm        <- vector("list", length(traits))
 names(sm) <- traits
 
+for (tr in traits) {
+  cis      <- ci_from_responses_2ifc(
+    raw[raw$trait == tr, ],
+    rdata_path = "stimuli_modernised.RData",
+    baseimage  = "male"
+  )
+  sm[[tr]] <- cis$signal_matrix
+}
+
+# A few convenience aliases for the contrasts used below.
 sm_trust     <- sm[["trust"]]
 sm_dominant  <- sm[["dominant"]]
 sm_competent <- sm[["competent"]]
 sm_friendly  <- sm[["friendly"]]
 ```
 
-In a real pipeline,
+`sm` is now a named list of ten signal matrices, each 65,536 x 20
+(`n_pixels x n_producers`). The contrasts and metrics in the sections
+that follow use these matrices directly. If you want to see what
 [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
-performs the same work and additionally handles the `rcicr` integration.
-Doing it by hand once makes the mask formula concrete; you can switch to
-[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
-afterwards.
+does internally (the noise-matrix lookup, the per-producer mask formula,
+and the `img_dims` / `source` attributes it sets), the recipe is broken
+into four short steps in §3.3.
 
 ### 12.6 Within-condition reliability per trait
 
@@ -2886,11 +3028,14 @@ produces the companion magnitude view on the same four traits:
 
 ``` r
 
+# `sm` is the named list of ten per-trait signal matrices built
+# in §12.5. `plot_ci_distance_matrix()` reduces each matrix to
+# its group mean internally; no manual averaging is needed.
 plot_ci_distance_matrix(
-  list(Trust     = rowMeans(signal_matrices$trust),
-       Friendly  = rowMeans(signal_matrices$friendly),
-       Competent = rowMeans(signal_matrices$competent),
-       Dominant  = rowMeans(signal_matrices$dominant)),
+  list(Trust     = sm[["trust"]],
+       Friendly  = sm[["friendly"]],
+       Competent = sm[["competent"]],
+       Dominant  = sm[["dominant"]]),
   img_dims = c(256L, 256L),
   mask     = "face",
   method   = "raw",        # "normalised" for cross-mask comparability
@@ -2938,15 +3083,34 @@ that hypothesis uses `k = 2L`:
 
 ``` r
 
+# `sm` is the named list of ten per-trait signal matrices built
+# in §12.5. Pick the ten traits in display order, then relabel
+# them with the pretty (display) names. `plot_ci_mds()` reduces
+# per-producer matrices to group means internally, so we pass
+# the matrices as-is.
+trait_order  <- c("trust",     "friendly",   "untrust",   "unfriendly",
+                  "competent", "intelligent","incompetent","unintelligent",
+                  "dominant",  "submissive")
+trait_pretty <- c("Trust",     "Friendly",   "Untrust",   "Unfriendly",
+                  "Competent", "Intelligent","Incompetent","Unintelligent",
+                  "Dominant",  "Submissive")
+trait_family <- c("warmth", "warmth", "warmth", "warmth",
+                  "competence", "competence", "competence", "competence",
+                  "dominance", "dominance")
+trait_pole   <- c("positive", "positive", "negative", "negative",
+                  "positive", "positive", "negative", "negative",
+                  "positive", "negative")
+
+mds_input        <- sm[trait_order]
+names(mds_input) <- trait_pretty
+
 plot_ci_mds(
-  setNames(lapply(trait_order_full, function(tr) {
-    rowMeans(signal_matrices[[tr]])
-  }), trait_pretty),
+  mds_input,
   img_dims = c(256L, 256L),
   mask     = "face",
-  k        = 2L,              # theory-driven: 2D paper figure
-  groups   = trait_family,    # "warmth" / "dominance" / "competence"
-  shapes   = trait_valence    # "positive" / "negative" pole
+  k        = 2L,             # theory-driven: 2D paper figure
+  groups   = trait_family,   # warmth / competence / dominance
+  shapes   = trait_pole      # positive / negative pole
 )
 ```
 
@@ -3051,28 +3215,50 @@ and lay them out side-by-side:
 
 ``` r
 
+# Three contrasts. Each is a named list with `$a` and `$b`: the
+# two per-trait signal matrices to compare. Building it this way
+# means the same `contrasts` object can drive both the full-face
+# tests below and the region-by-region tests in §12.8.
 contrasts <- list(
-  "Trust vs Friendly"     = list(a = sm[["trust"]],     b = sm[["friendly"]]),
-  "Competent vs Dominant" = list(a = sm[["competent"]], b = sm[["dominant"]]),
-  "Trust vs Dominant"     = list(a = sm[["trust"]],     b = sm[["dominant"]])
+  "Trust vs Friendly"     = list(a = sm[["trust"]],
+                                 b = sm[["friendly"]]),
+  "Competent vs Dominant" = list(a = sm[["competent"]],
+                                 b = sm[["dominant"]]),
+  "Trust vs Dominant"     = list(a = sm[["trust"]],
+                                 b = sm[["dominant"]])
 )
 
-# Full-face cluster tests, one per contrast.
-ct_full <- lapply(contrasts, function(p) {
-  rel_cluster_test(p$a, p$b,
-                   img_dims          = c(256L, 256L),
-                   cluster_threshold = 2.0,
-                   n_permutations    = 2000L,
-                   seed              = 1L,
-                   progress          = FALSE)
-})
+# Empty named lists to hold one result per contrast.
+ct_full     <- vector("list", length(contrasts))
+dissim_full <- vector("list", length(contrasts))
+names(ct_full)     <- names(contrasts)
+names(dissim_full) <- names(contrasts)
 
-# Per-contrast Euclidean dissimilarity with bootstrap CIs.
-dissim_full <- lapply(contrasts, function(p) {
-  rel_dissimilarity(p$a, p$b, n_boot = 2000L, seed = 1L,
-                    progress = FALSE)
-})
+# Compute the cluster test and the bootstrap dissimilarity for
+# each contrast. One loop pass per contrast; both results go
+# into their named slots.
+for (cname in names(contrasts)) {
+  a <- contrasts[[cname]]$a
+  b <- contrasts[[cname]]$b
 
+  ct_full[[cname]] <- rel_cluster_test(
+    a, b,
+    img_dims          = c(256L, 256L),
+    cluster_threshold = 2.0,
+    n_permutations    = 2000L,
+    seed              = 1L,
+    progress          = FALSE
+  )
+
+  dissim_full[[cname]] <- rel_dissimilarity(
+    a, b,
+    n_boot   = 2000L,
+    seed     = 1L,
+    progress = FALSE
+  )
+}
+
+# Side-by-side bootstrap-CI display of all three contrasts.
 plot_dissimilarity_grid(
   "Trust vs Friendly"     = dissim_full[["Trust vs Friendly"]],
   "Competent vs Dominant" = dissim_full[["Competent vs Dominant"]],
@@ -3199,9 +3385,8 @@ per region per condition:
 # giving the trial count per producer.
 trial_counts_for <- function(label) {
   trials <- raw[raw$trait == label, ]
-  ids    <- unique(trials$participant_id)
-  counts <- as.integer(table(trials$participant_id)[ids])
-  names(counts) <- ids
+  counts <- as.integer(table(trials$participant_id))
+  names(counts) <- unique(trials$participant_id)
   counts
 }
 
@@ -3216,14 +3401,14 @@ iv_grid$n_above  <- NA_integer_
 for (i in seq_len(nrow(iv_grid))) {
   label  <- iv_grid$trait[i]
   region <- iv_grid$region[i]
-  sm <- get(paste0("sm_", label))
-  tc <- trial_counts_for(label)
-  m  <- make_face_mask(c(256L, 256L), region = region)
-  iv <- infoval(sm, noise_matrix, tc,
-                iter     = 1000L,
-                mask     = m,
-                seed     = 1L,
-                progress = FALSE)
+  sig    <- sm[[label]]                       # per-trait signal matrix
+  tc     <- trial_counts_for(label)
+  m      <- make_face_mask(c(256L, 256L), region = region)
+  iv     <- infoval(sig, noise_matrix, tc,
+                    iter     = 1000L,
+                    mask     = m,
+                    seed     = 1L,
+                    progress = FALSE)
   iv_grid$median_z[i] <- stats::median(iv$infoval)
   iv_grid$n_above[i]  <- sum(iv$infoval >= 1.96)
 }
@@ -3510,10 +3695,14 @@ signal <- res$signal_matrix
 run_reliability(signal, seed = 1L)
 
 # 5. Per-producer infoVal with trial-count-matched reference.
+# Each producer in this study did exactly 60 trials. Build a
+# named integer vector with one entry per producer.
+trial_counts <- rep(60L, ncol(signal))
+names(trial_counts) <- colnames(signal)
+
 infoval(signal, nm,
-        trial_counts = setNames(rep(60L, ncol(signal)),
-                                colnames(signal)),
-        iter = 1000L, seed = 1L)
+        trial_counts = trial_counts,
+        iter         = 1000L, seed = 1L)
 
 # 6. Save rendered CIs to PNG (visualisation only). Do not
 #    feed these to rel_* or to hand-rolled infoVal.
@@ -3683,7 +3872,12 @@ steps before reporting it:
 ``` r
 
 sm <- res$signal_matrix
-tc <- setNames(rep(300L, ncol(sm)), colnames(sm))
+
+# Each producer in this study did 300 trials. Build a named
+# integer vector with one entry per producer (the names match
+# the column names of `sm`).
+tc <- rep(300L, ncol(sm))
+names(tc) <- colnames(sm)
 
 # 1. Compare observed and reference norm distributions directly.
 iv  <- infoval(sm, noise_matrix, tc, iter = 1000L, seed = 1L)
@@ -3700,23 +3894,35 @@ iv_masked <- infoval(sm, noise_matrix, tc, mask = fm,
                      iter = 1000L, seed = 1L)
 median(iv_masked$infoval)
 
-# 3. Compute the group-mean CI's infoVal.
-group   <- matrix(rowMeans(sm), ncol = 1,
-                  dimnames = list(NULL, "group"))
-tc_grp  <- setNames(sum(tc), "group")
-iv_grp  <- infoval(group, noise_matrix, tc_grp,
-                   iter = 1000L, seed = 1L)
+# 3. Compute the group-mean CI's infoVal. We treat the group as
+# a single "producer" whose trial count is the sum of the
+# individual counts.
+group <- matrix(rowMeans(sm), ncol = 1,
+                dimnames = list(NULL, "group"))
+tc_grp <- sum(tc)
+names(tc_grp) <- "group"
+
+iv_grp <- infoval(group, noise_matrix, tc_grp,
+                  iter = 1000L, seed = 1L)
 iv_grp$infoval                 # value depends on signal alignment;
                                # see paragraph 5 of §15
 
 # 4. Sanity-check the chance baseline. A random-mask producer
-#    should give z ~ 0 within MAD noise.
-random_mask <- (noise_matrix[, sample(ncol(noise_matrix),
-                                      300L, replace = TRUE)] %*%
-                  sample(c(-1, 1), 300L, replace = TRUE)) / 300
-iv_rand <- infoval(matrix(random_mask, ncol = 1,
-                          dimnames = list(NULL, "rnd")),
-                   noise_matrix, setNames(300L, "rnd"),
+# should give z ~ 0 within MAD noise. Build a fake producer's
+# mask out of 300 random stimuli and 300 random +/-1 responses,
+# the same way Step 3 of §12.5 builds a real one.
+rnd_stim <- sample(ncol(noise_matrix), 300L, replace = TRUE)
+rnd_resp <- sample(c(-1, 1),           300L, replace = TRUE)
+random_mask <- (noise_matrix[, rnd_stim] %*% rnd_resp) / 300
+
+# Put the random mask into a 1-column matrix named "rnd" and run
+# infoval() on it.
+rnd_signal <- matrix(random_mask, ncol = 1,
+                     dimnames = list(NULL, "rnd"))
+tc_rnd <- 300L
+names(tc_rnd) <- "rnd"
+
+iv_rand <- infoval(rnd_signal, noise_matrix, tc_rnd,
                    iter = 1000L, seed = 1L)
 iv_rand$infoval                 # should be ~ 0 within MAD noise
 ```
@@ -3769,7 +3975,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation
-#>   Data and Classification Images_. R package version 0.1.7,
+#>   Data and Classification Images_. R package version 0.1.8,
 #>   <https://github.com/olivethree/rcisignal>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -3779,7 +3985,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> Images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.1.7},
+#>     note = {R package version 0.1.8},
 #>     url = {https://github.com/olivethree/rcisignal},
 #>   }
 ```

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,172 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="stage-per-producer-cis">Stage 1 — Per-producer CIs<a class="anchor" aria-label="anchor" href="#stage-per-producer-cis"></a></h2>
+
+      <div class="section-desc"><p>Build per-producer signal matrices and run every reliability, discriminability, and informational-value analysis on them. Every function in this group takes a pixels x n_producers <code>signal_matrix</code> (or two of them) as its primary input.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>
+
+        </dt>
+        <dd>Compute individual Brief-RC CIs from trial-level responses</dd>
+
+        <dt>
+
+          <code><a href="ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>
+
+        </dt>
+        <dd>Compute individual 2IFC CIs from trial-level responses</dd>
+
+        <dt>
+
+          <code><a href="infoval.html">infoval()</a></code>
+
+        </dt>
+        <dd>Per-producer informational value with trial-count-matched reference</dd>
+
+        <dt>
+
+          <code><a href="rel_split_half.html">rel_split_half()</a></code>
+
+        </dt>
+        <dd>Permuted split-half reliability with Spearman-Brown correction</dd>
+
+        <dt>
+
+          <code><a href="rel_split_half_null.html">rel_split_half_null()</a></code>
+
+        </dt>
+        <dd>Compute only the empirical-null distribution for split-half</dd>
+
+        <dt>
+
+          <code><a href="rel_icc.html">rel_icc()</a></code>
+
+        </dt>
+        <dd>Intraclass correlation coefficients via direct mean squares</dd>
+
+        <dt>
+
+          <code><a href="rel_loo.html">rel_loo()</a></code>
+
+        </dt>
+        <dd>Leave-one-out influence screening</dd>
+
+        <dt>
+
+          <code><a href="rel_loo_z.html">rel_loo_z()</a></code>
+
+        </dt>
+        <dd>Z-scored leave-one-out influence (accessor)</dd>
+
+        <dt>
+
+          <code><a href="rel_cluster_test.html">rel_cluster_test()</a></code>
+
+        </dt>
+        <dd>Cluster-based permutation test with family-wise error control</dd>
+
+        <dt>
+
+          <code><a href="rel_dissimilarity.html">rel_dissimilarity()</a></code>
+
+        </dt>
+        <dd>Between-condition dissimilarity with bootstrap confidence intervals</dd>
+
+        <dt>
+
+          <code><a href="agreement_map_test.html">agreement_map_test()</a></code>
+
+        </dt>
+        <dd>Per-pixel inferential agreement map with FWER control</dd>
+
+        <dt>
+
+          <code><a href="pixel_t_test.html">pixel_t_test()</a></code>
+
+        </dt>
+        <dd>Vectorised pixel-wise t-test (independent or paired)</dd>
+
+        <dt>
+
+          <code><a href="run_reliability.html">run_reliability()</a></code>
+
+        </dt>
+        <dd>Run every within-condition reliability metric</dd>
+
+        <dt>
+
+          <code><a href="run_discriminability.html">run_discriminability()</a></code>
+
+        </dt>
+        <dd>Run every between-condition discriminability metric</dd>
+
+        <dt>
+
+          <code><a href="run_discriminability_pairwise.html">run_discriminability_pairwise()</a></code>
+
+        </dt>
+        <dd>Run all pairwise between-condition comparisons across K conditions</dd>
+
+        <dt>
+
+          <code><a href="compute_infoval_summary.html">compute_infoval_summary()</a></code>
+
+        </dt>
+        <dd>Per-participant information-value (infoVal) summary</dd>
+
+        <dt>
+
+          <code><a href="diagnose_infoval.html">diagnose_infoval()</a></code>
+
+        </dt>
+        <dd>Guided diagnostic for low or negative infoVal</dd>
+      </dl></div><div class="section level2">
+      <h2 id="stage-group-averaged-cis">Stage 2 — Group-averaged CIs<a class="anchor" aria-label="anchor" href="#stage-group-averaged-cis"></a></h2>
+
+      <div class="section-desc"><p>Collapse a per-producer signal matrix to per-group means for side-by-side comparison, RDM-style distance matrices, MDS, and correlogram views.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="group_ci.html">group_ci()</a></code>
+
+        </dt>
+        <dd>Collapse a per-producer signal matrix into per-group means</dd>
+
+        <dt>
+
+          <code><a href="plot_ci_distance_matrix.html">plot_ci_distance_matrix()</a></code>
+
+        </dt>
+        <dd>Pairwise Euclidean distance matrix across multiple group-mean CIs</dd>
+
+        <dt>
+
+          <code><a href="plot_ci_mds.html">plot_ci_mds()</a></code>
+
+        </dt>
+        <dd>Multidimensional-scaling (MDS) projection of multiple CIs</dd>
+
+        <dt>
+
+          <code><a href="plot_ci_correlogram.html">plot_ci_correlogram()</a></code>
+
+        </dt>
+        <dd>Pairwise Pearson-r correlogram across multiple group-mean CIs</dd>
+      </dl></div><div class="section level2">
+      <h2 id="i-o-and-simulation">I/O and simulation<a class="anchor" aria-label="anchor" href="#i-o-and-simulation"></a></h2>
 
 
 
@@ -43,10 +208,68 @@
 
       <dl><dt>
 
-          <code><a href="agreement_map_test.html">agreement_map_test()</a></code>
+          <code><a href="read_responses.html">read_responses()</a></code>
 
         </dt>
-        <dd>Per-pixel inferential agreement map with FWER control</dd>
+        <dd>Read reverse-correlation response data from a CSV file</dd>
+
+        <dt>
+
+          <code><a href="read_noise_matrix.html">read_noise_matrix()</a></code>
+
+        </dt>
+        <dd>Read a noise matrix from any supported source, with caching</dd>
+
+        <dt>
+
+          <code><a href="read_cis.html">read_cis()</a></code>
+
+        </dt>
+        <dd>Read a directory of CI images into a pixels x participants matrix</dd>
+
+        <dt>
+
+          <code><a href="read_signal_matrix.html">read_signal_matrix()</a></code>
+
+        </dt>
+        <dd>Read a directory of CI images and extract the base-subtracted signal</dd>
+
+        <dt>
+
+          <code><a href="extract_signal.html">extract_signal()</a></code>
+
+        </dt>
+        <dd>Subtract the base image from each column of a CI matrix</dd>
+
+        <dt>
+
+          <code><a href="simulate_briefrc_data.html">simulate_briefrc_data()</a></code>
+
+        </dt>
+        <dd>Simulate Brief-RC reverse-correlation data</dd>
+
+        <dt>
+
+          <code><a href="simulate_2ifc_data.html">simulate_2ifc_data()</a></code>
+
+        </dt>
+        <dd>Simulate 2IFC reverse-correlation data</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data-quality-diagnostics">Data-quality diagnostics<a class="anchor" aria-label="anchor" href="#data-quality-diagnostics"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="run_diagnostics.html">run_diagnostics()</a></code>
+
+        </dt>
+        <dd>Run the full battery of diagnostic checks</dd>
 
         <dt>
 
@@ -113,80 +336,26 @@
 
         <dt>
 
-          <code><a href="ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>
+          <code><a href="validate_noise_matrix.html">validate_noise_matrix()</a></code>
 
         </dt>
-        <dd>Compute individual 2IFC CIs from trial-level responses</dd>
+        <dd>Validate a noise matrix</dd>
+      </dl></div><div class="section level2">
+      <h2 id="plotting">Plotting<a class="anchor" aria-label="anchor" href="#plotting"></a></h2>
 
-        <dt>
 
-          <code><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>
 
-        </dt>
-        <dd>Compute individual Brief-RC CIs from trial-level responses</dd>
+      <dl></dl></div><div class="section level2">
 
-        <dt>
 
-          <code><a href="compute_infoval_summary.html">compute_infoval_summary()</a></code>
 
-        </dt>
-        <dd>Per-participant information-value (infoVal) summary</dd>
 
-        <dt>
+      <dl><dt>
 
-          <code><a href="diagnose_infoval.html">diagnose_infoval()</a></code>
+          <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code>
 
         </dt>
-        <dd>Guided diagnostic for low or negative infoVal</dd>
-
-        <dt>
-
-          <code><a href="extract_signal.html">extract_signal()</a></code>
-
-        </dt>
-        <dd>Subtract the base image from each column of a CI matrix</dd>
-
-        <dt>
-
-          <code><a href="infoval.html">infoval()</a></code>
-
-        </dt>
-        <dd>Per-producer informational value with trial-count-matched reference</dd>
-
-        <dt>
-
-          <code><a href="is_rcisignal_diag_result.html">is_rcisignal_diag_result()</a></code>
-
-        </dt>
-        <dd>Test whether an object is an <code>rcisignal_diag_result</code></dd>
-
-        <dt>
-
-          <code><a href="make_face_mask.html">make_face_mask()</a></code>
-
-        </dt>
-        <dd>Build an oval face-region mask for a square image</dd>
-
-        <dt>
-
-          <code><a href="pixel_t_test.html">pixel_t_test()</a></code>
-
-        </dt>
-        <dd>Vectorised pixel-wise t-test (independent or paired)</dd>
-
-        <dt>
-
-          <code><a href="plot.rcisignal_rel_agreement_map_test.html">plot(<i>&lt;rcisignal_rel_agreement_map_test&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot an agreement-map test result</dd>
-
-        <dt>
-
-          <code><a href="plot.rcisignal_rel_pairwise_report.html">plot(<i>&lt;rcisignal_rel_pairwise_report&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot the cluster-test grid for a pairwise discriminability report</dd>
+        <dd>Render a group CI as a translucent agreement-map overlay on a base image</dd>
 
         <dt>
 
@@ -197,38 +366,10 @@
 
         <dt>
 
-          <code><a href="plot_ci_correlogram.html">plot_ci_correlogram()</a></code>
+          <code><a href="plot_mask_overlay.html">plot_mask_overlay()</a></code>
 
         </dt>
-        <dd>Pairwise Pearson-r correlogram across multiple group-mean CIs</dd>
-
-        <dt>
-
-          <code><a href="plot_ci_distance_matrix.html">plot_ci_distance_matrix()</a></code>
-
-        </dt>
-        <dd>Pairwise Euclidean distance matrix across multiple group-mean CIs</dd>
-
-        <dt>
-
-          <code><a href="plot_ci_mds.html">plot_ci_mds()</a></code>
-
-        </dt>
-        <dd>Multidimensional-scaling (MDS) projection of multiple CIs</dd>
-
-        <dt>
-
-          <code><a href="plot_ci_overlay.html">plot_ci_overlay()</a></code>
-
-        </dt>
-        <dd>Render a group CI as a translucent agreement-map overlay on a base image</dd>
-
-        <dt>
-
-          <code><a href="plot_dissimilarity_grid.html">plot_dissimilarity_grid()</a></code>
-
-        </dt>
-        <dd>Compare Euclidean dissimilarity intervals across multiple contrasts on a single plot</dd>
+        <dd>Sanity-check a face mask against a base image</dd>
 
         <dt>
 
@@ -239,31 +380,26 @@
 
         <dt>
 
-          <code><a href="plot_mask_overlay.html">plot_mask_overlay()</a></code>
+          <code><a href="plot_dissimilarity_grid.html">plot_dissimilarity_grid()</a></code>
 
         </dt>
-        <dd>Sanity-check a face mask against a base image</dd>
+        <dd>Compare Euclidean dissimilarity intervals across multiple contrasts on a single plot</dd>
+      </dl></div><div class="section level2">
+      <h2 id="helpers">Helpers<a class="anchor" aria-label="anchor" href="#helpers"></a></h2>
 
-        <dt>
 
-          <code><a href="rcisignal_diag_report.html">rcisignal_diag_report()</a></code>
 
-        </dt>
-        <dd>Construct an <code>rcisignal_diag_report</code> object</dd>
+      <dl></dl></div><div class="section level2">
 
-        <dt>
 
-          <code><a href="rcisignal_diag_result.html">rcisignal_diag_result()</a></code>
 
-        </dt>
-        <dd>Construct an <code>rcisignal_diag_result</code> object</dd>
 
-        <dt>
+      <dl><dt>
 
-          <code><a href="read_cis.html">read_cis()</a></code>
+          <code><a href="make_face_mask.html">make_face_mask()</a></code>
 
         </dt>
-        <dd>Read a directory of CI images into a pixels x participants matrix</dd>
+        <dd>Build an oval face-region mask for a square image</dd>
 
         <dt>
 
@@ -274,24 +410,10 @@
 
         <dt>
 
-          <code><a href="read_noise_matrix.html">read_noise_matrix()</a></code>
+          <code><a href="shift_mask.html">shift_mask()</a></code>
 
         </dt>
-        <dd>Read a noise matrix from any supported source, with caching</dd>
-
-        <dt>
-
-          <code><a href="read_responses.html">read_responses()</a></code>
-
-        </dt>
-        <dd>Read reverse-correlation response data from a CSV file</dd>
-
-        <dt>
-
-          <code><a href="read_signal_matrix.html">read_signal_matrix()</a></code>
-
-        </dt>
-        <dd>Read a directory of CI images and extract the base-subtracted signal</dd>
+        <dd>Shift a face-region mask by a number of pixels</dd>
 
         <dt>
 
@@ -302,110 +424,27 @@
 
         <dt>
 
-          <code><a href="rel_cluster_test.html">rel_cluster_test()</a></code>
+          <code><a href="is_rcisignal_diag_result.html">is_rcisignal_diag_result()</a></code>
 
         </dt>
-        <dd>Cluster-based permutation test with family-wise error control</dd>
+        <dd>Test whether an object is an <code>rcisignal_diag_result</code></dd>
 
         <dt>
 
-          <code><a href="rel_dissimilarity.html">rel_dissimilarity()</a></code>
+          <code><a href="rcisignal_diag_result.html">rcisignal_diag_result()</a></code>
 
         </dt>
-        <dd>Between-condition dissimilarity with bootstrap confidence intervals</dd>
+        <dd>Construct an <code>rcisignal_diag_result</code> object</dd>
 
         <dt>
 
-          <code><a href="rel_icc.html">rel_icc()</a></code>
+          <code><a href="rcisignal_diag_report.html">rcisignal_diag_report()</a></code>
 
         </dt>
-        <dd>Intraclass correlation coefficients via direct mean squares</dd>
-
-        <dt>
-
-          <code><a href="rel_loo.html">rel_loo()</a></code>
-
-        </dt>
-        <dd>Leave-one-out influence screening</dd>
-
-        <dt>
-
-          <code><a href="rel_loo_z.html">rel_loo_z()</a></code>
-
-        </dt>
-        <dd>Z-scored leave-one-out influence (accessor)</dd>
-
-        <dt>
-
-          <code><a href="rel_split_half.html">rel_split_half()</a></code>
-
-        </dt>
-        <dd>Permuted split-half reliability with Spearman-Brown correction</dd>
-
-        <dt>
-
-          <code><a href="rel_split_half_null.html">rel_split_half_null()</a></code>
-
-        </dt>
-        <dd>Compute only the empirical-null distribution for split-half</dd>
-
-        <dt>
-
-          <code><a href="run_diagnostics.html">run_diagnostics()</a></code>
-
-        </dt>
-        <dd>Run the full battery of diagnostic checks</dd>
-
-        <dt>
-
-          <code><a href="run_discriminability.html">run_discriminability()</a></code>
-
-        </dt>
-        <dd>Run every between-condition discriminability metric</dd>
-
-        <dt>
-
-          <code><a href="run_discriminability_pairwise.html">run_discriminability_pairwise()</a></code>
-
-        </dt>
-        <dd>Run all pairwise between-condition comparisons across K conditions</dd>
-
-        <dt>
-
-          <code><a href="run_reliability.html">run_reliability()</a></code>
-
-        </dt>
-        <dd>Run every within-condition reliability metric</dd>
-
-        <dt>
-
-          <code><a href="shift_mask.html">shift_mask()</a></code>
-
-        </dt>
-        <dd>Shift a face-region mask by a number of pixels</dd>
-
-        <dt>
-
-          <code><a href="simulate_2ifc_data.html">simulate_2ifc_data()</a></code>
-
-        </dt>
-        <dd>Simulate 2IFC reverse-correlation data</dd>
-
-        <dt>
-
-          <code><a href="simulate_briefrc_data.html">simulate_briefrc_data()</a></code>
-
-        </dt>
-        <dd>Simulate Brief-RC reverse-correlation data</dd>
-
-        <dt>
-
-          <code><a href="validate_noise_matrix.html">validate_noise_matrix()</a></code>
-
-        </dt>
-        <dd>Validate a noise matrix</dd>
+        <dd>Construct an <code>rcisignal_diag_report</code> object</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

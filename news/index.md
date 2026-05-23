@@ -1,5 +1,89 @@
 # Changelog
 
+## rcisignal 0.1.8
+
+### New features
+
+- [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  (new exported function). Stage-2 aggregator that collapses a
+  per-producer `signal_matrix` (pixels x n_producers, as returned by
+  [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+  /
+  [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md))
+  into a per-group matrix (pixels x n_groups) suitable for the existing
+  distance-matrix, MDS, and correlogram plot functions. Accepts an
+  atomic grouping vector or a named list of vectors (factorial
+  grouping). Returns a numeric matrix classed
+  `c("rcisignal_group_ci", "matrix", "array")` with per-group producer
+  counts in `attr(., "n")` and `img_dims` inherited from the input.
+  Replaces the hand-rolled `rowMeans(signal_matrix[, group_idx])` users
+  were writing.
+
+- New S3 class `rcisignal_group_ci` with
+  [`print()`](https://rdrr.io/r/base/print.html) and
+  [`as.list()`](https://rdrr.io/r/base/list.html) methods. The print
+  method surfaces per-group producer counts and reminds the reader that
+  per-producer information has been averaged out.
+
+### Robustness
+
+- The stage-1 functions now error with a teaching message when handed a
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  result instead of a per-producer `signal_matrix`. The message names
+  the two-stage pattern and points at
+  [`vignette("rcisignal")`](https://olivethree.github.io/rcisignal/articles/rcisignal.md).
+  Affected functions:
+  [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
+  [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md),
+  [`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md),
+  [`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md),
+  [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
+  (both `_a` / `_b`),
+  [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
+  (both),
+  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
+  [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md)
+  (both),
+  [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
+  [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
+  (both), and
+  [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md)
+  (any list element). The internal `group_mean_z()` gets the same guard.
+  Pre-existing behaviour for legitimate per-producer matrices is
+  unchanged.
+
+### Documentation
+
+- New “Two-stage pattern” section in
+  [`vignette("rcisignal")`](https://olivethree.github.io/rcisignal/articles/rcisignal.md),
+  placed immediately after the Overview. The package now names the two
+  stages: stage 1 (per-producer `signal_matrix`, produced by
+  `ci_from_responses_*()`, consumed by every reliability /
+  discriminability / infoVal function) and stage 2 (group-averaged
+  matrix, produced by
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md),
+  consumed by the distance-matrix / MDS / correlogram plots).
+
+- pkgdown reference index regrouped to mirror the two stages. Visitors
+  to the package website now see “Stage 1 — per-producer CIs” and “Stage
+  2 — group CIs” as the first two reference sections.
+
+- README gains a small two-stage diagram showing how `responses`
+
+  - `noise_matrix` + `base_image` flow through stage 1 into the
+    reliability / infoVal / discriminability surfaces, and optionally
+    into stage 2 via
+    [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    for RDM / MDS / correlogram analyses.
+
+- `@seealso` on
+  [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+  and
+  [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+  now points at
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  as the optional stage-2 follow-on.
+
 ## rcisignal 0.1.7
 
 ### New features

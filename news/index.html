@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,9 +29,32 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/olivethree/rcisignal/blob/v0.1.7/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/olivethree/rcisignal/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.8" id="rcisignal-018">rcisignal 0.1.8<a class="anchor" aria-label="anchor" href="#rcisignal-018"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-1-8">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-8"></a></h3>
+<ul><li><p><code><a href="../reference/group_ci.html">group_ci()</a></code> (new exported function). Stage-2 aggregator that collapses a per-producer <code>signal_matrix</code> (pixels x n_producers, as returned by <code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> / <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>) into a per-group matrix (pixels x n_groups) suitable for the existing distance-matrix, MDS, and correlogram plot functions. Accepts an atomic grouping vector or a named list of vectors (factorial grouping). Returns a numeric matrix classed <code>c("rcisignal_group_ci", "matrix", "array")</code> with per-group producer counts in <code>attr(., "n")</code> and <code>img_dims</code> inherited from the input. Replaces the hand-rolled <code>rowMeans(signal_matrix[, group_idx])</code> users were writing.</p></li>
+<li><p>New S3 class <code>rcisignal_group_ci</code> with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list()</a></code> methods. The print method surfaces per-group producer counts and reminds the reader that per-producer information has been averaged out.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="robustness-0-1-8">Robustness<a class="anchor" aria-label="anchor" href="#robustness-0-1-8"></a></h3>
+<ul><li>The stage-1 functions now error with a teaching message when handed a <code><a href="../reference/group_ci.html">group_ci()</a></code> result instead of a per-producer <code>signal_matrix</code>. The message names the two-stage pattern and points at <code><a href="../articles/rcisignal.html">vignette("rcisignal")</a></code>. Affected functions: <code><a href="../reference/infoval.html">infoval()</a></code>, <code><a href="../reference/rel_split_half.html">rel_split_half()</a></code>, <code><a href="../reference/rel_icc.html">rel_icc()</a></code>, <code><a href="../reference/rel_loo.html">rel_loo()</a></code>, <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code> (both <code>_a</code> / <code>_b</code>), <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code> (both), <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>, <code><a href="../reference/pixel_t_test.html">pixel_t_test()</a></code> (both), <code><a href="../reference/run_reliability.html">run_reliability()</a></code>, <code><a href="../reference/run_discriminability.html">run_discriminability()</a></code> (both), and <code><a href="../reference/run_discriminability_pairwise.html">run_discriminability_pairwise()</a></code> (any list element). The internal <code>group_mean_z()</code> gets the same guard. Pre-existing behaviour for legitimate per-producer matrices is unchanged.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-8">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-8"></a></h3>
+<ul><li><p>New “Two-stage pattern” section in <code><a href="../articles/rcisignal.html">vignette("rcisignal")</a></code>, placed immediately after the Overview. The package now names the two stages: stage 1 (per-producer <code>signal_matrix</code>, produced by <code>ci_from_responses_*()</code>, consumed by every reliability / discriminability / infoVal function) and stage 2 (group-averaged matrix, produced by <code><a href="../reference/group_ci.html">group_ci()</a></code>, consumed by the distance-matrix / MDS / correlogram plots).</p></li>
+<li><p>pkgdown reference index regrouped to mirror the two stages. Visitors to the package website now see “Stage 1 — per-producer CIs” and “Stage 2 — group CIs” as the first two reference sections.</p></li>
+<li>
+<p>README gains a small two-stage diagram showing how <code>responses</code></p>
+<ul><li>
+<code>noise_matrix</code> + <code>base_image</code> flow through stage 1 into the reliability / infoVal / discriminability surfaces, and optionally into stage 2 via <code><a href="../reference/group_ci.html">group_ci()</a></code> for RDM / MDS / correlogram analyses.</li>
+</ul></li>
+<li><p><code>@seealso</code> on <code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> and <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> now points at <code><a href="../reference/group_ci.html">group_ci()</a></code> as the optional stage-2 follow-on.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.7" id="rcisignal-017">rcisignal 0.1.7<a class="anchor" aria-label="anchor" href="#rcisignal-017"></a></h2>
 <div class="section level3">

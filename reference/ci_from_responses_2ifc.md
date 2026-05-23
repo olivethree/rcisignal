@@ -136,7 +136,9 @@ What the wrapper does for you:
 ## See also
 
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md),
-[`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html)
+[`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html),
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+(stage 2, optional)
 
 ## Examples
 

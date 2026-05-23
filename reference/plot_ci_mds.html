@@ -21,7 +21,7 @@ more than a handful of conditions to compare side by side."><meta property="og:i
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,7 @@ more than a handful of conditions to compare side by side."><meta property="og:i
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Multidimensional-scaling (MDS) projection of multiple CIs</h1>
-      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/v0.1.7/R/plot_ci_mds.R" class="external-link"><code>R/plot_ci_mds.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/R/plot_ci_mds.R" class="external-link"><code>R/plot_ci_mds.R</code></a></small>
       <div class="d-none name"><code>plot_ci_mds.Rd</code></div>
     </div>
 
@@ -89,12 +89,15 @@ more than a handful of conditions to compare side by side.</p>
 
 
 <dl><dt id="arg-cis">cis<a class="anchor" aria-label="anchor" href="#arg-cis"></a></dt>
-<dd><p>Named list of CIs to project. Each element may be a
-numeric vector of length <code>prod(img_dims)</code>, a numeric matrix
-<code>n_pixels x 1</code>, or a per-producer <code>signal_matrix</code> of shape
-<code>n_pixels x n_producers</code> (reduced to a group mean via
-<code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans()</a></code>). At least three elements are required for a
-meaningful 2D projection.</p></dd>
+<dd><p>CIs to project, in any of three forms:</p><ul><li><p>a <code><a href="group_ci.html">group_ci()</a></code> result (an <a href="group_ci.html">rcisignal_group_ci</a> matrix);</p></li>
+<li><p>a numeric matrix <code>n_pixels x n_groups</code> with named columns;</p></li>
+<li><p>a named list of CIs (each element a vector of length
+<code>prod(img_dims)</code>, a single-column matrix, or a per-producer
+<code>signal_matrix</code> from <code>ci_from_responses_*()</code> which is
+reduced to a group mean internally).
+At least three CIs are required for a meaningful 2D
+projection.</p></li>
+</ul></dd>
 
 
 <dt id="arg-img-dims">img_dims<a class="anchor" aria-label="anchor" href="#arg-img-dims"></a></dt>

@@ -1,10 +1,12 @@
 # Pairwise Euclidean distance matrix across multiple group-mean CIs
 
 Renders a publication-ready Euclidean distance matrix across two or more
-classification images (CIs). The same beginner- friendly input format as
+classification images (CIs). A stage-2 consumer: accepts a
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+result directly, a named numeric matrix of `pixels x n_groups`, or the
+same named-list-of-CIs format as
 [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
-(a named list of CIs in any of three shapes); per-producer matrices are
-reduced to group means automatically.
+(per-producer matrices reduced to group means internally).
 
 Use this when the question is "how *far apart* are these CIs in pixel
 space?" rather than "how do they covary?". Euclidean distance does not
@@ -37,13 +39,21 @@ plot_ci_distance_matrix(
 
 - cis:
 
-  Named list of CIs to compare. Each element may be a numeric vector of
-  length `prod(img_dims)`, a numeric matrix `n_pixels x 1`, or a
-  per-producer `signal_matrix` of shape `n_pixels x n_producers`
-  (reduced to a group mean via
-  [`rowMeans()`](https://rdrr.io/r/base/colSums.html)). Names become the
-  row / column / diagonal labels in the figure. At least two elements
-  required.
+  CIs to compare, in any of three forms:
+
+  - a
+    [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    result (an
+    [rcisignal_group_ci](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    matrix);
+
+  - a numeric matrix `n_pixels x n_groups` with named columns;
+
+  - a named list of CIs (each element a vector of length
+    `prod(img_dims)`, a single-column matrix, or a per-producer
+    `signal_matrix` from `ci_from_responses_*()` which is reduced to a
+    group mean internally). Names become the row / column / diagonal
+    labels in the figure. At least two CIs are required.
 
 - img_dims:
 

@@ -48,5 +48,5 @@ validate_noise_matrix(mat,
                       expected_pixels  = 16384,
                       expected_stimuli = 10)
 #> [PASS] Noise matrix
-#>   16384 pixels x 10 stimuli, all finite. Range: [-0.244, 0.233].
+#>   16384 pixels x 10 stimuli, all finite. Range: [-0.227, 0.216].
 ```

@@ -140,7 +140,9 @@ reverse correlation: an improved tool to assess visual representations.
 
 [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
 [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
-[`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
+[`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+(stage 2, optional)
 
 ## Examples
 

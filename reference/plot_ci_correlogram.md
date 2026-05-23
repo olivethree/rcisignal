@@ -6,11 +6,12 @@ optional direct save to PNG (600 dpi) or PDF.
 
 Designed for the common publication-figure task: given a small set of
 group-mean CIs from different conditions, show how similar they are
-pixel-wise. The function accepts CIs in three shapes (column-major
-vectors, single-column matrices, or per-producer `signal_matrix`
-returned by `ci_from_responses_*()`); per-producer matrices are reduced
-to group means via [`rowMeans()`](https://rdrr.io/r/base/colSums.html)
-automatically.
+pixel-wise. A stage-2 consumer: accepts a
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+result directly, a named numeric matrix of `pixels x n_groups`, or a
+named list of CIs (vectors, single- column matrices, or per-producer
+`signal_matrix` objects from `ci_from_responses_*()` that are reduced to
+group means internally). Mixed shapes inside the list are allowed.
 
 Diverging-palette convention matches the rest of the package: positive
 `r` = blue, negative `r` = red, neutral colour at zero. The colour scale
@@ -40,14 +41,21 @@ plot_ci_correlogram(
 
 - cis:
 
-  A named list of CIs to correlate. Each element may be a numeric vector
-  of length `prod(img_dims)` (a single group-mean CI in column-major
-  order), a numeric matrix `n_pixels x 1`, or a numeric matrix
-  `n_pixels x n_producers` (a per-producer `signal_matrix` from
-  `ci_from_responses_*()`; the function takes
-  [`rowMeans()`](https://rdrr.io/r/base/colSums.html) to obtain the
-  group mean). Names become the row / column / diagonal labels in the
-  figure. At least two elements are required.
+  CIs to correlate, in any of three forms:
+
+  - a
+    [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    result (an
+    [rcisignal_group_ci](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    matrix);
+
+  - a numeric matrix `n_pixels x n_groups` with named columns;
+
+  - a named list of CIs (each element a vector of length
+    `prod(img_dims)`, a single-column matrix, or a per-producer
+    `signal_matrix` from `ci_from_responses_*()` which is reduced to a
+    group mean internally). Names become the row / column / diagonal
+    labels in the figure. At least two CIs are required.
 
 - img_dims:
 

@@ -41,12 +41,21 @@ plot_ci_mds(
 
 - cis:
 
-  Named list of CIs to project. Each element may be a numeric vector of
-  length `prod(img_dims)`, a numeric matrix `n_pixels x 1`, or a
-  per-producer `signal_matrix` of shape `n_pixels x n_producers`
-  (reduced to a group mean via
-  [`rowMeans()`](https://rdrr.io/r/base/colSums.html)). At least three
-  elements are required for a meaningful 2D projection.
+  CIs to project, in any of three forms:
+
+  - a
+    [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    result (an
+    [rcisignal_group_ci](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    matrix);
+
+  - a numeric matrix `n_pixels x n_groups` with named columns;
+
+  - a named list of CIs (each element a vector of length
+    `prod(img_dims)`, a single-column matrix, or a per-producer
+    `signal_matrix` from `ci_from_responses_*()` which is reduced to a
+    group mean internally). At least three CIs are required for a
+    meaningful 2D projection.
 
 - img_dims:
 

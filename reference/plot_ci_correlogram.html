@@ -5,11 +5,12 @@ region masking and optional direct save to PNG (600 dpi) or
 PDF.
 Designed for the common publication-figure task: given a small
 set of group-mean CIs from different conditions, show how
-similar they are pixel-wise. The function accepts CIs in three
-shapes (column-major vectors, single-column matrices, or
-per-producer signal_matrix returned by
-ci_from_responses_*()); per-producer matrices are reduced to
-group means via rowMeans() automatically.
+similar they are pixel-wise. A stage-2 consumer: accepts a
+group_ci() result directly, a named numeric matrix of
+pixels x n_groups, or a named list of CIs (vectors, single-
+column matrices, or per-producer signal_matrix objects from
+ci_from_responses_*() that are reduced to group means
+internally). Mixed shapes inside the list are allowed.
 Diverging-palette convention matches the rest of the package:
 positive r = blue, negative r = red, neutral colour at
 zero. The colour scale is fixed at c(-1, 1) so panels are
@@ -19,11 +20,12 @@ region masking and optional direct save to PNG (600 dpi) or
 PDF.
 Designed for the common publication-figure task: given a small
 set of group-mean CIs from different conditions, show how
-similar they are pixel-wise. The function accepts CIs in three
-shapes (column-major vectors, single-column matrices, or
-per-producer signal_matrix returned by
-ci_from_responses_*()); per-producer matrices are reduced to
-group means via rowMeans() automatically.
+similar they are pixel-wise. A stage-2 consumer: accepts a
+group_ci() result directly, a named numeric matrix of
+pixels x n_groups, or a named list of CIs (vectors, single-
+column matrices, or per-producer signal_matrix objects from
+ci_from_responses_*() that are reduced to group means
+internally). Mixed shapes inside the list are allowed.
 Diverging-palette convention matches the rest of the package:
 positive r = blue, negative r = red, neutral colour at
 zero. The colour scale is fixed at c(-1, 1) so panels are
@@ -35,7 +37,7 @@ directly comparable across runs and across paper figures."><meta property="og:im
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +59,7 @@ directly comparable across runs and across paper figures."><meta property="og:im
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Pairwise Pearson-r correlogram across multiple group-mean CIs</h1>
-      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/v0.1.7/R/plot_ci_correlogram.R" class="external-link"><code>R/plot_ci_correlogram.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/R/plot_ci_correlogram.R" class="external-link"><code>R/plot_ci_correlogram.R</code></a></small>
       <div class="d-none name"><code>plot_ci_correlogram.Rd</code></div>
     </div>
 
@@ -68,11 +70,12 @@ region masking and optional direct save to PNG (600 dpi) or
 PDF.</p>
 <p>Designed for the common publication-figure task: given a small
 set of group-mean CIs from different conditions, show how
-similar they are pixel-wise. The function accepts CIs in three
-shapes (column-major vectors, single-column matrices, or
-per-producer <code>signal_matrix</code> returned by
-<code>ci_from_responses_*()</code>); per-producer matrices are reduced to
-group means via <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans()</a></code> automatically.</p>
+similar they are pixel-wise. A stage-2 consumer: accepts a
+<code><a href="group_ci.html">group_ci()</a></code> result directly, a named numeric matrix of
+<code>pixels x n_groups</code>, or a named list of CIs (vectors, single-
+column matrices, or per-producer <code>signal_matrix</code> objects from
+<code>ci_from_responses_*()</code> that are reduced to group means
+internally). Mixed shapes inside the list are allowed.</p>
 <p>Diverging-palette convention matches the rest of the package:
 positive <code>r</code> = blue, negative <code>r</code> = red, neutral colour at
 zero. The colour scale is fixed at <code>c(-1, 1)</code> so panels are
@@ -102,14 +105,15 @@ directly comparable across runs and across paper figures.</p>
 
 
 <dl><dt id="arg-cis">cis<a class="anchor" aria-label="anchor" href="#arg-cis"></a></dt>
-<dd><p>A named list of CIs to correlate. Each element may
-be a numeric vector of length <code>prod(img_dims)</code> (a single
-group-mean CI in column-major order), a numeric matrix
-<code>n_pixels x 1</code>, or a numeric matrix <code>n_pixels x n_producers</code>
-(a per-producer <code>signal_matrix</code> from <code>ci_from_responses_*()</code>;
-the function takes <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans()</a></code> to obtain the group mean).
+<dd><p>CIs to correlate, in any of three forms:</p><ul><li><p>a <code><a href="group_ci.html">group_ci()</a></code> result (an <a href="group_ci.html">rcisignal_group_ci</a> matrix);</p></li>
+<li><p>a numeric matrix <code>n_pixels x n_groups</code> with named columns;</p></li>
+<li><p>a named list of CIs (each element a vector of length
+<code>prod(img_dims)</code>, a single-column matrix, or a per-producer
+<code>signal_matrix</code> from <code>ci_from_responses_*()</code> which is
+reduced to a group mean internally).
 Names become the row / column / diagonal labels in the
-figure. At least two elements are required.</p></dd>
+figure. At least two CIs are required.</p></li>
+</ul></dd>
 
 
 <dt id="arg-img-dims">img_dims<a class="anchor" aria-label="anchor" href="#arg-img-dims"></a></dt>
