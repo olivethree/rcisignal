@@ -1,6 +1,6 @@
 test_that("shift_mask preserves count for an in-bounds shift", {
   m <- make_face_mask(c(64L, 64L), region = "mouth")
-  shifted <- shift_mask(m, down = 4L, img_dims = c(64L, 64L))
+  shifted <- shift_mask(m, vertical = 4L, img_dims = c(64L, 64L))
   expect_type(shifted, "logical")
   expect_length(shifted, 64L * 64L)
   expect_equal(sum(m), sum(shifted))
@@ -9,7 +9,7 @@ test_that("shift_mask preserves count for an in-bounds shift", {
 test_that("shift_mask matrix-in returns matrix-out of same dim", {
   mat <- matrix(make_face_mask(c(48L, 48L), region = "nose"),
                 48L, 48L)
-  out <- shift_mask(mat, down = 2L, right = 3L)
+  out <- shift_mask(mat, vertical = 2L, horizontal = 3L)
   expect_true(is.matrix(out))
   expect_true(is.logical(out))
   expect_identical(dim(out), dim(mat))
@@ -18,7 +18,7 @@ test_that("shift_mask matrix-in returns matrix-out of same dim", {
 test_that("shift_mask drops pixels that fall off the image", {
   mat <- matrix(FALSE, 16L, 16L)
   mat[c(1L, 2L), c(1L, 2L)] <- TRUE
-  out <- shift_mask(mat, down = -5L, right = -5L)
+  out <- shift_mask(mat, vertical = -5L, horizontal = -5L)
   expect_equal(sum(out), 0L)
 })
 
@@ -27,10 +27,10 @@ test_that("shift_mask validates inputs", {
   m <- make_face_mask(c(16L, 16L), region = "full")
   expect_error(shift_mask(m), "img_dims")
   expect_error(
-    shift_mask(m, down = 1L, img_dims = c(8L, 8L)),
+    shift_mask(m, vertical = 1L, img_dims = c(8L, 8L)),
     "length does not match"
   )
-  expect_error(shift_mask(m, down = NA_real_, img_dims = c(16L, 16L)),
+  expect_error(shift_mask(m, vertical = NA_real_, img_dims = c(16L, 16L)),
                "finite")
 })
 

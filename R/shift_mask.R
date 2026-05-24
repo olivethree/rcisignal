@@ -1,8 +1,8 @@
 #' Shift a face-region mask by a number of pixels
 #'
 #' @description
-#' Slides a logical mask by `down` and `right` pixels and returns
-#' the shifted mask in the same shape as the input. Convenience
+#' Slides a logical mask along the two image axes and returns the
+#' shifted mask in the same shape as the input. Convenience
 #' wrapper around the manual recipe shown in vignette section 4.5
 #' for tuning an *elliptical* `make_face_mask()` region (`"full"`,
 #' `"nose"`, `"mouth"`, `"upper_face"`, `"lower_face"`) on a base
@@ -21,10 +21,11 @@
 #' @param mask Logical vector of length `prod(img_dims)`
 #'   (column-major, as returned by [make_face_mask()]) or a
 #'   logical matrix.
-#' @param down,right Integer pixel offsets. Positive `down` moves
-#'   the mask towards the bottom of the image; positive `right`
-#'   moves it towards the right edge. Negative values move up /
-#'   left. Defaults are `0` (no shift).
+#' @param vertical,horizontal Integer pixel offsets. Positive
+#'   `vertical` moves the mask up (toward the top of the image),
+#'   negative `vertical` moves it down. Positive `horizontal`
+#'   moves the mask right, negative moves it left. Defaults are
+#'   `0` (no shift).
 #' @param img_dims Integer `c(nrow, ncol)` (or a single integer
 #'   for a square image). Required when `mask` is a vector;
 #'   ignored when `mask` is already a matrix.
@@ -34,29 +35,33 @@
 #'   rectangle regions), [plot_mask_overlay()], [plot_face_mask()].
 #' @export
 #' @examples
-#' # Reshape the default mouth mask, slide it down 20 pixels on a
+#' # Reshape the default mouth mask, slide it up 20 pixels on a
 #' # 256-pixel image (about 8% of the height), and confirm it
 #' # still has the right number of TRUE pixels.
 #' m <- make_face_mask(c(256L, 256L), region = "mouth")
-#' shifted <- shift_mask(m, down = 20L, img_dims = c(256L, 256L))
+#' shifted <- shift_mask(m, vertical = 20L, img_dims = c(256L, 256L))
 #' identical(sum(m), sum(shifted))
 #'
-#' # Matrix-in, matrix-out.
+#' # Matrix-in, matrix-out: shift up 20 and right 8.
 #' mat <- matrix(m, 256L, 256L)
-#' shifted_mat <- shift_mask(mat, down = 20L, right = 8L)
+#' shifted_mat <- shift_mask(mat, vertical = 20L, horizontal = 8L)
 #' dim(shifted_mat)
-shift_mask <- function(mask, down = 0L, right = 0L,
+shift_mask <- function(mask, vertical = 0L, horizontal = 0L,
                        img_dims = NULL) {
-  if (!is.numeric(down) || length(down) != 1L ||
-      !is.finite(down)) {
-    cli::cli_abort("{.arg down} must be a single finite number.")
+  if (!is.numeric(vertical) || length(vertical) != 1L ||
+      !is.finite(vertical)) {
+    cli::cli_abort("{.arg vertical} must be a single finite number.")
   }
-  if (!is.numeric(right) || length(right) != 1L ||
-      !is.finite(right)) {
-    cli::cli_abort("{.arg right} must be a single finite number.")
+  if (!is.numeric(horizontal) || length(horizontal) != 1L ||
+      !is.finite(horizontal)) {
+    cli::cli_abort("{.arg horizontal} must be a single finite number.")
   }
-  down  <- as.integer(round(down))
-  right <- as.integer(round(right))
+  # Internally we operate on image-coordinate rows (row 1 at top, so
+  # "down" = larger row index). User-facing `vertical` uses the
+  # math / y-axis-up convention: positive = up. Flip the sign so the
+  # row arithmetic below moves rows in the correct direction.
+  down  <- as.integer(round(-vertical))
+  right <- as.integer(round(horizontal))
 
   return_vector <- FALSE
   if (is.matrix(mask)) {

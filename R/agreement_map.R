@@ -278,8 +278,13 @@ render_agreement_t_map <- function(t_map,
     "t-value (one-sample vs 0)"
   }
 
-  op <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(op), add = TRUE)
+  # Save only the params we modify, not the full par() state. Using
+  # par(no.readonly = TRUE) here would capture and later restore mfrow
+  # too, which resets the layout panel counter and breaks multi-panel
+  # callers that do `par(mfrow = c(2,2))` or `layout(...)` around a
+  # batch of plot_agreement_map() calls.
+  op_mar <- graphics::par("mar")
+  on.exit(graphics::par(mar = op_mar), add = TRUE)
   graphics::par(mar = c(1, 1, 3, 6) + 0.1)
   mat <- matrix(display, img_dims[1L], img_dims[2L])
 

@@ -126,30 +126,27 @@ for (region in regions) {
 # ---- shift_mask tuning demo on the ELLIPTICAL mouth region ----
 
 message("Rendering shift_mask demo on the mouth region ...")
-shift_mask <- function(mask, down = 0, right = 0) {
-  out <- matrix(FALSE, nrow(mask), ncol(mask))
-  src_rows <- seq_len(nrow(mask)) - down
-  src_cols <- seq_len(ncol(mask)) - right
-  keep_r   <- src_rows >= 1 & src_rows <= nrow(mask)
-  keep_c   <- src_cols >= 1 & src_cols <= ncol(mask)
-  out[keep_r, keep_c] <- mask[src_rows[keep_r], src_cols[keep_c]]
-  out
-}
+# Use the exported rcisignal::shift_mask (renamed args in v0.2.0).
 
 mouth_default <- matrix(
   make_face_mask(img_dims, region = "mouth"),
   nrow = img_dims[1L], ncol = img_dims[2L]
 )
-mouth_v  <- shift_mask(mouth_default, down = 20)
-mouth_vh <- shift_mask(mouth_default, down = 20, right = 8)
+# On this base face the actual mouth sits above the default mask
+# position, so a real tune moves the mask up (positive vertical;
+# see `?shift_mask` for the math / y-axis-up sign convention).
+# Combine with a small rightward shift to demonstrate the two-axis
+# form.
+mouth_v  <- shift_mask(mouth_default, vertical = 20)
+mouth_vh <- shift_mask(mouth_default, vertical = 20, horizontal = 8)
 
 mouth_panels <- list(
   artificial_mouth_demo_default  = list(mask = mouth_default,
                                         main = "mouth: default"),
   artificial_mouth_demo_shift_v  = list(mask = mouth_v,
-                                        main = "mouth: down 20 px"),
+                                        main = "mouth: up 20 px"),
   artificial_mouth_demo_shift_vh = list(mask = mouth_vh,
-                                        main = "mouth: down 20 + right 8 px")
+                                        main = "mouth: up 20 + right 8 px")
 )
 for (nm in names(mouth_panels)) {
   out <- file.path(out_dir, sprintf("%s.png", nm))

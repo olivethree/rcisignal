@@ -31,6 +31,14 @@
   rows. Both checks fail with teaching messages naming the
   offending producer.
 
+* `shift_mask()` arguments renamed and `vertical` sign flipped.
+  `down` -> `vertical`, `right` -> `horizontal`. The new
+  `vertical` follows the math / y-axis-up idiom (positive moves
+  the mask up, negative moves it down); `horizontal` keeps the
+  intuitive convention (positive right, negative left). Migration:
+  rename `down = N` -> `vertical = -N` (note the sign flip),
+  `right = N` -> `horizontal = N`. No deprecation alias.
+
 * Column-name arguments standardized on the `col_*` convention
   in the two CI builders. Renamed:
   `ci_from_responses_briefrc(participant_col, stimulus_col, response_col)`
