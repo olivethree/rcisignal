@@ -147,7 +147,7 @@ print(report)
 #> [PASS] Response bias
 #>   0 of 3 participants gave the same response on every trial.
 #>   0 participants have |mean response| > 0.6 (extreme bias).
-#>   Group mean response: 0.040.
+#>   Group mean response: -0.033.
 #> [PASS] Response times
 #>   0 of 3 participants exceed 5% fast trials (< 200 ms).
 #>   0 of 3 participants exceed 5% slow trials (> 5000 ms).

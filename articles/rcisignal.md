@@ -162,9 +162,11 @@ anything that needs producer-level information has to happen in stage 1.
 
 ``` r
 
-# Pass one label per producer (matching columns of signal_matrix).
-gcis <- group_ci(cis$signal_matrix,
-                 by = participant_condition)
+# `responses` is the same trial-level data frame you handed to
+# ci_from_responses_*(). `by` names the column that holds the
+# grouping label (one row per trial; rcisignal extracts the
+# producer -> condition map for you).
+gcis <- group_ci(cis$signal_matrix, responses, by = "condition")
 gcis                       # pixels x n_groups, with attr "n"
 plot_ci_distance_matrix(gcis)
 ```
@@ -187,14 +189,14 @@ The three stage-2 plot functions
 [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md))
 are flexible about input shape: they accept a
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-result directly, a named numeric matrix of `pixels x n_groups`, or the
-historical named-list form (per-producer matrices, single-column
-matrices, or pixel vectors mixed in one list). The reduction to group
-means happens inside the plot function in every case. Use
+result directly, a named numeric matrix of `pixels x n_groups`
+(e.g. built with `cbind(name = rowMeans(...), ...)`), or the historical
+named-list form (per-producer matrices, single-column matrices, or pixel
+vectors mixed in one list). Use
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-whenever you have a single per-producer matrix and a labels vector; use
-the list form when your data already lives as a named collection of
-per-condition `signal_matrix` objects.
+whenever you have a single per-producer signal matrix plus the responses
+data frame that fed into it; use the matrix or list form when your
+per-condition CIs already live in separate objects.
 
 ## 2. Installation
 
@@ -1328,59 +1330,77 @@ mouth_mask_default <- matrix(
   nrow = 256, ncol = 256
 )
 
-# Tune. On a 256-pixel image, 20 pixels is about 8 % of the
-# height and 8 pixels is about 3 % of the width.
-mouth_mask_v  <- shift_mask(mouth_mask_default, down = 20)
-mouth_mask_vh <- shift_mask(mouth_mask_default, down = 20, right = 8)
+# Tune. Sign convention follows the math / y-axis-up idiom:
+# positive `vertical` moves the mask up, negative moves it down;
+# positive `horizontal` moves it right, negative moves it left.
+# On this base the actual mouth sits *above* the default mask,
+# so we shift up. 20 pixels is about 8 % of the 256-pixel
+# height; 8 pixels is about 3 % of the width.
+mouth_mask_v  <- shift_mask(mouth_mask_default, vertical = 20)
+mouth_mask_vh <- shift_mask(mouth_mask_default,
+                            vertical = 20, horizontal = 8)
 ```
 
 [`shift_mask()`](https://olivethree.github.io/rcisignal/reference/shift_mask.md)
-accepts both `down` and `right` and combines them in a single call, so
-vertical-only and vertical-plus-horizontal tuning share the same idiom.
-It works on either a column-major logical vector (pass `img_dims`) or a
-logical matrix (returned in the same shape). Both
+accepts both `vertical` and `horizontal` offsets and combines them in a
+single call, so vertical-only and vertical-plus-horizontal tuning share
+the same idiom. It works on either a column-major logical vector (pass
+`img_dims`) or a logical matrix (returned in the same shape). Both
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
 and the `rel_*()` family accept a logical matrix as the `mask` argument,
 so the tuned grid can be passed in directly without flattening.
 
 Rendered over the same `artif_base.png` shown earlier (where the mouth
-sits noticeably below the default), the default mask and the two tuned
-variants look as follows:
+sits above the default), the default mask and the two tuned variants
+look as follows:
 
 ![Elliptical mouth-region mask before and after shift-tuning on a base
-face whose mouth sits below the default. Left: default geometry. Middle:
-shifted down by ~20 pixels (about 8 percent of image height). Right:
-same vertical shift plus an ~8-pixel rightward shift. Each panel renders
-one of the matrices produced by \`shift_mask()\` above. The same recipe
-works for \`nose\`, \`upper_face\`, \`lower_face\`, and the \`full\`
-oval; the three rectangle eye regions use \`region_bounds\`
+face whose mouth sits above the default. Left: default geometry. Middle:
+shifted up by 20 pixels (\`vertical = 20\`; about 8 percent of image
+height). Right: same vertical shift plus an 8-pixel rightward shift
+(\`vertical = 20, horizontal = 8\`). Each panel renders one of the
+matrices produced by \`shift_mask()\` above. The sign convention follows
+the math / y-axis-up idiom: positive \`vertical\` moves the mask up,
+negative moves it down; positive \`horizontal\` moves it right, negative
+moves it left. The same recipe works for \`nose\`, \`upper_face\`,
+\`lower_face\`, and the \`full\` oval; the three rectangle eye regions
+use \`region_bounds\`
 instead.](figures/face_masks/artificial_mouth_demo_default.png)![Elliptical
 mouth-region mask before and after shift-tuning on a base face whose
-mouth sits below the default. Left: default geometry. Middle: shifted
-down by ~20 pixels (about 8 percent of image height). Right: same
-vertical shift plus an ~8-pixel rightward shift. Each panel renders one
-of the matrices produced by \`shift_mask()\` above. The same recipe
-works for \`nose\`, \`upper_face\`, \`lower_face\`, and the \`full\`
-oval; the three rectangle eye regions use \`region_bounds\`
+mouth sits above the default. Left: default geometry. Middle: shifted up
+by 20 pixels (\`vertical = 20\`; about 8 percent of image height).
+Right: same vertical shift plus an 8-pixel rightward shift (\`vertical =
+20, horizontal = 8\`). Each panel renders one of the matrices produced
+by \`shift_mask()\` above. The sign convention follows the math /
+y-axis-up idiom: positive \`vertical\` moves the mask up, negative moves
+it down; positive \`horizontal\` moves it right, negative moves it left.
+The same recipe works for \`nose\`, \`upper_face\`, \`lower_face\`, and
+the \`full\` oval; the three rectangle eye regions use \`region_bounds\`
 instead.](figures/face_masks/artificial_mouth_demo_shift_v.png)![Elliptical
 mouth-region mask before and after shift-tuning on a base face whose
-mouth sits below the default. Left: default geometry. Middle: shifted
-down by ~20 pixels (about 8 percent of image height). Right: same
-vertical shift plus an ~8-pixel rightward shift. Each panel renders one
-of the matrices produced by \`shift_mask()\` above. The same recipe
-works for \`nose\`, \`upper_face\`, \`lower_face\`, and the \`full\`
-oval; the three rectangle eye regions use \`region_bounds\`
+mouth sits above the default. Left: default geometry. Middle: shifted up
+by 20 pixels (\`vertical = 20\`; about 8 percent of image height).
+Right: same vertical shift plus an 8-pixel rightward shift (\`vertical =
+20, horizontal = 8\`). Each panel renders one of the matrices produced
+by \`shift_mask()\` above. The sign convention follows the math /
+y-axis-up idiom: positive \`vertical\` moves the mask up, negative moves
+it down; positive \`horizontal\` moves it right, negative moves it left.
+The same recipe works for \`nose\`, \`upper_face\`, \`lower_face\`, and
+the \`full\` oval; the three rectangle eye regions use \`region_bounds\`
 instead.](figures/face_masks/artificial_mouth_demo_shift_vh.png)
 
 Elliptical mouth-region mask before and after shift-tuning on a base
-face whose mouth sits below the default. Left: default geometry. Middle:
-shifted down by ~20 pixels (about 8 percent of image height). Right:
-same vertical shift plus an ~8-pixel rightward shift. Each panel renders
-one of the matrices produced by
+face whose mouth sits above the default. Left: default geometry. Middle:
+shifted up by 20 pixels (`vertical = 20`; about 8 percent of image
+height). Right: same vertical shift plus an 8-pixel rightward shift
+(`vertical = 20, horizontal = 8`). Each panel renders one of the
+matrices produced by
 [`shift_mask()`](https://olivethree.github.io/rcisignal/reference/shift_mask.md)
-above. The same recipe works for `nose`, `upper_face`, `lower_face`, and
-the `full` oval; the three rectangle eye regions use `region_bounds`
-instead.
+above. The sign convention follows the math / y-axis-up idiom: positive
+`vertical` moves the mask up, negative moves it down; positive
+`horizontal` moves it right, negative moves it left. The same recipe
+works for `nose`, `upper_face`, `lower_face`, and the `full` oval; the
+three rectangle eye regions use `region_bounds` instead.
 
 Iterate with
 [`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
@@ -2605,14 +2625,16 @@ ci_matrix <- cbind(
 plot_ci_correlogram(ci_matrix)
 ```
 
-When the producers across conditions all live in one signal matrix (with
-one label per producer),
+When the producers across conditions all live in one signal matrix and
+the same `responses` data frame carries the condition column,
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
 is the shorter path to the same matrix:
 
 ``` r
 
-gcis <- group_ci(all_cis$signal_matrix, by = condition_per_producer)
+# `all_cis$signal_matrix` has one column per producer (named with
+# the producer ids); `responses` carries the condition column.
+gcis <- group_ci(all_cis$signal_matrix, responses, by = "condition")
 plot_ci_correlogram(gcis)
 ```
 
@@ -3418,15 +3440,6 @@ per region per condition:
 
 ``` r
 
-# Helper: for one trait label, return a named integer vector
-# giving the trial count per producer.
-trial_counts_for <- function(label) {
-  trials <- raw[raw$trait == label, ]
-  counts <- as.integer(table(trials$participant_id))
-  names(counts) <- unique(trials$participant_id)
-  counts
-}
-
 iv_grid <- expand.grid(
   trait  = c("trust", "friendly", "competent", "dominant"),
   region = regions,
@@ -3438,14 +3451,15 @@ iv_grid$n_above  <- NA_integer_
 for (i in seq_len(nrow(iv_grid))) {
   label  <- iv_grid$trait[i]
   region <- iv_grid$region[i]
-  sig    <- sm[[label]]                       # per-trait signal matrix
-  tc     <- trial_counts_for(label)
+  sig    <- sm[[label]]                          # per-trait signal matrix
+  resp   <- raw[raw$trait == label, ]            # trial-level rows for this trait
   m      <- make_face_mask(c(256L, 256L), region = region)
-  iv     <- infoval(sig, noise_matrix, tc,
-                    iter     = 1000L,
-                    mask     = m,
-                    seed     = 1L,
-                    progress = FALSE)
+  iv     <- infoval(sig, noise_matrix,
+                    responses = resp,            # infoval derives trial counts
+                    iter      = 1000L,
+                    mask      = m,
+                    seed      = 1L,
+                    progress  = FALSE)
   iv_grid$median_z[i] <- stats::median(iv$infoval)
   iv_grid$n_above[i]  <- sum(iv$infoval >= 1.96)
 }
@@ -3658,6 +3672,96 @@ Competent map retains noticeably more spatial extent than the Trust vs
 Friendly map. These maps extend Oliveira et al. (2019) by adding a
 between-condition inferential filter the original paper did not run.
 
+### 12.11 Producer agreement maps (within-condition)
+
+The pairwise maps in §12.10 ask *where two conditions differ*. A
+complementary question is *where, within one condition, do producers
+agree with each other?*.
+[`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+with `palette = "fire"` answers that visually: at each pixel it runs a
+one-sample t-test of the per-producer signals against zero, takes the
+absolute value, and renders `|t|` on a single-hue ramp. Pale-yellow
+pixels are places where producers did not consistently push in one
+direction (low agreement); deep-red pixels are where they pushed
+strongly and consistently in the same direction (high agreement). The
+unipolar `"fire"` view discards sign by design; pair with
+`palette = "diverging"` or with
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+if you also need to know which way the agreement points.
+
+The chunk below renders the four warmth / agency traits side-by-side on
+the male base face. A shared color scale (`zlim` fixed to the overall
+maximum `|t|` across the four panels) makes agreement magnitudes
+comparable across traits.
+
+``` r
+
+traits <- c("trust", "friendly", "competent", "dominant")
+panel_titles <- c(trust = "Trustworthy", friendly = "Friendly",
+                  competent = "Competent", dominant = "Dominant")
+
+# Restrict the agreement view to the full-face oval so background
+# pixels (hair, shoulders, margin) do not dominate the heatmap.
+face_mask <- make_face_mask(c(256L, 256L), region = "full")
+
+# One pass to find the shared maximum |t| inside the face mask
+# across the four traits, so panel colors are comparable.
+t_max <- max(vapply(traits, function(tr) {
+  res <- plot_agreement_map(sm[[tr]], palette = "fire",
+                            mask = face_mask, main = "")
+  max(abs(res$t_map[face_mask]), na.rm = TRUE)
+}, numeric(1L)))
+
+# Use layout() (not par(mfrow)) so each panel call cannot reset
+# the panel counter. Each panel gets its own colorbar against the
+# shared 0..t_max scale.
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for (tr in traits) {
+  plot_agreement_map(sm[[tr]],
+                     palette    = "fire",
+                     mask       = face_mask,
+                     base_image = base_face,
+                     zlim       = c(0, t_max),
+                     alpha_max  = 0.85,
+                     main       = panel_titles[[tr]],
+                     show_n     = FALSE)
+}
+```
+
+![Within-condition producer agreement maps for the four warmth / agency
+traits, restricted to the full-face oval. Each panel overlays the
+per-pixel one-sample agreement statistic \|t\| on the male base face:
+pale yellow marks pixels where the 20 producers in that condition did
+not consistently push in one direction (low agreement); deep red marks
+pixels where they consistently pushed strongly in the same direction
+(high agreement). Pixels outside the face oval are fully transparent
+(background, hair edges, shoulders, image margin) so only in-face
+agreement is shown. The four panels share a common color scale (the same
+maximum in-face \|t\| across the four traits) so panel-to-panel
+intensity is comparable. The fire palette discards sign by design; for
+the signed view (which direction the agreement points), use
+plot_ci_overlay() or palette =
+diverging.](figures/oliveira_2019/agreement_maps_fire.png)
+
+Within-condition producer agreement maps for the four warmth / agency
+traits, restricted to the full-face oval. Each panel overlays the
+per-pixel one-sample agreement statistic \|t\| on the male base face:
+pale yellow marks pixels where the 20 producers in that condition did
+not consistently push in one direction (low agreement); deep red marks
+pixels where they consistently pushed strongly in the same direction
+(high agreement). Pixels outside the face oval are fully transparent
+(background, hair edges, shoulders, image margin) so only in-face
+agreement is shown. The four panels share a common color scale (the same
+maximum in-face \|t\| across the four traits) so panel-to-panel
+intensity is comparable. The fire palette discards sign by design; for
+the signed view (which direction the agreement points), use
+plot_ci_overlay() or palette = diverging.
+
+Among the four traits on this dataset, friendly and dominant show the
+broadest spread of red across the face; competent’s agreement map looks
+more diffuse, consistent with its weaker group-mean infoVal (§12.4) and
+its low per-region median z (§12.9).
+
 ## 13. Brief-RC end-to-end
 
 The Brief-RC workflow follows the same diagnose, compute, and assess
@@ -3732,14 +3836,11 @@ signal <- res$signal_matrix
 run_reliability(signal, seed = 1L)
 
 # 5. Per-producer infoVal with trial-count-matched reference.
-# Each producer in this study did exactly 60 trials. Build a
-# named integer vector with one entry per producer.
-trial_counts <- rep(60L, ncol(signal))
-names(trial_counts) <- colnames(signal)
-
+# Pass the same trial-level data frame: infoval derives the
+# per-producer trial counts via table(responses$participant_id).
 infoval(signal, nm,
-        trial_counts = trial_counts,
-        iter         = 1000L, seed = 1L)
+        responses = briefrc_responses,
+        iter      = 1000L, seed = 1L)
 
 # 6. Save rendered CIs to PNG (visualization only). Do not
 #    feed these to rel_* or to hand-rolled infoVal.
@@ -4012,7 +4113,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation
-#>   Data and Classification Images_. R package version 0.1.9,
+#>   Data and Classification Images_. R package version 0.2.0,
 #>   <https://github.com/olivethree/rcisignal>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -4022,7 +4123,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> Images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.1.9},
+#>     note = {R package version 0.2.0},
 #>     url = {https://github.com/olivethree/rcisignal},
 #>   }
 ```

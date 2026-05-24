@@ -25,6 +25,7 @@ plot_agreement_map(
   base_image = NULL,
   alpha_max = 0.7,
   main = "Per-pixel producer agreement (t-map)",
+  show_n = TRUE,
   ...
 )
 ```
@@ -98,6 +99,12 @@ plot_agreement_map(
 - main:
 
   Title.
+
+- show_n:
+
+  Logical. When `TRUE` (default), draw the "N = ... producers, W x H
+  pixels" subtitle line below the title. Set `FALSE` for multi-panel
+  layouts where this information is already in the caption.
 
 - ...:
 

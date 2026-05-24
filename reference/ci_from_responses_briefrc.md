@@ -18,9 +18,9 @@ ci_from_responses_briefrc(
   rdata_path = NULL,
   noise_matrix = NULL,
   base_image = NULL,
-  participant_col = "participant_id",
-  stimulus_col = "stimulus",
-  response_col = "response",
+  col_participant = "participant_id",
+  col_stimulus = "stimulus",
+  col_response = "response",
   method = c("briefrc12", "briefrc20"),
   scaling = c("none", "matched", "constant"),
   scaling_constant = NULL,
@@ -33,7 +33,7 @@ ci_from_responses_briefrc(
 - responses:
 
   Data frame with one row per trial. Must contain the columns named by
-  `participant_col`, `stimulus_col`, `response_col`. `response` values
+  `col_participant`, `col_stimulus`, `col_response`. `response` values
   must be in `{-1, +1}`.
 
 - rdata_path, noise_matrix:
@@ -53,7 +53,7 @@ ci_from_responses_briefrc(
   visualization-only `$rendered_ci` field when `scaling` is `"matched"`
   or `"constant"`.
 
-- participant_col, stimulus_col, response_col:
+- col_participant, col_stimulus, col_response:
 
   Column names.
 

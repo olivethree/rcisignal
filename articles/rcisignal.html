@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,8 +51,6 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>rcisignal: User's Guide</h1>
-                        <h4 data-toc-skip class="author">Authored by:
-Manuel Oliveira</h4>
             
             <h4 data-toc-skip class="date">Last updated: 24-05-2026</h4>
       
@@ -213,9 +211,11 @@ Use it for side-by-side group plots, pairwise distance matrices
 <code>mask</code>, anything that needs producer-level information has to
 happen in stage 1.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Pass one label per producer (matching columns of signal_matrix).</span></span>
-<span><span class="va">gcis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/group_ci.html">group_ci</a></span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>,</span>
-<span>                 by <span class="op">=</span> <span class="va">participant_condition</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># `responses` is the same trial-level data frame you handed to</span></span>
+<span><span class="co"># ci_from_responses_*(). `by` names the column that holds the</span></span>
+<span><span class="co"># grouping label (one row per trial; rcisignal extracts the</span></span>
+<span><span class="co"># producer -&gt; condition map for you).</span></span>
+<span><span class="va">gcis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/group_ci.html">group_ci</a></span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>, <span class="va">responses</span>, by <span class="op">=</span> <span class="st">"condition"</span><span class="op">)</span></span>
 <span><span class="va">gcis</span>                       <span class="co"># pixels x n_groups, with attr "n"</span></span>
 <span><span class="fu"><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix</a></span><span class="op">(</span><span class="va">gcis</span><span class="op">)</span></span></code></pre></div>
 <p>The two stages are named contracts, not just a convention. If you
@@ -233,13 +233,13 @@ otherwise.</p>
 (<code><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix()</a></code>, <code><a href="../reference/plot_ci_mds.html">plot_ci_mds()</a></code>,
 <code><a href="../reference/plot_ci_correlogram.html">plot_ci_correlogram()</a></code>) are flexible about input shape: they
 accept a <code><a href="../reference/group_ci.html">group_ci()</a></code> result directly, a named numeric matrix
-of <code>pixels x n_groups</code>, or the historical named-list form
-(per-producer matrices, single-column matrices, or pixel vectors mixed
-in one list). The reduction to group means happens inside the plot
-function in every case. Use <code><a href="../reference/group_ci.html">group_ci()</a></code> whenever you have a
-single per-producer matrix and a labels vector; use the list form when
-your data already lives as a named collection of per-condition
-<code>signal_matrix</code> objects.</p>
+of <code>pixels x n_groups</code> (e.g. built with
+<code>cbind(name = rowMeans(...), ...)</code>), or the historical
+named-list form (per-producer matrices, single-column matrices, or pixel
+vectors mixed in one list). Use <code><a href="../reference/group_ci.html">group_ci()</a></code> whenever you
+have a single per-producer signal matrix plus the responses data frame
+that fed into it; use the matrix or list form when your per-condition
+CIs already live in separate objects.</p>
 </div>
 </div>
 <div class="section level2">
@@ -1448,29 +1448,38 @@ newly exposed edge is filled with <code>FALSE</code>.</p>
 <span>  nrow <span class="op">=</span> <span class="fl">256</span>, ncol <span class="op">=</span> <span class="fl">256</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Tune. On a 256-pixel image, 20 pixels is about 8 % of the</span></span>
-<span><span class="co"># height and 8 pixels is about 3 % of the width.</span></span>
-<span><span class="va">mouth_mask_v</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/shift_mask.html">shift_mask</a></span><span class="op">(</span><span class="va">mouth_mask_default</span>, down <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">mouth_mask_vh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/shift_mask.html">shift_mask</a></span><span class="op">(</span><span class="va">mouth_mask_default</span>, down <span class="op">=</span> <span class="fl">20</span>, right <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/shift_mask.html">shift_mask()</a></code> accepts both <code>down</code> and
-<code>right</code> and combines them in a single call, so vertical-only
-and vertical-plus-horizontal tuning share the same idiom. It works on
-either a column-major logical vector (pass <code>img_dims</code>) or a
-logical matrix (returned in the same shape). Both <code><a href="../reference/infoval.html">infoval()</a></code>
-and the <code>rel_*()</code> family accept a logical matrix as the
-<code>mask</code> argument, so the tuned grid can be passed in directly
-without flattening.</p>
+<span><span class="co"># Tune. Sign convention follows the math / y-axis-up idiom:</span></span>
+<span><span class="co"># positive `vertical` moves the mask up, negative moves it down;</span></span>
+<span><span class="co"># positive `horizontal` moves it right, negative moves it left.</span></span>
+<span><span class="co"># On this base the actual mouth sits *above* the default mask,</span></span>
+<span><span class="co"># so we shift up. 20 pixels is about 8 % of the 256-pixel</span></span>
+<span><span class="co"># height; 8 pixels is about 3 % of the width.</span></span>
+<span><span class="va">mouth_mask_v</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/shift_mask.html">shift_mask</a></span><span class="op">(</span><span class="va">mouth_mask_default</span>, vertical <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">mouth_mask_vh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/shift_mask.html">shift_mask</a></span><span class="op">(</span><span class="va">mouth_mask_default</span>,</span>
+<span>                            vertical <span class="op">=</span> <span class="fl">20</span>, horizontal <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/shift_mask.html">shift_mask()</a></code> accepts both <code>vertical</code> and
+<code>horizontal</code> offsets and combines them in a single call, so
+vertical-only and vertical-plus-horizontal tuning share the same idiom.
+It works on either a column-major logical vector (pass
+<code>img_dims</code>) or a logical matrix (returned in the same shape).
+Both <code><a href="../reference/infoval.html">infoval()</a></code> and the <code>rel_*()</code> family accept a
+logical matrix as the <code>mask</code> argument, so the tuned grid can
+be passed in directly without flattening.</p>
 <p>Rendered over the same <code>artif_base.png</code> shown earlier
-(where the mouth sits noticeably below the default), the default mask
-and the two tuned variants look as follows:</p>
+(where the mouth sits above the default), the default mask and the two
+tuned variants look as follows:</p>
 <div class="figure">
-<img src="figures/face_masks/artificial_mouth_demo_default.png" class="r-plt" alt="Elliptical mouth-region mask before and after shift-tuning on a base face whose mouth sits below the default. Left: default geometry. Middle: shifted down by ~20 pixels (about 8 percent of image height). Right: same vertical shift plus an ~8-pixel rightward shift. Each panel renders one of the matrices produced by `shift_mask()` above. The same recipe works for `nose`, `upper_face`, `lower_face`, and the `full` oval; the three rectangle eye regions use `region_bounds` instead." width="32%"><img src="figures/face_masks/artificial_mouth_demo_shift_v.png" class="r-plt" alt="Elliptical mouth-region mask before and after shift-tuning on a base face whose mouth sits below the default. Left: default geometry. Middle: shifted down by ~20 pixels (about 8 percent of image height). Right: same vertical shift plus an ~8-pixel rightward shift. Each panel renders one of the matrices produced by `shift_mask()` above. The same recipe works for `nose`, `upper_face`, `lower_face`, and the `full` oval; the three rectangle eye regions use `region_bounds` instead." width="32%"><img src="figures/face_masks/artificial_mouth_demo_shift_vh.png" class="r-plt" alt="Elliptical mouth-region mask before and after shift-tuning on a base face whose mouth sits below the default. Left: default geometry. Middle: shifted down by ~20 pixels (about 8 percent of image height). Right: same vertical shift plus an ~8-pixel rightward shift. Each panel renders one of the matrices produced by `shift_mask()` above. The same recipe works for `nose`, `upper_face`, `lower_face`, and the `full` oval; the three rectangle eye regions use `region_bounds` instead." width="32%"><p class="caption">
+<img src="figures/face_masks/artificial_mouth_demo_default.png" class="r-plt" alt="Elliptical mouth-region mask before and after shift-tuning on a base face whose mouth sits above the default. Left: default geometry. Middle: shifted up by 20 pixels (`vertical = 20`; about 8 percent of image height). Right: same vertical shift plus an 8-pixel rightward shift (`vertical = 20, horizontal = 8`). Each panel renders one of the matrices produced by `shift_mask()` above. The sign convention follows the math / y-axis-up idiom: positive `vertical` moves the mask up, negative moves it down; positive `horizontal` moves it right, negative moves it left. The same recipe works for `nose`, `upper_face`, `lower_face`, and the `full` oval; the three rectangle eye regions use `region_bounds` instead." width="32%"><img src="figures/face_masks/artificial_mouth_demo_shift_v.png" class="r-plt" alt="Elliptical mouth-region mask before and after shift-tuning on a base face whose mouth sits above the default. Left: default geometry. Middle: shifted up by 20 pixels (`vertical = 20`; about 8 percent of image height). Right: same vertical shift plus an 8-pixel rightward shift (`vertical = 20, horizontal = 8`). Each panel renders one of the matrices produced by `shift_mask()` above. The sign convention follows the math / y-axis-up idiom: positive `vertical` moves the mask up, negative moves it down; positive `horizontal` moves it right, negative moves it left. The same recipe works for `nose`, `upper_face`, `lower_face`, and the `full` oval; the three rectangle eye regions use `region_bounds` instead." width="32%"><img src="figures/face_masks/artificial_mouth_demo_shift_vh.png" class="r-plt" alt="Elliptical mouth-region mask before and after shift-tuning on a base face whose mouth sits above the default. Left: default geometry. Middle: shifted up by 20 pixels (`vertical = 20`; about 8 percent of image height). Right: same vertical shift plus an 8-pixel rightward shift (`vertical = 20, horizontal = 8`). Each panel renders one of the matrices produced by `shift_mask()` above. The sign convention follows the math / y-axis-up idiom: positive `vertical` moves the mask up, negative moves it down; positive `horizontal` moves it right, negative moves it left. The same recipe works for `nose`, `upper_face`, `lower_face`, and the `full` oval; the three rectangle eye regions use `region_bounds` instead." width="32%"><p class="caption">
 Elliptical mouth-region mask before and after shift-tuning on a base
-face whose mouth sits below the default. Left: default geometry. Middle:
-shifted down by ~20 pixels (about 8 percent of image height). Right:
-same vertical shift plus an ~8-pixel rightward shift. Each panel renders
+face whose mouth sits above the default. Left: default geometry. Middle:
+shifted up by 20 pixels (<code>vertical = 20</code>; about 8 percent of
+image height). Right: same vertical shift plus an 8-pixel rightward
+shift (<code>vertical = 20, horizontal = 8</code>). Each panel renders
 one of the matrices produced by <code><a href="../reference/shift_mask.html">shift_mask()</a></code> above. The
-same recipe works for <code>nose</code>, <code>upper_face</code>,
+sign convention follows the math / y-axis-up idiom: positive
+<code>vertical</code> moves the mask up, negative moves it down;
+positive <code>horizontal</code> moves it right, negative moves it left.
+The same recipe works for <code>nose</code>, <code>upper_face</code>,
 <code>lower_face</code>, and the <code>full</code> oval; the three
 rectangle eye regions use <code>region_bounds</code> instead.
 </p>
@@ -2636,10 +2645,13 @@ columns:</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_ci_correlogram.html">plot_ci_correlogram</a></span><span class="op">(</span><span class="va">ci_matrix</span><span class="op">)</span></span></code></pre></div>
 <p>When the producers across conditions all live in one signal matrix
-(with one label per producer), <code><a href="../reference/group_ci.html">group_ci()</a></code> is the shorter
-path to the same matrix:</p>
+and the same <code>responses</code> data frame carries the condition
+column, <code><a href="../reference/group_ci.html">group_ci()</a></code> is the shorter path to the same
+matrix:</p>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gcis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/group_ci.html">group_ci</a></span><span class="op">(</span><span class="va">all_cis</span><span class="op">$</span><span class="va">signal_matrix</span>, by <span class="op">=</span> <span class="va">condition_per_producer</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># `all_cis$signal_matrix` has one column per producer (named with</span></span>
+<span><span class="co"># the producer ids); `responses` carries the condition column.</span></span>
+<span><span class="va">gcis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/group_ci.html">group_ci</a></span><span class="op">(</span><span class="va">all_cis</span><span class="op">$</span><span class="va">signal_matrix</span>, <span class="va">responses</span>, by <span class="op">=</span> <span class="st">"condition"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_ci_correlogram.html">plot_ci_correlogram</a></span><span class="op">(</span><span class="va">gcis</span><span class="op">)</span></span></code></pre></div>
 <p>Same diverging convention as the rest of the package’s
 direction-bearing plots: positive <code>r</code> = blue, negative = red;
@@ -3647,16 +3659,7 @@ group CI looks weak overall may carry stronger signal in one specific
 region, and vice versa. Run <code><a href="../reference/infoval.html">infoval()</a></code> per region per
 condition:</p>
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Helper: for one trait label, return a named integer vector</span></span>
-<span><span class="co"># giving the trial count per producer.</span></span>
-<span><span class="va">trial_counts_for</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">trials</span> <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span> <span class="op">==</span> <span class="va">label</span>, <span class="op">]</span></span>
-<span>  <span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">participant_id</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">participant_id</span><span class="op">)</span></span>
-<span>  <span class="va">counts</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">iv_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">iv_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
 <span>  trait  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"trust"</span>, <span class="st">"friendly"</span>, <span class="st">"competent"</span>, <span class="st">"dominant"</span><span class="op">)</span>,</span>
 <span>  region <span class="op">=</span> <span class="va">regions</span>,</span>
 <span>  stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -3667,14 +3670,15 @@ condition:</p>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iv_grid</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">label</span>  <span class="op">&lt;-</span> <span class="va">iv_grid</span><span class="op">$</span><span class="va">trait</span><span class="op">[</span><span class="va">i</span><span class="op">]</span></span>
 <span>  <span class="va">region</span> <span class="op">&lt;-</span> <span class="va">iv_grid</span><span class="op">$</span><span class="va">region</span><span class="op">[</span><span class="va">i</span><span class="op">]</span></span>
-<span>  <span class="va">sig</span>    <span class="op">&lt;-</span> <span class="va">sm</span><span class="op">[[</span><span class="va">label</span><span class="op">]</span><span class="op">]</span>                       <span class="co"># per-trait signal matrix</span></span>
-<span>  <span class="va">tc</span>     <span class="op">&lt;-</span> <span class="fu">trial_counts_for</span><span class="op">(</span><span class="va">label</span><span class="op">)</span></span>
+<span>  <span class="va">sig</span>    <span class="op">&lt;-</span> <span class="va">sm</span><span class="op">[[</span><span class="va">label</span><span class="op">]</span><span class="op">]</span>                          <span class="co"># per-trait signal matrix</span></span>
+<span>  <span class="va">resp</span>   <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">trait</span> <span class="op">==</span> <span class="va">label</span>, <span class="op">]</span>            <span class="co"># trial-level rows for this trait</span></span>
 <span>  <span class="va">m</span>      <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_face_mask.html">make_face_mask</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>, region <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span>
-<span>  <span class="va">iv</span>     <span class="op">&lt;-</span> <span class="fu"><a href="../reference/infoval.html">infoval</a></span><span class="op">(</span><span class="va">sig</span>, <span class="va">noise_matrix</span>, <span class="va">tc</span>,</span>
-<span>                    iter     <span class="op">=</span> <span class="fl">1000L</span>,</span>
-<span>                    mask     <span class="op">=</span> <span class="va">m</span>,</span>
-<span>                    seed     <span class="op">=</span> <span class="fl">1L</span>,</span>
-<span>                    progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">iv</span>     <span class="op">&lt;-</span> <span class="fu"><a href="../reference/infoval.html">infoval</a></span><span class="op">(</span><span class="va">sig</span>, <span class="va">noise_matrix</span>,</span>
+<span>                    responses <span class="op">=</span> <span class="va">resp</span>,            <span class="co"># infoval derives trial counts</span></span>
+<span>                    iter      <span class="op">=</span> <span class="fl">1000L</span>,</span>
+<span>                    mask      <span class="op">=</span> <span class="va">m</span>,</span>
+<span>                    seed      <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>                    progress  <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span>  <span class="va">iv_grid</span><span class="op">$</span><span class="va">median_z</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">iv</span><span class="op">$</span><span class="va">infoval</span><span class="op">)</span></span>
 <span>  <span class="va">iv_grid</span><span class="op">$</span><span class="va">n_above</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">iv</span><span class="op">$</span><span class="va">infoval</span> <span class="op">&gt;=</span> <span class="fl">1.96</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -3932,6 +3936,79 @@ Competent map retains noticeably more spatial extent than the Trust vs
 Friendly map. These maps extend Oliveira et al. (2019) by adding a
 between-condition inferential filter the original paper did not run.</p>
 </div>
+<div class="section level3">
+<h3 id="producer-agreement-maps-within-condition">12.11 Producer agreement maps (within-condition)<a class="anchor" aria-label="anchor" href="#producer-agreement-maps-within-condition"></a>
+</h3>
+<p>The pairwise maps in §12.10 ask <em>where two conditions differ</em>.
+A complementary question is <em>where, within one condition, do
+producers agree with each other?</em>. <code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code>
+with <code>palette = "fire"</code> answers that visually: at each pixel
+it runs a one-sample t-test of the per-producer signals against zero,
+takes the absolute value, and renders <code>|t|</code> on a single-hue
+ramp. Pale-yellow pixels are places where producers did not consistently
+push in one direction (low agreement); deep-red pixels are where they
+pushed strongly and consistently in the same direction (high agreement).
+The unipolar <code>"fire"</code> view discards sign by design; pair with
+<code>palette = "diverging"</code> or with
+<code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code> if you also need to know which way the
+agreement points.</p>
+<p>The chunk below renders the four warmth / agency traits side-by-side
+on the male base face. A shared color scale (<code>zlim</code> fixed to
+the overall maximum <code>|t|</code> across the four panels) makes
+agreement magnitudes comparable across traits.</p>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">traits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"trust"</span>, <span class="st">"friendly"</span>, <span class="st">"competent"</span>, <span class="st">"dominant"</span><span class="op">)</span></span>
+<span><span class="va">panel_titles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>trust <span class="op">=</span> <span class="st">"Trustworthy"</span>, friendly <span class="op">=</span> <span class="st">"Friendly"</span>,</span>
+<span>                  competent <span class="op">=</span> <span class="st">"Competent"</span>, dominant <span class="op">=</span> <span class="st">"Dominant"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Restrict the agreement view to the full-face oval so background</span></span>
+<span><span class="co"># pixels (hair, shoulders, margin) do not dominate the heatmap.</span></span>
+<span><span class="va">face_mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_face_mask.html">make_face_mask</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>, region <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># One pass to find the shared maximum |t| inside the face mask</span></span>
+<span><span class="co"># across the four traits, so panel colors are comparable.</span></span>
+<span><span class="va">t_max</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">traits</span>, <span class="kw">function</span><span class="op">(</span><span class="va">tr</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_agreement_map.html">plot_agreement_map</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="va">tr</span><span class="op">]</span><span class="op">]</span>, palette <span class="op">=</span> <span class="st">"fire"</span>,</span>
+<span>                            mask <span class="op">=</span> <span class="va">face_mask</span>, main <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">t_map</span><span class="op">[</span><span class="va">face_mask</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1L</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Use layout() (not par(mfrow)) so each panel call cannot reset</span></span>
+<span><span class="co"># the panel counter. Each panel gets its own colorbar against the</span></span>
+<span><span class="co"># shared 0..t_max scale.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/layout.html" class="external-link">layout</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, nrow <span class="op">=</span> <span class="fl">2</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">tr</span> <span class="kw">in</span> <span class="va">traits</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/plot_agreement_map.html">plot_agreement_map</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="va">tr</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>                     palette    <span class="op">=</span> <span class="st">"fire"</span>,</span>
+<span>                     mask       <span class="op">=</span> <span class="va">face_mask</span>,</span>
+<span>                     base_image <span class="op">=</span> <span class="va">base_face</span>,</span>
+<span>                     zlim       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">t_max</span><span class="op">)</span>,</span>
+<span>                     alpha_max  <span class="op">=</span> <span class="fl">0.85</span>,</span>
+<span>                     main       <span class="op">=</span> <span class="va">panel_titles</span><span class="op">[[</span><span class="va">tr</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>                     show_n     <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="figure">
+<img src="figures/oliveira_2019/agreement_maps_fire.png" class="r-plt" alt="Within-condition producer agreement maps for the four warmth / agency traits, restricted to the full-face oval. Each panel overlays the per-pixel one-sample agreement statistic |t| on the male base face: pale yellow marks pixels where the 20 producers in that condition did not consistently push in one direction (low agreement); deep red marks pixels where they consistently pushed strongly in the same direction (high agreement). Pixels outside the face oval are fully transparent (background, hair edges, shoulders, image margin) so only in-face agreement is shown. The four panels share a common color scale (the same maximum in-face |t| across the four traits) so panel-to-panel intensity is comparable. The fire palette discards sign by design; for the signed view (which direction the agreement points), use plot_ci_overlay() or palette = diverging." width="100%"><p class="caption">
+Within-condition producer agreement maps for the four warmth / agency
+traits, restricted to the full-face oval. Each panel overlays the
+per-pixel one-sample agreement statistic |t| on the male base face: pale
+yellow marks pixels where the 20 producers in that condition did not
+consistently push in one direction (low agreement); deep red marks
+pixels where they consistently pushed strongly in the same direction
+(high agreement). Pixels outside the face oval are fully transparent
+(background, hair edges, shoulders, image margin) so only in-face
+agreement is shown. The four panels share a common color scale (the same
+maximum in-face |t| across the four traits) so panel-to-panel intensity
+is comparable. The fire palette discards sign by design; for the signed
+view (which direction the agreement points), use plot_ci_overlay() or
+palette = diverging.
+</p>
+</div>
+<p>Among the four traits on this dataset, friendly and dominant show the
+broadest spread of red across the face; competent’s agreement map looks
+more diffuse, consistent with its weaker group-mean infoVal (§12.4) and
+its low per-region median z (§12.9).</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="brief-rc-end-to-end">13. Brief-RC end-to-end<a class="anchor" aria-label="anchor" href="#brief-rc-end-to-end"></a>
@@ -3978,7 +4055,7 @@ result should be reported as exploratory.</p>
 <div class="section level3">
 <h3 id="end-to-end-brief-rc-example">13.2 End-to-end Brief-RC example<a class="anchor" aria-label="anchor" href="#end-to-end-brief-rc-example"></a>
 </h3>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 1. Read the Schmitz et al. 2024 noise matrix directly. You</span></span>
@@ -4010,14 +4087,11 @@ result should be reported as exploratory.</p>
 <span><span class="fu"><a href="../reference/run_reliability.html">run_reliability</a></span><span class="op">(</span><span class="va">signal</span>, seed <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 5. Per-producer infoVal with trial-count-matched reference.</span></span>
-<span><span class="co"># Each producer in this study did exactly 60 trials. Build a</span></span>
-<span><span class="co"># named integer vector with one entry per producer.</span></span>
-<span><span class="va">trial_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">60L</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">signal</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trial_counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">signal</span><span class="op">)</span></span>
-<span></span>
+<span><span class="co"># Pass the same trial-level data frame: infoval derives the</span></span>
+<span><span class="co"># per-producer trial counts via table(responses$participant_id).</span></span>
 <span><span class="fu"><a href="../reference/infoval.html">infoval</a></span><span class="op">(</span><span class="va">signal</span>, <span class="va">nm</span>,</span>
-<span>        trial_counts <span class="op">=</span> <span class="va">trial_counts</span>,</span>
-<span>        iter         <span class="op">=</span> <span class="fl">1000L</span>, seed <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
+<span>        responses <span class="op">=</span> <span class="va">briefrc_responses</span>,</span>
+<span>        iter      <span class="op">=</span> <span class="fl">1000L</span>, seed <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 6. Save rendered CIs to PNG (visualization only). Do not</span></span>
 <span><span class="co">#    feed these to rel_* or to hand-rolled infoVal.</span></span>
@@ -4175,7 +4249,7 @@ Brinkman-style per- producer distribution.</p>
 </h3>
 <p>If a per-producer infoVal table looks worryingly low, work through
 these steps before reporting it:</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sm</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span></span>
 <span></span>
 <span><span class="co"># Each producer in this study did 300 trials. Build a named</span></span>
@@ -4268,7 +4342,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <div class="section level2">
 <h2 id="citation">16. Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"rcisignal"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"rcisignal"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
@@ -4281,7 +4355,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt; To cite package 'rcisignal' in publications use:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation</span></span>
-<span><span class="co">#&gt;   Data and Classification Images_. R package version 0.1.9,</span></span>
+<span><span class="co">#&gt;   Data and Classification Images_. R package version 0.2.0,</span></span>
 <span><span class="co">#&gt;   &lt;https://github.com/olivethree/rcisignal&gt;.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
@@ -4291,7 +4365,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt; Images},</span></span>
 <span><span class="co">#&gt;     author = {Manuel Oliveira},</span></span>
 <span><span class="co">#&gt;     year = {2026},</span></span>
-<span><span class="co">#&gt;     note = {R package version 0.1.9},</span></span>
+<span><span class="co">#&gt;     note = {R package version 0.2.0},</span></span>
 <span><span class="co">#&gt;     url = {https://github.com/olivethree/rcisignal},</span></span>
 <span><span class="co">#&gt;   }</span></span></code></pre></div>
 </div>

@@ -8,10 +8,22 @@ Stage-2 aggregator of the rcisignal pipeline. Collapses a per-producer
 into a per-group matrix (pixels x n_groups) for use with the
 distance-matrix, MDS, and correlogram plot functions.
 
+Uses the same "data frame plus column name" idiom as every other
+responses-consuming function in the package: pass the trial-level
+`responses` data frame, plus the name of the column you want to group
+by. Producer-to-group alignment happens internally via
+`colnames(signal_matrix)`.
+
 ## Usage
 
 ``` r
-group_ci(signal_matrix, by, drop = TRUE)
+group_ci(
+  signal_matrix,
+  responses,
+  by,
+  col_participant = "participant_id",
+  drop = TRUE
+)
 ```
 
 ## Arguments
@@ -22,15 +34,30 @@ group_ci(signal_matrix, by, drop = TRUE)
   [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
   or
   [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
-  in their `$signal_matrix` field. The column count must match
-  `length(by)` (or `length(by[[1]])` when `by` is a list).
+  in their `$signal_matrix` field. Must have non-empty column names (the
+  producer ids that map into `responses[[col_participant]]`).
+
+- responses:
+
+  Trial-level data frame containing one row per trial. Must contain the
+  column named by `col_participant` (mapping to
+  `colnames(signal_matrix)`) and every column named in `by`. Each
+  producer's `by` value(s) must be consistent across all of their rows;
+  an inconsistency aborts with a teaching message naming the offending
+  producer.
 
 - by:
 
-  Either an atomic vector of length `ncol(signal_matrix)` (one group
-  label per producer) or a named list of such vectors for factorial
-  grouping (cell names are the levels joined by `"_"`). Coerced to
-  factor; `NA` levels are dropped with a warning naming the count.
+  Character vector of column names in `responses`. Length 1 selects a
+  single grouping column (e.g. `by = "condition"`). Length 2+ produces a
+  factorial grouping where cell labels are the levels joined with `"_"`
+  in the given order (e.g. `by = c("condition", "sex")` yields cells
+  like `"happy_F"`).
+
+- col_participant:
+
+  Name of the participant-id column in `responses`. Default
+  `"participant_id"`, matching the rest of the package.
 
 - drop:
 
@@ -53,14 +80,15 @@ A numeric matrix of pixels x n_groups, classed
 ## Details
 
 The package has two stages. Stage 1 (per-producer `signal_matrix`) is
-the only object accepted by reliability, discriminability, and infoVal
-functions. Stage 2 (group-averaged matrix) is for plotting, RDM-style
-comparison, and MDS. `group_ci()` is the stage-1-to-stage-2 transformer.
+the only object accepted by reliability, discriminability, and
+informational-value functions. Stage 2 (group-averaged matrix) is for
+plotting, RDM-style comparison, and MDS. `group_ci()` is the
+stage-1-to-stage-2 transformer.
 
 For each group, the corresponding output column is
-`rowMeans(signal_matrix[, producers_in_group, drop = FALSE])`. When `by`
-is a list, the cell label is the levels joined by `"_"` in the order the
-list elements are given.
+`rowMeans(signal_matrix[, producers_in_group, drop = FALSE])`. For a
+factorial `by` (length 2+), the cell label is the levels joined by `"_"`
+in the column order given.
 
 `group_ci()` does not accept (and will never accept) `trial_counts`,
 `noise_matrix`, or `mask`. Anything that needs producer-level
@@ -79,32 +107,21 @@ Downstream (stage 2):
 ## Examples
 
 ``` r
-set.seed(1)
-n_pix  <- 32L * 32L
-n_prod <- 12L
-sm <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod,
-             dimnames = list(NULL, sprintf("p%02d", seq_len(n_prod))))
-attr(sm, "img_dims") <- c(32L, 32L)
-g <- rep(c("A", "B"), each = n_prod / 2L)
-gcis <- group_ci(sm, by = g)
-dim(gcis)                 # n_pix x 2
-#> [1] 1024    2
-attr(gcis, "n")           # named per-group producer counts
-#> A B 
-#> 6 6 
-
 if (FALSE) { # \dontrun{
-# Realistic end-to-end: simulate, build per-producer CIs, collapse.
+# End-to-end: simulate two conditions, build per-producer CIs,
+# collapse into one CI per condition.
 sim <- simulate_briefrc_data(
   n_per_condition = 10, n_trials = 60,
   conditions = c("A", "B"), seed = 1
 )
-cis <- ci_from_responses_briefrc(sim$data,
-                                 noise_matrix = sim$noise_matrix)
-producer_to_cond <- sim$data$condition[match(
-  colnames(cis$signal_matrix), sim$data$participant_id)]
-gcis <- group_ci(cis$signal_matrix, by = producer_to_cond)
-plot_ci_distance_matrix(gcis,
-  img_dims = c(sim$meta$img_size, sim$meta$img_size))
+cis  <- ci_from_responses_briefrc(sim$data,
+                                  noise_matrix = sim$noise_matrix)
+gcis <- group_ci(cis$signal_matrix, sim$data, by = "condition")
+gcis                              # n_pixels x 2 (A and B)
+attr(gcis, "n")                   # per-group producer counts
+
+# Factorial grouping via two columns:
+# gcis_fact <- group_ci(cis$signal_matrix, sim$data,
+#                       by = c("condition", "sex"))
 } # }
 ```

@@ -17,7 +17,7 @@ the statistic is computed."><meta property="og:image" content="https://olivethre
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,9 @@ the statistic is computed.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">infoval</span><span class="op">(</span></span>
 <span>  <span class="va">signal_matrix</span>,</span>
 <span>  <span class="va">noise_matrix</span>,</span>
-<span>  <span class="va">trial_counts</span>,</span>
+<span>  trial_counts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  responses <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  col_participant <span class="op">=</span> <span class="st">"participant_id"</span>,</span>
 <span>  iter <span class="op">=</span> <span class="fl">10000L</span>,</span>
 <span>  mask <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  with_replacement <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
@@ -83,8 +85,24 @@ patterns. Row count must match <code>signal_matrix</code>.</p></dd>
 
 
 <dt id="arg-trial-counts">trial_counts<a class="anchor" aria-label="anchor" href="#arg-trial-counts"></a></dt>
-<dd><p>Named integer vector of trial counts per
-producer. Names must match <code>colnames(signal_matrix)</code>.</p></dd>
+<dd><p>Optional named integer vector of trial
+counts per producer; names must match
+<code>colnames(signal_matrix)</code>. If omitted, pass <code>responses</code> and
+<code>infoval()</code> will derive <code>trial_counts</code> via
+<code>table(responses[[col_participant]])</code>.</p></dd>
+
+
+<dt id="arg-responses">responses<a class="anchor" aria-label="anchor" href="#arg-responses"></a></dt>
+<dd><p>Optional trial-level data frame (the same one
+you handed to <code>ci_from_responses_*()</code>). When supplied,
+<code>trial_counts</code> is derived internally so you do not need to
+build the named integer vector by hand. Ignored when
+<code>trial_counts</code> is supplied directly.</p></dd>
+
+
+<dt id="arg-col-participant">col_participant<a class="anchor" aria-label="anchor" href="#arg-col-participant"></a></dt>
+<dd><p>Name of the participant-id column in
+<code>responses</code>. Default <code>"participant_id"</code>.</p></dd>
 
 
 <dt id="arg-iter">iter<a class="anchor" aria-label="anchor" href="#arg-iter"></a></dt>
@@ -214,16 +232,14 @@ representations. <em>European Journal of Social Psychology</em>.
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Same function, richer input: plant a strong signal in the eye region</span></span></span>
-<span class="r-in"><span><span class="co"># so per-producer infoVal z values mostly clear the 1.96 threshold.</span></span></span>
+<span class="r-in"><span><span class="co"># End-to-end: pass `responses` and let infoval derive trial counts.</span></span></span>
 <span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_briefrc_data.html">simulate_briefrc_data</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  n_per_condition <span class="op">=</span> <span class="fl">20</span>, n_trials <span class="op">=</span> <span class="fl">60</span>, conditions <span class="op">=</span> <span class="st">"target"</span>,</span></span>
 <span class="r-in"><span>  signal_region <span class="op">=</span> <span class="st">"eyes"</span>, signal_strength <span class="op">=</span> <span class="st">"strong"</span>, seed <span class="op">=</span> <span class="fl">1</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cis</span> <span class="op">&lt;-</span> <span class="fu"><a href="ci_from_responses_briefrc.html">ci_from_responses_briefrc</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span>, noise_matrix <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">noise_matrix</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">trial_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">participant_id</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">infoval</span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>, <span class="va">sim</span><span class="op">$</span><span class="va">noise_matrix</span>, <span class="va">trial_counts</span>,</span></span>
-<span class="r-in"><span>        iter <span class="op">=</span> <span class="fl">500L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">infoval</span><span class="op">(</span><span class="va">cis</span><span class="op">$</span><span class="va">signal_matrix</span>, <span class="va">sim</span><span class="op">$</span><span class="va">noise_matrix</span>,</span></span>
+<span class="r-in"><span>        responses <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">data</span>, iter <span class="op">=</span> <span class="fl">500L</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

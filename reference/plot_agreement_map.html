@@ -29,7 +29,7 @@ side by side.'><meta property="og:image" content="https://olivethree.github.io/r
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,6 +82,7 @@ side by side.</p>
 <span>  base_image <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha_max <span class="op">=</span> <span class="fl">0.7</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"Per-pixel producer agreement (t-map)"</span>,</span>
+<span>  show_n <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -153,6 +154,13 @@ is supplied. Ignored otherwise. Default 0.7.</p></dd>
 
 <dt id="arg-main">main<a class="anchor" aria-label="anchor" href="#arg-main"></a></dt>
 <dd><p>Title.</p></dd>
+
+
+<dt id="arg-show-n">show_n<a class="anchor" aria-label="anchor" href="#arg-show-n"></a></dt>
+<dd><p>Logical. When <code>TRUE</code> (default), draw the
+"N = ... producers, W x H pixels" subtitle line below the
+title. Set <code>FALSE</code> for multi-panel layouts where this
+information is already in the caption.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

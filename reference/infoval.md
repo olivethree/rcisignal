@@ -12,7 +12,9 @@ single function: the difference is entirely in what the user passes as
 infoval(
   signal_matrix,
   noise_matrix,
-  trial_counts,
+  trial_counts = NULL,
+  responses = NULL,
+  col_participant = "participant_id",
   iter = 10000L,
   mask = NULL,
   with_replacement = c("auto", TRUE, FALSE),
@@ -38,8 +40,22 @@ infoval(
 
 - trial_counts:
 
-  Named integer vector of trial counts per producer. Names must match
-  `colnames(signal_matrix)`.
+  Optional named integer vector of trial counts per producer; names must
+  match `colnames(signal_matrix)`. If omitted, pass `responses` and
+  `infoval()` will derive `trial_counts` via
+  `table(responses[[col_participant]])`.
+
+- responses:
+
+  Optional trial-level data frame (the same one you handed to
+  `ci_from_responses_*()`). When supplied, `trial_counts` is derived
+  internally so you do not need to build the named integer vector by
+  hand. Ignored when `trial_counts` is supplied directly.
+
+- col_participant:
+
+  Name of the participant-id column in `responses`. Default
+  `"participant_id"`.
 
 - iter:
 
@@ -186,15 +202,13 @@ print(iv)
 } # }
 
 if (FALSE) { # \dontrun{
-# Same function, richer input: plant a strong signal in the eye region
-# so per-producer infoVal z values mostly clear the 1.96 threshold.
+# End-to-end: pass `responses` and let infoval derive trial counts.
 sim <- simulate_briefrc_data(
   n_per_condition = 20, n_trials = 60, conditions = "target",
   signal_region = "eyes", signal_strength = "strong", seed = 1
 )
 cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
-trial_counts <- as.integer(table(sim$data$participant_id))
-infoval(cis$signal_matrix, sim$noise_matrix, trial_counts,
-        iter = 500L, seed = 1)
+infoval(cis$signal_matrix, sim$noise_matrix,
+        responses = sim$data, iter = 500L, seed = 1)
 } # }
 ```

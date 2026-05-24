@@ -16,9 +16,9 @@ ci_from_responses_2ifc(
   rdata_path = NULL,
   stimuli = NULL,
   base_image = NULL,
-  participant_col = "participant_id",
-  stimulus_col = "stimulus",
-  response_col = "response",
+  col_participant = "participant_id",
+  col_stimulus = "stimulus",
+  col_response = "response",
   scaling = "autoscale",
   keep_rendered = FALSE,
   targetpath = tempfile("rcisignal_2ifc_"),
@@ -30,9 +30,9 @@ ci_from_responses_2ifc(
 
 - responses:
 
-  A data frame with one row per trial. Must contain `participant_col`
-  (producer id), the column named by `stimulus_col` (stimulus id,
-  integer, index into the rcicr noise pool), and `response_col` with
+  A data frame with one row per trial. Must contain `col_participant`
+  (producer id), the column named by `col_stimulus` (stimulus id,
+  integer, index into the rcicr noise pool), and `col_response` with
   values in `{-1, +1}`.
 
 - rdata_path:
@@ -68,7 +68,7 @@ ci_from_responses_2ifc(
     injected into a temporary copy of the rdata under a synthetic label
     so the rcicr call sees the same structure it always has.
 
-- participant_col, stimulus_col, response_col:
+- col_participant, col_stimulus, col_response:
 
   Column names in `responses`.
 

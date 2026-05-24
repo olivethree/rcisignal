@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,38 @@
       <small>Source: <a href="https://github.com/olivethree/rcisignal/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="rcisignal-020">rcisignal 0.2.0<a class="anchor" aria-label="anchor" href="#rcisignal-020"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
+<ul><li>
+<p><code><a href="../reference/group_ci.html">group_ci()</a></code> redesigned. The vector / list-of-vectors <code>by</code> argument is gone. New signature:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/group_ci.html">group_ci</a></span><span class="op">(</span><span class="va">signal_matrix</span>, <span class="va">responses</span>, <span class="va">by</span>,</span>
+<span>         col_participant <span class="op">=</span> <span class="st">"participant_id"</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><code>responses</code> is the same trial-level data frame you handed to <code>ci_from_responses_*()</code>; <code>by</code> is the name of the grouping column (or a character vector of column names for factorial grouping). Producer-to-group alignment happens internally via <code>colnames(signal_matrix)</code>. Migration:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Before:</span></span>
+<span><span class="va">cond</span> <span class="op">&lt;-</span> <span class="va">responses</span><span class="op">$</span><span class="va">condition</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sm</span><span class="op">)</span>, <span class="va">responses</span><span class="op">$</span><span class="va">participant_id</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">gcis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/group_ci.html">group_ci</a></span><span class="op">(</span><span class="va">sm</span>, by <span class="op">=</span> <span class="va">cond</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Now:</span></span>
+<span><span class="va">gcis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/group_ci.html">group_ci</a></span><span class="op">(</span><span class="va">sm</span>, <span class="va">responses</span>, by <span class="op">=</span> <span class="st">"condition"</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/group_ci.html">group_ci()</a></code> also validates that every producer in <code>colnames(signal_matrix)</code> is present in <code>responses</code>, and that each producer’s <code>by</code> column(s) are constant across their rows. Both checks fail with teaching messages naming the offending producer.</p>
+</li>
+<li><p><code><a href="../reference/shift_mask.html">shift_mask()</a></code> arguments renamed and <code>vertical</code> sign flipped. <code>down</code> -&gt; <code>vertical</code>, <code>right</code> -&gt; <code>horizontal</code>. The new <code>vertical</code> follows the math / y-axis-up idiom (positive moves the mask up, negative moves it down); <code>horizontal</code> keeps the intuitive convention (positive right, negative left). Migration: rename <code>down = N</code> -&gt; <code>vertical = -N</code> (note the sign flip), <code>right = N</code> -&gt; <code>horizontal = N</code>. No deprecation alias.</p></li>
+<li><p>Column-name arguments standardized on the <code>col_*</code> convention in the two CI builders. Renamed: <code>ci_from_responses_briefrc(participant_col, stimulus_col, response_col)</code> -&gt; <code>(col_participant, col_stimulus, col_response)</code>; same for <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>. Every other responses-consuming function (<code>check_*</code>, <code>diagnose_*</code>, <code>compute_*</code>, <code>run_*</code>) already used <code>col_*</code>; the package is now uniform. No deprecation alias; calls using the old names fail with the standard R unused-argument error.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
+<ul><li><p><code><a href="../reference/infoval.html">infoval()</a></code> gains a <code>responses = NULL</code>, <code>col_participant = "participant_id"</code> path. When <code>trial_counts</code> is omitted, <code><a href="../reference/infoval.html">infoval()</a></code> derives it internally via <code>table(responses[[col_participant]])</code> and matches against <code>colnames(signal_matrix)</code>. Existing scripts that pass <code>trial_counts</code> directly continue to work unchanged.</p></li>
+<li><p><code><a href="../reference/run_reliability.html">run_reliability()</a></code> validates <code>noise_matrix</code> at function entry when <code>null = "random_responders"</code>, with a teaching message pointing at <code><a href="../reference/read_noise_matrix.html">read_noise_matrix()</a></code>. Replaces a deeper cryptic abort that used to fire inside <code><a href="../reference/rel_split_half.html">rel_split_half()</a></code>.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>
+<ul><li>Vignette §1.3 (two-stage pattern), §10.5, and the worked-example cross-references updated to use the new <code><a href="../reference/group_ci.html">group_ci()</a></code> idiom. §9 (infoval) and roxygen <code>@examples</code> on <code><a href="../reference/infoval.html">infoval()</a></code> updated to lead with the <code>responses</code> path.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.9" id="rcisignal-019">rcisignal 0.1.9<a class="anchor" aria-label="anchor" href="#rcisignal-019"></a></h2>
 <div class="section level3">

@@ -1,5 +1,85 @@
 # Changelog
 
+## rcisignal 0.2.0
+
+### Breaking changes
+
+- [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  redesigned. The vector / list-of-vectors `by` argument is gone. New
+  signature:
+
+  ``` r
+
+  group_ci(signal_matrix, responses, by,
+           col_participant = "participant_id", drop = TRUE)
+  ```
+
+  `responses` is the same trial-level data frame you handed to
+  `ci_from_responses_*()`; `by` is the name of the grouping column (or a
+  character vector of column names for factorial grouping).
+  Producer-to-group alignment happens internally via
+  `colnames(signal_matrix)`. Migration:
+
+  ``` r
+
+  # Before:
+  cond <- responses$condition[match(colnames(sm), responses$participant_id)]
+  gcis <- group_ci(sm, by = cond)
+
+  # Now:
+  gcis <- group_ci(sm, responses, by = "condition")
+  ```
+
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  also validates that every producer in `colnames(signal_matrix)` is
+  present in `responses`, and that each producer’s `by` column(s) are
+  constant across their rows. Both checks fail with teaching messages
+  naming the offending producer.
+
+- [`shift_mask()`](https://olivethree.github.io/rcisignal/reference/shift_mask.md)
+  arguments renamed and `vertical` sign flipped. `down` -\> `vertical`,
+  `right` -\> `horizontal`. The new `vertical` follows the math /
+  y-axis-up idiom (positive moves the mask up, negative moves it down);
+  `horizontal` keeps the intuitive convention (positive right, negative
+  left). Migration: rename `down = N` -\> `vertical = -N` (note the sign
+  flip), `right = N` -\> `horizontal = N`. No deprecation alias.
+
+- Column-name arguments standardized on the `col_*` convention in the
+  two CI builders. Renamed:
+  `ci_from_responses_briefrc(participant_col, stimulus_col, response_col)`
+  -\> `(col_participant, col_stimulus, col_response)`; same for
+  [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md).
+  Every other responses-consuming function (`check_*`, `diagnose_*`,
+  `compute_*`, `run_*`) already used `col_*`; the package is now
+  uniform. No deprecation alias; calls using the old names fail with the
+  standard R unused-argument error.
+
+### New features
+
+- [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+  gains a `responses = NULL`, `col_participant = "participant_id"` path.
+  When `trial_counts` is omitted,
+  [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+  derives it internally via `table(responses[[col_participant]])` and
+  matches against `colnames(signal_matrix)`. Existing scripts that pass
+  `trial_counts` directly continue to work unchanged.
+
+- [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
+  validates `noise_matrix` at function entry when
+  `null = "random_responders"`, with a teaching message pointing at
+  [`read_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/read_noise_matrix.md).
+  Replaces a deeper cryptic abort that used to fire inside
+  [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md).
+
+### Documentation
+
+- Vignette §1.3 (two-stage pattern), §10.5, and the worked-example
+  cross-references updated to use the new
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  idiom. §9 (infoval) and roxygen `@examples` on
+  [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+  updated to lead with the `responses` path.
+
 ## rcisignal 0.1.9
 
 ### Breaking change
