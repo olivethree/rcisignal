@@ -8,17 +8,23 @@
 #' (pixels x n_groups) for use with the distance-matrix, MDS, and
 #' correlogram plot functions.
 #'
+#' Uses the same "data frame plus column name" idiom as every
+#' other responses-consuming function in the package: pass the
+#' trial-level `responses` data frame, plus the name of the
+#' column you want to group by. Producer-to-group alignment
+#' happens internally via `colnames(signal_matrix)`.
+#'
 #' @details
 #' The package has two stages. Stage 1 (per-producer
 #' `signal_matrix`) is the only object accepted by reliability,
-#' discriminability, and infoVal functions. Stage 2
+#' discriminability, and informational-value functions. Stage 2
 #' (group-averaged matrix) is for plotting, RDM-style comparison,
 #' and MDS. `group_ci()` is the stage-1-to-stage-2 transformer.
 #'
 #' For each group, the corresponding output column is
 #' `rowMeans(signal_matrix[, producers_in_group, drop = FALSE])`.
-#' When `by` is a list, the cell label is the levels joined by
-#' `"_"` in the order the list elements are given.
+#' For a factorial `by` (length 2+), the cell label is the levels
+#' joined by `"_"` in the column order given.
 #'
 #' `group_ci()` does not accept (and will never accept)
 #' `trial_counts`, `noise_matrix`, or `mask`. Anything that needs
@@ -28,13 +34,23 @@
 #' @param signal_matrix Numeric matrix of pixels x n_producers, as
 #'   returned by [ci_from_responses_briefrc()] or
 #'   [ci_from_responses_2ifc()] in their `$signal_matrix` field.
-#'   The column count must match `length(by)` (or
-#'   `length(by[[1]])` when `by` is a list).
-#' @param by Either an atomic vector of length
-#'   `ncol(signal_matrix)` (one group label per producer) or a
-#'   named list of such vectors for factorial grouping (cell
-#'   names are the levels joined by `"_"`). Coerced to factor;
-#'   `NA` levels are dropped with a warning naming the count.
+#'   Must have non-empty column names (the producer ids that map
+#'   into `responses[[col_participant]]`).
+#' @param responses Trial-level data frame containing one row per
+#'   trial. Must contain the column named by `col_participant`
+#'   (mapping to `colnames(signal_matrix)`) and every column
+#'   named in `by`. Each producer's `by` value(s) must be
+#'   consistent across all of their rows; an inconsistency aborts
+#'   with a teaching message naming the offending producer.
+#' @param by Character vector of column names in `responses`.
+#'   Length 1 selects a single grouping column (e.g.
+#'   `by = "condition"`). Length 2+ produces a factorial grouping
+#'   where cell labels are the levels joined with `"_"` in the
+#'   given order (e.g. `by = c("condition", "sex")` yields cells
+#'   like `"happy_F"`).
+#' @param col_participant Name of the participant-id column in
+#'   `responses`. Default `"participant_id"`, matching the rest
+#'   of the package.
 #' @param drop Logical. When `TRUE` (default), empty cells are
 #'   dropped from the output. When `FALSE`, empty cells are
 #'   present as `NA` columns with `n = 0L`.
@@ -56,33 +72,29 @@
 #' @aliases rcisignal_group_ci
 #'
 #' @examples
-#' set.seed(1)
-#' n_pix  <- 32L * 32L
-#' n_prod <- 12L
-#' sm <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod,
-#'              dimnames = list(NULL, sprintf("p%02d", seq_len(n_prod))))
-#' attr(sm, "img_dims") <- c(32L, 32L)
-#' g <- rep(c("A", "B"), each = n_prod / 2L)
-#' gcis <- group_ci(sm, by = g)
-#' dim(gcis)                 # n_pix x 2
-#' attr(gcis, "n")           # named per-group producer counts
-#'
 #' \dontrun{
-#' # Realistic end-to-end: simulate, build per-producer CIs, collapse.
+#' # End-to-end: simulate two conditions, build per-producer CIs,
+#' # collapse into one CI per condition.
 #' sim <- simulate_briefrc_data(
 #'   n_per_condition = 10, n_trials = 60,
 #'   conditions = c("A", "B"), seed = 1
 #' )
-#' cis <- ci_from_responses_briefrc(sim$data,
-#'                                  noise_matrix = sim$noise_matrix)
-#' producer_to_cond <- sim$data$condition[match(
-#'   colnames(cis$signal_matrix), sim$data$participant_id)]
-#' gcis <- group_ci(cis$signal_matrix, by = producer_to_cond)
-#' plot_ci_distance_matrix(gcis,
-#'   img_dims = c(sim$meta$img_size, sim$meta$img_size))
+#' cis  <- ci_from_responses_briefrc(sim$data,
+#'                                   noise_matrix = sim$noise_matrix)
+#' gcis <- group_ci(cis$signal_matrix, sim$data, by = "condition")
+#' gcis                              # n_pixels x 2 (A and B)
+#' attr(gcis, "n")                   # per-group producer counts
+#'
+#' # Factorial grouping via two columns:
+#' # gcis_fact <- group_ci(cis$signal_matrix, sim$data,
+#' #                       by = c("condition", "sex"))
 #' }
 #' @export
-group_ci <- function(signal_matrix, by, drop = TRUE) {
+group_ci <- function(signal_matrix,
+                     responses,
+                     by,
+                     col_participant = "participant_id",
+                     drop            = TRUE) {
   if (inherits(signal_matrix, "rcisignal_group_ci")) {
     cli::cli_abort(c(
       "{.arg signal_matrix} is already a stage-2 \\
@@ -99,12 +111,25 @@ group_ci <- function(signal_matrix, by, drop = TRUE) {
        (pixels x n_producers)."
     )
   }
-  n_prod <- ncol(signal_matrix)
-  if (n_prod < 1L) {
+  if (ncol(signal_matrix) < 1L) {
     cli::cli_abort("{.arg signal_matrix} has no columns to group.")
   }
+  if (is.null(colnames(signal_matrix))) {
+    cli::cli_abort(c(
+      "{.arg signal_matrix} has no column names.",
+      "i" = "Column names are the producer ids that map into \\
+             {.code responses[[col_participant]]}. The \\
+             {.fn ci_from_responses_briefrc} / \\
+             {.fn ci_from_responses_2ifc} builders set these for \\
+             you; if you built {.arg signal_matrix} by hand, set \\
+             {.code colnames(signal_matrix)} to your producer ids \\
+             before calling."
+    ))
+  }
 
-  factor_label <- build_grouping_factor(by, n_prod)
+  factor_label <- build_grouping_from_responses(
+    signal_matrix, responses, by, col_participant
+  )
   f       <- factor_label$factor
   by_name <- factor_label$arg_text
 
@@ -144,47 +169,97 @@ group_ci <- function(signal_matrix, by, drop = TRUE) {
   out
 }
 
-#' Build a single factor from an atomic vector or a list of vectors
+#' Build the per-producer grouping factor from a responses data frame
 #'
-#' Returns a list with `factor` (the result) and `arg_text` (the
+#' Returns a list with `factor` (length `ncol(signal_matrix)`,
+#' one entry per producer, in colnames order) and `arg_text` (the
 #' description used in print methods).
 #'
 #' @keywords internal
 #' @noRd
-build_grouping_factor <- function(by, n_prod) {
-  if (is.list(by) && !is.data.frame(by)) {
-    if (length(by) == 0L) {
-      cli::cli_abort("{.arg by} list is empty.")
-    }
-    lens <- vapply(by, length, integer(1L))
-    if (!all(lens == n_prod)) {
-      cli::cli_abort(c(
-        "{.arg by} list elements must each have length \\
-         {n_prod} (= {.code ncol(signal_matrix)}).",
-        "*" = "Got lengths: {.val {lens}}"
-      ))
-    }
-    parts <- lapply(by, function(x) as.character(x))
-    combined <- do.call(paste, c(parts, list(sep = "_")))
-    has_na   <- Reduce(`|`, lapply(by, is.na))
-    combined[has_na] <- NA_character_
-    f <- factor(combined)
-    if (!is.null(names(by))) {
-      arg_text <- paste(names(by), collapse = " x ")
-    } else {
-      arg_text <- sprintf("list of %d factors", length(by))
-    }
-    return(list(factor = f, arg_text = arg_text))
+build_grouping_from_responses <- function(signal_matrix, responses,
+                                          by, col_participant) {
+  if (!is.data.frame(responses)) {
+    cli::cli_abort(
+      "{.arg responses} must be a data frame (got \\
+       {.cls {class(responses)[1L]}})."
+    )
   }
-  if (length(by) != n_prod) {
+  if (!is.character(by) || length(by) < 1L || any(is.na(by)) ||
+        any(!nzchar(by))) {
     cli::cli_abort(c(
-      "{.arg by} has length {length(by)} but \\
-       {.code ncol(signal_matrix)} is {n_prod}.",
-      "i" = "Pass one group label per producer."
+      "{.arg by} must be a character vector of column names \\
+       in {.arg responses}.",
+      "i" = "Single grouping: {.code by = \"condition\"}.",
+      "i" = "Factorial: {.code by = c(\"condition\", \"sex\")}."
     ))
   }
-  f <- if (is.factor(by)) by else factor(by)
-  list(factor = f, arg_text = "by")
+  required_cols <- c(col_participant, by)
+  missing_cols  <- setdiff(required_cols, names(responses))
+  if (length(missing_cols) > 0L) {
+    n_missing <- length(missing_cols)
+    cli::cli_abort(c(
+      "{n_missing} column{?s} not in {.arg responses}: \\
+       {.val {missing_cols}}.",
+      "i" = "Available: {.val {names(responses)}}"
+    ))
+  }
+
+  producer_ids <- colnames(signal_matrix)
+  resp_pids    <- as.character(responses[[col_participant]])
+  missing_pids <- setdiff(producer_ids, resp_pids)
+  if (length(missing_pids) > 0L) {
+    n_show <- min(5L, length(missing_pids))
+    cli::cli_abort(c(
+      "{length(missing_pids)} producer{?s} in \\
+       {.code colnames(signal_matrix)} not found in \\
+       {.code responses[[\"{col_participant}\"]]}.",
+      "*" = "Missing: {.val {missing_pids[seq_len(n_show)]}}\\
+             {if (length(missing_pids) > n_show) ', ...' else ''}",
+      "i" = "{.arg signal_matrix} columns and {.arg responses} \\
+             rows must come from the same dataset."
+    ))
+  }
+
+  group_strings <- character(length(producer_ids))
+  for (i in seq_along(producer_ids)) {
+    pid     <- producer_ids[i]
+    pid_rows <- which(resp_pids == pid)
+    if (length(by) == 1L) {
+      vals <- as.character(responses[[by]][pid_rows])
+    } else {
+      vals_per_row <- lapply(by, function(b) {
+        as.character(responses[[b]][pid_rows])
+      })
+      vals <- do.call(paste, c(vals_per_row, list(sep = "_")))
+    }
+    uniq <- unique(vals)
+    if (length(uniq) > 1L) {
+      cli::cli_abort(c(
+        "Producer {.val {pid}} has inconsistent {.arg by} \\
+         values across their rows in {.arg responses}.",
+        "*" = "Got: {.val {uniq}}",
+        "i" = "Each producer's {.arg by} column(s) must be \\
+               constant across their trials. Check the column{?s} \\
+               {.val {by}} in {.arg responses}."
+      ))
+    }
+    group_strings[i] <- if (length(uniq) == 0L) NA_character_ else uniq
+  }
+
+  # Preserve empty factor levels if `by` is a single factor column;
+  # this is what makes `drop = FALSE` produce NA columns for unused
+  # levels. For factorial `by`, levels are observed only.
+  if (length(by) == 1L && is.factor(responses[[by]])) {
+    src_levels <- levels(responses[[by]])
+    all_levels <- union(stats::na.omit(unique(group_strings)),
+                        src_levels)
+    f <- factor(group_strings, levels = all_levels)
+  } else {
+    f <- factor(group_strings)
+  }
+  arg_text <- if (length(by) == 1L) by else paste(by, collapse = " x ")
+  list(factor = f, arg_text = arg_text)
 }
 
 #' @export

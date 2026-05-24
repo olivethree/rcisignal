@@ -7,7 +7,9 @@
 infoval(
   signal_matrix,
   noise_matrix,
-  trial_counts,
+  trial_counts = NULL,
+  responses = NULL,
+  col_participant = "participant_id",
   iter = 10000L,
   mask = NULL,
   with_replacement = c("auto", TRUE, FALSE),
@@ -24,8 +26,20 @@ raw masks (as returned by \code{\link[=ci_from_responses_2ifc]{ci_from_responses
 \item{noise_matrix}{Pixels x pool-size numeric matrix of noise
 patterns. Row count must match \code{signal_matrix}.}
 
-\item{trial_counts}{Named integer vector of trial counts per
-producer. Names must match \code{colnames(signal_matrix)}.}
+\item{trial_counts}{Optional named integer vector of trial
+counts per producer; names must match
+\code{colnames(signal_matrix)}. If omitted, pass \code{responses} and
+\code{infoval()} will derive \code{trial_counts} via
+\code{table(responses[[col_participant]])}.}
+
+\item{responses}{Optional trial-level data frame (the same one
+you handed to \verb{ci_from_responses_*()}). When supplied,
+\code{trial_counts} is derived internally so you do not need to
+build the named integer vector by hand. Ignored when
+\code{trial_counts} is supplied directly.}
+
+\item{col_participant}{Name of the participant-id column in
+\code{responses}. Default \code{"participant_id"}.}
 
 \item{iter}{Reference-distribution Monte Carlo size. Default
 10000.}
@@ -131,16 +145,14 @@ print(iv)
 }
 
 \dontrun{
-# Same function, richer input: plant a strong signal in the eye region
-# so per-producer infoVal z values mostly clear the 1.96 threshold.
+# End-to-end: pass `responses` and let infoval derive trial counts.
 sim <- simulate_briefrc_data(
   n_per_condition = 20, n_trials = 60, conditions = "target",
   signal_region = "eyes", signal_strength = "strong", seed = 1
 )
 cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
-trial_counts <- as.integer(table(sim$data$participant_id))
-infoval(cis$signal_matrix, sim$noise_matrix, trial_counts,
-        iter = 500L, seed = 1)
+infoval(cis$signal_matrix, sim$noise_matrix,
+        responses = sim$data, iter = 500L, seed = 1)
 }
 }
 \references{

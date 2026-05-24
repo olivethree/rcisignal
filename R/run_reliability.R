@@ -76,6 +76,18 @@ run_reliability <- function(signal_matrix,
                             acknowledge_scaling = FALSE) {
   abort_if_group_ci(signal_matrix, fn = "run_reliability")
   null <- match.arg(null)
+  if (identical(null, "random_responders") && is.null(noise_matrix)) {
+    cli::cli_abort(c(
+      "{.arg noise_matrix} is required when \\
+       {.code null = \"random_responders\"}.",
+      "i" = "The null distribution simulates random-responder CIs \\
+             by sign-flipping the noise pool.",
+      "i" = "Pass {.arg noise_matrix} (the noise pool used at \\
+             stimulus generation; load it via \\
+             {.fn read_noise_matrix} if you have an rcicr rdata or \\
+             a Brief-RC text file)."
+    ))
+  }
   validate_signal_matrix(signal_matrix)
   img_dims <- attr(signal_matrix, "img_dims")
 

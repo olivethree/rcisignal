@@ -9,9 +9,9 @@ ci_from_responses_briefrc(
   rdata_path = NULL,
   noise_matrix = NULL,
   base_image = NULL,
-  participant_col = "participant_id",
-  stimulus_col = "stimulus",
-  response_col = "response",
+  col_participant = "participant_id",
+  col_stimulus = "stimulus",
+  col_response = "response",
   method = c("briefrc12", "briefrc20"),
   scaling = c("none", "matched", "constant"),
   scaling_constant = NULL,
@@ -20,8 +20,8 @@ ci_from_responses_briefrc(
 }
 \arguments{
 \item{responses}{Data frame with one row per trial. Must contain
-the columns named by \code{participant_col}, \code{stimulus_col},
-\code{response_col}. \code{response} values must be in \verb{\{-1, +1\}}.}
+the columns named by \code{col_participant}, \code{col_stimulus},
+\code{col_response}. \code{response} values must be in \verb{\{-1, +1\}}.}
 
 \item{rdata_path, noise_matrix}{Exactly one must be supplied.
 Provide \code{rdata_path} to read the noise matrix from an rcicr
@@ -36,7 +36,7 @@ mathematical mask. Required for the visualization-only
 \verb{$rendered_ci} field when \code{scaling} is \code{"matched"} or
 \code{"constant"}.}
 
-\item{participant_col, stimulus_col, response_col}{Column names.}
+\item{col_participant, col_stimulus, col_response}{Column names.}
 
 \item{method}{Brief-RC variant: \code{"briefrc12"} (12 alternatives
 per trial, 6 original + 6 inverted; the default) or

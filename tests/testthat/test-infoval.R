@@ -262,3 +262,51 @@ test_that("face_mask integrates with infoval as a region restrictor", {
                              seed = 1L, progress = FALSE))
   )
 })
+
+test_that("infoval derives trial_counts from responses + col_participant", {
+  set.seed(1)
+  n_pix  <- 64L
+  n_prod <- 8L
+  pids   <- sprintf("p%02d", seq_len(n_prod))
+  sm     <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod,
+                   dimnames = list(NULL, pids))
+  nm     <- matrix(rnorm(n_pix * 100L), n_pix, 100L)
+  responses <- data.frame(
+    participant_id = rep(pids, each = 25L),
+    stringsAsFactors = FALSE
+  )
+  iv_direct <- infoval(sm, nm,
+                       trial_counts = stats::setNames(rep(25L, n_prod), pids),
+                       iter = 50L, seed = 1L, progress = FALSE)
+  iv_derived <- infoval(sm, nm,
+                        responses = responses,
+                        iter = 50L, seed = 1L, progress = FALSE)
+  expect_equal(iv_direct$z_scores, iv_derived$z_scores)
+})
+
+test_that("infoval(responses) aborts when a producer is missing", {
+  set.seed(2)
+  pids <- sprintf("p%02d", 1:4)
+  sm   <- matrix(rnorm(64L * 4L), 64L, 4L, dimnames = list(NULL, pids))
+  nm   <- matrix(rnorm(64L * 100L), 64L, 100L)
+  responses <- data.frame(
+    participant_id = rep(c("p01", "p02", "p03"), each = 10L),
+    stringsAsFactors = FALSE
+  )
+  expect_error(
+    infoval(sm, nm, responses = responses,
+            iter = 50L, progress = FALSE),
+    regexp = "p04|not found"
+  )
+})
+
+test_that("infoval aborts cleanly when neither trial_counts nor responses given", {
+  set.seed(3)
+  sm <- matrix(rnorm(64L * 4L), 64L, 4L,
+               dimnames = list(NULL, sprintf("p%02d", 1:4)))
+  nm <- matrix(rnorm(64L * 100L), 64L, 100L)
+  expect_error(
+    infoval(sm, nm, iter = 50L, progress = FALSE),
+    regexp = "trial counts|trial_counts"
+  )
+})

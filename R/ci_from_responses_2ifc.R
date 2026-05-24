@@ -44,9 +44,9 @@
 #'   `$signal_matrix` directly.
 #'
 #' @param responses A data frame with one row per trial. Must
-#'   contain `participant_col` (producer id), the column named by
-#'   `stimulus_col` (stimulus id, integer, index into the rcicr
-#'   noise pool), and `response_col` with values in `{-1, +1}`.
+#'   contain `col_participant` (producer id), the column named by
+#'   `col_stimulus` (stimulus id, integer, index into the rcicr
+#'   noise pool), and `col_response` with values in `{-1, +1}`.
 #' @param rdata_path Path to the `.Rdata` file produced by
 #'   [rcicr::generateStimuli2IFC()]. Either `rdata_path` or
 #'   `stimuli` must be supplied; if both are given `stimuli` wins.
@@ -68,7 +68,7 @@
 #'   available labels. Matrix and path forms are injected into a
 #'   temporary copy of the rdata under a synthetic label so the
 #'   rcicr call sees the same structure it always has.
-#' @param participant_col,stimulus_col,response_col Column names in
+#' @param col_participant,col_stimulus,col_response Column names in
 #'   `responses`.
 #' @param scaling rcicr scaling option; one of `"autoscale"`,
 #'   `"independent"`, `"constant"`, `"none"`. Passed through to
@@ -115,9 +115,9 @@ ci_from_responses_2ifc <- function(responses,
                                    rdata_path      = NULL,
                                    stimuli         = NULL,
                                    base_image      = NULL,
-                                   participant_col = "participant_id",
-                                   stimulus_col    = "stimulus",
-                                   response_col    = "response",
+                                   col_participant = "participant_id",
+                                   col_stimulus    = "stimulus",
+                                   col_response    = "response",
                                    scaling         = "autoscale",
                                    keep_rendered   = FALSE,
                                    targetpath      = tempfile("rcisignal_2ifc_"),
@@ -133,7 +133,7 @@ ci_from_responses_2ifc <- function(responses,
   }
 
   responses <- as.data.frame(responses)
-  required <- c(participant_col, stimulus_col, response_col)
+  required <- c(col_participant, col_stimulus, col_response)
   missing_cols <- setdiff(required, colnames(responses))
   if (length(missing_cols) > 0L) {
     n_missing <- length(missing_cols)
@@ -144,10 +144,10 @@ ci_from_responses_2ifc <- function(responses,
     ))
   }
 
-  unique_resp <- sort(unique(as.numeric(responses[[response_col]])))
+  unique_resp <- sort(unique(as.numeric(responses[[col_response]])))
   if (!identical(unique_resp, c(-1, 1))) {
     msg <- c(
-      "Column {.var {response_col}} must contain only values in \\
+      "Column {.var {col_response}} must contain only values in \\
        {.val {c(-1, 1)}}.",
       "*" = "Got: {.val {unique_resp}}"
     )
@@ -160,8 +160,8 @@ ci_from_responses_2ifc <- function(responses,
                pipelines (often produced by experiment software \\
                that records 'left' / 'right' as 0 / 1).",
         "i" = "Recode in one line: \\
-               {.code responses${response_col} <- \\
-                       2 * responses${response_col} - 1}"
+               {.code responses${col_response} <- \\
+                       2 * responses${col_response} - 1}"
       )
     }
     cli::cli_abort(msg)
@@ -178,9 +178,9 @@ ci_from_responses_2ifc <- function(responses,
 
   cis <- rcicr::batchGenerateCI2IFC(
     data        = responses,
-    by          = participant_col,
-    stimuli     = stimulus_col,
-    responses   = response_col,
+    by          = col_participant,
+    stimuli     = col_stimulus,
+    responses   = col_response,
     baseimage   = baseimage,
     rdata       = rdata_path,
     save_as_png = save_as_png,
@@ -188,7 +188,7 @@ ci_from_responses_2ifc <- function(responses,
     scaling     = scaling
   )
 
-  participants <- unique(as.character(responses[[participant_col]]))
+  participants <- unique(as.character(responses[[col_participant]]))
   n_pix <- prod(img_dims)
   signal_matrix <- matrix(
     NA_real_,
@@ -202,7 +202,7 @@ ci_from_responses_2ifc <- function(responses,
   } else NULL
 
   for (pid in participants) {
-    key <- grep(paste0(participant_col, "_", pid, "$"),
+    key <- grep(paste0(col_participant, "_", pid, "$"),
                 names(cis), value = TRUE)
     if (length(key) == 0L) {
       cli::cli_abort(c(

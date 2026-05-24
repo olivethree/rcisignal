@@ -47,8 +47,8 @@
 #'   because the user often wants to save a PNG.
 #'
 #' @param responses Data frame with one row per trial. Must contain
-#'   the columns named by `participant_col`, `stimulus_col`,
-#'   `response_col`. `response` values must be in `{-1, +1}`.
+#'   the columns named by `col_participant`, `col_stimulus`,
+#'   `col_response`. `response` values must be in `{-1, +1}`.
 #' @param rdata_path,noise_matrix Exactly one must be supplied.
 #'   Provide `rdata_path` to read the noise matrix from an rcicr
 #'   `.Rdata`, or pass a pre-loaded `noise_matrix` directly.
@@ -63,7 +63,7 @@
 #' @param base_image_path **Deprecated.** Use `base_image` (which
 #'   accepts both a numeric matrix and a path). The old name still
 #'   works for one release with a deprecation warning.
-#' @param participant_col,stimulus_col,response_col Column names.
+#' @param col_participant,col_stimulus,col_response Column names.
 #' @param method Brief-RC variant: `"briefrc12"` (12 alternatives
 #'   per trial, 6 original + 6 inverted; the default) or
 #'   `"briefrc20"` (20 alternatives per trial, 10 original + 10
@@ -112,9 +112,9 @@ ci_from_responses_briefrc <- function(responses,
                                       rdata_path       = NULL,
                                       noise_matrix     = NULL,
                                       base_image       = NULL,
-                                      participant_col  = "participant_id",
-                                      stimulus_col     = "stimulus",
-                                      response_col     = "response",
+                                      col_participant  = "participant_id",
+                                      col_stimulus     = "stimulus",
+                                      col_response     = "response",
                                       method           = c("briefrc12",
                                                            "briefrc20"),
                                       scaling          = c("none",
@@ -147,7 +147,7 @@ ci_from_responses_briefrc <- function(responses,
   }
 
   responses <- as.data.frame(responses)
-  required <- c(participant_col, stimulus_col, response_col)
+  required <- c(col_participant, col_stimulus, col_response)
   missing_cols <- setdiff(required, colnames(responses))
   if (length(missing_cols) > 0L) {
     n_missing <- length(missing_cols)
@@ -157,16 +157,16 @@ ci_from_responses_briefrc <- function(responses,
     ))
   }
 
-  resp_values <- as.numeric(responses[[response_col]])
+  resp_values <- as.numeric(responses[[col_response]])
   if (!all(is.finite(resp_values))) {
     cli::cli_abort(
-      "Column {.var {response_col}} contains non-finite values."
+      "Column {.var {col_response}} contains non-finite values."
     )
   }
   uniq <- sort(unique(resp_values))
   if (!identical(uniq, c(-1, 1))) {
     msg <- c(
-      "Column {.var {response_col}} must contain only values in \\
+      "Column {.var {col_response}} must contain only values in \\
        {.val {c(-1, 1)}}.",
       "*" = "Got: {.val {uniq}}"
     )
@@ -178,8 +178,8 @@ ci_from_responses_briefrc <- function(responses,
                coding is the most common silent failure in RC \\
                pipelines.",
         "i" = "Recode in one line: \\
-               {.code responses${response_col} <- \\
-                       2 * responses${response_col} - 1}"
+               {.code responses${col_response} <- \\
+                       2 * responses${col_response} - 1}"
       )
     }
     cli::cli_abort(msg)
@@ -211,7 +211,7 @@ ci_from_responses_briefrc <- function(responses,
   base_vec <- base_resolved$base_vec
   n_pool   <- ncol(noise_matrix)
 
-  participants <- unique(as.character(responses[[participant_col]]))
+  participants <- unique(as.character(responses[[col_participant]]))
   signal_matrix <- matrix(
     NA_real_,
     nrow = nrow(noise_matrix),
@@ -219,14 +219,14 @@ ci_from_responses_briefrc <- function(responses,
     dimnames = list(NULL, participants)
   )
 
-  response_char <- as.character(responses[[participant_col]])
-  stim_all      <- as.integer(responses[[stimulus_col]])
+  response_char <- as.character(responses[[col_participant]])
+  stim_all      <- as.integer(responses[[col_stimulus]])
   resp_all      <- resp_values
 
   if (any(stim_all < 1L | stim_all > n_pool)) {
     bad <- range(stim_all)
     cli::cli_abort(c(
-      "Column {.var {stimulus_col}} has ids outside the pool range.",
+      "Column {.var {col_stimulus}} has ids outside the pool range.",
       "*" = "Range in data: [{bad[1]}, {bad[2]}]",
       "*" = "Noise matrix pool size: {n_pool}"
     ))

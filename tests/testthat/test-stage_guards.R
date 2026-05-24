@@ -3,7 +3,13 @@
 
 make_group_ci <- function(n_pix = 64L) {
   sm <- make_sig(n_pix = n_pix, n_p = 4L, seed = 1L)
-  group_ci(sm, by = c("A", "A", "B", "B"))
+  colnames(sm) <- sprintf("p%02d", 1:4)
+  responses <- data.frame(
+    participant_id = sprintf("p%02d", 1:4),
+    condition      = c("A", "A", "B", "B"),
+    stringsAsFactors = FALSE
+  )
+  group_ci(sm, responses, by = "condition")
 }
 
 test_that("infoval rejects rcisignal_group_ci", {

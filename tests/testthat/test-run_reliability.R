@@ -34,3 +34,12 @@ test_that("report round-trips through saveRDS", {
   expect_identical(rep$results$icc$icc_3_1,
                    back$results$icc$icc_3_1)
 })
+
+test_that("run_reliability aborts when null='random_responders' without noise_matrix", {
+  sm <- make_sig(n_pix = 64L, n_p = 8L, seed = 1L)
+  expect_error(
+    run_reliability(sm, null = "random_responders",
+                    n_permutations = 10L, progress = FALSE),
+    regexp = "noise_matrix.*random_responders|random_responders.*noise_matrix"
+  )
+})

@@ -63,8 +63,18 @@
 #'   [ci_from_responses_briefrc()]).
 #' @param noise_matrix Pixels x pool-size numeric matrix of noise
 #'   patterns. Row count must match `signal_matrix`.
-#' @param trial_counts Named integer vector of trial counts per
-#'   producer. Names must match `colnames(signal_matrix)`.
+#' @param trial_counts Optional named integer vector of trial
+#'   counts per producer; names must match
+#'   `colnames(signal_matrix)`. If omitted, pass `responses` and
+#'   `infoval()` will derive `trial_counts` via
+#'   `table(responses[[col_participant]])`.
+#' @param responses Optional trial-level data frame (the same one
+#'   you handed to `ci_from_responses_*()`). When supplied,
+#'   `trial_counts` is derived internally so you do not need to
+#'   build the named integer vector by hand. Ignored when
+#'   `trial_counts` is supplied directly.
+#' @param col_participant Name of the participant-id column in
+#'   `responses`. Default `"participant_id"`.
 #' @param iter Reference-distribution Monte Carlo size. Default
 #'   10000.
 #' @param mask Optional logical vector of length
@@ -127,21 +137,21 @@
 #' }
 #'
 #' \dontrun{
-#' # Same function, richer input: plant a strong signal in the eye region
-#' # so per-producer infoVal z values mostly clear the 1.96 threshold.
+#' # End-to-end: pass `responses` and let infoval derive trial counts.
 #' sim <- simulate_briefrc_data(
 #'   n_per_condition = 20, n_trials = 60, conditions = "target",
 #'   signal_region = "eyes", signal_strength = "strong", seed = 1
 #' )
 #' cis <- ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)
-#' trial_counts <- as.integer(table(sim$data$participant_id))
-#' infoval(cis$signal_matrix, sim$noise_matrix, trial_counts,
-#'         iter = 500L, seed = 1)
+#' infoval(cis$signal_matrix, sim$noise_matrix,
+#'         responses = sim$data, iter = 500L, seed = 1)
 #' }
 #' @export
 infoval <- function(signal_matrix,
                     noise_matrix,
-                    trial_counts,
+                    trial_counts     = NULL,
+                    responses        = NULL,
+                    col_participant  = "participant_id",
                     iter             = 10000L,
                     mask             = NULL,
                     with_replacement = c("auto", TRUE, FALSE),
@@ -181,6 +191,45 @@ infoval <- function(signal_matrix,
   }
   producers <- colnames(signal_matrix)
 
+  if (is.null(trial_counts) && !is.null(responses)) {
+    if (!is.data.frame(responses)) {
+      cli::cli_abort(
+        "{.arg responses} must be a data frame (got \\
+         {.cls {class(responses)[1L]}})."
+      )
+    }
+    if (!col_participant %in% names(responses)) {
+      cli::cli_abort(c(
+        "{.arg col_participant} = {.val {col_participant}} not \\
+         in {.arg responses}.",
+        "i" = "Available: {.val {names(responses)}}"
+      ))
+    }
+    resp_pids <- as.character(responses[[col_participant]])
+    missing_pids <- setdiff(producers, resp_pids)
+    if (length(missing_pids) > 0L) {
+      n_show <- min(5L, length(missing_pids))
+      cli::cli_abort(c(
+        "{length(missing_pids)} producer{?s} in \\
+         {.code colnames(signal_matrix)} not found in \\
+         {.code responses[[\"{col_participant}\"]]}.",
+        "*" = "Missing: {.val {missing_pids[seq_len(n_show)]}}"
+      ))
+    }
+    counts_tab   <- table(resp_pids)
+    trial_counts <- as.integer(counts_tab[producers])
+    names(trial_counts) <- producers
+  }
+  if (is.null(trial_counts)) {
+    cli::cli_abort(c(
+      "No trial counts available.",
+      "i" = "Pass {.arg trial_counts} (named integer vector aligned \\
+             to {.code colnames(signal_matrix)}), or pass \\
+             {.arg responses} (and optionally {.arg col_participant}) \\
+             so {.fn infoval} can derive them via \\
+             {.code table(responses[[col_participant]])}."
+    ))
+  }
   if (is.null(names(trial_counts))) {
     cli::cli_abort(
       "{.arg trial_counts} must be a named integer vector; names \\

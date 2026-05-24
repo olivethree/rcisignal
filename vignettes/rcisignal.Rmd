@@ -167,9 +167,11 @@ The function does not accept `trial_counts`, `noise_matrix`, or
 happen in stage 1.
 
 ```{r stage2, eval = FALSE}
-# Pass one label per producer (matching columns of signal_matrix).
-gcis <- group_ci(cis$signal_matrix,
-                 by = participant_condition)
+# `responses` is the same trial-level data frame you handed to
+# ci_from_responses_*(). `by` names the column that holds the
+# grouping label (one row per trial; rcisignal extracts the
+# producer -> condition map for you).
+gcis <- group_ci(cis$signal_matrix, responses, by = "condition")
 gcis                       # pixels x n_groups, with attr "n"
 plot_ci_distance_matrix(gcis)
 ```
@@ -190,13 +192,13 @@ they say otherwise.
 The three stage-2 plot functions (`plot_ci_distance_matrix()`,
 `plot_ci_mds()`, `plot_ci_correlogram()`) are flexible about
 input shape: they accept a `group_ci()` result directly, a
-named numeric matrix of `pixels x n_groups`, or the historical
+named numeric matrix of `pixels x n_groups` (e.g. built with
+`cbind(name = rowMeans(...), ...)`), or the historical
 named-list form (per-producer matrices, single-column matrices,
-or pixel vectors mixed in one list). The reduction to group
-means happens inside the plot function in every case. Use
-`group_ci()` whenever you have a single per-producer matrix and
-a labels vector; use the list form when your data already lives
-as a named collection of per-condition `signal_matrix` objects.
+or pixel vectors mixed in one list). Use `group_ci()` whenever
+you have a single per-producer signal matrix plus the responses
+data frame that fed into it; use the matrix or list form when
+your per-condition CIs already live in separate objects.
 
 ## 2. Installation
 
@@ -2372,11 +2374,13 @@ plot_ci_correlogram(ci_matrix)
 ```
 
 When the producers across conditions all live in one signal
-matrix (with one label per producer), `group_ci()` is the
-shorter path to the same matrix:
+matrix and the same `responses` data frame carries the condition
+column, `group_ci()` is the shorter path to the same matrix:
 
 ```{r plot-correlogram-groupci, eval = FALSE}
-gcis <- group_ci(all_cis$signal_matrix, by = condition_per_producer)
+# `all_cis$signal_matrix` has one column per producer (named with
+# the producer ids); `responses` carries the condition column.
+gcis <- group_ci(all_cis$signal_matrix, responses, by = "condition")
 plot_ci_correlogram(gcis)
 ```
 

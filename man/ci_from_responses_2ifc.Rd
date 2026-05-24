@@ -9,9 +9,9 @@ ci_from_responses_2ifc(
   rdata_path = NULL,
   stimuli = NULL,
   base_image = NULL,
-  participant_col = "participant_id",
-  stimulus_col = "stimulus",
-  response_col = "response",
+  col_participant = "participant_id",
+  col_stimulus = "stimulus",
+  col_response = "response",
   scaling = "autoscale",
   keep_rendered = FALSE,
   targetpath = tempfile("rcisignal_2ifc_"),
@@ -20,9 +20,9 @@ ci_from_responses_2ifc(
 }
 \arguments{
 \item{responses}{A data frame with one row per trial. Must
-contain \code{participant_col} (producer id), the column named by
-\code{stimulus_col} (stimulus id, integer, index into the rcicr
-noise pool), and \code{response_col} with values in \verb{\{-1, +1\}}.}
+contain \code{col_participant} (producer id), the column named by
+\code{col_stimulus} (stimulus id, integer, index into the rcicr
+noise pool), and \code{col_response} with values in \verb{\{-1, +1\}}.}
 
 \item{rdata_path}{Path to the \code{.Rdata} file produced by
 \code{\link[rcicr:generateStimuli2IFC]{rcicr::generateStimuli2IFC()}}. Either \code{rdata_path} or
@@ -50,7 +50,7 @@ temporary copy of the rdata under a synthetic label so the
 rcicr call sees the same structure it always has.
 }}
 
-\item{participant_col, stimulus_col, response_col}{Column names in
+\item{col_participant, col_stimulus, col_response}{Column names in
 \code{responses}.}
 
 \item{scaling}{rcicr scaling option; one of \code{"autoscale"},
