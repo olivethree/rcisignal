@@ -48,7 +48,7 @@ to match the package's image vectorisation convention.
 }
 \description{
 Returns a logical vector of length \code{prod(img_dims)} marking a
-face region (or a face sub-region) centred on the image. Pass
+face region (or a face sub-region) centered on the image. Pass
 to \code{\link[=infoval]{infoval()}} to restrict both observed and reference Frobenius
 norms to the masked region; pass to any \verb{rel_*()} function via
 row-subsetting (\code{signal_matrix[mask, ]}) to compute reliability
@@ -57,7 +57,7 @@ or discriminability on a single anatomical region.
 Eight regions are supported:
 \itemize{
 \item \code{"full"} (default): the full face oval. Defaults are a
-typical centred-face oval (\code{half_width = 0.35},
+typical centered-face oval (\code{half_width = 0.35},
 \code{half_height = 0.45}) and tunable via \code{centre} /
 \code{half_width} / \code{half_height}. Applying an oval mask to a CI
 before computing pixel-wise metrics follows the convention
@@ -72,13 +72,13 @@ of the full-oval geometry; tune via \code{region_bounds}.
 viewer's left and right eye respectively. Independent of the
 full-oval geometry; tune via \code{region_bounds}.
 \item \code{"nose"}: a narrow vertical ellipse along the midline.
-\item \code{"mouth"}: a wide-and-short ellipse below centre.
+\item \code{"mouth"}: a wide-and-short ellipse below center.
 \item \code{"upper_face"}, \code{"lower_face"}: top and bottom halves of the
 full face oval.
 }
 
 Sub-region geometries are heuristic approximations matched to a
-typical centred face on a square base (e.g. 256x256). For
+typical centered face on a square base (e.g. 256x256). For
 non-default base images, the elliptical regions (\code{"nose"},
 \code{"mouth"}) scale with \code{centre} / \code{half_width} / \code{half_height};
 the three rectangle regions (\code{"eyes"}, \code{"left_eye"},

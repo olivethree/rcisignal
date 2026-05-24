@@ -17,11 +17,11 @@ test_that("read_noise_matrix accepts whitespace-delimited text files", {
   expect_equal(nm, m, tolerance = 1e-10)
 })
 
-test_that("read_noise_matrix errors clearly on an unrecognised rdata", {
+test_that("read_noise_matrix errors clearly on an unrecognized rdata", {
   tmp <- tempfile(fileext = ".Rdata")
   other_name <- matrix(1:10, 5L, 2L)
   save(other_name, file = tmp)
-  expect_error(read_noise_matrix(tmp), "Unrecognised objects")
+  expect_error(read_noise_matrix(tmp), "Unrecognized objects")
 })
 
 test_that("read_noise_matrix round-trips through .rds", {

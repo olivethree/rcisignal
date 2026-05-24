@@ -33,7 +33,7 @@ supplied, the mask is rendered as a translucent overlay on top.}
 
 \item{alpha}{Numeric in \verb{[0, 1]}. Overlay opacity. Default \code{0.5}.}
 
-\item{col}{Highlight colour for the masked region. Default
+\item{col}{Highlight color for the masked region. Default
 \code{"red"}.}
 
 \item{threshold}{When \code{mask} is a numeric matrix or image path,

@@ -10,7 +10,7 @@ read_face_mask(path, threshold = 0.5, invert = FALSE, expected_dims = NULL)
 \item{path}{Path to a PNG or JPEG mask image.}
 
 \item{threshold}{Numeric in \verb{[0, 1]}. Pixels with luminance above
-this become \code{TRUE}. Default \code{0.5} (mid-grey).}
+this become \code{TRUE}. Default \code{0.5} (mid-gray).}
 
 \item{invert}{If \code{TRUE}, the mask is inverted (useful for
 black-on-white masks). Default \code{FALSE}.}

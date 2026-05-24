@@ -9,7 +9,7 @@ check_rt_infoval_consistency(
   method = c("2ifc", "briefrc"),
   rdata = NULL,
   stimuli = NULL,
-  baseimage = "base",
+  base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
@@ -35,7 +35,7 @@ of an \code{rcisignal_sim} object). Use in place of \code{rdata} when
 the file path no longer resolves (e.g. after \code{\link[=saveRDS]{saveRDS()}}/
 \code{\link[=readRDS]{readRDS()}} across R sessions).}
 
-\item{baseimage}{Name of the base image in \code{rdata$base_face_files}.}
+\item{base_image}{Name of the base image in \code{rdata$base_face_files}.}
 
 \item{col_participant, col_stimulus, col_response, col_rt}{Column names.
 \code{col_rt} is required.}

@@ -55,7 +55,7 @@ peak of the signal magnitude. Default 0.7.}
 \item{palette}{Character. Currently only \code{"diverging"} is
 implemented (red-white-blue). Future-proofed by argument.}
 
-\item{contour_col, contour_lwd}{Significance-contour colour and
+\item{contour_col, contour_lwd}{Significance-contour color and
 line width when \code{test} is supplied. Defaults: \code{"black"}, \code{1.0}.}
 
 \item{main}{Optional plot title.}
@@ -81,20 +81,20 @@ if needed.
 \section{Reading the plot}{
 
 \itemize{
-\item \strong{Colour} encodes the sign of the producer-mean signal at each
+\item \strong{Color} encodes the sign of the producer-mean signal at each
 pixel. Blue = positive (producers' average mask is brighter than
 the base at that pixel); red = negative (darker than the base);
 pixels rendered as the bare base = at or near zero.
 \item \strong{Opacity} encodes the magnitude of the signal, scaled to
-\code{alpha_max} at the global peak \verb{|signal|}. Faint colour means
-weak agreement; saturated colour means a strong, consistent
+\code{alpha_max} at the global peak \verb{|signal|}. Faint color means
+weak agreement; saturated color means a strong, consistent
 producer-mean deflection.
 \item \strong{Black contours} (only drawn when \code{test} is supplied) trace
 the boundary of the FWE-significant pixel set returned by
 \code{\link[=agreement_map_test]{agreement_map_test()}} at its \code{alpha}. Pixels inside the
 contour are individually significant under the max-|t| null;
 pixels outside are not.
-\item Colour convention matches \code{\link[=plot_agreement_map]{plot_agreement_map()}} and the
+\item Color convention matches \code{\link[=plot_agreement_map]{plot_agreement_map()}} and the
 cluster-test plots so the same group CI reads consistently
 across the package.
 }

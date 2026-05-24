@@ -138,25 +138,25 @@ Welch t (or signed TFCE values for \code{method = "tfce"}) as a
 raster image with FWE-significant cluster boundaries traced on
 top.
 \itemize{
-\item \strong{Colour} encodes the sign and magnitude of the per-pixel
+\item \strong{Color} encodes the sign and magnitude of the per-pixel
 statistic. Blue = condition A larger than B at that pixel
 (positive Welch t); red = condition B larger than A
-(negative Welch t); white = near zero. The colourbar reads
+(negative Welch t); white = near zero. The colorbar reads
 in \verb{Welch t} units (or signed \verb{TFCE value} for TFCE).
 \item \strong{Black contours} trace the boundary of clusters that are
 significant at the chosen \code{alpha} under the max-mass null
 (threshold method) or the boundary of pixels with FWE-
 corrected \code{p < alpha} (TFCE method). Pixels inside the
 contour survive the FWE correction; pixels outside do not.
-\item The colour scale is symmetric around zero by default so the
-neutral colour aligns with \code{t = 0}. The displayed t-map is
+\item The color scale is symmetric around zero by default so the
+neutral color aligns with \code{t = 0}. The displayed t-map is
 the \emph{observed} statistic before any thresholding; the
 contours encode the inferential decision.
-\item Colour convention matches \code{\link[=plot_agreement_map]{plot_agreement_map()}} and
+\item Color convention matches \code{\link[=plot_agreement_map]{plot_agreement_map()}} and
 \code{\link[=plot_ci_overlay]{plot_ci_overlay()}} so the same data reads consistently
 across the package.
-\item \code{plot()} accepts \verb{main =} (title) and \verb{colour_bar =} (logical,
-default \code{TRUE}). Set \code{colour_bar = FALSE} when packing many
+\item \code{plot()} accepts \verb{main =} (title) and \verb{color_bar =} (logical,
+default \code{TRUE}). Set \code{color_bar = FALSE} when packing many
 panels into a small grid — used internally by
 \code{\link[=plot.rcisignal_rel_pairwise_report]{plot.rcisignal_rel_pairwise_report()}} for that reason.
 }

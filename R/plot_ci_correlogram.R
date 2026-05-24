@@ -16,8 +16,8 @@
 #' internally). Mixed shapes inside the list are allowed.
 #'
 #' Diverging-palette convention matches the rest of the package:
-#' positive `r` = blue, negative `r` = red, neutral colour at
-#' zero. The colour scale is fixed at `c(-1, 1)` so panels are
+#' positive `r` = blue, negative `r` = red, neutral color at
+#' zero. The color scale is fixed at `c(-1, 1)` so panels are
 #' directly comparable across runs and across paper figures.
 #'
 #' @section Reading the plot:
@@ -47,15 +47,18 @@
 #' distance with bootstrap CI). For pixel-level localisation
 #' of *where* two conditions differ, see [rel_cluster_test()].
 #'
-#' @param cis CIs to correlate, in any of three forms:
-#'   - a [group_ci()] result (an [rcisignal_group_ci] matrix);
-#'   - a numeric matrix `n_pixels x n_groups` with named columns;
-#'   - a named list of CIs (each element a vector of length
-#'     `prod(img_dims)`, a single-column matrix, or a per-producer
-#'     `signal_matrix` from `ci_from_responses_*()` which is
-#'     reduced to a group mean internally).
-#'   Names become the row / column / diagonal labels in the
-#'   figure. At least two CIs are required.
+#' @param cis CIs to correlate. The recommended form is a numeric
+#'   matrix `n_pixels x n_cis` with named columns; each column is
+#'   one CI (a group mean, a single producer's CI, or any mix).
+#'   Build it outside the call with
+#'   `cbind(name = rowMeans(cis$signal_matrix), ...)`. Two other
+#'   forms are accepted for back-compatibility: a [group_ci()]
+#'   result (an [rcisignal_group_ci] matrix) and a named list of
+#'   CIs (vectors of length `prod(img_dims)`, single-column
+#'   matrices, or per-producer `signal_matrix` objects from
+#'   `ci_from_responses_*()` which are reduced to group means
+#'   internally). Names become the row / column / diagonal labels
+#'   in the figure. At least two CIs are required.
 #' @param img_dims Integer `c(nrow, ncol)`. If `NULL`, inferred
 #'   from `attr(cis[[1]], "img_dims")` (set by `ci_from_responses_*()`)
 #'   or from `sqrt(n_pixels)` if that is a whole number.
@@ -285,7 +288,7 @@ plot_ci_correlogram <- function(cis,
                     cex = 1.0, col = "grey15")
   }
 
-  add_colour_bar(c(-1, 1), col_vec, label = "Pearson r")
+  add_color_bar(c(-1, 1), col_vec, label = "Pearson r")
 
   invisible(list(
     correlation_matrix = cor_mat,

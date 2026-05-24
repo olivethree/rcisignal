@@ -15,20 +15,20 @@
 #' if needed.
 #'
 #' @section Reading the plot:
-#' * **Colour** encodes the sign of the producer-mean signal at each
+#' * **Color** encodes the sign of the producer-mean signal at each
 #'   pixel. Blue = positive (producers' average mask is brighter than
 #'   the base at that pixel); red = negative (darker than the base);
 #'   pixels rendered as the bare base = at or near zero.
 #' * **Opacity** encodes the magnitude of the signal, scaled to
-#'   `alpha_max` at the global peak `|signal|`. Faint colour means
-#'   weak agreement; saturated colour means a strong, consistent
+#'   `alpha_max` at the global peak `|signal|`. Faint color means
+#'   weak agreement; saturated color means a strong, consistent
 #'   producer-mean deflection.
 #' * **Black contours** (only drawn when `test` is supplied) trace
 #'   the boundary of the FWE-significant pixel set returned by
 #'   [agreement_map_test()] at its `alpha`. Pixels inside the
 #'   contour are individually significant under the max-|t| null;
 #'   pixels outside are not.
-#' * Colour convention matches [plot_agreement_map()] and the
+#' * Color convention matches [plot_agreement_map()] and the
 #'   cluster-test plots so the same group CI reads consistently
 #'   across the package.
 #'
@@ -61,7 +61,7 @@
 #'   peak of the signal magnitude. Default 0.7.
 #' @param palette Character. Currently only `"diverging"` is
 #'   implemented (red-white-blue). Future-proofed by argument.
-#' @param contour_col,contour_lwd Significance-contour colour and
+#' @param contour_col,contour_lwd Significance-contour color and
 #'   line width when `test` is supplied. Defaults: `"black"`, `1.0`.
 #' @param main Optional plot title.
 #' @return Invisibly the composed `nrow x ncol x 3` raster. The

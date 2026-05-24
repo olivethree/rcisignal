@@ -67,7 +67,7 @@ test_that("plot_mask_overlay aborts on bad alpha / overlay_col / base", {
   expect_error(plot_mask_overlay(base, mask, alpha = 2),
                "in \\[0, 1\\]")
   expect_error(plot_mask_overlay(base, mask, overlay_col = c("red", "blue")),
-               "single colour")
+               "single color")
   expect_error(plot_mask_overlay("does/not/exist.png", mask),
                "not found")
   expect_error(plot_mask_overlay(list(1, 2), mask),

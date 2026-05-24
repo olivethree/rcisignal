@@ -21,17 +21,18 @@ plot_ci_distance_matrix(
 )
 }
 \arguments{
-\item{cis}{CIs to compare, in any of three forms:
-\itemize{
-\item a \code{\link[=group_ci]{group_ci()}} result (an \link{rcisignal_group_ci} matrix);
-\item a numeric matrix \verb{n_pixels x n_groups} with named columns;
-\item a named list of CIs (each element a vector of length
-\code{prod(img_dims)}, a single-column matrix, or a per-producer
-\code{signal_matrix} from \verb{ci_from_responses_*()} which is
-reduced to a group mean internally).
-Names become the row / column / diagonal labels in the
-figure. At least two CIs are required.
-}}
+\item{cis}{CIs to compare. The recommended form is a numeric
+matrix \verb{n_pixels x n_cis} with named columns; each column is
+one CI (a group mean, a single producer's CI, or any mix).
+Build it outside the call with
+\code{cbind(name = rowMeans(cis$signal_matrix), ...)}. Two other
+forms are accepted for back-compatibility: a \code{\link[=group_ci]{group_ci()}}
+result (an \link{rcisignal_group_ci} matrix) and a named list of
+CIs (vectors of length \code{prod(img_dims)}, single-column
+matrices, or per-producer \code{signal_matrix} objects from
+\verb{ci_from_responses_*()} which are reduced to group means
+internally). Names become the row / column / diagonal labels
+in the figure. At least two CIs are required.}
 
 \item{img_dims}{Integer \code{c(nrow, ncol)}. If \code{NULL}, inferred
 from \code{attr(cis[[1]], "img_dims")} or from \code{sqrt(n_pixels)}.}

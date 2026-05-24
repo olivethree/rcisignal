@@ -10,7 +10,7 @@ diagnose_infoval(
   rdata = NULL,
   stimuli = NULL,
   noise_matrix = NULL,
-  baseimage = "base",
+  base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
@@ -43,7 +43,7 @@ the file path no longer resolves (e.g. after \code{\link[=saveRDS]{saveRDS()}}/
 \item{noise_matrix}{Path to a Brief-RC noise-matrix text file, or
 an already-loaded numeric matrix.}
 
-\item{baseimage}{Name of the base image in the rdata
+\item{base_image}{Name of the base image in the rdata
 \code{base_face_files} list. Default \code{"base"}. Only consulted for 2IFC.}
 
 \item{col_participant, col_stimulus, col_response}{Column names.}

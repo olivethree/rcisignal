@@ -44,7 +44,7 @@
 #'   file path no longer resolves (e.g. after [saveRDS()]/[readRDS()]
 #'   across R sessions). Internally written to a fresh tempdir-
 #'   backed `.Rdata` before the call into rcicr.
-#' @param baseimage Name of the base image used at generation time
+#' @param base_image Name of the base image used at generation time
 #'   (the key in `base_face_files` in the rdata). Default `"base"`.
 #' @param col_participant,col_stimulus,col_response Column names.
 #' @param iter Number of iterations for rcicr's reference-distribution
@@ -84,7 +84,7 @@ compute_infoval_summary <- function(responses,
                                     method = c("2ifc", "briefrc"),
                                     rdata = NULL,
                                     stimuli = NULL,
-                                    baseimage = "base",
+                                    base_image = "base",
                                     col_participant = "participant_id",
                                     col_stimulus = "stimulus",
                                     col_response = "response",
@@ -117,6 +117,9 @@ compute_infoval_summary <- function(responses,
   validate_responses_df(
     responses, col_participant, col_stimulus, col_response
   )
+  resolved   <- resolve_2ifc_base_image(base_image, rdata)
+  base_image <- resolved$label
+  rdata      <- resolved$rdata_path
 
   # rcicr's 2IFC code uses %dopar%, tribble, and %>% at eval time.
   # Loading the namespaces isn't enough; they need to be on the search path.
@@ -131,7 +134,7 @@ compute_infoval_summary <- function(responses,
     by          = col_participant,
     stimuli     = col_stimulus,
     responses   = col_response,
-    baseimage   = baseimage,
+    baseimage   = base_image,
     rdata       = rdata,
     save_as_png = FALSE,
     targetpath  = tmp_out
@@ -142,7 +145,7 @@ compute_infoval_summary <- function(responses,
     function(nm) rcicr::computeInfoVal2IFC(cis[[nm]], rdata, iter = iter),
     numeric(1L)
   )
-  ids <- extract_participant_ids(names(cis), baseimage, col_participant)
+  ids <- extract_participant_ids(names(cis), base_image, col_participant)
   per_p <- data.frame(
     participant_id  = ids,
     infoval         = unname(per_participant),
@@ -184,8 +187,8 @@ compute_infoval_summary <- function(responses,
 }
 
 # rcicr's batch CI functions return lists named
-# "<baseimage>_<by>_<id>"; recover the <id> component.
-extract_participant_ids <- function(nms, baseimage, by) {
-  prefix <- paste0("^", baseimage, "_", by, "_")
+# "<base_image>_<by>_<id>"; recover the <id> component.
+extract_participant_ids <- function(nms, base_image, by) {
+  prefix <- paste0("^", base_image, "_", by, "_")
   sub(prefix, "", nms)
 }

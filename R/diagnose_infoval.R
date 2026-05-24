@@ -60,7 +60,7 @@
 #'   [readRDS()] across R sessions).
 #' @param noise_matrix Path to a Brief-RC noise-matrix text file, or
 #'   an already-loaded numeric matrix.
-#' @param baseimage Name of the base image in the rdata
+#' @param base_image Name of the base image in the rdata
 #'   `base_face_files` list. Default `"base"`. Only consulted for 2IFC.
 #' @param col_participant,col_stimulus,col_response Column names.
 #' @param iter Reference-distribution Monte Carlo size. Default
@@ -124,7 +124,7 @@ diagnose_infoval <- function(responses,
                              rdata            = NULL,
                              stimuli          = NULL,
                              noise_matrix     = NULL,
-                             baseimage        = "base",
+                             base_image        = "base",
                              col_participant  = "participant_id",
                              col_stimulus     = "stimulus",
                              col_response     = "response",
@@ -138,6 +138,9 @@ diagnose_infoval <- function(responses,
                            stimuli = stimuli)
   if (method == "2ifc") {
     rdata <- resolve_rdata_input(rdata, stimuli, method = "2ifc")
+    resolved   <- resolve_2ifc_base_image(base_image, rdata)
+    base_image <- resolved$label
+    rdata      <- resolved$rdata_path
   }
   validate_responses_df(responses, col_participant, col_stimulus, col_response)
   iter <- as.integer(iter)
@@ -147,7 +150,7 @@ diagnose_infoval <- function(responses,
     cli::cli_h2("Preparing inputs")
   }
   built <- build_diagnose_inputs(
-    responses, method, rdata, noise_matrix, baseimage,
+    responses, method, rdata, noise_matrix, base_image,
     col_participant, col_stimulus, col_response,
     progress = progress
   )
@@ -286,7 +289,7 @@ diagnose_infoval <- function(responses,
 
 # Build per-producer signal matrix, noise matrix, trial counts, img dims.
 build_diagnose_inputs <- function(responses, method, rdata, noise_matrix,
-                                  baseimage, col_participant,
+                                  base_image, col_participant,
                                   col_stimulus, col_response,
                                   progress = TRUE) {
   if (method == "2ifc") {
@@ -295,7 +298,7 @@ build_diagnose_inputs <- function(responses, method, rdata, noise_matrix,
     }
     validate_path(rdata, "rdata")
     return(build_inputs_2ifc(
-      responses, rdata, baseimage,
+      responses, rdata, base_image,
       col_participant, col_stimulus, col_response,
       progress = progress
     ))
@@ -312,7 +315,7 @@ build_diagnose_inputs <- function(responses, method, rdata, noise_matrix,
   )
 }
 
-build_inputs_2ifc <- function(responses, rdata, baseimage,
+build_inputs_2ifc <- function(responses, rdata, base_image,
                               col_participant, col_stimulus, col_response,
                               progress = TRUE) {
   if (!requireNamespace("rcicr", quietly = TRUE)) {
@@ -334,20 +337,20 @@ build_inputs_2ifc <- function(responses, rdata, baseimage,
       "i" = "Expected the output of {.fn rcicr::generateStimuli2IFC}, which saves base_faces, stimuli_params, and p."
     ))
   }
-  if (!baseimage %in% names(env$base_faces)) {
+  if (!base_image %in% names(env$base_faces)) {
     cli::cli_abort(c(
-      "{.arg baseimage} = {.val {baseimage}} not in rdata.",
+      "{.arg base_image} = {.val {base_image}} not in rdata.",
       "i" = "Available: {.val {names(env$base_faces)}}"
     ))
   }
-  base_mat <- env$base_faces[[baseimage]]
+  base_mat <- env$base_faces[[base_image]]
   img_dims <- as.integer(dim(base_mat))
   n_pix    <- prod(img_dims)
 
-  params_mat <- env$stimuli_params[[baseimage]]
+  params_mat <- env$stimuli_params[[base_image]]
   if (is.null(params_mat)) {
     cli::cli_abort(
-      "{.arg baseimage} = {.val {baseimage}} has no entry in stimuli_params."
+      "{.arg base_image} = {.val {base_image}} has no entry in stimuli_params."
     )
   }
   n_pool <- nrow(params_mat)
@@ -386,7 +389,7 @@ build_inputs_2ifc <- function(responses, rdata, baseimage,
       by          = col_participant,
       stimuli     = col_stimulus,
       responses   = col_response,
-      baseimage   = baseimage,
+      baseimage   = base_image,
       rdata       = rdata,
       save_as_png = FALSE,
       targetpath  = tmp_out
@@ -400,7 +403,7 @@ build_inputs_2ifc <- function(responses, rdata, baseimage,
     }
   )
 
-  ids <- extract_participant_ids(names(cis), baseimage, col_participant)
+  ids <- extract_participant_ids(names(cis), base_image, col_participant)
   signal_matrix <- vapply(
     seq_along(cis),
     function(i) as.vector(cis[[i]]$ci),

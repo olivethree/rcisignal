@@ -32,7 +32,7 @@
 #'   of an `rcisignal_sim` object). Use in place of `rdata` when
 #'   the file path no longer resolves (e.g. after [saveRDS()]/
 #'   [readRDS()] across R sessions).
-#' @param baseimage Name of the base image in `rdata$base_face_files`.
+#' @param base_image Name of the base image in `rdata$base_face_files`.
 #' @param col_participant,col_stimulus,col_response,col_rt Column names.
 #'   `col_rt` is required.
 #' @param iter Reference-distribution iterations. Default `10000`.
@@ -54,7 +54,7 @@ check_rt_infoval_consistency <- function(responses,
                                       method = c("2ifc", "briefrc"),
                                       rdata = NULL,
                                       stimuli = NULL,
-                                      baseimage = "base",
+                                      base_image = "base",
                                       col_participant = "participant_id",
                                       col_stimulus = "stimulus",
                                       col_response = "response",
@@ -85,7 +85,7 @@ check_rt_infoval_consistency <- function(responses,
 
   iv_result <- compute_infoval_summary(
     responses, method = method, rdata = rdata, stimuli = stimuli,
-    baseimage = baseimage,
+    base_image = base_image,
     col_participant = col_participant, col_stimulus = col_stimulus,
     col_response = col_response, iter = iter
   )

@@ -19,7 +19,7 @@
 #' (cluster t-map with FWE-significant contours; bootstrap
 #' dissimilarity histograms). To plot one panel at a time, call
 #' `plot(result$results$cluster_test)` or
-#' `plot(result$results$dissimilarity)` directly. Colour
+#' `plot(result$results$dissimilarity)` directly. Color
 #' convention on the cluster panel matches the rest of the
 #' package: blue = condition A larger; red = condition B larger;
 #' black contours bound FWE-significant clusters.

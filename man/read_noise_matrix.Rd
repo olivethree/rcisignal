@@ -6,7 +6,7 @@
 \usage{
 read_noise_matrix(
   path,
-  baseimage = NULL,
+  base_image = NULL,
   stimuli_object = "stimuli",
   cache = TRUE,
   cache_path = NULL,
@@ -17,7 +17,7 @@ read_noise_matrix(
 \item{path}{Path to the noise-matrix source (any of the formats
 listed in \code{Description}).}
 
-\item{baseimage}{For rcicr \code{.RData} inputs: which base label to
+\item{base_image}{For rcicr \code{.RData} inputs: which base label to
 reconstruct noise for. Defaults to the only label if the rdata
 contains exactly one; aborts with a list of options otherwise.}
 
@@ -93,7 +93,7 @@ under \verb{read_*} names and operate independently.
 \describe{
 \item{\code{base_face_files}}{Named list of file paths to the
 original face images. List names are the labels passed
-downstream as \code{baseimage = "..."}.}
+downstream as \code{base_image = "..."}.}
 \item{\code{base_faces}}{Base images themselves, loaded as numeric
 matrices of grayscale pixels in \verb{[0, 1]}.}
 \item{\code{img_size}}{Side length of the (square) images in pixels.}

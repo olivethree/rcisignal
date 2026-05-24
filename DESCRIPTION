@@ -1,6 +1,6 @@
 Package: rcisignal
 Title: Quality Checks for Reverse-Correlation Data and Classification Images
-Version: 0.1.8
+Version: 0.1.9
 Authors@R:
     person("Manuel", "Oliveira",
            email   = "m.j.barbosa.de.oliveira@tue.nl",
@@ -27,7 +27,7 @@ Description: A consolidated toolkit for assessing the quality of reverse
     on a second-phase trait-rating study.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Language: en-GB
+Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 URL: https://github.com/olivethree/rcisignal,

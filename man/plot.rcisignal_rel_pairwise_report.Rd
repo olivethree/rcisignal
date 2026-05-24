@@ -24,7 +24,7 @@ supplied, each per-pair t-map is composited on top of the
 grayscale base; otherwise panels render on a flat background.}
 
 \item{alpha_max}{Numeric in \verb{[0, 1]}. Maximum opacity of the t-map
-overlay at the colour-scale top when \code{base_image} is supplied.
+overlay at the color-scale top when \code{base_image} is supplied.
 Default 0.7.}
 }
 \value{
@@ -34,7 +34,7 @@ Invisibly the input \code{x}.
 Renders one cluster t-map (or signed TFCE map) per pair, laid out
 in a square-ish grid. Each panel shows the per-pixel statistic
 with black contours bounding FWE-significant clusters (or
-FWE-corrected pixels under TFCE). Colour convention matches the
+FWE-corrected pixels under TFCE). Color convention matches the
 rest of the package: blue = first condition larger, red = second
 condition larger.
 }

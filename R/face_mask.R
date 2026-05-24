@@ -2,7 +2,7 @@
 #'
 #' @description
 #' Returns a logical vector of length `prod(img_dims)` marking a
-#' face region (or a face sub-region) centred on the image. Pass
+#' face region (or a face sub-region) centered on the image. Pass
 #' to [infoval()] to restrict both observed and reference Frobenius
 #' norms to the masked region; pass to any `rel_*()` function via
 #' row-subsetting (`signal_matrix[mask, ]`) to compute reliability
@@ -10,7 +10,7 @@
 #'
 #' Eight regions are supported:
 #' * `"full"` (default): the full face oval. Defaults are a
-#'   typical centred-face oval (`half_width = 0.35`,
+#'   typical centered-face oval (`half_width = 0.35`,
 #'   `half_height = 0.45`) and tunable via `centre` /
 #'   `half_width` / `half_height`. Applying an oval mask to a CI
 #'   before computing pixel-wise metrics follows the convention
@@ -25,12 +25,12 @@
 #'   viewer's left and right eye respectively. Independent of the
 #'   full-oval geometry; tune via `region_bounds`.
 #' * `"nose"`: a narrow vertical ellipse along the midline.
-#' * `"mouth"`: a wide-and-short ellipse below centre.
+#' * `"mouth"`: a wide-and-short ellipse below center.
 #' * `"upper_face"`, `"lower_face"`: top and bottom halves of the
 #'   full face oval.
 #'
 #' Sub-region geometries are heuristic approximations matched to a
-#' typical centred face on a square base (e.g. 256x256). For
+#' typical centered face on a square base (e.g. 256x256). For
 #' non-default base images, the elliptical regions (`"nose"`,
 #' `"mouth"`) scale with `centre` / `half_width` / `half_height`;
 #' the three rectangle regions (`"eyes"`, `"left_eye"`,
@@ -175,7 +175,7 @@ make_face_mask <- function(img_dims,
 #'
 #' @param path Path to a PNG or JPEG mask image.
 #' @param threshold Numeric in `[0, 1]`. Pixels with luminance above
-#'   this become `TRUE`. Default `0.5` (mid-grey).
+#'   this become `TRUE`. Default `0.5` (mid-gray).
 #' @param invert If `TRUE`, the mask is inverted (useful for
 #'   black-on-white masks). Default `FALSE`.
 #' @param expected_dims Optional integer `c(nrow, ncol)`. When set,
@@ -293,7 +293,7 @@ rect_mask <- function(img_dims, row_min, row_max, col_min, col_max) {
 #' Internal: validate `region_bounds` and resolve to a default
 #' rectangle if `NULL`.
 #'
-#' Defaults are heuristics for a typical centred-portrait base
+#' Defaults are heuristics for a typical centered-portrait base
 #' on a square 256x256 image. They are exposed via `region_bounds`
 #' for precise tuning on non-default bases.
 #'

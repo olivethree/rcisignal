@@ -238,7 +238,7 @@ print.rcisignal_rel_agreement_map_test <- function(x, ...) {
 #'
 #' @description
 #' Renders the observed per-pixel t-map from [agreement_map_test()]
-#' with the same colour conventions as [plot_agreement_map()], and
+#' with the same color conventions as [plot_agreement_map()], and
 #' overlays the FWE-significant pixel boundary as black contours
 #' when `show_contour = TRUE` (the default). Optionally composites
 #' the map on a grayscale base face.
@@ -255,9 +255,9 @@ print.rcisignal_rel_agreement_map_test <- function(x, ...) {
 #'   ramp). See [plot_agreement_map()] for the full Reading-the-plot
 #'   discussion; the same conventions apply here.
 #' @param threshold Optional positive numeric. Pixels with
-#'   `|t| < threshold` render as the neutral colour (descriptive
+#'   `|t| < threshold` render as the neutral color (descriptive
 #'   only; FWE control is already in `significant_mask`).
-#' @param zlim Numeric `c(low, high)` for the colour scale.
+#' @param zlim Numeric `c(low, high)` for the color scale.
 #'   Defaults to a symmetric `c(-max|t|, max|t|)` for diverging or
 #'   `c(0, max|t|)` for fire.
 #' @param base_image Optional. Numeric matrix or path to PNG/JPEG.
@@ -265,10 +265,10 @@ print.rcisignal_rel_agreement_map_test <- function(x, ...) {
 #'   base; out-of-mask and subthreshold pixels render fully
 #'   transparent.
 #' @param alpha_max Numeric in `[0, 1]`. Maximum opacity at the
-#'   colour-scale top when `base_image` is supplied. Default 0.7.
+#'   color-scale top when `base_image` is supplied. Default 0.7.
 #' @param show_contour Logical. Draw the FWE-significant pixel
 #'   boundary as black contours on top of the t-map. Default `TRUE`.
-#' @param contour_col,contour_lwd Significance-contour colour and
+#' @param contour_col,contour_lwd Significance-contour color and
 #'   line width.
 #' @param main Plot title.
 #' @param ... Reserved for future use.

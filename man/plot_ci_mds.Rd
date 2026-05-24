@@ -28,17 +28,18 @@ plot_ci_mds(
 )
 }
 \arguments{
-\item{cis}{CIs to project, in any of three forms:
-\itemize{
-\item a \code{\link[=group_ci]{group_ci()}} result (an \link{rcisignal_group_ci} matrix);
-\item a numeric matrix \verb{n_pixels x n_groups} with named columns;
-\item a named list of CIs (each element a vector of length
-\code{prod(img_dims)}, a single-column matrix, or a per-producer
-\code{signal_matrix} from \verb{ci_from_responses_*()} which is
-reduced to a group mean internally).
-At least three CIs are required for a meaningful 2D
-projection.
-}}
+\item{cis}{CIs to project. The recommended form is a numeric
+matrix \verb{n_pixels x n_cis} with named columns; each column is
+one CI (a group mean, a single producer's CI, or any mix).
+Build it outside the call with
+\code{cbind(name = rowMeans(cis$signal_matrix), ...)}. Two other
+forms are accepted for back-compatibility: a \code{\link[=group_ci]{group_ci()}}
+result (an \link{rcisignal_group_ci} matrix) and a named list of
+CIs (vectors of length \code{prod(img_dims)}, single-column
+matrices, or per-producer \code{signal_matrix} objects from
+\verb{ci_from_responses_*()} which are reduced to group means
+internally). At least three CIs are required for a
+meaningful 2D projection.}
 
 \item{img_dims}{Integer \code{c(nrow, ncol)}. If \code{NULL}, inferred
 from \code{attr(cis[[1]], "img_dims")} or from \code{sqrt(n_pixels)}.}
@@ -69,7 +70,7 @@ will try. Default \code{4L}, capping the multi-panel grid at
 \code{length(cis) - 1L} (the maximum embeddable dimension).}
 
 \item{groups}{Optional named character vector mapping CI names
-to a categorical group label. Used to colour the points.
+to a categorical group label. Used to color the points.
 Names must match \code{names(cis)} exactly.}
 
 \item{shapes}{Optional named character vector with the same
@@ -178,7 +179,7 @@ render the corresponding \code{choose(k, 2)}-panel grid.
 Each panel is a scatter of CIs in two MDS dimensions. Points
 close together represent CIs that are similar in pixel space;
 distant points represent dissimilar CIs. With \code{groups},
-points colour by category; with \code{shapes}, points carry
+points color by category; with \code{shapes}, points carry
 distinct marker shapes by another category. The aspect ratio
 is fixed (\code{asp = 1}) so visual distances faithfully reflect
 the MDS distances.
@@ -286,7 +287,7 @@ out <- plot_ci_mds(ci_list, mask = "face")
 plot_ci_mds(ci_list, mask = "face", k = 2L,
             file = "fig_mds.pdf")
 
-# Add a grouping variable for point colour:
+# Add a grouping variable for point color:
 plot_ci_mds(
   ci_list, mask = "face",
   groups = c(Eyes = "feature", Mouth = "feature",

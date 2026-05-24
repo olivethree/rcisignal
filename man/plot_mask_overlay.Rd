@@ -44,7 +44,7 @@ otherwise.}
 \item{alpha}{Numeric in \verb{[0, 1]}. Opacity of the mask overlay.
 Default \code{0.35}.}
 
-\item{overlay_col}{Single colour for the mask overlay. Default
+\item{overlay_col}{Single color for the mask overlay. Default
 \code{"red"}.}
 
 \item{main}{Optional plot title (character of length 1). Default

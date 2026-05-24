@@ -25,7 +25,7 @@ test_that("compute_infoval_summary returns a tidy per-participant data frame", {
   sub <- as.data.frame(resp[resp$participant_id %in% c("P01", "P02", "P27"), ])
 
   result <- compute_infoval_summary(
-    sub, method = "2ifc", rdata = paths$rdata, baseimage = "base",
+    sub, method = "2ifc", rdata = paths$rdata, base_image = "base",
     iter = 1000L
   )
   expect_s3_class(result, "rcisignal_diag_result")

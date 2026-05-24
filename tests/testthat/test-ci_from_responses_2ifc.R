@@ -42,7 +42,7 @@ test_that("2IFC wrapper smokes against the original rcicr if available", {
   res <- ci_from_responses_2ifc(
     responses       = responses,
     rdata_path      = rdata_path,
-    baseimage       = "base",
+    base_image       = "base",
     save_as_png     = FALSE,
     targetpath      = file.path(tmp, "cis")
   )
@@ -63,7 +63,7 @@ test_that("2IFC wrapper rejects bad response coding", {
   )
   expect_error(
     ci_from_responses_2ifc(responses = responses, rdata_path = tmp,
-                           baseimage = "base"),
+                           base_image = "base"),
     "must contain only values"
   )
 })

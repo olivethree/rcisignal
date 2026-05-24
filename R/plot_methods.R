@@ -419,13 +419,13 @@ summary.rcisignal_rel_cluster_test <- function(object, ...) {
 #' @export
 plot.rcisignal_rel_cluster_test <- function(x, ...,
                                        main       = NULL,
-                                       colour_bar = TRUE,
+                                       color_bar = TRUE,
                                        base_image = NULL,
                                        alpha_max  = 0.7) {
   op <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(op), add = TRUE)
   method <- if (is.null(x$method)) "threshold" else x$method
-  bar_mar <- if (isTRUE(colour_bar)) 6 else 1
+  bar_mar <- if (isTRUE(color_bar)) 6 else 1
   set_pub_par(mar = c(1, 1, 3, bar_mar) + 0.1)
 
   pal <- grDevices::hcl.colors(256L, "RdBu")
@@ -497,8 +497,8 @@ plot.rcisignal_rel_cluster_test <- function(x, ...,
         col = "grey10", lwd = 1.5
       )
     }
-    if (isTRUE(colour_bar)) {
-      add_colour_bar(zlim, pal, label = "TFCE value (signed)")
+    if (isTRUE(color_bar)) {
+      add_color_bar(zlim, pal, label = "TFCE value (signed)")
     }
     graphics::mtext(
       sprintf("alpha = %.2f, %d permutations, H = %.1f, E = %.1f",
@@ -534,8 +534,8 @@ plot.rcisignal_rel_cluster_test <- function(x, ...,
   add_contour(x$pos_labels, sig_pos_ids, "grey10")
   add_contour(x$neg_labels, sig_neg_ids, "grey10")
 
-  if (isTRUE(colour_bar)) {
-    add_colour_bar(zlim, pal, label = "Welch t")
+  if (isTRUE(color_bar)) {
+    add_color_bar(zlim, pal, label = "Welch t")
   }
   n_sig <- sum(x$clusters$significant)
   graphics::mtext(
@@ -802,7 +802,7 @@ print.rcisignal_rel_pairwise_report <- function(x, ...) {
 #' Renders one cluster t-map (or signed TFCE map) per pair, laid out
 #' in a square-ish grid. Each panel shows the per-pixel statistic
 #' with black contours bounding FWE-significant clusters (or
-#' FWE-corrected pixels under TFCE). Colour convention matches the
+#' FWE-corrected pixels under TFCE). Color convention matches the
 #' rest of the package: blue = first condition larger, red = second
 #' condition larger.
 #'
@@ -822,7 +822,7 @@ print.rcisignal_rel_pairwise_report <- function(x, ...) {
 #'   supplied, each per-pair t-map is composited on top of the
 #'   grayscale base; otherwise panels render on a flat background.
 #' @param alpha_max Numeric in `[0, 1]`. Maximum opacity of the t-map
-#'   overlay at the colour-scale top when `base_image` is supplied.
+#'   overlay at the color-scale top when `base_image` is supplied.
 #'   Default 0.7.
 #' @return Invisibly the input `x`.
 #' @seealso [plot_dissimilarity_grid()] for a shared-axis comparison
@@ -862,7 +862,7 @@ plot.rcisignal_rel_pairwise_report <- function(x, ...,
   for (pid in pair_ids) {
     child <- x$results[[pid]]$cluster_test
     pretty_title <- gsub("_vs_", " vs ", pid, fixed = TRUE)
-    plot(child, main = pretty_title, colour_bar = FALSE,
+    plot(child, main = pretty_title, color_bar = FALSE,
          base_image = base_resolved, alpha_max = alpha_max)
   }
   invisible(x)

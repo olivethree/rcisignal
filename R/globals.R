@@ -7,7 +7,7 @@
 ## - `utils::globalVariables()` silences R CMD check NOTEs about
 ##   unbound sentinels used inside data.table calls.
 ## - `.datatable.aware <- TRUE` flips the runtime flag that makes
-##   `cedta` recognise this package as data.table-aware, so
+##   `cedta` recognize this package as data.table-aware, so
 ##   `[.data.table` dispatches correctly instead of falling through
 ##   to `[.data.frame`.
 ##

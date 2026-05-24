@@ -88,25 +88,25 @@
 #' Welch t (or signed TFCE values for `method = "tfce"`) as a
 #' raster image with FWE-significant cluster boundaries traced on
 #' top.
-#' * **Colour** encodes the sign and magnitude of the per-pixel
+#' * **Color** encodes the sign and magnitude of the per-pixel
 #'   statistic. Blue = condition A larger than B at that pixel
 #'   (positive Welch t); red = condition B larger than A
-#'   (negative Welch t); white = near zero. The colourbar reads
+#'   (negative Welch t); white = near zero. The colorbar reads
 #'   in `Welch t` units (or signed `TFCE value` for TFCE).
 #' * **Black contours** trace the boundary of clusters that are
 #'   significant at the chosen `alpha` under the max-mass null
 #'   (threshold method) or the boundary of pixels with FWE-
 #'   corrected `p < alpha` (TFCE method). Pixels inside the
 #'   contour survive the FWE correction; pixels outside do not.
-#' * The colour scale is symmetric around zero by default so the
-#'   neutral colour aligns with `t = 0`. The displayed t-map is
+#' * The color scale is symmetric around zero by default so the
+#'   neutral color aligns with `t = 0`. The displayed t-map is
 #'   the *observed* statistic before any thresholding; the
 #'   contours encode the inferential decision.
-#' * Colour convention matches [plot_agreement_map()] and
+#' * Color convention matches [plot_agreement_map()] and
 #'   [plot_ci_overlay()] so the same data reads consistently
 #'   across the package.
-#' * `plot()` accepts `main =` (title) and `colour_bar =` (logical,
-#'   default `TRUE`). Set `colour_bar = FALSE` when packing many
+#' * `plot()` accepts `main =` (title) and `color_bar =` (logical,
+#'   default `TRUE`). Set `color_bar = FALSE` when packing many
 #'   panels into a small grid — used internally by
 #'   [plot.rcisignal_rel_pairwise_report()] for that reason.
 #'

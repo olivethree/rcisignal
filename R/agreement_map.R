@@ -5,9 +5,9 @@
 #' direction of signal. For each pixel, computes a one-sample
 #' t-statistic against zero across producers
 #' (`mean / (sd / sqrt(N))`), then displays the resulting map with
-#' a diverging colour palette (positive = agreement on positive
+#' a diverging color palette (positive = agreement on positive
 #' signal, negative = agreement on negative signal, zero = no
-#' agreement). Saturation of the colour is the magnitude of the
+#' agreement). Saturation of the color is the magnitude of the
 #' agreement, *not* the value of the group-mean CI.
 #'
 #' Use this to answer "where do producers consistently *agree* the
@@ -31,17 +31,17 @@
 #' **`palette = "diverging"` (default).** Encodes sign and
 #' magnitude together. Both deep red and deep blue indicate
 #' **strong** agreement among producers; only the **direction**
-#' differs. "No agreement" is the neutral colour (white), not red.
+#' differs. "No agreement" is the neutral color (white), not red.
 #' * **Hue** encodes the sign of the per-pixel one-sample `t`.
 #'   Blue = producers consistently *add* to the base at that pixel
 #'   (positive agreement, producers chose noise that lightens the
 #'   region); red = consistently *subtract* (negative agreement,
 #'   producers chose noise that darkens the region).
-#' * **Saturation** encodes `|t|`. Deep colour at either end means
-#'   strong, consistent agreement; pale colour means weak or
-#'   inconsistent. The colourbar on the right reads in `t` units.
+#' * **Saturation** encodes `|t|`. Deep color at either end means
+#'   strong, consistent agreement; pale color means weak or
+#'   inconsistent. The colorbar on the right reads in `t` units.
 #' * **`zlim`** is symmetric around zero by default so the neutral
-#'   colour aligns with `t = 0`. Pass `zlim = c(-z, z)` to fix the
+#'   color aligns with `t = 0`. Pass `zlim = c(-z, z)` to fix the
 #'   scale across panels for direct comparison.
 #'
 #' **`palette = "fire"`.** Encodes `|t|` only on a single-hue ramp
@@ -56,11 +56,11 @@
 #' * **Hue intensity** encodes `|t|`. Pale yellow / near-white at
 #'   low `|t|` (so the underlying base face shows through low-
 #'   agreement regions); orange at moderate `|t|`; deep red at
-#'   large `|t|`. The colourbar reads in `|t|` units.
+#'   large `|t|`. The colorbar reads in `|t|` units.
 #' * **`zlim`** defaults to `c(0, max(|t|))` and is asymmetric.
 #'
 #' **Common to both palettes.**
-#' * **`threshold`** clips colour to the neutral end below
+#' * **`threshold`** clips color to the neutral end below
 #'   `|t| < threshold`, making strong-agreement clusters stand out.
 #'   This is descriptive only; it does not provide FWER control. For
 #'   inferential pixel significance, use [agreement_map_test()] and
@@ -71,9 +71,9 @@
 #'   base face so anatomical context shows through. Out-of-mask and
 #'   subthreshold pixels render fully transparent; the per-pixel
 #'   opacity scales `|t| / zlim_max` up to `alpha_max`. Works for
-#'   both palettes. The colour bar still shows the full scale so
+#'   both palettes. The color bar still shows the full scale so
 #'   magnitudes are readable off the rendered overlay.
-#' * The diverging colour convention (blue = positive,
+#' * The diverging color convention (blue = positive,
 #'   red = negative) matches [plot_ci_overlay()] and the
 #'   cluster-test plots so the same group CI reads consistently
 #'   across the package. The `"fire"` option is unique to this
@@ -92,11 +92,11 @@
 #'   masks. Pixels outside the mask render as `NA` (transparent).
 #' @param threshold Optional positive numeric. When supplied,
 #'   pixels with `|t| < threshold` are rendered in the neutral
-#'   (white) colour, making clusters of agreement stand out.
+#'   (white) color, making clusters of agreement stand out.
 #'   Default `NULL` (full continuous map).
-#' @param zlim Numeric `c(low, high)` for the colour scale. For
+#' @param zlim Numeric `c(low, high)` for the color scale. For
 #'   `palette = "diverging"` (default), defaults to
-#'   `c(-max(|t|), max(|t|))` so the neutral colour aligns with
+#'   `c(-max(|t|), max(|t|))` so the neutral color aligns with
 #'   `t = 0`. For `palette = "fire"`, defaults to `c(0, max(|t|))`
 #'   so pale yellow aligns with `|t| = 0`.
 #' @param palette Character. `"diverging"` (default; positive =
@@ -113,15 +113,15 @@
 #'   PNG/JPEG file. When supplied, the t-map is composited on top of
 #'   the grayscale base; out-of-mask and subthreshold pixels render
 #'   fully transparent. When `NULL` (default), the map is drawn on a
-#'   flat panel via `graphics::image()` (the historical behaviour).
+#'   flat panel via `graphics::image()` (the historical behavior).
 #' @param alpha_max Numeric in `[0, 1]`. Maximum opacity of the
-#'   heatmap at the colour-scale top (`zlim_max`) when `base_image`
+#'   heatmap at the color-scale top (`zlim_max`) when `base_image`
 #'   is supplied. Ignored otherwise. Default 0.7.
 #' @param main Title.
 #' @param ... Passed to `graphics::image()`.
 #' @return Invisibly, a list with `t_map` (numeric vector of t values
 #'   per pixel; always signed regardless of palette), `n` (producer
-#'   count), `img_dims`, `mask` (if supplied), `zlim` (the colour
+#'   count), `img_dims`, `mask` (if supplied), `zlim` (the color
 #'   scale used), and `palette` (the palette name).
 #' @seealso [plot_ci_overlay()] for the producer-mean counterpart
 #'   (signed CI, optionally with FWE contours); [agreement_map_test()]
@@ -156,7 +156,7 @@
 #' \dontrun{
 #' # Composite the agreement map on the base face for a single
 #' # publication-grade figure. Works for both palettes; the
-#' # "diverging" branch matches plot_ci_overlay()'s colour mapping.
+#' # "diverging" branch matches plot_ci_overlay()'s color mapping.
 #' sim <- simulate_briefrc_data(
 #'   n_per_condition = 20, n_trials = 60, conditions = "target",
 #'   signal_region = "eyes", signal_strength = "strong", seed = 1
@@ -336,7 +336,7 @@ render_agreement_t_map <- function(t_map,
     }
   }
 
-  add_colour_bar(zlim, col_vec, label = bar_label)
+  add_color_bar(zlim, col_vec, label = bar_label)
 
   if (!is.null(sub_n)) {
     graphics::mtext(
@@ -351,11 +351,11 @@ render_agreement_t_map <- function(t_map,
   invisible(list(zlim = zlim, palette = palette))
 }
 
-#' Add a vertical colour bar in the right margin of the active plot
+#' Add a vertical color bar in the right margin of the active plot
 #'
 #' @keywords internal
 #' @noRd
-add_colour_bar <- function(zlim, col, label = NULL,
+add_color_bar <- function(zlim, col, label = NULL,
                            bar_width_frac = 0.05) {
   usr <- graphics::par("usr")
   pin <- graphics::par("pin")

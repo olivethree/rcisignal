@@ -31,7 +31,7 @@
 #' @param base_image Optional path to a PNG or JPEG base face. When
 #'   supplied, the mask is rendered as a translucent overlay on top.
 #' @param alpha Numeric in `[0, 1]`. Overlay opacity. Default `0.5`.
-#' @param col Highlight colour for the masked region. Default
+#' @param col Highlight color for the masked region. Default
 #'   `"red"`.
 #' @param threshold When `mask` is a numeric matrix or image path,
 #'   pixels strictly above this value are treated as inside the

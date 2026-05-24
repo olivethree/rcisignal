@@ -48,7 +48,7 @@
 #' \describe{
 #'   \item{`base_face_files`}{Named list of file paths to the
 #'     original face images. List names are the labels passed
-#'     downstream as `baseimage = "..."`.}
+#'     downstream as `base_image = "..."`.}
 #'   \item{`base_faces`}{Base images themselves, loaded as numeric
 #'     matrices of grayscale pixels in `[0, 1]`.}
 #'   \item{`img_size`}{Side length of the (square) images in pixels.}
@@ -68,7 +68,7 @@
 #'
 #' @param path Path to the noise-matrix source (any of the formats
 #'   listed in `Description`).
-#' @param baseimage For rcicr `.RData` inputs: which base label to
+#' @param base_image For rcicr `.RData` inputs: which base label to
 #'   reconstruct noise for. Defaults to the only label if the rdata
 #'   contains exactly one; aborts with a list of options otherwise.
 #' @param stimuli_object For `.RData` files that contain a pre-saved
@@ -100,7 +100,7 @@
 #' nm <- read_noise_matrix("data/rcicr_stimuli.Rdata")
 #' }
 read_noise_matrix <- function(path,
-                              baseimage      = NULL,
+                              base_image      = NULL,
                               stimuli_object = "stimuli",
                               cache          = TRUE,
                               cache_path     = NULL,
@@ -124,14 +124,14 @@ read_noise_matrix <- function(path,
     }
   }
 
-  parsed <- parse_noise_source(path, ext, baseimage,
+  parsed <- parse_noise_source(path, ext, base_image,
                                stimuli_object, header)
   matrix_out <- parsed$matrix
 
   if (isTRUE(cache) && !is.null(cache_target) &&
         !identical(parsed$source_kind, "fresh_rds")) {
     write_noise_cache(cache_target, matrix_out, path, src_info,
-                      parsed$source_kind, baseimage)
+                      parsed$source_kind, base_image)
     inform_cache_built(cache_target)
   }
 
@@ -214,7 +214,7 @@ try_load_noise_cache <- function(cache_target, src_info, source_path) {
 #' @noRd
 write_noise_cache <- function(cache_target, mat, source_path,
                               src_info, source_kind,
-                              baseimage = NULL) {
+                              base_image = NULL) {
   payload <- list(
     .rcisignal_noise_cache = TRUE,
     rcisignal_version      = utils::packageVersion("rcisignal"),
@@ -224,7 +224,7 @@ write_noise_cache <- function(cache_target, mat, source_path,
     source_size           = src_info$size,
     source_mtime          = src_info$mtime,
     source_kind           = source_kind,
-    baseimage             = baseimage,
+    base_image             = base_image,
     cached_at             = Sys.time()
   )
   saveRDS(payload, cache_target)
@@ -233,10 +233,10 @@ write_noise_cache <- function(cache_target, mat, source_path,
 
 #' @keywords internal
 #' @noRd
-parse_noise_source <- function(path, ext, baseimage,
+parse_noise_source <- function(path, ext, base_image,
                                stimuli_object, header = FALSE) {
   if (ext %in% c("rdata", "RData")) {
-    return(parse_noise_rdata(path, baseimage, stimuli_object))
+    return(parse_noise_rdata(path, base_image, stimuli_object))
   }
   if (ext %in% c("txt", "csv", "tsv", "dat")) {
     return(parse_noise_text(path, header))
@@ -258,7 +258,7 @@ parse_noise_source <- function(path, ext, baseimage,
         source_kind = "fresh_rds"
       ))
     }
-    return(parse_noise_rdata(path, baseimage, stimuli_object))
+    return(parse_noise_rdata(path, base_image, stimuli_object))
   }
   parse_noise_text(path, header)
 }
@@ -287,7 +287,7 @@ parse_noise_text <- function(path, header = FALSE) {
 
 #' @keywords internal
 #' @noRd
-parse_noise_rdata <- function(path, baseimage, stimuli_object) {
+parse_noise_rdata <- function(path, base_image, stimuli_object) {
   env <- new.env(parent = emptyenv())
   load_ok <- tryCatch({ load(path, envir = env); TRUE },
                      error = function(e) FALSE)
@@ -315,23 +315,23 @@ parse_noise_rdata <- function(path, baseimage, stimuli_object) {
       ))
     }
     labels <- names(env$stimuli_params)
-    if (is.null(baseimage)) {
+    if (is.null(base_image)) {
       if (length(labels) != 1L) {
         cli::cli_abort(c(
           "Multiple base labels in rdata; pick one via \\
-           {.arg baseimage}.",
+           {.arg base_image}.",
           "i" = "Available: {.val {labels}}"
         ))
       }
-      baseimage <- labels[1L]
+      base_image <- labels[1L]
     }
-    if (!baseimage %in% labels) {
+    if (!base_image %in% labels) {
       cli::cli_abort(c(
-        "{.arg baseimage} = {.val {baseimage}} not in rdata.",
+        "{.arg base_image} = {.val {base_image}} not in rdata.",
         "i" = "Available: {.val {labels}}"
       ))
     }
-    params  <- env$stimuli_params[[baseimage]]
+    params  <- env$stimuli_params[[base_image]]
     p_basis <- env$p
     img_sz  <- env$img_size
     n_trials <- nrow(params)
@@ -346,7 +346,7 @@ parse_noise_rdata <- function(path, baseimage, stimuli_object) {
   }
 
   cli::cli_abort(c(
-    "Unrecognised objects in {.path {path}}.",
+    "Unrecognized objects in {.path {path}}.",
     "i" = "Expected either {.var {stimuli_object}} (pre-saved \\
            matrix) or {.var stimuli_params} + {.var p} + \\
            {.var img_size} (rcicr rdata).",

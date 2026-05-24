@@ -40,7 +40,7 @@ unique noise pairs rather than on trial count. With the
 defaults (\code{noise_pool_size = 500}, \code{images_per_trial = 12})
 this resolves to \code{n_trials = 83}; with \code{images_per_trial = 20} it resolves to \code{50}. Supplying \code{n_trials} directly
 overrides this and (if \code{noise_pool_size} is also \code{NULL})
-restores the older "pool grows with trials" behaviour.}
+restores the older "pool grows with trials" behavior.}
 
 \item{images_per_trial}{Integer (even). Number of images shown
 per trial; half are original and half are inverted versions of

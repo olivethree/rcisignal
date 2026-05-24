@@ -35,7 +35,7 @@
 #'   only this to reliability metrics or any external infoVal
 #'   computation.
 #' * `$rendered_ci`, when present, is `base + scaling(mask)` per
-#'   producer. **Visualisation only.**
+#'   producer. **Visualization only.**
 #' * `$participants` and `$img_dims` are convenience metadata.
 #'
 #' @section Common mistakes:
@@ -57,7 +57,7 @@
 #'   [simulate_briefrc_data()], or a hand-built mask) or a single
 #'   string path to a PNG / JPEG. Optional when `scaling = "none"`
 #'   (default), in which case the image is not needed for the
-#'   mathematical mask. Required for the visualisation-only
+#'   mathematical mask. Required for the visualization-only
 #'   `$rendered_ci` field when `scaling` is `"matched"` or
 #'   `"constant"`.
 #' @param base_image_path **Deprecated.** Use `base_image` (which
@@ -71,7 +71,7 @@
 #'   & Yzerbyt (2024). The CI computation is identical for both;
 #'   the argument is kept as metadata so that downstream code and
 #'   reports can record which paradigm produced the data.
-#' @param scaling Visualisation-only scaling for the optional
+#' @param scaling Visualization-only scaling for the optional
 #'   `$rendered_ci` field. One of `"none"` (default), `"matched"`
 #'   (stretch mask to base range, then add to base) or
 #'   `"constant"` (multiply mask by `scaling_constant`, then add
@@ -274,7 +274,7 @@ ci_from_responses_briefrc <- function(responses,
 #' single string path (read via the internal `read_image_as_gray()`).
 #' Optional
 #' (returns `base_vec = NULL`) when `scaling = "none"`, since the
-#' base face only feeds the visualisation-only `$rendered_ci`. Image
+#' base face only feeds the visualization-only `$rendered_ci`. Image
 #' dimensions are taken from the matrix / file when supplied; when
 #' the base is omitted, dims are inferred as a square grid from
 #' `nrow(noise_matrix)` and the function aborts if the pixel count
@@ -348,7 +348,7 @@ resolve_base_image <- function(base_image, n_pixels, scaling) {
   ))
 }
 
-#' Render a raw mask matrix into base+scaling(mask) for visualisation
+#' Render a raw mask matrix into base+scaling(mask) for visualization
 #'
 #' @keywords internal
 #' @noRd

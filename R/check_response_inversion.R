@@ -30,7 +30,7 @@
 #'   of an `rcisignal_sim` object). Use in place of `rdata` when
 #'   the file path no longer resolves (e.g. after [saveRDS()]/
 #'   [readRDS()] across R sessions).
-#' @param baseimage Name of the base image in `rdata$base_face_files`.
+#' @param base_image Name of the base image in `rdata$base_face_files`.
 #' @param col_participant,col_stimulus,col_response Column names.
 #' @param margin Numeric. Flagging threshold: flipped infoVal must
 #'   exceed original infoVal by at least this amount. Default `1.96`.
@@ -53,7 +53,7 @@ check_response_inversion <- function(responses,
                                      method = c("2ifc", "briefrc"),
                                      rdata = NULL,
                                      stimuli = NULL,
-                                     baseimage = "base",
+                                     base_image = "base",
                                      col_participant = "participant_id",
                                      col_stimulus = "stimulus",
                                      col_response = "response",
@@ -77,7 +77,7 @@ check_response_inversion <- function(responses,
 
   original <- compute_infoval_summary(
     responses, method = method, rdata = rdata, stimuli = stimuli,
-    baseimage = baseimage,
+    base_image = base_image,
     col_participant = col_participant, col_stimulus = col_stimulus,
     col_response = col_response, iter = iter, ...
   )
@@ -86,7 +86,7 @@ check_response_inversion <- function(responses,
   flipped_responses[[col_response]] <- -flipped_responses[[col_response]]
   flipped <- compute_infoval_summary(
     flipped_responses, method = method, rdata = rdata, stimuli = stimuli,
-    baseimage = baseimage,
+    base_image = base_image,
     col_participant = col_participant, col_stimulus = col_stimulus,
     col_response = col_response, iter = iter, ...
   )

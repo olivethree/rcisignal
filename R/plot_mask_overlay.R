@@ -36,7 +36,7 @@
 #'   otherwise.
 #' @param alpha Numeric in `[0, 1]`. Opacity of the mask overlay.
 #'   Default `0.35`.
-#' @param overlay_col Single colour for the mask overlay. Default
+#' @param overlay_col Single color for the mask overlay. Default
 #'   `"red"`.
 #' @param main Optional plot title (character of length 1). Default
 #'   `NULL` (no title).
@@ -85,7 +85,7 @@ plot_mask_overlay <- function(base_image,
     cli::cli_abort("{.arg alpha} must be a single number in [0, 1].")
   }
   if (!is.character(overlay_col) || length(overlay_col) != 1L) {
-    cli::cli_abort("{.arg overlay_col} must be a single colour name.")
+    cli::cli_abort("{.arg overlay_col} must be a single color name.")
   }
   if (!is.null(main) &&
       (!is.character(main) || length(main) != 1L)) {

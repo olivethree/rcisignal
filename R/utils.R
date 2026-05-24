@@ -597,7 +597,7 @@ resolve_base_for_overlay <- function(base_image) {
 #'
 #' Positive entries map to blue, negative to red, zero to (0, 0, 0).
 #' Caller multiplies the result by an alpha raster when compositing.
-#' Matches the colour convention of `plot_ci_overlay()` and the
+#' Matches the color convention of `plot_ci_overlay()` and the
 #' cluster-test plots (positive = blue, negative = red).
 #'
 #' @keywords internal
@@ -617,7 +617,7 @@ diverging_rgb_array <- function(signed_mat) {
 #' Build a YlOrRd-sampled RGB array from a non-negative magnitude matrix
 #'
 #' `mag_mat` must be non-negative (typically `abs(t)` after thresholding).
-#' Values are scaled by `max_mag` (the colour-scale top) and sampled from
+#' Values are scaled by `max_mag` (the color-scale top) and sampled from
 #' the reversed `YlOrRd` ramp. Pixels at zero get the pale-yellow end of
 #' the ramp, which is intentionally near-white so the base shows through
 #' when the alpha is also low.

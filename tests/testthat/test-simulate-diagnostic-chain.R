@@ -2,7 +2,7 @@
 ## diagnostic chain. Catches recurrence of the v0.1.1 rdata-env
 ## bugs (CLAUDE.md §11.21): the rdata file written by
 ## simulate_2ifc_data() must satisfy both rcisignal's consumers
-## (default baseimage = "base") and rcicr's reference-distribution
+## (default base_image = "base") and rcicr's reference-distribution
 ## regenerator (load(rdata); references noise_type).
 ##
 ## Gated on rcicr (Suggests) and skipped on CRAN-style runs.

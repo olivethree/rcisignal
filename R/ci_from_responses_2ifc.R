@@ -22,7 +22,7 @@
 #'   for `rel_*()`.
 #' - When `keep_rendered = TRUE`, also extracts the rendered
 #'   `$combined` image and stacks it as `$rendered_ci` for
-#'   visualisation (display only, not for downstream stats).
+#'   visualization (display only, not for downstream stats).
 #'
 #' `rcicr` must be installed (it is a Suggests dep; install with
 #' `remotes::install_github("rdotsch/rcicr")` if needed).
@@ -32,7 +32,7 @@
 #'   producer). This is what every `rel_*` function expects.
 #' * `$rendered_ci`, present when `keep_rendered = TRUE`, is the
 #'   `base + scaling(mask)` image rcicr would have written to PNG.
-#'   **Visualisation only.**
+#'   **Visualization only.**
 #' * `$rcicr_result` is the raw return value of
 #'   [rcicr::batchGenerateCI2IFC()].
 #'
@@ -57,9 +57,17 @@
 #'   stored on `$rdata_path` no longer resolves, but `$stimuli`
 #'   is self-contained. Internally the list is written to a
 #'   fresh tempdir-backed `.Rdata` before the call into rcicr.
-#' @param baseimage Base image label used at stimulus-generation
-#'   time. If `NULL`, tries to read the single base stored in
-#'   `rdata_path`.
+#' @param base_image Base face image. Three forms are accepted,
+#'   matching [ci_from_responses_briefrc()]:
+#'   * a numeric matrix in `[0, 1]` (used directly),
+#'   * a single string path to a PNG / JPEG, or
+#'   * a single string label naming an entry in the rdata's
+#'     `base_faces` list (the historical 2IFC form).
+#'   When `NULL`, the rdata's single base is used; if the rdata
+#'   contains more than one base, the call aborts and lists the
+#'   available labels. Matrix and path forms are injected into a
+#'   temporary copy of the rdata under a synthetic label so the
+#'   rcicr call sees the same structure it always has.
 #' @param participant_col,stimulus_col,response_col Column names in
 #'   `responses`.
 #' @param scaling rcicr scaling option; one of `"autoscale"`,
@@ -69,7 +77,7 @@
 #'   `$signal_matrix` is the raw mask regardless of this argument.
 #' @param keep_rendered If `TRUE`, also extract rcicr's `$combined`
 #'   image (base + scaled noise) per producer and stack into
-#'   `$rendered_ci`. Default `FALSE`. Visualisation only.
+#'   `$rendered_ci`. Default `FALSE`. Visualization only.
 #' @param targetpath Where rcicr writes PNGs. Defaults to an
 #'   auto-cleaned tempdir so the working directory is not polluted.
 #' @param save_as_png Whether rcicr writes individual CI PNGs.
@@ -96,11 +104,17 @@
 #' # Same call, but using the portable in-memory stimuli list -- the
 #' # form that survives saveRDS()/readRDS() across R sessions.
 #' res2 <- ci_from_responses_2ifc(sim$data, stimuli = sim$stimuli)
+#'
+#' # Supply a base image as a path or matrix (same shapes as Brief-RC).
+#' res3 <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path,
+#'                                base_image = sim$base_image_path)
+#' res4 <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path,
+#'                                base_image = sim$base_face)
 #' }
 ci_from_responses_2ifc <- function(responses,
                                    rdata_path      = NULL,
                                    stimuli         = NULL,
-                                   baseimage       = NULL,
+                                   base_image      = NULL,
                                    participant_col = "participant_id",
                                    stimulus_col    = "stimulus",
                                    response_col    = "response",
@@ -153,34 +167,10 @@ ci_from_responses_2ifc <- function(responses,
     cli::cli_abort(msg)
   }
 
-  env <- new.env(parent = emptyenv())
-  load(rdata_path, envir = env)
-  if (is.null(baseimage)) {
-    if (!"base_faces" %in% ls(env)) {
-      cli::cli_abort(c(
-        "Cannot infer {.arg baseimage}; no {.var base_faces} in \\
-         {.path {rdata_path}}.",
-        "i" = "Pass {.arg baseimage} explicitly."
-      ))
-    }
-    labels <- names(env$base_faces)
-    if (length(labels) != 1L) {
-      cli::cli_abort(c(
-        "Multiple base images in rdata; pick one via \\
-         {.arg baseimage}.",
-        "i" = "Available: {.val {labels}}"
-      ))
-    }
-    baseimage <- labels[1L]
-  }
-  if (!baseimage %in% names(env$base_faces)) {
-    cli::cli_abort(c(
-      "{.arg baseimage} = {.val {baseimage}} not found in rdata.",
-      "i" = "Available: {.val {names(env$base_faces)}}"
-    ))
-  }
-  base_mat <- env$base_faces[[baseimage]]
-  img_dims <- as.integer(dim(base_mat))
+  resolved   <- resolve_2ifc_base_image(base_image, rdata_path)
+  baseimage  <- resolved$label
+  rdata_path <- resolved$rdata_path
+  img_dims   <- resolved$img_dims
 
   ensure_attached(c("foreach", "tibble", "dplyr"))
 
@@ -254,4 +244,117 @@ ci_from_responses_2ifc <- function(responses,
   )
   if (!is.null(rendered)) out$rendered_ci <- rendered
   out
+}
+
+#' Resolve the `base_image` argument for 2IFC functions
+#'
+#' Accepts a numeric matrix, an image path, a label string, or NULL.
+#' For matrix / path forms, injects the resolved base into a fresh
+#' temp copy of the rdata under a synthetic label so the rcicr call
+#' downstream sees the same `base_faces` / `stimuli_params` layout it
+#' always has. Returns the label and (possibly new) rdata path
+#' downstream code should use, plus the resolved image dims.
+#'
+#' Disambiguation rule for a character input: if it ends in an image
+#' extension (`.png`, `.jpe?g`, `.tiff?`, `.bmp`) it is treated as a
+#' path; otherwise as a label lookup in `env$base_faces`.
+#'
+#' @keywords internal
+#' @noRd
+resolve_2ifc_base_image <- function(base_image, rdata_path) {
+  env <- new.env(parent = emptyenv())
+  load(rdata_path, envir = env)
+  if (!"base_faces" %in% ls(env)) {
+    cli::cli_abort(c(
+      "No {.var base_faces} in {.path {rdata_path}}.",
+      "i" = "Expected the output of {.fn rcicr::generateStimuli2IFC}."
+    ))
+  }
+  labels <- names(env$base_faces)
+
+  if (is.null(base_image)) {
+    if (length(labels) != 1L) {
+      cli::cli_abort(c(
+        "Multiple base images in rdata; pick one via \\
+         {.arg base_image}.",
+        "i" = "Available: {.val {labels}}"
+      ))
+    }
+    label <- labels[1L]
+    img_dims <- as.integer(dim(env$base_faces[[label]]))
+    return(list(label = label, rdata_path = rdata_path,
+                img_dims = img_dims))
+  }
+
+  if (is.character(base_image) && length(base_image) == 1L) {
+    is_path <- grepl("\\.(png|jpe?g|tiff?|bmp)$", base_image,
+                     ignore.case = TRUE)
+    if (!is_path) {
+      if (!base_image %in% labels) {
+        cli::cli_abort(c(
+          "{.arg base_image} = {.val {base_image}} not found in rdata.",
+          "i" = "Available labels: {.val {labels}}",
+          "i" = "To supply an image file, give a path ending in \\
+                 {.val .png} / {.val .jpg} / {.val .jpeg}."
+        ))
+      }
+      img_dims <- as.integer(dim(env$base_faces[[base_image]]))
+      return(list(label = base_image, rdata_path = rdata_path,
+                  img_dims = img_dims))
+    }
+    base_mat <- read_image_as_gray(base_image)
+  } else if (is.matrix(base_image) && is.numeric(base_image)) {
+    if (any(!is.finite(base_image) & !is.na(base_image))) {
+      cli::cli_abort("{.arg base_image} matrix contains non-finite values.")
+    }
+    if (!all(base_image >= 0 & base_image <= 1, na.rm = TRUE)) {
+      cli::cli_abort(c(
+        "{.arg base_image} matrix values must lie in {.code [0, 1]}.",
+        "*" = "Range observed: \\
+               [{min(base_image, na.rm = TRUE)}, \\
+               {max(base_image, na.rm = TRUE)}]"
+      ))
+    }
+    base_mat <- base_image
+  } else {
+    cli::cli_abort(c(
+      "{.arg base_image} must be one of:",
+      "*" = "{.code NULL} (use the rdata's single base);",
+      "*" = "a numeric matrix in {.code [0, 1]};",
+      "*" = "a single string path to a PNG / JPEG; or",
+      "*" = "a single string label naming an entry in \\
+             {.code base_faces}."
+    ))
+  }
+
+  primary <- labels[1L]
+  primary_dims <- as.integer(dim(env$base_faces[[primary]]))
+  supplied_dims <- as.integer(dim(base_mat))
+  if (!identical(primary_dims, supplied_dims)) {
+    cli::cli_abort(c(
+      "Supplied {.arg base_image} dimensions \\
+       {.val {supplied_dims}} do not match the rdata's base \\
+       {.val {primary_dims}}.",
+      "i" = "The noise pool was generated for the rdata's image \\
+             size and is not interchangeable."
+    ))
+  }
+
+  synth_label <- "_rcisignal_supplied_base"
+  env$base_faces[[synth_label]] <- base_mat
+  if ("stimuli_params" %in% ls(env) &&
+        is.list(env$stimuli_params) &&
+        primary %in% names(env$stimuli_params)) {
+    env$stimuli_params[[synth_label]] <- env$stimuli_params[[primary]]
+  }
+  if ("base_face_files" %in% ls(env) &&
+        is.list(env$base_face_files) &&
+        primary %in% names(env$base_face_files)) {
+    env$base_face_files[[synth_label]] <- env$base_face_files[[primary]]
+  }
+
+  tmp_rdata <- tempfile("rcisignal_2ifc_basesub_", fileext = ".Rdata")
+  save(list = ls(env), envir = env, file = tmp_rdata)
+  list(label = synth_label, rdata_path = tmp_rdata,
+       img_dims = supplied_dims)
 }

@@ -1,5 +1,5 @@
 ## Internal helpers for cluster-based permutation testing.
-## Pure R, no compiled code. Connected-component labelling via
+## Pure R, no compiled code. Connected-component labeling via
 ## breadth-first search with 4-connectivity (the more conservative
 ## choice than 8-connectivity).
 

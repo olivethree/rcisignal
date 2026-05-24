@@ -54,7 +54,7 @@
 #' look.
 #'
 #' @section Reading the result:
-#' * `$z_scores`, named numeric vector, per-producer standardised
+#' * `$z_scores`, named numeric vector, per-producer standardized
 #'   influence. The recommended quantity to plot or threshold.
 #' * `$correlations`, named numeric vector, raw per-producer
 #'   `r_loo` values.

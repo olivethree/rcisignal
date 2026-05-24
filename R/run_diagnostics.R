@@ -26,7 +26,7 @@
 #' @param noise_matrix Optional. Path to a Brief-RC noise-matrix text
 #'   file, or an already-loaded numeric matrix. Enables
 #'   [validate_noise_matrix()] and [check_stimulus_alignment()] (Brief-RC).
-#' @param baseimage Name of the base image used at stimulus-generation
+#' @param base_image Name of the base image used at stimulus-generation
 #'   time (key in `base_face_files` in the rdata). Default `"base"`.
 #'   Only consulted when the infoval-dependent checks run.
 #' @param expected_n Optional. Passed to [check_trial_counts()].
@@ -63,7 +63,7 @@ run_diagnostics <- function(responses,
                            rdata = NULL,
                            stimuli = NULL,
                            noise_matrix = NULL,
-                           baseimage = "base",
+                           base_image = "base",
                            expected_n = NULL,
                            col_participant = "participant_id",
                            col_stimulus = "stimulus",
@@ -145,7 +145,7 @@ run_diagnostics <- function(responses,
         method           = method,
         rdata            = rdata,
         noise_matrix     = noise_matrix,
-        baseimage        = baseimage,
+        base_image        = base_image,
         col_participant  = col_participant,
         col_stimulus     = col_stimulus,
         col_response     = col_response,
@@ -176,7 +176,7 @@ run_diagnostics <- function(responses,
     # The tryCatch here is only for 2IFC error paths (e.g., rcicr failures).
     results$infoval <- tryCatch(
       compute_infoval_summary(
-        responses, method = method, rdata = rdata, baseimage = baseimage,
+        responses, method = method, rdata = rdata, base_image = base_image,
         col_participant = col_participant, col_stimulus = col_stimulus,
         col_response = col_response, iter = infoval_iter
       ),
@@ -190,7 +190,7 @@ run_diagnostics <- function(responses,
 
     results$response_inversion <- tryCatch(
       check_response_inversion(
-        responses, method = method, rdata = rdata, baseimage = baseimage,
+        responses, method = method, rdata = rdata, base_image = base_image,
         col_participant = col_participant, col_stimulus = col_stimulus,
         col_response = col_response, iter = infoval_iter
       ),
@@ -205,7 +205,7 @@ run_diagnostics <- function(responses,
     if (!is.null(col_rt) && col_rt %in% names(responses)) {
       results$rt_infoval <- tryCatch(
         check_rt_infoval_consistency(
-          responses, method = method, rdata = rdata, baseimage = baseimage,
+          responses, method = method, rdata = rdata, base_image = base_image,
           col_participant = col_participant, col_stimulus = col_stimulus,
           col_response = col_response, col_rt = col_rt, iter = infoval_iter
         ),

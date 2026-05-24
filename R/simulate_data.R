@@ -288,7 +288,7 @@ simulate_2ifc_data <- function(n_per_condition       = 50L,
 #'   this resolves to `n_trials = 83`; with `images_per_trial =
 #'   20` it resolves to `50`. Supplying `n_trials` directly
 #'   overrides this and (if `noise_pool_size` is also `NULL`)
-#'   restores the older "pool grows with trials" behaviour.
+#'   restores the older "pool grows with trials" behavior.
 #' @param images_per_trial Integer (even). Number of images shown
 #'   per trial; half are original and half are inverted versions of
 #'   the same noise patterns. Default `12` (= 6 pairs).
@@ -814,7 +814,7 @@ materialize_stimuli_rdata <- function(stimuli,
 #'
 #' Single source of truth for the on-disk layout of the simulated
 #' stimuli env. When `dir = NULL` writes to a fresh tempdir
-#' (legacy behaviour). When `dir` is a character path the file
+#' (legacy behavior). When `dir` is a character path the file
 #' goes there under a stable filename (overwrites if present).
 #'
 #' @keywords internal

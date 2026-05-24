@@ -93,7 +93,7 @@ look.
 \section{Reading the result}{
 
 \itemize{
-\item \verb{$z_scores}, named numeric vector, per-producer standardised
+\item \verb{$z_scores}, named numeric vector, per-producer standardized
 influence. The recommended quantity to plot or threshold.
 \item \verb{$correlations}, named numeric vector, raw per-producer
 \code{r_loo} values.

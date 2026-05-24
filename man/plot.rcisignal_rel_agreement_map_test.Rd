@@ -27,10 +27,10 @@ ramp). See \code{\link[=plot_agreement_map]{plot_agreement_map()}} for the full 
 discussion; the same conventions apply here.}
 
 \item{threshold}{Optional positive numeric. Pixels with
-\verb{|t| < threshold} render as the neutral colour (descriptive
+\verb{|t| < threshold} render as the neutral color (descriptive
 only; FWE control is already in \code{significant_mask}).}
 
-\item{zlim}{Numeric \code{c(low, high)} for the colour scale.
+\item{zlim}{Numeric \code{c(low, high)} for the color scale.
 Defaults to a symmetric \verb{c(-max|t|, max|t|)} for diverging or
 \verb{c(0, max|t|)} for fire.}
 
@@ -40,12 +40,12 @@ base; out-of-mask and subthreshold pixels render fully
 transparent.}
 
 \item{alpha_max}{Numeric in \verb{[0, 1]}. Maximum opacity at the
-colour-scale top when \code{base_image} is supplied. Default 0.7.}
+color-scale top when \code{base_image} is supplied. Default 0.7.}
 
 \item{show_contour}{Logical. Draw the FWE-significant pixel
 boundary as black contours on top of the t-map. Default \code{TRUE}.}
 
-\item{contour_col, contour_lwd}{Significance-contour colour and
+\item{contour_col, contour_lwd}{Significance-contour color and
 line width.}
 
 \item{main}{Plot title.}
@@ -57,7 +57,7 @@ Invisibly the input \code{x}.
 }
 \description{
 Renders the observed per-pixel t-map from \code{\link[=agreement_map_test]{agreement_map_test()}}
-with the same colour conventions as \code{\link[=plot_agreement_map]{plot_agreement_map()}}, and
+with the same color conventions as \code{\link[=plot_agreement_map]{plot_agreement_map()}}, and
 overlays the FWE-significant pixel boundary as black contours
 when \code{show_contour = TRUE} (the default). Optionally composites
 the map on a grayscale base face.

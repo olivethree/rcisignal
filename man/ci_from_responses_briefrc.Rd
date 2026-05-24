@@ -32,7 +32,7 @@ Provide \code{rdata_path} to read the noise matrix from an rcicr
 \code{\link[=simulate_briefrc_data]{simulate_briefrc_data()}}, or a hand-built mask) or a single
 string path to a PNG / JPEG. Optional when \code{scaling = "none"}
 (default), in which case the image is not needed for the
-mathematical mask. Required for the visualisation-only
+mathematical mask. Required for the visualization-only
 \verb{$rendered_ci} field when \code{scaling} is \code{"matched"} or
 \code{"constant"}.}
 
@@ -46,7 +46,7 @@ inverted). Both variants are validated in Schmitz, Rougier,
 the argument is kept as metadata so that downstream code and
 reports can record which paradigm produced the data.}
 
-\item{scaling}{Visualisation-only scaling for the optional
+\item{scaling}{Visualization-only scaling for the optional
 \verb{$rendered_ci} field. One of \code{"none"} (default), \code{"matched"}
 (stretch mask to base range, then add to base) or
 \code{"constant"} (multiply mask by \code{scaling_constant}, then add
@@ -103,7 +103,7 @@ computation.
 only this to reliability metrics or any external infoVal
 computation.
 \item \verb{$rendered_ci}, when present, is \code{base + scaling(mask)} per
-producer. \strong{Visualisation only.}
+producer. \strong{Visualization only.}
 \item \verb{$participants} and \verb{$img_dims} are convenience metadata.
 }
 }

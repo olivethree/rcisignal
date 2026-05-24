@@ -10,7 +10,7 @@ run_diagnostics(
   rdata = NULL,
   stimuli = NULL,
   noise_matrix = NULL,
-  baseimage = "base",
+  base_image = "base",
   expected_n = NULL,
   col_participant = "participant_id",
   col_stimulus = "stimulus",
@@ -46,7 +46,7 @@ path stored on \verb{$rdata_path} no longer resolves).}
 file, or an already-loaded numeric matrix. Enables
 \code{\link[=validate_noise_matrix]{validate_noise_matrix()}} and \code{\link[=check_stimulus_alignment]{check_stimulus_alignment()}} (Brief-RC).}
 
-\item{baseimage}{Name of the base image used at stimulus-generation
+\item{base_image}{Name of the base image used at stimulus-generation
 time (key in \code{base_face_files} in the rdata). Default \code{"base"}.
 Only consulted when the infoval-dependent checks run.}
 

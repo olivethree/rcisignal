@@ -9,7 +9,7 @@ compute_infoval_summary(
   method = c("2ifc", "briefrc"),
   rdata = NULL,
   stimuli = NULL,
-  baseimage = "base",
+  base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
@@ -36,7 +36,7 @@ file path no longer resolves (e.g. after \code{\link[=saveRDS]{saveRDS()}}/\code
 across R sessions). Internally written to a fresh tempdir-
 backed \code{.Rdata} before the call into rcicr.}
 
-\item{baseimage}{Name of the base image used at generation time
+\item{base_image}{Name of the base image used at generation time
 (the key in \code{base_face_files} in the rdata). Default \code{"base"}.}
 
 \item{col_participant, col_stimulus, col_response}{Column names.}
