@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/olivethree/rcisignal/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/olivethree/rcisignal/blob/v0.1.9/DESCRIPTION)
 
 Oliveira M (2026). *rcisignal: Quality Checks for Reverse-Correlation
 Data and Classification Images*. R package version 0.1.9,
