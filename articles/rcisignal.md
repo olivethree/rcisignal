@@ -283,7 +283,7 @@ str(sim, max.level = 1)
 #>  $ meta            : list (seed, elapsed, etc.)
 ```
 
-#### Defaults at a glance
+#### Defaults
 
 | Argument | Default | Notes |
 |----|----|----|
@@ -408,13 +408,13 @@ visualisation (`scaling = "matched"`).
 
 #### A note on speed
 
-Noise generation is the dominant cost (about 0.4-0.5 s per trial at 256
-pixels with default basis settings). With default parameters expect
-roughly 1-3 minutes per call. The function is single-shot by design:
-generate once, then reuse the returned `rcisignal_sim` object across as
-many downstream analyses as you like.
+Noise generation can take a lot of time to execute (around 0.4-0.5 s per
+trial at 256 pixels with default basis settings). With default
+parameters you can expect roughly 1-3 minutes per call. The function is
+single-shot by design: generate once, then reuse the returned
+`rcisignal_sim` object across as many downstream analyses as you like.
 
-To pay the cost only once across R sessions
+To pay this computation duration cost only once across R sessions
 ([`saveRDS()`](https://rdrr.io/r/base/readRDS.html) /
 [`readRDS()`](https://rdrr.io/r/base/readRDS.html), knitr
 `cache = TRUE`, sharing with a collaborator), use one of two portable
@@ -2793,7 +2793,7 @@ head(raw)
 #> ...
 ```
 
-### 12.2 Modernising the legacy `rcicr` 0.3.0 rdata
+### 12.2 Modernizing the legacy `rcicr` 0.3.0 rdata
 
 The 2015 rdata stores its noise basis under `s$sinusoids` and
 `s$sinIdx`, while current rcicr expects the `p$patches` and `p$patchIdx`
@@ -3927,7 +3927,7 @@ iv_rand <- infoval(rnd_signal, noise_matrix, tc_rnd,
 iv_rand$infoval                 # should be ~ 0 within MAD noise
 ```
 
-### 15.2 What clearly negative z-scores mean
+### 15.2 What’s up with negative z-scores?
 
 A negative z indicates that the observed mask carries less Frobenius
 energy than the chance reference. This is informative rather than a
