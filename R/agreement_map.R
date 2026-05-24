@@ -118,6 +118,10 @@
 #'   heatmap at the color-scale top (`zlim_max`) when `base_image`
 #'   is supplied. Ignored otherwise. Default 0.7.
 #' @param main Title.
+#' @param show_n Logical. When `TRUE` (default), draw the
+#'   "N = ... producers, W x H pixels" subtitle line below the
+#'   title. Set `FALSE` for multi-panel layouts where this
+#'   information is already in the caption.
 #' @param ... Passed to `graphics::image()`.
 #' @return Invisibly, a list with `t_map` (numeric vector of t values
 #'   per pixel; always signed regardless of palette), `n` (producer
@@ -176,6 +180,7 @@ plot_agreement_map <- function(signal_matrix,
                                base_image = NULL,
                                alpha_max  = 0.7,
                                main      = "Per-pixel producer agreement (t-map)",
+                               show_n    = TRUE,
                                ...) {
   if (!is.matrix(signal_matrix) || !is.numeric(signal_matrix)) {
     cli::cli_abort("{.arg signal_matrix} must be a numeric matrix.")
@@ -216,6 +221,7 @@ plot_agreement_map <- function(signal_matrix,
     alpha_max  = alpha_max,
     main       = main,
     sub_n      = n,
+    show_n     = show_n,
     ...
   )
   invisible(list(t_map = t_map, n = n,
@@ -243,6 +249,7 @@ render_agreement_t_map <- function(t_map,
                                    alpha_max  = 0.7,
                                    main       = NULL,
                                    sub_n      = NULL,
+                                   show_n     = TRUE,
                                    ...) {
   palette <- match.arg(palette)
   img_dims <- as.integer(img_dims)
@@ -272,11 +279,7 @@ render_agreement_t_map <- function(t_map,
   } else {
     grDevices::hcl.colors(256L, "YlOrRd", rev = TRUE)
   }
-  bar_label <- if (palette == "fire") {
-    "|t-value| (one-sample vs 0)"
-  } else {
-    "t-value (one-sample vs 0)"
-  }
+  bar_label <- if (palette == "fire") "|t|" else "t"
 
   # Save only the params we modify, not the full par() state. Using
   # par(no.readonly = TRUE) here would capture and later restore mfrow
@@ -294,7 +297,7 @@ render_agreement_t_map <- function(t_map,
       t(mat[nrow(mat):1L, ]),
       col       = col_vec,
       zlim      = zlim,
-      main      = main,
+      main      = "",
       axes      = FALSE,
       xlab      = "", ylab = "",
       asp       = img_dims[1L] / img_dims[2L],
@@ -302,6 +305,11 @@ render_agreement_t_map <- function(t_map,
       ...
     )
     graphics::box(col = "grey80", lwd = 0.5)
+    if (!is.null(main)) {
+      title_line <- if (isTRUE(show_n) && !is.null(sub_n)) 1.6 else 0.8
+      graphics::title(main = main, line = title_line, cex.main = 1.1,
+                      font.main = 1)
+    }
   } else {
     base_mat <- resolve_base_for_overlay(base_image)
     if (!identical(as.integer(dim(base_mat)), as.integer(img_dims))) {
@@ -336,14 +344,15 @@ render_agreement_t_map <- function(t_map,
                           interpolate = FALSE)
     graphics::box(col = "grey80", lwd = 0.5)
     if (!is.null(main)) {
-      graphics::title(main = main, line = 1, cex.main = 1.0,
+      title_line <- if (isTRUE(show_n) && !is.null(sub_n)) 1.6 else 0.8
+      graphics::title(main = main, line = title_line, cex.main = 1.1,
                       font.main = 1)
     }
   }
 
   add_color_bar(zlim, col_vec, label = bar_label)
 
-  if (!is.null(sub_n)) {
+  if (isTRUE(show_n) && !is.null(sub_n)) {
     graphics::mtext(
       sprintf("N = %d producers,  %d x %d pixels%s",
               sub_n, img_dims[1L], img_dims[2L],
@@ -389,9 +398,9 @@ add_color_bar <- function(zlim, col, label = NULL,
                  labels = format(ticks), pos = 4, cex = 0.7,
                  col = "grey20")
   if (!is.null(label)) {
-    graphics::text(x_right + (usr[2] - usr[1]) * 0.06,
+    graphics::text(x_right + (usr[2] - usr[1]) * 0.12,
                    (y_bot + y_top) / 2,
-                   labels = label, srt = -90, cex = 0.75,
+                   labels = label, srt = -90, cex = 0.85,
                    col = "grey30")
   }
 }

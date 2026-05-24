@@ -14,6 +14,7 @@ plot_agreement_map(
   base_image = NULL,
   alpha_max = 0.7,
   main = "Per-pixel producer agreement (t-map)",
+  show_n = TRUE,
   ...
 )
 }
@@ -64,6 +65,11 @@ heatmap at the color-scale top (\code{zlim_max}) when \code{base_image}
 is supplied. Ignored otherwise. Default 0.7.}
 
 \item{main}{Title.}
+
+\item{show_n}{Logical. When \code{TRUE} (default), draw the
+"N = ... producers, W x H pixels" subtitle line below the
+title. Set \code{FALSE} for multi-panel layouts where this
+information is already in the caption.}
 
 \item{...}{Passed to \code{graphics::image()}.}
 }

@@ -18,8 +18,8 @@ sm        <- readRDS(file.path(cache_dir, "signal_matrices.rds"))
 base_face <- png::readPNG(file.path(fig_dir, "base_face.png"))
 if (length(dim(base_face)) == 3L) {
   base_face <- 0.2126 * base_face[, , 1] +
-               0.7152 * base_face[, , 2] +
-               0.0722 * base_face[, , 3]
+    0.7152 * base_face[, , 2] +
+    0.0722 * base_face[, , 3]
 }
 
 traits <- c("trust", "friendly", "competent", "dominant")
@@ -62,7 +62,8 @@ for (tr in traits) {
     base_image = base_face,
     zlim       = shared_zlim,
     alpha_max  = 0.85,
-    main       = panel_titles[[tr]]
+    main       = panel_titles[[tr]],
+    show_n     = FALSE
   )
 }
 
