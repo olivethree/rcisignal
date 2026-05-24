@@ -2,7 +2,7 @@
 
 Renders the observed per-pixel t-map from
 [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
-with the same colour conventions as
+with the same color conventions as
 [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md),
 and overlays the FWE-significant pixel boundary as black contours when
 `show_contour = TRUE` (the default). Optionally composites the map on a
@@ -52,12 +52,12 @@ plot(
 - threshold:
 
   Optional positive numeric. Pixels with `|t| < threshold` render as the
-  neutral colour (descriptive only; FWE control is already in
+  neutral color (descriptive only; FWE control is already in
   `significant_mask`).
 
 - zlim:
 
-  Numeric `c(low, high)` for the colour scale. Defaults to a symmetric
+  Numeric `c(low, high)` for the color scale. Defaults to a symmetric
   `c(-max|t|, max|t|)` for diverging or `c(0, max|t|)` for fire.
 
 - base_image:
@@ -68,7 +68,7 @@ plot(
 
 - alpha_max:
 
-  Numeric in `[0, 1]`. Maximum opacity at the colour-scale top when
+  Numeric in `[0, 1]`. Maximum opacity at the color-scale top when
   `base_image` is supplied. Default 0.7.
 
 - show_contour:
@@ -78,7 +78,7 @@ plot(
 
 - contour_col, contour_lwd:
 
-  Significance-contour colour and line width.
+  Significance-contour color and line width.
 
 - main:
 

@@ -56,7 +56,7 @@ plot_face_mask(
 
 - col:
 
-  Highlight colour for the masked region. Default `"red"`.
+  Highlight color for the masked region. Default `"red"`.
 
 - threshold:
 

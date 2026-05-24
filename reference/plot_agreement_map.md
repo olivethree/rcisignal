@@ -3,9 +3,9 @@
 Visualises where producers in a single condition agree on the direction
 of signal. For each pixel, computes a one-sample t-statistic against
 zero across producers (`mean / (sd / sqrt(N))`), then displays the
-resulting map with a diverging colour palette (positive = agreement on
+resulting map with a diverging color palette (positive = agreement on
 positive signal, negative = agreement on negative signal, zero = no
-agreement). Saturation of the colour is the magnitude of the agreement,
+agreement). Saturation of the color is the magnitude of the agreement,
 *not* the value of the group-mean CI.
 
 Use this to answer "where do producers consistently *agree* the target
@@ -57,16 +57,16 @@ plot_agreement_map(
 - threshold:
 
   Optional positive numeric. When supplied, pixels with
-  `|t| < threshold` are rendered in the neutral (white) colour, making
+  `|t| < threshold` are rendered in the neutral (white) color, making
   clusters of agreement stand out. Default `NULL` (full continuous map).
 
 - zlim:
 
-  Numeric `c(low, high)` for the colour scale. For
+  Numeric `c(low, high)` for the color scale. For
   `palette = "diverging"` (default), defaults to
-  `c(-max(|t|), max(|t|))` so the neutral colour aligns with `t = 0`.
-  For `palette = "fire"`, defaults to `c(0, max(|t|))` so pale yellow
-  aligns with `|t| = 0`.
+  `c(-max(|t|), max(|t|))` so the neutral color aligns with `t = 0`. For
+  `palette = "fire"`, defaults to `c(0, max(|t|))` so pale yellow aligns
+  with `|t| = 0`.
 
 - palette:
 
@@ -87,13 +87,13 @@ plot_agreement_map(
   pixels render fully transparent. When `NULL` (default), the map is
   drawn on a flat panel via
   [`graphics::image()`](https://rdrr.io/r/graphics/image.html) (the
-  historical behaviour).
+  historical behavior).
 
 - alpha_max:
 
-  Numeric in `[0, 1]`. Maximum opacity of the heatmap at the
-  colour-scale top (`zlim_max`) when `base_image` is supplied. Ignored
-  otherwise. Default 0.7.
+  Numeric in `[0, 1]`. Maximum opacity of the heatmap at the color-scale
+  top (`zlim_max`) when `base_image` is supplied. Ignored otherwise.
+  Default 0.7.
 
 - main:
 
@@ -108,7 +108,7 @@ plot_agreement_map(
 
 Invisibly, a list with `t_map` (numeric vector of t values per pixel;
 always signed regardless of palette), `n` (producer count), `img_dims`,
-`mask` (if supplied), `zlim` (the colour scale used), and `palette` (the
+`mask` (if supplied), `zlim` (the color scale used), and `palette` (the
 palette name).
 
 ## Details
@@ -130,7 +130,7 @@ data.
 **`palette = "diverging"` (default).** Encodes sign and magnitude
 together. Both deep red and deep blue indicate **strong** agreement
 among producers; only the **direction** differs. "No agreement" is the
-neutral colour (white), not red.
+neutral color (white), not red.
 
 - **Hue** encodes the sign of the per-pixel one-sample `t`. Blue =
   producers consistently *add* to the base at that pixel (positive
@@ -138,11 +138,11 @@ neutral colour (white), not red.
   consistently *subtract* (negative agreement, producers chose noise
   that darkens the region).
 
-- **Saturation** encodes `|t|`. Deep colour at either end means strong,
-  consistent agreement; pale colour means weak or inconsistent. The
-  colourbar on the right reads in `t` units.
+- **Saturation** encodes `|t|`. Deep color at either end means strong,
+  consistent agreement; pale color means weak or inconsistent. The
+  colorbar on the right reads in `t` units.
 
-- **`zlim`** is symmetric around zero by default so the neutral colour
+- **`zlim`** is symmetric around zero by default so the neutral color
   aligns with `t = 0`. Pass `zlim = c(-z, z)` to fix the scale across
   panels for direct comparison.
 
@@ -158,14 +158,14 @@ of the group-mean CI.
 
 - **Hue intensity** encodes `|t|`. Pale yellow / near-white at low `|t|`
   (so the underlying base face shows through low- agreement regions);
-  orange at moderate `|t|`; deep red at large `|t|`. The colourbar reads
+  orange at moderate `|t|`; deep red at large `|t|`. The colorbar reads
   in `|t|` units.
 
 - **`zlim`** defaults to `c(0, max(|t|))` and is asymmetric.
 
 **Common to both palettes.**
 
-- **`threshold`** clips colour to the neutral end below
+- **`threshold`** clips color to the neutral end below
   `|t| < threshold`, making strong-agreement clusters stand out. This is
   descriptive only; it does not provide FWER control. For inferential
   pixel significance, use
@@ -177,11 +177,11 @@ of the group-mean CI.
 - **`base_image`** composites the heatmap on top of a grayscale base
   face so anatomical context shows through. Out-of-mask and subthreshold
   pixels render fully transparent; the per-pixel opacity scales
-  `|t| / zlim_max` up to `alpha_max`. Works for both palettes. The
-  colour bar still shows the full scale so magnitudes are readable off
-  the rendered overlay.
+  `|t| / zlim_max` up to `alpha_max`. Works for both palettes. The color
+  bar still shows the full scale so magnitudes are readable off the
+  rendered overlay.
 
-- The diverging colour convention (blue = positive, red = negative)
+- The diverging color convention (blue = positive, red = negative)
   matches
   [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
   and the cluster-test plots so the same group CI reads consistently
@@ -233,7 +233,7 @@ plot_agreement_map(cis$signal_matrix)
 if (FALSE) { # \dontrun{
 # Composite the agreement map on the base face for a single
 # publication-grade figure. Works for both palettes; the
-# "diverging" branch matches plot_ci_overlay()'s colour mapping.
+# "diverging" branch matches plot_ci_overlay()'s color mapping.
 sim <- simulate_briefrc_data(
   n_per_condition = 20, n_trials = 60, conditions = "target",
   signal_region = "eyes", signal_strength = "strong", seed = 1

@@ -71,7 +71,7 @@ plot_mask_overlay(
 
 - overlay_col:
 
-  Single colour for the mask overlay. Default `"red"`.
+  Single color for the mask overlay. Default `"red"`.
 
 - main:
 

@@ -64,7 +64,7 @@ simulate_briefrc_data(
   resolves to `n_trials = 83`; with `images_per_trial = 20` it resolves
   to `50`. Supplying `n_trials` directly overrides this and (if
   `noise_pool_size` is also `NULL`) restores the older "pool grows with
-  trials" behaviour.
+  trials" behavior.
 
 - images_per_trial:
 

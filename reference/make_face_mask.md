@@ -1,7 +1,7 @@
 # Build an oval face-region mask for a square image
 
 Returns a logical vector of length `prod(img_dims)` marking a face
-region (or a face sub-region) centred on the image. Pass to
+region (or a face sub-region) centered on the image. Pass to
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
 to restrict both observed and reference Frobenius norms to the masked
 region; pass to any `rel_*()` function via row-subsetting
@@ -11,7 +11,7 @@ a single anatomical region.
 Eight regions are supported:
 
 - `"full"` (default): the full face oval. Defaults are a typical
-  centred-face oval (`half_width = 0.35`, `half_height = 0.45`) and
+  centered-face oval (`half_width = 0.35`, `half_height = 0.45`) and
   tunable via `centre` / `half_width` / `half_height`. Applying an oval
   mask to a CI before computing pixel-wise metrics follows the
   convention used by Oliveira et al. (2019), Ratner et al. (2014), and
@@ -28,13 +28,13 @@ Eight regions are supported:
 
 - `"nose"`: a narrow vertical ellipse along the midline.
 
-- `"mouth"`: a wide-and-short ellipse below centre.
+- `"mouth"`: a wide-and-short ellipse below center.
 
 - `"upper_face"`, `"lower_face"`: top and bottom halves of the full face
   oval.
 
 Sub-region geometries are heuristic approximations matched to a typical
-centred face on a square base (e.g. 256x256). For non-default base
+centered face on a square base (e.g. 256x256). For non-default base
 images, the elliptical regions (`"nose"`, `"mouth"`) scale with `centre`
 / `half_width` / `half_height`; the three rectangle regions (`"eyes"`,
 `"left_eye"`, `"right_eye"`) ignore those and are tuned directly via

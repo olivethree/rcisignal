@@ -3,7 +3,7 @@
 Renders one cluster t-map (or signed TFCE map) per pair, laid out in a
 square-ish grid. Each panel shows the per-pixel statistic with black
 contours bounding FWE-significant clusters (or FWE-corrected pixels
-under TFCE). Colour convention matches the rest of the package: blue =
+under TFCE). Color convention matches the rest of the package: blue =
 first condition larger, red = second condition larger.
 
 ## Usage
@@ -46,7 +46,7 @@ plot(x, ..., ncol = NULL, max_pairs = 12L, base_image = NULL, alpha_max = 0.7)
 - alpha_max:
 
   Numeric in `[0, 1]`. Maximum opacity of the t-map overlay at the
-  colour-scale top when `base_image` is supplied. Default 0.7.
+  color-scale top when `base_image` is supplied. Default 0.7.
 
 ## Value
 

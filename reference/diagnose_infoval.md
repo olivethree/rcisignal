@@ -15,7 +15,7 @@ diagnose_infoval(
   rdata = NULL,
   stimuli = NULL,
   noise_matrix = NULL,
-  baseimage = "base",
+  base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
@@ -60,7 +60,7 @@ diagnose_infoval(
   Path to a Brief-RC noise-matrix text file, or an already-loaded
   numeric matrix.
 
-- baseimage:
+- base_image:
 
   Name of the base image in the rdata `base_face_files` list. Default
   `"base"`. Only consulted for 2IFC.

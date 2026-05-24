@@ -17,7 +17,7 @@ compute_infoval_summary(
   method = c("2ifc", "briefrc"),
   rdata = NULL,
   stimuli = NULL,
-  baseimage = "base",
+  base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
@@ -55,7 +55,7 @@ compute_infoval_summary(
   across R sessions). Internally written to a fresh tempdir- backed
   `.Rdata` before the call into rcicr.
 
-- baseimage:
+- base_image:
 
   Name of the base image used at generation time (the key in
   `base_face_files` in the rdata). Default `"base"`.

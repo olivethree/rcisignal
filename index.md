@@ -90,7 +90,7 @@ al. (2019), Study 1* section.
 ## Validation status
 
 Several metrics in this package are package-level extensions whose
-behaviour on social-face RC data has not been independently validated.
+behavior on social-face RC data has not been independently validated.
 See [*§1.2 Validation
 status*](https://olivethree.github.io/rcisignal/articles/rcisignal.html#validation-status)
 in the user guide for the breakdown of validated versus unvalidated

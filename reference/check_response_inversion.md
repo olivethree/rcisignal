@@ -18,7 +18,7 @@ check_response_inversion(
   method = c("2ifc", "briefrc"),
   rdata = NULL,
   stimuli = NULL,
-  baseimage = "base",
+  base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
@@ -54,7 +54,7 @@ check_response_inversion(
   (e.g. after [`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/
   [`readRDS()`](https://rdrr.io/r/base/readRDS.html) across R sessions).
 
-- baseimage:
+- base_image:
 
   Name of the base image in `rdata$base_face_files`.
 

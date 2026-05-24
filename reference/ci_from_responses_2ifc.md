@@ -15,7 +15,7 @@ ci_from_responses_2ifc(
   responses,
   rdata_path = NULL,
   stimuli = NULL,
-  baseimage = NULL,
+  base_image = NULL,
   participant_col = "participant_id",
   stimulus_col = "stimulus",
   response_col = "response",
@@ -52,10 +52,21 @@ ci_from_responses_2ifc(
   resolves, but `$stimuli` is self-contained. Internally the list is
   written to a fresh tempdir-backed `.Rdata` before the call into rcicr.
 
-- baseimage:
+- base_image:
 
-  Base image label used at stimulus-generation time. If `NULL`, tries to
-  read the single base stored in `rdata_path`.
+  Base face image. Three forms are accepted, matching
+  [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md):
+
+  - a numeric matrix in `[0, 1]` (used directly),
+
+  - a single string path to a PNG / JPEG, or
+
+  - a single string label naming an entry in the rdata's `base_faces`
+    list (the historical 2IFC form). When `NULL`, the rdata's single
+    base is used; if the rdata contains more than one base, the call
+    aborts and lists the available labels. Matrix and path forms are
+    injected into a temporary copy of the rdata under a synthetic label
+    so the rcicr call sees the same structure it always has.
 
 - participant_col, stimulus_col, response_col:
 
@@ -74,7 +85,7 @@ ci_from_responses_2ifc(
 
   If `TRUE`, also extract rcicr's `$combined` image (base + scaled
   noise) per producer and stack into `$rendered_ci`. Default `FALSE`.
-  Visualisation only.
+  Visualization only.
 
 - targetpath:
 
@@ -106,7 +117,7 @@ What the wrapper does for you:
   already base-subtracted, ready for `rel_*()`.
 
 - When `keep_rendered = TRUE`, also extracts the rendered `$combined`
-  image and stacks it as `$rendered_ci` for visualisation (display only,
+  image and stacks it as `$rendered_ci` for visualization (display only,
   not for downstream stats).
 
 `rcicr` must be installed (it is a Suggests dep; install with
@@ -119,7 +130,7 @@ What the wrapper does for you:
 
 - `$rendered_ci`, present when `keep_rendered = TRUE`, is the
   `base + scaling(mask)` image rcicr would have written to PNG.
-  **Visualisation only.**
+  **Visualization only.**
 
 - `$rcicr_result` is the raw return value of
   [`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html).
@@ -158,5 +169,11 @@ rel_split_half(res$signal_matrix, n_permutations = 200L, seed = 1)
 # Same call, but using the portable in-memory stimuli list -- the
 # form that survives saveRDS()/readRDS() across R sessions.
 res2 <- ci_from_responses_2ifc(sim$data, stimuli = sim$stimuli)
+
+# Supply a base image as a path or matrix (same shapes as Brief-RC).
+res3 <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path,
+                               base_image = sim$base_image_path)
+res4 <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path,
+                               base_image = sim$base_face)
 } # }
 ```

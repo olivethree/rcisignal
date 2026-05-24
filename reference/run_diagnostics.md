@@ -14,7 +14,7 @@ run_diagnostics(
   rdata = NULL,
   stimuli = NULL,
   noise_matrix = NULL,
-  baseimage = "base",
+  base_image = "base",
   expected_n = NULL,
   col_participant = "participant_id",
   col_stimulus = "stimulus",
@@ -70,7 +70,7 @@ run_diagnostics(
   [`check_stimulus_alignment()`](https://olivethree.github.io/rcisignal/reference/check_stimulus_alignment.md)
   (Brief-RC).
 
-- baseimage:
+- base_image:
 
   Name of the base image used at stimulus-generation time (key in
   `base_face_files` in the rdata). Default `"base"`. Only consulted when

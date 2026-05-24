@@ -33,7 +33,7 @@ Supported sources, with no `format` flag — detection is automatic:
 ``` r
 read_noise_matrix(
   path,
-  baseimage = NULL,
+  base_image = NULL,
   stimuli_object = "stimuli",
   cache = TRUE,
   cache_path = NULL,
@@ -48,7 +48,7 @@ read_noise_matrix(
   Path to the noise-matrix source (any of the formats listed in
   `Description`).
 
-- baseimage:
+- base_image:
 
   For rcicr `.RData` inputs: which base label to reconstruct noise for.
   Defaults to the only label if the rdata contains exactly one; aborts
@@ -110,7 +110,7 @@ names and operate independently.
 - `base_face_files`:
 
   Named list of file paths to the original face images. List names are
-  the labels passed downstream as `baseimage = "..."`.
+  the labels passed downstream as `base_image = "..."`.
 
 - `base_faces`:
 

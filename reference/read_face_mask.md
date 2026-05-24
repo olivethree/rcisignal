@@ -29,7 +29,7 @@ read_face_mask(path, threshold = 0.5, invert = FALSE, expected_dims = NULL)
 - threshold:
 
   Numeric in `[0, 1]`. Pixels with luminance above this become `TRUE`.
-  Default `0.5` (mid-grey).
+  Default `0.5` (mid-gray).
 
 - invert:
 

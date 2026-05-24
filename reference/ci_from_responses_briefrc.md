@@ -50,7 +50,7 @@ ci_from_responses_briefrc(
   or a hand-built mask) or a single string path to a PNG / JPEG.
   Optional when `scaling = "none"` (default), in which case the image is
   not needed for the mathematical mask. Required for the
-  visualisation-only `$rendered_ci` field when `scaling` is `"matched"`
+  visualization-only `$rendered_ci` field when `scaling` is `"matched"`
   or `"constant"`.
 
 - participant_col, stimulus_col, response_col:
@@ -68,7 +68,7 @@ ci_from_responses_briefrc(
 
 - scaling:
 
-  Visualisation-only scaling for the optional `$rendered_ci` field. One
+  Visualization-only scaling for the optional `$rendered_ci` field. One
   of `"none"` (default), `"matched"` (stretch mask to base range, then
   add to base) or `"constant"` (multiply mask by `scaling_constant`,
   then add to base). The mathematical `$signal_matrix` is always the raw
@@ -115,7 +115,7 @@ does not branch the computation.
   to reliability metrics or any external infoVal computation.
 
 - `$rendered_ci`, when present, is `base + scaling(mask)` per producer.
-  **Visualisation only.**
+  **Visualization only.**
 
 - `$participants` and `$img_dims` are convenience metadata.
 

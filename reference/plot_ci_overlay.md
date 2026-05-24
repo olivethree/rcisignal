@@ -92,7 +92,7 @@ plot_ci_overlay(
 
 - contour_col, contour_lwd:
 
-  Significance-contour colour and line width when `test` is supplied.
+  Significance-contour color and line width when `test` is supplied.
   Defaults: `"black"`, `1.0`.
 
 - main:
@@ -106,14 +106,14 @@ the active device as a side effect.
 
 ## Reading the plot
 
-- **Colour** encodes the sign of the producer-mean signal at each pixel.
+- **Color** encodes the sign of the producer-mean signal at each pixel.
   Blue = positive (producers' average mask is brighter than the base at
   that pixel); red = negative (darker than the base); pixels rendered as
   the bare base = at or near zero.
 
 - **Opacity** encodes the magnitude of the signal, scaled to `alpha_max`
-  at the global peak `|signal|`. Faint colour means weak agreement;
-  saturated colour means a strong, consistent producer-mean deflection.
+  at the global peak `|signal|`. Faint color means weak agreement;
+  saturated color means a strong, consistent producer-mean deflection.
 
 - **Black contours** (only drawn when `test` is supplied) trace the
   boundary of the FWE-significant pixel set returned by
@@ -121,7 +121,7 @@ the active device as a side effect.
   at its `alpha`. Pixels inside the contour are individually significant
   under the max-\|t\| null; pixels outside are not.
 
-- Colour convention matches
+- Color convention matches
   [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
   and the cluster-test plots so the same group CI reads consistently
   across the package.

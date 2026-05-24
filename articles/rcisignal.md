@@ -93,7 +93,7 @@ social-face RC:**
   per- producer reporting.
 - **Between-condition discriminability tests** (cluster-based
   permutation and TFCE). The underlying machinery is borrowed from
-  neuroimaging where it is well-validated; its specific behaviour on
+  neuroimaging where it is well-validated; its specific behavior on
   social-face CI maps (which differ from EEG/MEG or fMRI in spatial
   structure, signal-to-noise, and base-image artefacts) has not been the
   subject of a dedicated validation study.
@@ -118,7 +118,7 @@ rcisignal pipelines have two stages. Knowing which stage you are in
 tells you which functions are available, and the package will tell you
 (with a teaching error) if you try to cross the line.
 
-**Stage 1 — per-producer CIs.** Computed by
+**Stage 1: per-producer CIs.** Computed by
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
 or
 [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md).
@@ -147,7 +147,7 @@ infoval(cis$signal_matrix, noise_matrix, trial_counts,
         iter = 500L)
 ```
 
-**Stage 2 — group-averaged CIs (optional).** Computed by
+**Stage 2: group-averaged CIs (optional).** Computed by
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md).
 The output is a numeric matrix of `pixels x n_groups`, classed
 `rcisignal_group_ci`. Use it for side-by-side group plots, pairwise
@@ -157,7 +157,7 @@ correlogram views
 ([`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)),
 and MDS projections
 ([`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)).
-The function does not accept `trial_counts`, `noise_matrix`, or `mask` —
+The function does not accept `trial_counts`, `noise_matrix`, or `mask`,
 anything that needs producer-level information has to happen in stage 1.
 
 ``` r
@@ -404,7 +404,7 @@ The Brief-RC consumer reads the noise matrix directly, so the call
 becomes
 `ci_from_responses_briefrc(sim$data, noise_matrix = sim$noise_matrix)`;
 add `base_image = sim$base_face` if you also want the rendered
-visualisation (`scaling = "matched"`).
+visualization (`scaling = "matched"`).
 
 #### A note on speed
 
@@ -511,7 +511,7 @@ This is the safe path for the reliability metrics later on.
 res <- ci_from_responses_2ifc(
   responses,
   rdata_path = "data/rcicr_stimuli.Rdata",
-  baseimage  = "base"
+  base_image  = "base"
 )
 signal <- res$signal_matrix
 ```
@@ -550,7 +550,7 @@ scaling distorts the numbers. The `"matched"` (per-CI) scaling option,
 where each producer’s mask is stretched to the base’s dynamic range,
 breaks correlation-based metrics as well.
 
-`rcisignal` keeps track of which kind of matrix you have by labelling
+`rcisignal` keeps track of which kind of matrix you have by labeling
 each signal matrix with a `source` tag (either `"raw"` or `"rendered"`).
 The variance-based functions check this tag before they run, and stop
 with an informative error if you pass a rendered matrix:
@@ -613,7 +613,7 @@ for Brief-RC) does the work in both pipelines:
 cis <- ci_from_responses_2ifc(
   responses,
   rdata_path = "stimuli.RData",
-  baseimage  = "base"
+  base_image  = "base"
 )
 cis$signal_matrix       # n_pixels x n_producers
 ```
@@ -632,19 +632,19 @@ The recipe assumes you have:
   stimulus (loaded once via
   [`read_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/read_noise_matrix.md)).
 
-**Step 1 — load the noise matrix once.** Each column is the noise
-pattern shown on one trial out of the pool (300 stimuli is a typical
-pool size for 2IFC).
+**Step 1: load the noise matrix once.** Each column is the noise pattern
+shown on one trial out of the pool (300 stimuli is a typical pool size
+for 2IFC).
 
 ``` r
 
 noise_matrix <- read_noise_matrix("stimuli.RData",
-                                  baseimage = "base")
+                                  base_image = "base")
 dim(noise_matrix)
 #> 65536 x 300    # n_pixels x pool_size
 ```
 
-**Step 2 — sort responses by producer and trial, and read out the
+**Step 2: sort responses by producer and trial, and read out the
 producer ids.** Sorting is not strictly required for the maths, but it
 makes the recipe easier to follow.
 
@@ -657,7 +657,7 @@ length(participants)
 #> 20
 ```
 
-**Step 3 — compute one producer’s mask.** Pick the noise patterns that
+**Step 3: compute one producer’s mask.** Pick the noise patterns that
 producer saw (`noise_matrix[, p1$stimulus]`), multiply each column by
 their response (`+1` or `-1`), and divide by the number of trials.
 
@@ -681,7 +681,7 @@ length(mask_1)
 #> 65536
 ```
 
-**Step 4 — repeat for all producers and stack into a matrix.** Tag the
+**Step 4: repeat for all producers and stack into a matrix.** Tag the
 result with `img_dims` so plotting helpers know it is 256 x 256, and
 with `source = "raw"` so variance-based metrics accept it.
 
@@ -894,7 +894,7 @@ The 2IFC pipeline uses an `.RData` file produced by
 The objects in this file that the analysis actually uses are:
 
 - `base_faces`: the loaded base-face matrices, grayscale in `[0, 1]`.
-  List names (e.g. `"base"`) become the `baseimage` argument used by
+  List names (e.g. `"base"`) become the `base_image` argument used by
   later functions. `base_face_files` carries the matching source paths.
 - `img_size`: side length of the (square) image in pixels.
 - `p`: the noise basis (with `$patches` and `$patchIdx`), the sinusoidal
@@ -943,7 +943,7 @@ nm <- read_noise_matrix("data/noise_matrix.txt")
 # rcicr .Rdata source: reconstructs each trial via
 # rcicr::generateNoiseImage() and caches the result.
 nm <- read_noise_matrix("data/rcicr_stimuli.Rdata",
-                        baseimage = "base")
+                        base_image = "base")
 ```
 
 The `.rds` is rebuilt automatically if you change the source file (each
@@ -977,8 +977,8 @@ The base face used at stimulus generation. Must be:
   [`png::readPNG`](https://rdrr.io/pkg/png/man/readPNG.html) and
   [`jpeg::readJPEG`](https://rdrr.io/pkg/jpeg/man/readJPEG.html)
   produce).
-- **Centred** with eye/nose/mouth roughly at the geometry assumed by the
-  default oval mask (eyes upper third, mouth lower third).
+- **Centered** with eye/nose/mouth roughly at the geometry assumed by
+  the default oval mask (eyes upper third, mouth lower third).
 
 For a research-quality base, the
 [webmorphR](https://github.com/debruine/webmorphR) package by DeBruine
@@ -1017,7 +1017,7 @@ Three ways to obtain a mask:
 ``` r
 
 # 1. Parametric, no extra dependencies. Default oval geometry
-#    is a typical centred-face oval; tune via centre,
+#    is a typical centered-face oval; tune via centre,
 #    half_width, half_height.
 fm <- make_face_mask(c(256L, 256L), region = "full")
 
@@ -1095,14 +1095,14 @@ shown below.
 ![Effect of a face-region mask on a base image. Left: raw FMNES base
 face (Karolinska Directed Emotional Faces; Lundqvist et al. 1998).
 Right: same face with a premade full-face oval mask applied; pixels
-outside the mask are dimmed to light grey to make the analysed region
+outside the mask are dimmed to light gray to make the analyzed region
 explicit. The reliability and discriminability metrics in this package
 will only see the inside-mask pixels when a mask is supplied via the
 \`mask\` argument.](figures/face_masks/fmnes_raw.png)![Effect of a
 face-region mask on a base image. Left: raw FMNES base face (Karolinska
 Directed Emotional Faces; Lundqvist et al. 1998). Right: same face with
 a premade full-face oval mask applied; pixels outside the mask are
-dimmed to light grey to make the analysed region explicit. The
+dimmed to light gray to make the analyzed region explicit. The
 reliability and discriminability metrics in this package will only see
 the inside-mask pixels when a mask is supplied via the \`mask\`
 argument.](figures/face_masks/fmnes_masked.png)
@@ -1110,7 +1110,7 @@ argument.](figures/face_masks/fmnes_masked.png)
 Effect of a face-region mask on a base image. Left: raw FMNES base face
 (Karolinska Directed Emotional Faces; Lundqvist et al. 1998). Right:
 same face with a premade full-face oval mask applied; pixels outside the
-mask are dimmed to light grey to make the analysed region explicit. The
+mask are dimmed to light gray to make the analyzed region explicit. The
 reliability and discriminability metrics in this package will only see
 the inside-mask pixels when a mask is supplied via the `mask` argument.
 
@@ -1124,7 +1124,7 @@ apply), they look as follows. Five regions are ellipses (`full`, `nose`,
 `left_eye`, `right_eye`) are axis-aligned rectangles, tunable to a
 specific base via the `region_bounds` argument (see the tuning
 subsection below). All eight region geometries are this package’s
-heuristics for a centred-portrait base; they are not taken from any
+heuristics for a centered-portrait base; they are not taken from any
 specific published paper. The convention of applying a full-face oval
 before pixel-wise metrics follows prior practice in social-face RC
 (e.g., Oliveira et al., 2019; Ratner et al., 2014; Schmitz, Rougier, &
@@ -1134,56 +1134,56 @@ Yzerbyt, 2024).
 artificial-person base face (256 x 256). Each translucent red overlay
 marks the pixels that pass through the mask; pixels outside are excluded
 from the analysis. All eight region geometries are this package's
-heuristics for a centred-portrait base. The three rectangle eye regions
+heuristics for a centered-portrait base. The three rectangle eye regions
 are independent of the full-oval geometry and tunable via
 \`region_bounds\`.](figures/face_masks/artificial_full.png)![The eight
 built-in face-region masks rendered over the same artificial-person base
 face (256 x 256). Each translucent red overlay marks the pixels that
 pass through the mask; pixels outside are excluded from the analysis.
 All eight region geometries are this package's heuristics for a
-centred-portrait base. The three rectangle eye regions are independent
+centered-portrait base. The three rectangle eye regions are independent
 of the full-oval geometry and tunable via
 \`region_bounds\`.](figures/face_masks/artificial_upper_face.png)![The
 eight built-in face-region masks rendered over the same
 artificial-person base face (256 x 256). Each translucent red overlay
 marks the pixels that pass through the mask; pixels outside are excluded
 from the analysis. All eight region geometries are this package's
-heuristics for a centred-portrait base. The three rectangle eye regions
+heuristics for a centered-portrait base. The three rectangle eye regions
 are independent of the full-oval geometry and tunable via
 \`region_bounds\`.](figures/face_masks/artificial_lower_face.png)![The
 eight built-in face-region masks rendered over the same
 artificial-person base face (256 x 256). Each translucent red overlay
 marks the pixels that pass through the mask; pixels outside are excluded
 from the analysis. All eight region geometries are this package's
-heuristics for a centred-portrait base. The three rectangle eye regions
+heuristics for a centered-portrait base. The three rectangle eye regions
 are independent of the full-oval geometry and tunable via
 \`region_bounds\`.](figures/face_masks/artificial_nose.png)![The eight
 built-in face-region masks rendered over the same artificial-person base
 face (256 x 256). Each translucent red overlay marks the pixels that
 pass through the mask; pixels outside are excluded from the analysis.
 All eight region geometries are this package's heuristics for a
-centred-portrait base. The three rectangle eye regions are independent
+centered-portrait base. The three rectangle eye regions are independent
 of the full-oval geometry and tunable via
 \`region_bounds\`.](figures/face_masks/artificial_mouth.png)![The eight
 built-in face-region masks rendered over the same artificial-person base
 face (256 x 256). Each translucent red overlay marks the pixels that
 pass through the mask; pixels outside are excluded from the analysis.
 All eight region geometries are this package's heuristics for a
-centred-portrait base. The three rectangle eye regions are independent
+centered-portrait base. The three rectangle eye regions are independent
 of the full-oval geometry and tunable via
 \`region_bounds\`.](figures/face_masks/artificial_eyes.png)![The eight
 built-in face-region masks rendered over the same artificial-person base
 face (256 x 256). Each translucent red overlay marks the pixels that
 pass through the mask; pixels outside are excluded from the analysis.
 All eight region geometries are this package's heuristics for a
-centred-portrait base. The three rectangle eye regions are independent
+centered-portrait base. The three rectangle eye regions are independent
 of the full-oval geometry and tunable via
 \`region_bounds\`.](figures/face_masks/artificial_left_eye.png)![The
 eight built-in face-region masks rendered over the same
 artificial-person base face (256 x 256). Each translucent red overlay
 marks the pixels that pass through the mask; pixels outside are excluded
 from the analysis. All eight region geometries are this package's
-heuristics for a centred-portrait base. The three rectangle eye regions
+heuristics for a centered-portrait base. The three rectangle eye regions
 are independent of the full-oval geometry and tunable via
 \`region_bounds\`.](figures/face_masks/artificial_right_eye.png)
 
@@ -1191,12 +1191,12 @@ The eight built-in face-region masks rendered over the same
 artificial-person base face (256 x 256). Each translucent red overlay
 marks the pixels that pass through the mask; pixels outside are excluded
 from the analysis. All eight region geometries are this package’s
-heuristics for a centred-portrait base. The three rectangle eye regions
+heuristics for a centered-portrait base. The three rectangle eye regions
 are independent of the full-oval geometry and tunable via
 `region_bounds`.
 
 The default geometry assumes the eyes sit roughly in the upper third of
-the image and the mouth in the lower third (centred square base, face
+the image and the mouth in the lower third (centered square base, face
 filling most of the frame). Pass `centre`, `half_width`, and
 `half_height` to
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
@@ -1204,12 +1204,12 @@ if your base image has different framing.
 
 #### Tuning a sub-region for a non-default base face
 
-The default sub-region geometry is calibrated for a centred, frontal
+The default sub-region geometry is calibrated for a centered, frontal
 base face that fills most of the frame. The elliptical regions are
 positioned relative to the full-face oval (`centre`, `half_width`,
 `half_height`); the rectangle eye regions are independent of the oval
 and tuned via their own `region_bounds`. When the base image violates
-the centred-portrait assumption, the parametric overlay drifts off the
+the centered-portrait assumption, the parametric overlay drifts off the
 intended feature and the metrics computed against it no longer mean what
 their name implies.
 
@@ -1598,7 +1598,7 @@ report <- run_diagnostics(
   responses,
   method       = "2ifc",
   rdata        = "rcic_stimuli.Rdata",
-  baseimage    = "base",
+  base_image    = "base",
   col_rt       = "rt",
   expected_n   = 300L,
   infoval_iter = 1000L,
@@ -1617,20 +1617,20 @@ Once the diagnostics pass, compute CIs.
 The 2IFC path delegates to
 [`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html)
 and returns a list with `$signal_matrix` (raw mask, ready for `rel_*`),
-optionally `$rendered_ci` for visualisation, plus metadata.
+optionally `$rendered_ci` for visualization, plus metadata.
 
 ``` r
 
+# `responses` is a data frame loaded from CSV (see section 4.1).
 res <- ci_from_responses_2ifc(
   responses,
   rdata_path    = "rcic_stimuli.Rdata",
-  baseimage     = "base",
+  base_image    = "base",   # label from rdata, a path, or a numeric matrix
   scaling       = "none",   # raw mask only; render later if needed
   keep_rendered = FALSE
 )
 
 dim(res$signal_matrix)   # n_pixels x n_participants
-attr(res$signal_matrix, "source")    # "raw"
 ```
 
 Behind the scenes the function takes care of the steps that are easy to
@@ -1638,6 +1638,11 @@ get wrong when calling rcicr directly: it loads the helper packages
 rcicr expects (`foreach`, `tibble`, `dplyr`), checks that responses are
 coded `{-1, +1}`, runs single-threaded by default, and matches the
 `.Rdata` filename in a case- insensitive way.
+
+The two CI builders accept `base_image` the same way: a numeric matrix
+in `[0, 1]`, a path to a PNG / JPEG, or (for 2IFC) a label naming an
+entry in the rdata’s `base_faces` list. Pass whichever form you already
+have.
 
 The Brief-RC implementation follows Schmitz’s `genMask()` formula step
 for step, including the rule that collapses repeated stimulus ids by
@@ -1657,6 +1662,12 @@ You can pass a pre-loaded `noise_matrix` instead of `rdata_path`; useful
 when you have a non-rcicr-generated pool (e.g. Schmitz’s OSF text
 matrix).
 
+Both builders return one column per producer in `$signal_matrix`. To
+average across producers into a single group CI (or several side-by-side
+group CIs for between-condition comparisons), see
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+and the two-stage pattern in section 1.3.
+
 ### 6.2 From pre-rendered CIs
 
 When you already have one CI image per producer on disk (PNG or JPEG),
@@ -1669,7 +1680,7 @@ signal <- read_signal_matrix(
   dir             = "data/cis_condition_A/",
   base_image_path = "data/base.jpg"
 )
-attr(signal, "source")   # "rendered"
+dim(signal)   # n_pixels x n_producers
 ```
 
 [`read_cis()`](https://olivethree.github.io/rcisignal/reference/read_cis.md)
@@ -1707,7 +1718,7 @@ optional `$rendered_ci` field that `keep_rendered = TRUE` returns.
 Recommendation: feed the raw `$signal_matrix` to every metric. For
 [`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
 the choice does not matter (it reads `$ci` internally). For Brief-RC,
-treat any non-`none` scaling as visualisation-only and never pass it to
+treat any non-`none` scaling as visualization-only and never pass it to
 `rel_*` or to hand-rolled `infoVal`.
 
 ## 7. Step 3: within-condition reliability
@@ -1815,11 +1826,6 @@ Report `$r_sb` as the headline; `$r_sb_excess` as the above-chance
 increment when a null is requested. `$ci_95` / `$ci_95_sb` are
 percentile 95% CIs on the observed distribution.
 
-[`rel_split_half_null()`](https://olivethree.github.io/rcisignal/reference/rel_split_half_null.md)
-exposes the same null-distribution simulation as a standalone function,
-useful when you want to precompute a null and reuse it across conditions
-with the same producer count.
-
 ### 7.2 `rel_icc()`
 
 *Background.* The intraclass correlation coefficient (ICC) is a family
@@ -1870,7 +1876,7 @@ the two-way-random model is needed.
 
 ICC is variance-based, so it errors on a `"rendered"` source matrix
 unless `acknowledge_scaling = TRUE` is passed. Rendered scaling corrupts
-ICC values in non-recoverable ways, so the default behaviour is
+ICC values in non-recoverable ways, so the default behavior is
 conservative.
 
 A once-per-session warning fires when `n_targets > 50,000` and ICC(3,k)
@@ -1897,7 +1903,7 @@ worth a closer look. This is **not** a reliability metric. The
 with-producer and without-producer group CIs share `(N-1)/N` of their
 data, so LOO correlations are near 1 by construction even on noisy data;
 the diagnostic information lives in the *relative* ordering of
-producers, which the function summarises as a robust z-score.
+producers, which the function summarizes as a robust z-score.
 
 For each producer `i`, this function computes the Pearson correlation
 between the full-sample group CI and the group CI recomputed without
@@ -1977,7 +1983,7 @@ overcorrects in the opposite direction because pixels are spatially
 correlated; CI signal lives in contiguous regions, not independent dots.
 
 The solution adopted here is borrowed from the neuroimaging literature:
-build a single test statistic that summarises the spatial extent of the
+build a single test statistic that summarizes the spatial extent of the
 effect (a *cluster*), and calibrate it against a null distribution
 generated by random label permutation. This controls the *family-wise
 error rate (FWER)* in the strong sense, that is, the probability of one
@@ -2047,10 +2053,10 @@ nuisance. The procedure is in three conceptual steps:
     absolute value at some cutoff (e.g., `|t| > 2`). Each pixel is
     either supra-threshold or not.
 2.  Group the supra-threshold pixels into spatially contiguous
-    *clusters* using a neighbour rule. The default in `rcisignal` is
-    **4-connectivity**: a pixel’s neighbours are the four pixels sharing
+    *clusters* using a neighbor rule. The default in `rcisignal` is
+    **4-connectivity**: a pixel’s neighbors are the four pixels sharing
     an edge with it (up, down, left, right). 8-connectivity (which also
-    counts diagonal neighbours) tends to merge things that only touch at
+    counts diagonal neighbors) tends to merge things that only touch at
     a corner, producing larger and fewer clusters; 4-connectivity is the
     conservative default and is the one used here.
 3.  Score each cluster by its **mass**: the sum of the t-values inside
@@ -2070,8 +2076,8 @@ cluster is tested against the *maximum* under the null, this controls
 the family-wise error rate in the strong sense (Nichols & Holmes, 2002).
 
 One caveat: the cluster-forming threshold does not have a fully
-principled default. Lower thresholds favour broad and diffuse effects;
-higher thresholds favour focal and intense ones (Smith & Nichols, 2009).
+principled default. Lower thresholds favor broad and diffuse effects;
+higher thresholds favor focal and intense ones (Smith & Nichols, 2009).
 When you do not have prior intuition about the spatial scale of your
 effect, TFCE (below) avoids having to choose.
 
@@ -2115,7 +2121,7 @@ enhancement. Instead of picking one cluster-forming threshold, TFCE
 walks across many possible thresholds and adds up, at each pixel, how
 much spatial support the surrounding cluster has at each threshold
 height. Pixels embedded in strongly-supported clusters end up with high
-TFCE scores; isolated pixels with no neighbour support end up with low
+TFCE scores; isolated pixels with no neighbor support end up with low
 scores. Per-pixel TFCE value is the integral over thresholds of
 `size^E x h^H x dh`; positive and negative tails are enhanced separately
 and recombined with sign preserved. No free threshold parameter to
@@ -2306,7 +2312,7 @@ A pair with no clusters contributes `p_min = 1.0`.
 question: is this producer’s CI larger in magnitude than what a random
 responder would produce on the same task? The metric is a z-score. The
 numerator is the **Frobenius norm** of the CI mask (the square root of
-the summed squared pixel values, a scalar that summarises overall mask
+the summed squared pixel values, a scalar that summarizes overall mask
 “size”). The reference distribution comes from simulating many random
 `(stimulus, ±1)` response sequences through the same CI formula,
 computing the Frobenius norm of each simulated mask, and recording the
@@ -2450,11 +2456,11 @@ The result has its own
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method that
 renders the observed t-map with FWE-significant pixels outlined in
 black. This is the one-call form of the canonical pairing; see §10.2 for
-what it does and the colour conventions it inherits.
+what it does and the color conventions it inherits.
 
 ### 10.2 `plot_agreement_map()` and `plot(agreement_map_test_result)`
 
-Renders the per-pixel one-sample t-map as a colour image, with optional
+Renders the per-pixel one-sample t-map as a color image, with optional
 thresholding and an optional base-face overlay:
 
 ``` r
@@ -2477,7 +2483,7 @@ plot_agreement_map(signal_matrix,
 On the default diverging palette, both deep red and deep blue indicate
 **strong** producer agreement; only the direction differs (blue =
 producers consistently added to the base, red = consistently
-subtracted). “No agreement” is the neutral colour (white), not red.
+subtracted). “No agreement” is the neutral color (white), not red.
 
 If the question is “where do producers have any consistent opinion”
 rather than “in which direction do they agree”, pass `palette = "fire"`
@@ -2555,20 +2561,30 @@ plot_dissimilarity_grid(
 ### 10.5 `plot_ci_correlogram()`
 
 A publication-ready Pearson-*r* matrix across multiple group-mean CIs.
-Pass a named list of CIs (vectors of length `prod(img_dims)`, or
-`$signal_matrix` objects from `ci_from_responses_*()` — per-producer
-matrices are reduced to group means automatically). Useful as a compact
-visual summary of which conditions covary across the image.
+The function takes a single matrix where each column is one CI (a group
+mean, an individual producer, or any mix). Useful as a compact visual
+summary of which conditions covary across the image.
+
+Build the input matrix outside the call.
+[`rowMeans()`](https://rdrr.io/r/base/colSums.html) collapses the
+per-producer columns of one `$signal_matrix` into a single group CI;
+[`cbind()`](https://rdrr.io/r/base/cbind.html) stacks the columns side
+by side. Column names become the panel labels.
 
 ``` r
 
+# trust_cis, friendly_cis, ... are the outputs of
+# ci_from_responses_briefrc() or ci_from_responses_2ifc() for
+# each condition (see sections 6.1 and 1.3).
+ci_matrix <- cbind(
+  Trust     = rowMeans(trust_cis$signal_matrix),
+  Friendly  = rowMeans(friendly_cis$signal_matrix),
+  Competent = rowMeans(competent_cis$signal_matrix),
+  Dominant  = rowMeans(dominant_cis$signal_matrix)
+)
+
 plot_ci_correlogram(
-  list(
-    "Trust"     = trust_cis$signal_matrix,
-    "Friendly"  = friendly_cis$signal_matrix,
-    "Competent" = competent_cis$signal_matrix,
-    "Dominant"  = dominant_cis$signal_matrix
-  ),
+  ci_matrix,
   mask     = "face",       # also "none", "upper_face", "lower_face"
   triangle = "upper",      # also "full", "lower"
   palette  = "diverging",  # also "diverging_puor", "diverging_brbg"
@@ -2576,9 +2592,33 @@ plot_ci_correlogram(
 )
 ```
 
+You can mix group CIs with individual producers by stacking extra
+columns:
+
+``` r
+
+ci_matrix <- cbind(
+  Trust_group = rowMeans(trust_cis$signal_matrix),
+  Trust_P05   = trust_cis$signal_matrix[, "P05"],
+  Trust_P12   = trust_cis$signal_matrix[, "P12"]
+)
+plot_ci_correlogram(ci_matrix)
+```
+
+When the producers across conditions all live in one signal matrix (with
+one label per producer),
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+is the shorter path to the same matrix:
+
+``` r
+
+gcis <- group_ci(all_cis$signal_matrix, by = condition_per_producer)
+plot_ci_correlogram(gcis)
+```
+
 Same diverging convention as the rest of the package’s direction-bearing
 plots: positive `r` = blue, negative = red; saturation encodes
-magnitude. The colour scale is fixed at `c(-1, 1)` so panels are
+magnitude. The color scale is fixed at `c(-1, 1)` so panels are
 comparable across runs and across paper figures. The §12.6 worked
 example uses this function on the four-trait subset.
 
@@ -2593,24 +2633,27 @@ baseline-free magnitude summary, pair with
 ### 10.6 `plot_ci_distance_matrix()`
 
 A publication-ready Euclidean distance matrix across multiple group-mean
-CIs. Same data input logic as that used for
+CIs. Same input format as
 [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md):
-accepts a [`group_ci()`](#id_13-the-two-stage-pattern) result directly,
-a named numeric matrix of `pixels x n_groups`, or a named list of CIs
-(per-producer matrices reduced to group means internally). Uses the
-magnitude metric recommended by §8.3 instead of Pearson correlation.
-Useful when the question is “how *far apart* are these CIs in pixel
-space?” rather than “how do they covary?”.
+one matrix with one CI per column. Uses the magnitude metric recommended
+by §8.3 instead of Pearson correlation. Useful when the question is “how
+*far apart* are these CIs in pixel space?” rather than “how do they
+covary?”.
 
 ``` r
 
+# Same `ci_matrix` constructed in section 10.5: one column per
+# group CI, built with cbind() of rowMeans() over each condition's
+# per-producer signal matrix.
+ci_matrix <- cbind(
+  Trust     = rowMeans(trust_cis$signal_matrix),
+  Friendly  = rowMeans(friendly_cis$signal_matrix),
+  Competent = rowMeans(competent_cis$signal_matrix),
+  Dominant  = rowMeans(dominant_cis$signal_matrix)
+)
+
 plot_ci_distance_matrix(
-  list(
-    "Trust"     = trust_cis$signal_matrix,
-    "Friendly"  = friendly_cis$signal_matrix,
-    "Competent" = competent_cis$signal_matrix,
-    "Dominant"  = dominant_cis$signal_matrix
-  ),
+  ci_matrix,
   mask     = "face",        # also "none", "upper_face", "lower_face"
   method   = "normalised",  # also "raw" (default); normalised divides
                             # by sqrt(n_pixels_used) for cross-mask
@@ -2621,9 +2664,9 @@ plot_ci_distance_matrix(
 )
 ```
 
-Distance is non-negative and unbounded, so the colour scale adapts to
-the data range (unlike the correlogram’s fixed `c(-1, 1)`). Pale yellow
-at small distances, deep dark at large distances. The returned object
+Distance is non-negative and unbounded, so the color scale adapts to the
+data range (unlike the correlogram’s fixed `c(-1, 1)`). Pale yellow at
+small distances, deep dark at large distances. The returned object
 exposes both `$distance_matrix` (raw or normalised per `method`) and
 `$distance_raw` (always raw, useful for downstream
 [`hclust()`](https://rdrr.io/r/stats/hclust.html) or MDS).
@@ -2654,15 +2697,18 @@ Kruskal’s (1964) interpretive bands for stress-1:
 
 ``` r
 
-# Minimal call: auto-selects k, prints a one-screen summary.
-out <- plot_ci_mds(
-  list("Trust"     = trust_cis$signal_matrix,
-       "Friendly"  = friendly_cis$signal_matrix,
-       "Competent" = competent_cis$signal_matrix,
-       "Dominant"  = dominant_cis$signal_matrix,
-       "Submissive" = submissive_cis$signal_matrix),
-  mask = "face"
+# Build a CI matrix the same way as for the correlogram: one
+# column per group CI.
+ci_matrix <- cbind(
+  Trust      = rowMeans(trust_cis$signal_matrix),
+  Friendly   = rowMeans(friendly_cis$signal_matrix),
+  Competent  = rowMeans(competent_cis$signal_matrix),
+  Dominant   = rowMeans(dominant_cis$signal_matrix),
+  Submissive = rowMeans(submissive_cis$signal_matrix)
 )
+
+# Minimal call: auto-selects k, prints a one-screen summary.
+out <- plot_ci_mds(ci_matrix, mask = "face")
 print(out)            # one-screen view of dimensionality selection
 
 # The coordinates of each CI in the Euclidean MDS space:
@@ -2675,24 +2721,17 @@ out$stress_by_k
 ``` r
 
 # A grouped scatter for a multi-condition design. `groups`
-# colours points; `shapes` adds a second categorical level.
-# Force a single 2D paper panel once fidelity has been audited.
-
-# Name the colour / shape vectors so each value lines up with the
-# matching CI in `ci_list_country_trait`. We just copy the CI
-# list's names onto each vector in turn.
-group_labels <- country_codes
-names(group_labels) <- names(ci_list_country_trait)
-
-shape_labels <- trait_family
-names(shape_labels) <- names(ci_list_country_trait)
-
+# colors points; `shapes` adds a second categorical level.
+# `country_codes` and `trait_family` are character vectors with
+# one entry per column of `ci_matrix_country_trait` (built the
+# same cbind() way as above). Force a single 2D paper panel
+# once fidelity has been audited.
 plot_ci_mds(
-  ci_list_country_trait,
+  ci_matrix_country_trait,
   mask     = "face",
   k        = 2L,
-  groups   = group_labels,
-  shapes   = shape_labels,
+  groups   = country_codes,
+  shapes   = trait_family,
   file     = "fig_mds.pdf"
 )
 ```
@@ -2760,11 +2799,10 @@ trait conditions in a between-subjects design (20 producers per trait):
 Dominant, Submissive, Trust, Untrust, Friendly, Unfriendly, Intelligent,
 Unintelligent, Competent, Incompetent.
 
-The R code chunks below are shown for reading and adaptation; they are
-marked `eval = FALSE` so the vignette renders quickly. The numbers and
-figures shown alongside each chunk were computed on the open OSF data
-for this study. Copy the chunks into a fresh R session and run them on
-your own data to reproduce the analysis pattern.
+The R code chunks below are shown for reading and adaptation. The
+numbers and figures alongside each chunk were computed on the open OSF
+data for this study. Copy the chunks into a fresh R session and run them
+on your own data to reproduce the analysis pattern.
 
 ### 12.1 Loading the data
 
@@ -2904,7 +2942,7 @@ trust_trials <- raw[raw$trait == "trust", ]
 trust_cis    <- ci_from_responses_2ifc(
   trust_trials,
   rdata_path = "stimuli_modernised.RData",
-  baseimage  = "male"
+  base_image  = "male"
 )
 trust_cis$signal_matrix     # n_pixels x n_producers
 ```
@@ -2922,7 +2960,7 @@ for (tr in traits) {
   cis      <- ci_from_responses_2ifc(
     raw[raw$trait == tr, ],
     rdata_path = "stimuli_modernised.RData",
-    baseimage  = "male"
+    base_image  = "male"
   )
   sm[[tr]] <- cis$signal_matrix
 }
@@ -3072,9 +3110,8 @@ CIs as faithfully as the chosen number of dimensions allows. By default
 the function fits classical MDS at every `k` from 2 to `k_max` and auto-
 selects the smallest `k` whose Kruskal stress-1 reaches the “good” band
 (0.05). When the data have a theoretical reason to be plotted in a
-specific number of dimensions — for example, a two-axis hypothesis like
-warmth vs dominance — pass an integer `k` to override the
-auto-selection.
+specific number of dimensions, for example, a two-axis hypothesis like
+warmth vs dominance, pass an integer `k` to override the auto-selection.
 
 The Oliveira et al. (2019) trait-rating literature works with a
 two-dimensional theoretical structure (warmth and competence families,
@@ -3118,7 +3155,7 @@ plot_ci_mds(
 (2019) data, fit to face-masked raw Euclidean distances and forced to k
 = 2 dimensions for theory-driven plotting. The Kruskal stress at k = 2
 is 0.223 (Kruskal's 'very poor' band); the first two axes capture 57.8%
-and 13.1% of the absolute eigenmass. Points colour by trait family
+and 13.1% of the absolute eigenmass. Points color by trait family
 (warmth / dominance / competence); triangles mark the positive pole
 within each family, circles the negative
 pole.](figures/oliveira_2019/trait_ci_mds.png)
@@ -3127,7 +3164,7 @@ Classical MDS projection of all ten trait CIs in the Oliveira et
 al. (2019) data, fit to face-masked raw Euclidean distances and forced
 to k = 2 dimensions for theory-driven plotting. The Kruskal stress at k
 = 2 is 0.223 (Kruskal’s ‘very poor’ band); the first two axes capture
-57.8% and 13.1% of the absolute eigenmass. Points colour by trait family
+57.8% and 13.1% of the absolute eigenmass. Points color by trait family
 (warmth / dominance / competence); triangles mark the positive pole
 within each family, circles the negative pole.
 
@@ -3209,7 +3246,7 @@ original paper:
   functional dimensions, included as a reference benchmark.
 
 Each contrast is a stratified cluster permutation test on the full face.
-We summarise the overall magnitude of each divergence with
+We summarize the overall magnitude of each divergence with
 [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
 and lay them out side-by-side:
 
@@ -3459,7 +3496,7 @@ answer two different questions about the same masked region. The cluster
 test asks where conditions A and B disagree; infoVal asks how
 informative a single condition’s mask is when restricted to this region.
 Reporting both side-by-side gives a fuller picture of how producers’
-representations organise across the face.
+representations organize across the face.
 
 ### 12.10 Pairwise cluster maps for two motivating contrasts
 
@@ -3547,7 +3584,7 @@ plot_ci_overlay(
 ```
 
 **Descriptive maps.** No significance filter applied; the display is
-restricted to the face oval so the colour scale is not dominated by
+restricted to the face oval so the color scale is not dominated by
 hair/background pixels.
 
 ![Descriptive pairwise difference maps on the male base face. Left:
@@ -3581,7 +3618,7 @@ Left: Trust minus Friendly. Right: Dominant minus Competent. Each map
 shows the difference of the two group-mean CIs only at pixels belonging
 to a cluster that is significant at p \< .05 under FWER-controlled
 cluster-based permutation testing (cluster threshold \|t\| \> 2.0; 2000
-stratified label permutations; max-mass null). Colour convention as in
+stratified label permutations; max-mass null). Color convention as in
 the descriptive maps above (blue = first condition stronger; red =
 second condition stronger; opacity = magnitude). Compare with the
 descriptive maps to see how much of the raw pattern survives the
@@ -3592,7 +3629,7 @@ Friendly. Right: Dominant minus Competent. Each map shows the difference
 of the two group-mean CIs only at pixels belonging to a cluster that is
 significant at p \< .05 under FWER-controlled cluster-based permutation
 testing (cluster threshold \|t\| \> 2.0; 2000 stratified label
-permutations; max-mass null). Colour convention as in the descriptive
+permutations; max-mass null). Color convention as in the descriptive
 maps above (blue = first condition stronger; red = second condition
 stronger; opacity = magnitude). Compare with the descriptive maps to see
 how much of the raw pattern survives the inferential
@@ -3603,7 +3640,7 @@ Left: Trust minus Friendly. Right: Dominant minus Competent. Each map
 shows the difference of the two group-mean CIs only at pixels belonging
 to a cluster that is significant at p \< .05 under FWER-controlled
 cluster-based permutation testing (cluster threshold \|t\| \> 2.0; 2000
-stratified label permutations; max-mass null). Colour convention as in
+stratified label permutations; max-mass null). Color convention as in
 the descriptive maps above (blue = first condition stronger; red =
 second condition stronger; opacity = magnitude). Compare with the
 descriptive maps to see how much of the raw pattern survives the
@@ -3677,7 +3714,7 @@ report <- run_diagnostics(
   method       = "briefrc",
   noise_matrix = nm,
   expected_n   = 60L,
-  baseimage    = "base.jpg",
+  base_image    = "base.jpg",
   infoval_iter = 1000L
 )
 report
@@ -3704,7 +3741,7 @@ infoval(signal, nm,
         trial_counts = trial_counts,
         iter         = 1000L, seed = 1L)
 
-# 6. Save rendered CIs to PNG (visualisation only). Do not
+# 6. Save rendered CIs to PNG (visualization only). Do not
 #    feed these to rel_* or to hand-rolled infoVal.
 res_render <- ci_from_responses_briefrc(
   briefrc_responses,
@@ -3724,9 +3761,9 @@ this package quantify whether a CI is stable (within-condition) and
 separable (between-condition). Whether the CI accurately reflects the
 producer’s mental representation of the target trait is a separate
 validity question, typically addressed by an external rater study or a
-behavioural validation, and the package does not address it. High
-`rel_*` values support claims about consistency and discriminability;
-plan validity work alongside the rcisignal pipeline.
+behavioral validation, and the package does not address it. High `rel_*`
+values support claims about consistency and discriminability; plan
+validity work alongside the rcisignal pipeline.
 
 **Raw vs rendered.** Pre-rendered PNGs are convenient and carry the
 scaling step into your pixel data. Variance-based metrics break under
@@ -3735,7 +3772,7 @@ and break under per-CI “matched” scaling. The package errors at runtime
 when a known-rendered matrix is fed to a variance-based metric. The
 cleanest workflow computes CIs from raw responses
 (`ci_from_responses_*`), feeds the returned `$signal_matrix` to all
-metrics, and renders to PNG only for visualisation.
+metrics, and renders to PNG only for visualization.
 
 **Group-mean z and per-producer z carry different information.**
 Per-producer Frobenius norms aggregate over the whole image and dilute
@@ -3975,7 +4012,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation
-#>   Data and Classification Images_. R package version 0.1.8,
+#>   Data and Classification Images_. R package version 0.1.9,
 #>   <https://github.com/olivethree/rcisignal>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -3985,7 +4022,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> Images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.1.8},
+#>     note = {R package version 0.1.9},
 #>     url = {https://github.com/olivethree/rcisignal},
 #>   }
 ```

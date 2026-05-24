@@ -1,5 +1,61 @@
 # Changelog
 
+## rcisignal 0.1.9
+
+### Breaking change
+
+- [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+  argument `baseimage` renamed to `base_image` to match
+  [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md).
+  The new argument now accepts the same three input forms as Brief-RC: a
+  numeric matrix in `[0, 1]`, a path to a PNG / JPEG, or a string label
+  naming an entry in the rdata’s `base_faces` list (the historical 2IFC
+  form). Matrix and path inputs are injected into a fresh temporary copy
+  of the rdata under a synthetic label before the call into rcicr. No
+  deprecation alias; calls using `baseimage = "..."` will fail with the
+  standard R unused-argument error.
+
+- The same rename cascades through the five downstream 2IFC diagnostic
+  functions and the noise reader:
+  [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md),
+  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md),
+  [`check_rt_infoval_consistency()`](https://olivethree.github.io/rcisignal/reference/check_rt_infoval_consistency.md),
+  [`check_response_inversion()`](https://olivethree.github.io/rcisignal/reference/check_response_inversion.md),
+  [`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md),
+  plus `read_noise_matrix(base_image = ...)`. All accept the same three
+  forms via the same internal resolver.
+
+### Documentation
+
+- Tutorial vignette cleaned up for readability per a user-driven audit:
+  - All user-facing prose (vignette, README, NEWS, roxygen, `cli`
+    message bodies) switched from British to American English. Argument
+    names and [`match.arg()`](https://rdrr.io/r/base/match.arg.html)
+    value strings (e.g., `centre`, `colour_bar`,
+    `method = "normalised"`) were left in place to preserve the
+    documented API surface.
+  - `DESCRIPTION` `Language` field updated `en-GB` -\> `en-US`.
+  - [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md),
+    [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
+    and
+    [`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+    `@param cis` and the worked-example chunks in vignette §10.5 / §10.6
+    / §10.7 now lead with the named- matrix input form (one column per
+    CI, built outside the call with `cbind(name = rowMeans(...))`). The
+    named-list and
+    [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    forms are still accepted; they are documented as the
+    back-compatibility / convenience paths. Mixed group-CI +
+    individual-producer correlogram example added.
+  - §6.1 (compute CIs) now cross-links to §1.3 (two-stage pattern) and
+    [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+    as the canonical group-CI route.
+  - Removed developer-facing asides that leaked into the user-guide
+    register (the “eval = FALSE for faster vignette rendering” note in
+    §12.0; the precompute-null reuse aside in §7.1; the
+    `attr(res$signal_matrix, "source")` and `attr(signal, "source")`
+    example lines in §6.1 and §6.2).
+
 ## rcisignal 0.1.8
 
 ### New features
@@ -49,7 +105,7 @@
   (both), and
   [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md)
   (any list element). The internal `group_mean_z()` gets the same guard.
-  Pre-existing behaviour for legitimate per-producer matrices is
+  Pre-existing behavior for legitimate per-producer matrices is
   unchanged.
 
 ### Documentation
@@ -66,7 +122,7 @@
 
 - pkgdown reference index regrouped to mirror the two stages. Visitors
   to the package website now see “Stage 1 — per-producer CIs” and “Stage
-  2 — group CIs” as the first two reference sections.
+  2, group CIs” as the first two reference sections.
 
 - README gains a small two-stage diagram showing how `responses`
 
@@ -172,7 +228,7 @@
   single-hue (pale yellow to deep red) ramp. Use when the question is
   “where do producers have a consistent opinion” and direction is not
   needed; the `"fire"` view discards sign by design. The default
-  `palette = "diverging"` is unchanged in API; see the colour-direction
+  `palette = "diverging"` is unchanged in API; see the color-direction
   fix below.
 
 - [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
@@ -212,7 +268,7 @@
   `$mds_points` exposes the `n_cis x k_selected` coordinate matrix in
   the Euclidean MDS space, `$stress_by_k` and `$variance_pct_by_k`
   expose the full dimensionality-selection trace. Supports optional
-  categorical `groups` (point colour) and `shapes` (point pch) arguments
+  categorical `groups` (point color) and `shapes` (point pch) arguments
   for grouped scatters in multi-condition designs. Same masking and
   PNG/PDF save options as the other plot helpers.
 
@@ -223,12 +279,12 @@
   [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
   and
   [`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md).
-  No user-visible behaviour change to
+  No user-visible behavior change to
   [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md).
 
-### Behavioural change
+### Behavioral change
 
-- Colour direction fixed on the diverging-palette plots that use
+- Color direction fixed on the diverging-palette plots that use
   `hcl.colors("RdBu", ...)`. `plot_agreement_map(palette = "diverging")`
   and `plot.rcisignal_rel_cluster_test()` previously rendered positive
   values as red and negative as blue, opposite to what their help pages
@@ -237,20 +293,20 @@
   documented. Both now render positive = blue, negative = red, matching
   every other diverging plot in the package and matching the
   long-standing help-page docs. Visual effect: rendered figures from
-  prior versions of these two functions look like their colours have
-  been swapped. The new
+  prior versions of these two functions look like their colors have been
+  swapped. The new
   [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
   follows the same convention from the start.
 - The worked-example correlogram figure
   (`vignettes/figures/oliveira_2019/trait_ci_correlogram.png`) is
   regenerated to match the corrected convention. Same data, flipped
-  colours.
+  colors.
 
 ### Breaking change
 
 - `plot_agreement_map(palette = "viridis")` is removed. The previous
   viridis branch plotted signed `t` against a palette with no neutral
-  midpoint, so zero rendered at a perceptually arbitrary colour. The new
+  midpoint, so zero rendered at a perceptually arbitrary color. The new
   `"fire"` option supersedes that use case correctly. The argument is
   now `palette = c("diverging", "fire")`.
 
@@ -260,7 +316,7 @@
   help page rewritten to be explicit that on the default diverging
   palette both deep red and deep blue indicate **strong** agreement
   (sign in hue, magnitude in saturation); “no agreement” is the neutral
-  colour (white), not red. The new `"fire"` palette is documented as a
+  color (white), not red. The new `"fire"` palette is documented as a
   sign-discarding magnitude-only view with explicit pointers to recover
   direction via the diverging palette or
   [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md).
@@ -290,14 +346,14 @@
 ### Internal
 
 - [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
-  invisibly returns two new fields: `zlim` (the colour scale used) and
+  invisibly returns two new fields: `zlim` (the color scale used) and
   `palette` (the palette name). Backwards compatible only in the sense
   that no caller was relying on the prior list having exactly four
   names; tests that asserted on `names(...)` were updated.
 
 ## rcisignal 0.1.5
 
-### Behavioural change
+### Behavioral change
 
 - [`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
   now always renders a single panel (the base image with the mask
@@ -387,7 +443,7 @@
 
 ## rcisignal 0.1.4
 
-### Behavioural change
+### Behavioral change
 
 - `make_face_mask(region = "eyes")` now returns a single wide
   axis-aligned **rectangle** covering both eyes ear-to-ear and from the
@@ -409,7 +465,7 @@
   [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md).
   Each returns an axis-aligned rectangle around the viewer’s left or
   right eye, independent of the other eye and of the full-face oval.
-  Bounds default to a heuristic centred-face geometry and can be
+  Bounds default to a heuristic centered-face geometry and can be
   overridden via `region_bounds`.
 - New `region_bounds = NULL` argument on
   [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md).
@@ -477,9 +533,9 @@
   `plot.rcisignal_rel_cluster_test()`). A warning fires above
   `max_pairs = 12`; pass `max_pairs = Inf` to silence.
 - [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on a
-  `rcisignal_rel_cluster_test` result gains a `colour_bar = TRUE`
-  argument (default preserves prior behaviour). Set `FALSE` to suppress
-  the per-panel colour bar when packing many panels into a small grid;
+  `rcisignal_rel_cluster_test` result gains a `color_bar = TRUE`
+  argument (default preserves prior behavior). Set `FALSE` to suppress
+  the per-panel color bar when packing many panels into a small grid;
   the new pairwise plot method uses this internally.
 
 ### Documentation
@@ -518,7 +574,7 @@
   argument `base_image_path` is renamed `base_image` and now accepts
   either a numeric matrix in `[0, 1]` (e.g. `sim$base_face`) or a file
   path. The argument is now optional when `scaling = "none"` (the
-  default), since the base face only feeds the visualisation-only
+  default), since the base face only feeds the visualization-only
   `$rendered_ci` field. The old `base_image_path` keeps working for one
   release with a deprecation warning.
 - [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
@@ -537,17 +593,17 @@
   with the 2IFC path. The Brief-RC consumers still read `$noise_matrix`
   directly so the file is informational rather than required.
 
-### Behavioural change
+### Behavioral change
 
 - [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
   now uses positive = blue, negative = red (matching
   [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
   and the cluster-test plots). Previously it rendered positive = red,
-  negative = blue, which flipped the colour reading between the
-  package’s three diverging plots. Saved overlay PNGs from prior
-  versions will look mirrored if regenerated. The four worked-example
-  pairwise figures in `vignettes/figures/oliveira_2019/` and the README
-  captions were refreshed to match.
+  negative = blue, which flipped the color reading between the package’s
+  three diverging plots. Saved overlay PNGs from prior versions will
+  look mirrored if regenerated. The four worked-example pairwise figures
+  in `vignettes/figures/oliveira_2019/` and the README captions were
+  refreshed to match.
 
 ### Documentation
 
@@ -560,9 +616,9 @@
   [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
   and
   [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md)
-  describing colour semantics, contour meaning, and
+  describing color semantics, contour meaning, and
   significance/observed-statistic distinctions.
-- Standardised the `mask` `@param` description across
+- Standardized the `mask` `@param` description across
   [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
   `agreement_map()`,
   [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),

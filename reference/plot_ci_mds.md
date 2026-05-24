@@ -41,21 +41,18 @@ plot_ci_mds(
 
 - cis:
 
-  CIs to project, in any of three forms:
-
-  - a
-    [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-    result (an
-    [rcisignal_group_ci](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-    matrix);
-
-  - a numeric matrix `n_pixels x n_groups` with named columns;
-
-  - a named list of CIs (each element a vector of length
-    `prod(img_dims)`, a single-column matrix, or a per-producer
-    `signal_matrix` from `ci_from_responses_*()` which is reduced to a
-    group mean internally). At least three CIs are required for a
-    meaningful 2D projection.
+  CIs to project. The recommended form is a numeric matrix
+  `n_pixels x n_cis` with named columns; each column is one CI (a group
+  mean, a single producer's CI, or any mix). Build it outside the call
+  with `cbind(name = rowMeans(cis$signal_matrix), ...)`. Two other forms
+  are accepted for back-compatibility: a
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  result (an
+  [rcisignal_group_ci](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  matrix) and a named list of CIs (vectors of length `prod(img_dims)`,
+  single-column matrices, or per-producer `signal_matrix` objects from
+  `ci_from_responses_*()` which are reduced to group means internally).
+  At least three CIs are required for a meaningful 2D projection.
 
 - img_dims:
 
@@ -99,7 +96,7 @@ plot_ci_mds(
 - groups:
 
   Optional named character vector mapping CI names to a categorical
-  group label. Used to colour the points. Names must match `names(cis)`
+  group label. Used to color the points. Names must match `names(cis)`
   exactly.
 
 - shapes:
@@ -208,7 +205,7 @@ theoretically motivated; the function will render the corresponding
 
 Each panel is a scatter of CIs in two MDS dimensions. Points close
 together represent CIs that are similar in pixel space; distant points
-represent dissimilar CIs. With `groups`, points colour by category; with
+represent dissimilar CIs. With `groups`, points color by category; with
 `shapes`, points carry distinct marker shapes by another category. The
 aspect ratio is fixed (`asp = 1`) so visual distances faithfully reflect
 the MDS distances.
@@ -332,7 +329,7 @@ out <- plot_ci_mds(ci_list, mask = "face")
 plot_ci_mds(ci_list, mask = "face", k = 2L,
             file = "fig_mds.pdf")
 
-# Add a grouping variable for point colour:
+# Add a grouping variable for point color:
 plot_ci_mds(
   ci_list, mask = "face",
   groups = c(Eyes = "feature", Mouth = "feature",
