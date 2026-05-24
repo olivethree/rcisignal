@@ -82,8 +82,8 @@ Reporting accordingly matters.
 - **Threshold-free cluster enhancement (TFCE)** (Smith & Nichols, 2009).
   Validated on neuroimaging data; same transferability caveat as above.
 
-**Package-level extensions, not yet independently validated for
-social-face RC:**
+**Package-level extensions, not yet independently validated for face
+evaluation RC:**
 
 - **Group-mean infoVal.** A natural extension of per-producer infoVal to
   the group-average CI, with a trial-count-matched reference. Brinkman
