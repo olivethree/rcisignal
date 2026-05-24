@@ -98,7 +98,7 @@ targets. Reporting accordingly matters.
     transferability caveat as above.
 
 **Package-level extensions, not yet independently validated for
-social-face RC:**
+face evaluation RC:**
 
 -   **Group-mean infoVal.** A natural extension of per-producer
     infoVal to the group-average CI, with a trial-count-matched
