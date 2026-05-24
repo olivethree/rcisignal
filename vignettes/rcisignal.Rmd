@@ -3363,10 +3363,16 @@ traits <- c("trust", "friendly", "competent", "dominant")
 panel_titles <- c(trust = "Trustworthy", friendly = "Friendly",
                   competent = "Competent", dominant = "Dominant")
 
-# One pass to find the shared maximum |t| across the four traits.
+# Restrict the agreement view to the full-face oval so background
+# pixels (hair, shoulders, margin) do not dominate the heatmap.
+face_mask <- make_face_mask(c(256L, 256L), region = "full")
+
+# One pass to find the shared maximum |t| inside the face mask
+# across the four traits, so panel colors are comparable.
 t_max <- max(vapply(traits, function(tr) {
-  res <- plot_agreement_map(sm[[tr]], palette = "fire", main = "")
-  max(abs(res$t_map), na.rm = TRUE)
+  res <- plot_agreement_map(sm[[tr]], palette = "fire",
+                            mask = face_mask, main = "")
+  max(abs(res$t_map[face_mask]), na.rm = TRUE)
 }, numeric(1L)))
 
 # Use layout() (not par(mfrow)) so each panel call cannot reset
@@ -3376,14 +3382,16 @@ layout(matrix(1:4, nrow = 2, byrow = TRUE))
 for (tr in traits) {
   plot_agreement_map(sm[[tr]],
                      palette    = "fire",
+                     mask       = face_mask,
                      base_image = base_face,
                      zlim       = c(0, t_max),
                      alpha_max  = 0.85,
-                     main       = panel_titles[[tr]])
+                     main       = panel_titles[[tr]],
+                     show_n     = FALSE)
 }
 ```
 
-```{r olv-agreement-maps-fire-fig, eval = TRUE, echo = FALSE, out.width = "100%", fig.cap = "Within-condition producer agreement maps for the four warmth / agency traits. Each panel overlays the per-pixel one-sample agreement statistic |t| on the male base face: pale yellow marks pixels where the 20 producers in that condition did not consistently push in one direction (low agreement); deep red marks pixels where they consistently pushed strongly in the same direction (high agreement). The four panels share a common color scale (the same maximum |t| across the four traits) so panel-to-panel intensity is comparable. The fire palette discards sign by design; for the signed view (which direction the agreement points), use plot_ci_overlay() or palette = diverging."}
+```{r olv-agreement-maps-fire-fig, eval = TRUE, echo = FALSE, out.width = "100%", fig.cap = "Within-condition producer agreement maps for the four warmth / agency traits, restricted to the full-face oval. Each panel overlays the per-pixel one-sample agreement statistic |t| on the male base face: pale yellow marks pixels where the 20 producers in that condition did not consistently push in one direction (low agreement); deep red marks pixels where they consistently pushed strongly in the same direction (high agreement). Pixels outside the face oval are fully transparent (background, hair edges, shoulders, image margin) so only in-face agreement is shown. The four panels share a common color scale (the same maximum in-face |t| across the four traits) so panel-to-panel intensity is comparable. The fire palette discards sign by design; for the signed view (which direction the agreement points), use plot_ci_overlay() or palette = diverging."}
 if (file.exists(file.path(olv_fig, "agreement_maps_fire.png")))
   knitr::include_graphics(file.path(olv_fig,
                                     "agreement_maps_fire.png"))

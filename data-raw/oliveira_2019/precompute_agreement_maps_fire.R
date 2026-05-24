@@ -30,14 +30,20 @@ panel_titles <- c(
   dominant  = "Dominant"
 )
 
+# Full-face oval mask so the agreement is restricted to face pixels.
+img_dims  <- attr(sm[[1L]], "img_dims")
+face_mask <- make_face_mask(img_dims, region = "full")
+
 # Shared zlim across the four panels so the color scale is comparable.
+# Compute the max |t| inside the face mask only (out-of-mask pixels
+# would inflate the scale if the t-map happens to have spikes there).
 t_maxes <- vapply(traits, function(tr) {
   out <- capture.output({
     res <- plot_agreement_map(sm[[tr]], palette = "fire",
-                              main = "")
+                              mask = face_mask, main = "")
   })
   invisible(out)
-  max(abs(res$t_map), na.rm = TRUE)
+  max(abs(res$t_map[face_mask]), na.rm = TRUE)
 }, numeric(1L))
 shared_zlim <- c(0, max(t_maxes))
 
@@ -59,6 +65,7 @@ for (tr in traits) {
   plot_agreement_map(
     sm[[tr]],
     palette    = "fire",
+    mask       = face_mask,
     base_image = base_face,
     zlim       = shared_zlim,
     alpha_max  = 0.85,
