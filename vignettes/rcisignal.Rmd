@@ -21,23 +21,28 @@ knitr::opts_chunk$set(
 
 ## 1. Overview
 
-`rcisignal` is a toolkit offering functions to examine and diagnose the data quality of reverse-correlation (RC) experiments, as well as a variety of analytical tools to detect and triangulate any signal captured in the dataset (e.g., signal of a hypothesized mental representation of a friendly face). It
-addresses three questions, in order. First, are the inputs
-clean (response coding, trial counts, response bias, stimulus-
-pool alignment)? Second, is the signal informative and stable
-(does each condition's group CI carry more pattern than chance,
-and would the pattern replicate on a different half of the
-producers)? Third, when there is more than one condition, are
-the conditions distinguishable, both in overall magnitude and
-in spatial location?
+`rcisignal` is a toolkit for examining the data quality of
+reverse-correlation (RC) experiments and for triangulating any
+signal captured in the dataset (e.g., a hypothesized mental
+representation of a friendly face). It addresses three
+questions, in order. First, are the inputs clean (response
+coding, trial counts, response bias, stimulus-pool alignment)?
+Second, is the signal informative and stable (does each
+condition's group CI carry more pattern than chance, and would
+the pattern replicate on a different half of the producers)?
+Third, when there is more than one condition, are the
+conditions distinguishable, both in overall magnitude and in
+spatial location?
 
 Two halves of the package address these questions in turn.
 The input-side diagnostics (`run_diagnostics()` and the
-`check_*` family) cover the first question. The output-side
-reliability and discriminability metrics (`run_reliability()`,
-`run_discriminability()`, `infoval()`, `agreement_map_test()`,
-together with the lower-level building blocks `rel_*()` and
-`pixel_t_test()`) cover the second and third.
+`check_*` family, plus `diagnose_infoval()` for the focused
+"is my data informative at all?" walk-through) cover the first
+question. The output-side reliability and discriminability
+metrics (`run_reliability()`, `run_discriminability()`,
+`infoval()`, `agreement_map_test()`, together with the
+lower-level building blocks `rel_*()` and `pixel_t_test()`)
+cover the second and third.
 
 ### 1.1 Scope
 
@@ -127,6 +132,11 @@ If you use the unvalidated metrics in published work, please
 report them as exploratory and indicate the package version. If
 you are aware of validation studies I have missed, I would be
 glad to update this section (m.j.barbosa.de.oliveira@tue.nl).
+
+For the engine-equivalence receipts behind the per-producer
+2IFC infoVal claim above (and a Brief-RC signal-recovery
+sanity check), see
+`vignette("validation_rcicr", package = "rcisignal")`.
 
 ### 1.3 The two-stage pattern
 
@@ -391,12 +401,13 @@ visualization (`scaling = "matched"`).
 
 #### A note on speed
 
-Noise generation can take a lot of time to execute (around 0.4-0.5 s per trial at 256 pixels with default basis settings). With default parameters you can
-expect roughly 1-3 minutes per call. The function is single-shot
-by design: generate once, then reuse the returned `rcisignal_sim`
-object across as many downstream analyses as you like.
+Noise generation is slow (around 0.4-0.5 s per trial at 256 pixels
+with default basis settings, roughly 1-3 minutes per call). The
+function is single-shot by design: generate once, then reuse the
+returned `rcisignal_sim` object across as many downstream analyses
+as you like.
 
-To pay this computation duration cost only once across R sessions (`saveRDS()` /
+To pay this cost only once across R sessions (`saveRDS()` /
 `readRDS()`, knitr `cache = TRUE`, sharing with a collaborator),
 use one of two portable routes. Pass `rdata_dir = "simdata/"` to
 the simulator so the stimuli `.Rdata` keeps a stable path, or hand
@@ -427,18 +438,6 @@ easy to confuse. In `rcisignal`, each one has exactly one job:
 | **`noise_matrix`**    |  **input** pool of noise patterns the experiment chose stimuli from. One column per pre-generated noise pattern. | `n_pixels` × `pool_size`    | input (you give it to the package) |
 | **noise mask** (a.k.a. "per-participant CI") | **one participant's** classification image: a single vector of pixel values, base-subtracted. Conceptually, the weighted average of the noise patterns they "selected" with their responses. | `n_pixels` × 1 (one column) | intermediate     |
 | **`signal_matrix`**   | **all participants' noise masks stacked side by side**, one column per producer. This is the central object of `rcisignal`. | `n_pixels` × `n_participants` | output (you pass it to every `rel_*`, `run_reliability`, `run_discriminability` call) |
-
-In sum:
-
--   **`noise_matrix`** describes the *stimuli* (what the
-    experiment showed), and exists *before* any participant runs the
-    task (see §4.3 for how to read it);
--   **noise mask** describes *one participant's* CI, and exists
-    *after* that participant has responded;
--   **`signal_matrix`** describes *the whole sample's* CIs. It is
-    the collection of all individual noise masks lined up by
-    participant (this is the matrix every reliability and discriminability
-    function in `rcisignal` uses).
 
 You don't build the noise mask or the `signal_matrix` by hand:
 `ci_from_responses_2ifc()` and `ci_from_responses_briefrc()` do it
@@ -1071,8 +1070,7 @@ There are two tuning routes, depending on the region's shape:
   argument that sets the rectangle's edges directly in 0-1
   image fractions. Independent of the full-oval geometry; the
   rectangle for either eye can move without dragging the other
-  along, which is the friction the previous
-  two-ellipses-that-moved-together design ran into.
+  along.
 - **Elliptical regions (`"full"`, `"nose"`, `"mouth"`,
   `"upper_face"`, `"lower_face"`)** are positioned relative to
   the full-face oval and tuned via the global `centre`,
@@ -1208,10 +1206,14 @@ more than that, the whole face is probably misaligned and
 
 ## 5. Step 1: diagnose the inputs
 
-Before computing CIs, run the diagnostic battery. The single
-entry point is `run_diagnostics()`, which invokes every
-implemented check whose required inputs are available and gathers
-the results into one printable report.
+Before computing CIs, run the diagnostic battery. Two top-level
+entry points cover this step. `run_diagnostics()` (§5.1) invokes
+every implemented check whose required inputs are available and
+gathers the results into one printable report.
+`diagnose_infoval()` (§5.4) is a focused six-step walk-through
+of the single question "is my data informative at all?"; it is
+the diagnostic to reach for when the headline worry is signal
+strength rather than coding or balance.
 
 ### 5.1 A first run
 
@@ -1354,8 +1356,7 @@ The status logic:
   miscalibrated; almost always indicates a noise-matrix or pool-id
   mismatch.
 - **WARN**: anything in between. Usually means the per-producer
-  signal is genuinely modest but the group CI is informative
-  (typical pattern for trait inferences).
+  signal is genuinely modest but the group CI is informative.
 
 ### 5.5 `compute_infoval_summary()`
 
@@ -1719,20 +1720,16 @@ rel_loo_z(lo)            # tidy data frame, sorted by z_score
 plot(lo)
 ```
 
-`rel_loo()` is an influence-screening diagnostic, distinct from
-the reliability metrics in §7.1 and §7.2. Because the full-sample
-mean and the leave-one-out mean share `(N-1)/N` of their data,
-`r_loo` values are near 1 by construction even on noisy data
-(typically in the `[0.95, 0.999]` range at N = 30). The relative
-ordering across producers carries the diagnostic information, so
-the function reports `$z_scores` as the recommended quantity.
+`r_loo` values typically sit in the `[0.95, 0.999]` range at
+N = 30 (near 1 by construction, per the *Background* note
+above), so the function reports `$z_scores` as the headline
+diagnostic.
 
-Two flagging rules are available: `"mad"` (default) and `"sd"`
-(kept for compatibility with earlier versions; will be removed
-in v0.2.0). MAD is robust to the influential producers
-the test is meant to flag; SD's mean and standard deviation are
-themselves pulled by the outlier. Default `flag_threshold = 2.5`
-so that a 30-producer dataset flags ~0.3 producers by chance.
+Two flagging rules are available: `"mad"` (default) and `"sd"`.
+MAD is robust to the influential producers the test is meant to
+flag; SD's mean and standard deviation are themselves pulled by
+the outlier. Default `flag_threshold = 2.5` so that a 30-producer
+dataset flags ~0.3 producers by chance.
 
 A flag prompts inspection rather than exclusion. Investigate
 first (response coding, fatigue, atypical strategy) and
@@ -2209,8 +2206,6 @@ otherwise it recomputes.
 
 ## 10. Step 6: agreement maps and paper figures
 
-Three plot helpers turn results into publication-grade figures.
-
 Three composable plot surfaces share one base-overlay convention:
 `plot_agreement_map()` shows the per-pixel one-sample t (signed or
 `|t|`), `plot_ci_overlay()` shows the producer-mean CI (signed),
@@ -2239,7 +2234,7 @@ am$significant_mask  # logical vector: which pixels survive FWER
 
 The result has its own `plot()` method that renders the observed
 t-map with FWE-significant pixels outlined in black. This is the
-one-call form of the canonical pairing; see §10.2 for what it
+one-call form of the standard pairing; see §10.2 for what it
 does and the color conventions it inherits.
 
 ### 10.2 `plot_agreement_map()` and `plot(agreement_map_test_result)`
@@ -2248,7 +2243,7 @@ Renders the per-pixel one-sample t-map as a color image, with
 optional thresholding and an optional base-face overlay:
 
 ```{r plot-agreement, eval = FALSE}
-# Flat panel (the historical form).
+# Flat panel.
 plot_agreement_map(signal_matrix,
                    img_dims  = c(256L, 256L),
                    threshold = 2.0,
@@ -2306,7 +2301,7 @@ plot_ci_overlay(
 )
 ```
 
-`plot_agreement_map()` and `plot_ci_overlay()` are now cognate
+`plot_agreement_map()` and `plot_ci_overlay()` are cognate
 surfaces: the agreement map shows the inferential `t`-statistic
 (signed or `|t|`), the CI overlay shows the producer-mean signal
 (signed), and both can be composited on the same base face. Use
@@ -2340,15 +2335,16 @@ CI (a group mean, an individual producer, or any mix). Useful as
 a compact visual summary of which conditions covary across the
 image.
 
-Build the input matrix outside the call. `rowMeans()` collapses
-the per-producer columns of one `$signal_matrix` into a single
-group CI; `cbind()` stacks the columns side by side. Column
-names become the panel labels.
+Build the input matrix outside the call. Column names become
+the panel labels.
 
 ```{r plot-correlogram, eval = FALSE}
 # trust_cis, friendly_cis, ... are the outputs of
 # ci_from_responses_briefrc() or ci_from_responses_2ifc() for
-# each condition (see sections 6.1 and 1.3).
+# each condition (see sections 6.1 and 1.3). Each $signal_matrix
+# has one column per producer; rowMeans() averages those columns
+# into one group-level CI vector. cbind() stacks the per-condition
+# group CIs side by side.
 ci_matrix <- cbind(
   Trust     = rowMeans(trust_cis$signal_matrix),
   Friendly  = rowMeans(friendly_cis$signal_matrix),
@@ -2589,7 +2585,6 @@ consistency:
 
 ```{r olv-load, eval = FALSE}
 library(rcisignal)
-library(dplyr)
 
 raw <- read.csv2("study1data.csv", stringsAsFactors = FALSE)
 raw$participant_id <- as.character(raw$subject)
@@ -2608,9 +2603,8 @@ head(raw)
 ### 12.2 Modernizing the legacy `rcicr` 0.3.0 rdata
 
 The 2015 rdata stores its noise basis under `s$sinusoids` and
-`s$sinIdx`, while current rcicr expects the `p$patches` and
-`p$patchIdx` schema that current rcicr uses. Patch the legacy file
-without re-running stimulus generation:
+`s$sinIdx`; current rcicr expects `p$patches` and `p$patchIdx`.
+Patch the legacy file without re-running stimulus generation:
 
 ```{r olv-modernize, eval = FALSE}
 load("rcic_seed_1_time_fev_05_2015_03_17.Rdata")  # legacy file
@@ -2697,8 +2691,7 @@ typically clears it. This pattern is structural rather than a
 data problem: per-producer Frobenius norms aggregate over the
 whole image and dilute localised signal, so individual z values
 are systematically smaller than the group-mean equivalent on
-the same data. Brinkman et al. (2019) report the same general
-pattern for trait inferences.
+the same data.
 
 ### 12.5 Building the per-trait signal matrices
 
@@ -3225,21 +3218,14 @@ let the reader judge whether the data agree.
 For each between-condition contrast we render two complementary
 maps on the same male base face. The **descriptive map** shows
 the difference of the two group-mean CIs across all pixels in
-the face oval, with no inferential filter applied. It lets the
-reader see the raw spatial pattern of agreement first, before
-any statistical thresholding decisions are layered on. The
-**FWER-controlled map** shows the same difference, but
-restricted to pixels that fall inside a cluster significant at
-*p* < .05 under FWER-controlled cluster-based permutation
-testing.
-
-The descriptive map answers "where do the two group CIs diverge,
-descriptively?". The FWER-controlled map answers "which of those
-divergences are large enough that we should believe they reflect
-a real between-condition difference rather than noise?". Showing
-both side-by-side lets the reader see how much of the descriptive
-pattern is supported by the data once a controlled Type I error
-filter is applied.
+the face oval, with no inferential filter applied; it lets the
+reader see the raw spatial pattern first, before any
+thresholding is layered on. The **FWER-controlled map** shows
+the same difference restricted to pixels inside a cluster
+significant at *p* < .05 under FWER-controlled cluster-based
+permutation testing. Showing both side-by-side lets the reader
+see how much of the descriptive pattern is supported once a
+controlled Type I error filter is applied.
 
 For each contrast we (i) take the difference of the two group-
 mean CIs, (ii) render it on the base face (descriptive view),
@@ -3252,6 +3238,9 @@ threshold |t| > 2.0).
 
 ```{r olv-pairwise-cluster-call, eval = FALSE}
 # Descriptive map: difference of group means, no significance filter.
+# sm[["trust"]] and sm[["friendly"]] are per-producer signal matrices
+# (one column per producer); rowMeans() averages the columns down to
+# one group-level CI vector per trait.
 diff_signal <- rowMeans(sm[["trust"]]) - rowMeans(sm[["friendly"]])
 
 plot_ci_overlay(
@@ -3284,9 +3273,8 @@ sig_neg <- ct_tf$clusters$cluster_id[ct_tf$clusters$direction == "neg" &
 sig_mask <- (ct_tf$pos_labels %in% sig_pos) |
             (ct_tf$neg_labels %in% sig_neg)
 
-# Plot the difference (Trust minus Friendly) on the base face.
-diff_signal <- rowMeans(sm[["trust"]]) - rowMeans(sm[["friendly"]])
-
+# Plot the same diff_signal on the base face, but show it only
+# where sig_mask is TRUE (inside a significant cluster).
 plot_ci_overlay(
   diff_signal,
   base_image = "base.jpg",
