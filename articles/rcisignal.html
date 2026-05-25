@@ -52,9 +52,9 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>rcisignal: User's Guide</h1>
             
-            <h4 data-toc-skip class="date">Last updated: 24-05-2026</h4>
+            <h4 data-toc-skip class="date">Last updated: 25-05-2026</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/v0.2.0/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
       <div class="d-none name"><code>rcisignal.Rmd</code></div>
     </div>
 
@@ -63,22 +63,21 @@
 <div class="section level2">
 <h2 id="overview">1. Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><code>rcisignal</code> is a toolkit offering functions to examine and
-diagnose the data quality of reverse-correlation (RC) experiments, as
-well as a variety of analytical tools to detect and triangulate any
-signal captured in the dataset (e.g., signal of a hypothesized mental
-representation of a friendly face). It addresses three questions, in
-order. First, are the inputs clean (response coding, trial counts,
-response bias, stimulus- pool alignment)? Second, is the signal
-informative and stable (does each condition’s group CI carry more
-pattern than chance, and would the pattern replicate on a different half
-of the producers)? Third, when there is more than one condition, are the
-conditions distinguishable, both in overall magnitude and in spatial
-location?</p>
+<p><code>rcisignal</code> is a toolkit for examining the data quality of
+reverse-correlation (RC) experiments and for triangulating any signal
+captured in the dataset (e.g., a hypothesized mental representation of a
+friendly face). It addresses three questions, in order. First, are the
+inputs clean (response coding, trial counts, response bias,
+stimulus-pool alignment)? Second, is the signal informative and stable
+(does each condition’s group CI carry more pattern than chance, and
+would the pattern replicate on a different half of the producers)?
+Third, when there is more than one condition, are the conditions
+distinguishable, both in overall magnitude and in spatial location?</p>
 <p>Two halves of the package address these questions in turn. The
 input-side diagnostics (<code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code> and the
-<code>check_*</code> family) cover the first question. The output-side
-reliability and discriminability metrics
+<code>check_*</code> family, plus <code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code> for
+the focused “is my data informative at all?” walk-through) cover the
+first question. The output-side reliability and discriminability metrics
 (<code><a href="../reference/run_reliability.html">run_reliability()</a></code>, <code><a href="../reference/run_discriminability.html">run_discriminability()</a></code>,
 <code><a href="../reference/infoval.html">infoval()</a></code>, <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>, together with
 the lower-level building blocks <code>rel_*()</code> and
@@ -172,6 +171,9 @@ Brief-RC.</li>
 them as exploratory and indicate the package version. If you are aware
 of validation studies I have missed, I would be glad to update this
 section (<a href="mailto:m.j.barbosa.de.oliveira@tue.nl" class="email">m.j.barbosa.de.oliveira@tue.nl</a>).</p>
+<p>For the engine-equivalence receipts behind the per-producer 2IFC
+infoVal claim above (and a Brief-RC signal-recovery sanity check), see
+<code>vignette("validation_rcicr", package = "rcisignal")</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="the-two-stage-pattern">1.3 The two-stage pattern<a class="anchor" aria-label="anchor" href="#the-two-stage-pattern"></a>
@@ -539,18 +541,17 @@ rendered visualization (<code>scaling = "matched"</code>).</p>
 <div class="section level4">
 <h4 id="a-note-on-speed">A note on speed<a class="anchor" aria-label="anchor" href="#a-note-on-speed"></a>
 </h4>
-<p>Noise generation can take a lot of time to execute (around 0.4-0.5 s
-per trial at 256 pixels with default basis settings). With default
-parameters you can expect roughly 1-3 minutes per call. The function is
-single-shot by design: generate once, then reuse the returned
+<p>Noise generation is slow (around 0.4-0.5 s per trial at 256 pixels
+with default basis settings, roughly 1-3 minutes per call). The function
+is single-shot by design: generate once, then reuse the returned
 <code>rcisignal_sim</code> object across as many downstream analyses as
 you like.</p>
-<p>To pay this computation duration cost only once across R sessions
-(<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> / <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code>, knitr
-<code>cache = TRUE</code>, sharing with a collaborator), use one of two
-portable routes. Pass <code>rdata_dir = "simdata/"</code> to the
-simulator so the stimuli <code>.Rdata</code> keeps a stable path, or
-hand <code>stimuli = sim$stimuli</code> to the consumer in place of
+<p>To pay this cost only once across R sessions (<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code>
+/ <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code>, knitr <code>cache = TRUE</code>, sharing with
+a collaborator), use one of two portable routes. Pass
+<code>rdata_dir = "simdata/"</code> to the simulator so the stimuli
+<code>.Rdata</code> keeps a stable path, or hand
+<code>stimuli = sim$stimuli</code> to the consumer in place of
 <code>rdata_path = sim$rdata_path</code>. The <code>$stimuli</code> list
 is self-contained and survives session restarts even after the
 <code>.Rdata</code> file is gone.</p>
@@ -628,22 +629,6 @@ call)</td>
 </tr>
 </tbody>
 </table>
-<p>In sum:</p>
-<ul>
-<li>
-<strong><code>noise_matrix</code></strong> describes the
-<em>stimuli</em> (what the experiment showed), and exists
-<em>before</em> any participant runs the task (see §4.3 for how to read
-it);</li>
-<li>
-<strong>noise mask</strong> describes <em>one participant’s</em> CI,
-and exists <em>after</em> that participant has responded;</li>
-<li>
-<strong><code>signal_matrix</code></strong> describes <em>the whole
-sample’s</em> CIs. It is the collection of all individual noise masks
-lined up by participant (this is the matrix every reliability and
-discriminability function in <code>rcisignal</code> uses).</li>
-</ul>
 <p>You don’t build the noise mask or the <code>signal_matrix</code> by
 hand: <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> and
 <code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> do it for you and return a list
@@ -1357,9 +1342,7 @@ their name implies.</p>
 <code>region_bounds = c(row_min, row_max, col_min, col_max)</code>
 argument that sets the rectangle’s edges directly in 0-1 image
 fractions. Independent of the full-oval geometry; the rectangle for
-either eye can move without dragging the other along, which is the
-friction the previous two-ellipses-that-moved-together design ran
-into.</li>
+either eye can move without dragging the other along.</li>
 <li>
 <strong>Elliptical regions (<code>"full"</code>,
 <code>"nose"</code>, <code>"mouth"</code>, <code>"upper_face"</code>,
@@ -1499,10 +1482,13 @@ the global level via <code><a href="../reference/make_face_mask.html">make_face_
 <div class="section level2">
 <h2 id="step-1-diagnose-the-inputs">5. Step 1: diagnose the inputs<a class="anchor" aria-label="anchor" href="#step-1-diagnose-the-inputs"></a>
 </h2>
-<p>Before computing CIs, run the diagnostic battery. The single entry
-point is <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code>, which invokes every implemented
-check whose required inputs are available and gathers the results into
-one printable report.</p>
+<p>Before computing CIs, run the diagnostic battery. Two top-level entry
+points cover this step. <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code> (§5.1) invokes
+every implemented check whose required inputs are available and gathers
+the results into one printable report. <code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code>
+(§5.4) is a focused six-step walk-through of the single question “is my
+data informative at all?”; it is the diagnostic to reach for when the
+headline worry is signal strength rather than coding or balance.</p>
 <div class="section level3">
 <h3 id="a-first-run">5.1 A first run<a class="anchor" aria-label="anchor" href="#a-first-run"></a>
 </h3>
@@ -1664,8 +1650,8 @@ Reference distribution is miscalibrated; almost always indicates a
 noise-matrix or pool-id mismatch.</li>
 <li>
 <strong>WARN</strong>: anything in between. Usually means the
-per-producer signal is genuinely modest but the group CI is informative
-(typical pattern for trait inferences).</li>
+per-producer signal is genuinely modest but the group CI is
+informative.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -2050,17 +2036,12 @@ well below the others are candidates for inspection.</p>
 <span><span class="va">lo</span>                       <span class="co"># raw cors + z-scores + flag column</span></span>
 <span><span class="fu"><a href="../reference/rel_loo_z.html">rel_loo_z</a></span><span class="op">(</span><span class="va">lo</span><span class="op">)</span>            <span class="co"># tidy data frame, sorted by z_score</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">lo</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/rel_loo.html">rel_loo()</a></code> is an influence-screening diagnostic, distinct
-from the reliability metrics in §7.1 and §7.2. Because the full-sample
-mean and the leave-one-out mean share <code>(N-1)/N</code> of their
-data, <code>r_loo</code> values are near 1 by construction even on noisy
-data (typically in the <code>[0.95, 0.999]</code> range at N = 30). The
-relative ordering across producers carries the diagnostic information,
-so the function reports <code>$z_scores</code> as the recommended
-quantity.</p>
+<p><code>r_loo</code> values typically sit in the
+<code>[0.95, 0.999]</code> range at N = 30 (near 1 by construction, per
+the <em>Background</em> note above), so the function reports
+<code>$z_scores</code> as the headline diagnostic.</p>
 <p>Two flagging rules are available: <code>"mad"</code> (default) and
-<code>"sd"</code> (kept for compatibility with earlier versions; will be
-removed in v0.2.0). MAD is robust to the influential producers the test
+<code>"sd"</code>. MAD is robust to the influential producers the test
 is meant to flag; SD’s mean and standard deviation are themselves pulled
 by the outlier. Default <code>flag_threshold = 2.5</code> so that a
 30-producer dataset flags ~0.3 producers by chance.</p>
@@ -2492,7 +2473,6 @@ loads the cached reference; otherwise it recomputes.</p>
 <div class="section level2">
 <h2 id="step-6-agreement-maps-and-paper-figures">10. Step 6: agreement maps and paper figures<a class="anchor" aria-label="anchor" href="#step-6-agreement-maps-and-paper-figures"></a>
 </h2>
-<p>Three plot helpers turn results into publication-grade figures.</p>
 <p>Three composable plot surfaces share one base-overlay convention:
 <code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code> shows the per-pixel one-sample t
 (signed or <code>|t|</code>), <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code> shows the
@@ -2518,7 +2498,7 @@ pixels.</p>
 <span><span class="va">am</span><span class="op">$</span><span class="va">significant_mask</span>  <span class="co"># logical vector: which pixels survive FWER</span></span></code></pre></div>
 <p>The result has its own <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method that renders the
 observed t-map with FWE-significant pixels outlined in black. This is
-the one-call form of the canonical pairing; see §10.2 for what it does
+the one-call form of the standard pairing; see §10.2 for what it does
 and the color conventions it inherits.</p>
 </div>
 <div class="section level3">
@@ -2528,7 +2508,7 @@ and the color conventions it inherits.</p>
 <p>Renders the per-pixel one-sample t-map as a color image, with
 optional thresholding and an optional base-face overlay:</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Flat panel (the historical form).</span></span>
+<code class="sourceCode R"><span><span class="co"># Flat panel.</span></span>
 <span><span class="fu"><a href="../reference/plot_agreement_map.html">plot_agreement_map</a></span><span class="op">(</span><span class="va">signal_matrix</span>,</span>
 <span>                   img_dims  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">256L</span>, <span class="fl">256L</span><span class="op">)</span>,</span>
 <span>                   threshold <span class="op">=</span> <span class="fl">2.0</span>,</span>
@@ -2582,7 +2562,7 @@ tracing its boundary as black contours:</p>
 <span>  alpha_max  <span class="op">=</span> <span class="fl">0.7</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code> and <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code>
-are now cognate surfaces: the agreement map shows the inferential
+are cognate surfaces: the agreement map shows the inferential
 <code>t</code>-statistic (signed or <code>|t|</code>), the CI overlay
 shows the producer-mean signal (signed), and both can be composited on
 the same base face. Use the agreement map when the question is “where do
@@ -2613,14 +2593,15 @@ read four numbers from a table:</p>
 group-mean CIs. The function takes a single matrix where each column is
 one CI (a group mean, an individual producer, or any mix). Useful as a
 compact visual summary of which conditions covary across the image.</p>
-<p>Build the input matrix outside the call. <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans()</a></code>
-collapses the per-producer columns of one <code>$signal_matrix</code>
-into a single group CI; <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind()</a></code> stacks the columns side by
-side. Column names become the panel labels.</p>
+<p>Build the input matrix outside the call. Column names become the
+panel labels.</p>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># trust_cis, friendly_cis, ... are the outputs of</span></span>
 <span><span class="co"># ci_from_responses_briefrc() or ci_from_responses_2ifc() for</span></span>
-<span><span class="co"># each condition (see sections 6.1 and 1.3).</span></span>
+<span><span class="co"># each condition (see sections 6.1 and 1.3). Each $signal_matrix</span></span>
+<span><span class="co"># has one column per producer; rowMeans() averages those columns</span></span>
+<span><span class="co"># into one group-level CI vector. cbind() stacks the per-condition</span></span>
+<span><span class="co"># group CIs side by side.</span></span>
 <span><span class="va">ci_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
 <span>  Trust     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">trust_cis</span><span class="op">$</span><span class="va">signal_matrix</span><span class="op">)</span>,</span>
 <span>  Friendly  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">friendly_cis</span><span class="op">$</span><span class="va">signal_matrix</span><span class="op">)</span>,</span>
@@ -2841,7 +2822,6 @@ name the package expects, store the ids as text (so they are not treated
 as numeric), and lower-case the trait labels for consistency:</p>
 <div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv2</a></span><span class="op">(</span><span class="st">"study1data.csv"</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">raw</span><span class="op">$</span><span class="va">participant_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">raw</span><span class="op">$</span><span class="va">subject</span><span class="op">)</span></span>
@@ -2860,10 +2840,9 @@ as numeric), and lower-case the trait labels for consistency:</p>
 <h3 id="modernizing-the-legacy-rcicr-0-3-0-rdata">12.2 Modernizing the legacy <code>rcicr</code> 0.3.0 rdata<a class="anchor" aria-label="anchor" href="#modernizing-the-legacy-rcicr-0-3-0-rdata"></a>
 </h3>
 <p>The 2015 rdata stores its noise basis under <code>s$sinusoids</code>
-and <code>s$sinIdx</code>, while current rcicr expects the
-<code>p$patches</code> and <code>p$patchIdx</code> schema that current
-rcicr uses. Patch the legacy file without re-running stimulus
-generation:</p>
+and <code>s$sinIdx</code>; current rcicr expects <code>p$patches</code>
+and <code>p$patchIdx</code>. Patch the legacy file without re-running
+stimulus generation:</p>
 <div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"rcic_seed_1_time_fev_05_2015_03_17.Rdata"</span><span class="op">)</span>  <span class="co"># legacy file</span></span>
 <span></span>
@@ -3028,8 +3007,7 @@ gives the table below:</p>
 it. This pattern is structural rather than a data problem: per-producer
 Frobenius norms aggregate over the whole image and dilute localised
 signal, so individual z values are systematically smaller than the
-group-mean equivalent on the same data. Brinkman et al. (2019) report
-the same general pattern for trait inferences.</p>
+group-mean equivalent on the same data.</p>
 </div>
 <div class="section level3">
 <h3 id="building-the-per-trait-signal-matrices">12.5 Building the per-trait signal matrices<a class="anchor" aria-label="anchor" href="#building-the-per-trait-signal-matrices"></a>
@@ -3831,19 +3809,13 @@ data agree.</p>
 <p>For each between-condition contrast we render two complementary maps
 on the same male base face. The <strong>descriptive map</strong> shows
 the difference of the two group-mean CIs across all pixels in the face
-oval, with no inferential filter applied. It lets the reader see the raw
-spatial pattern of agreement first, before any statistical thresholding
-decisions are layered on. The <strong>FWER-controlled map</strong> shows
-the same difference, but restricted to pixels that fall inside a cluster
-significant at <em>p</em> &lt; .05 under FWER-controlled cluster-based
-permutation testing.</p>
-<p>The descriptive map answers “where do the two group CIs diverge,
-descriptively?”. The FWER-controlled map answers “which of those
-divergences are large enough that we should believe they reflect a real
-between-condition difference rather than noise?”. Showing both
+oval, with no inferential filter applied; it lets the reader see the raw
+spatial pattern first, before any thresholding is layered on. The
+<strong>FWER-controlled map</strong> shows the same difference
+restricted to pixels inside a cluster significant at <em>p</em> &lt; .05
+under FWER-controlled cluster-based permutation testing. Showing both
 side-by-side lets the reader see how much of the descriptive pattern is
-supported by the data once a controlled Type I error filter is
-applied.</p>
+supported once a controlled Type I error filter is applied.</p>
 <p>For each contrast we (i) take the difference of the two group- mean
 CIs, (ii) render it on the base face (descriptive view), (iii) run
 <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code> to find spatially contiguous regions
@@ -3853,6 +3825,9 @@ belonging to a significant cluster (2000 stratified label permutations,
 max-mass null, cluster threshold |t| &gt; 2.0).</p>
 <div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Descriptive map: difference of group means, no significance filter.</span></span>
+<span><span class="co"># sm[["trust"]] and sm[["friendly"]] are per-producer signal matrices</span></span>
+<span><span class="co"># (one column per producer); rowMeans() averages the columns down to</span></span>
+<span><span class="co"># one group-level CI vector per trait.</span></span>
 <span><span class="va">diff_signal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="st">"trust"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="st">"friendly"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_ci_overlay.html">plot_ci_overlay</a></span><span class="op">(</span></span>
@@ -3885,9 +3860,8 @@ max-mass null, cluster threshold |t| &gt; 2.0).</p>
 <span><span class="va">sig_mask</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">ct_tf</span><span class="op">$</span><span class="va">pos_labels</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">sig_pos</span><span class="op">)</span> <span class="op">|</span></span>
 <span>            <span class="op">(</span><span class="va">ct_tf</span><span class="op">$</span><span class="va">neg_labels</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">sig_neg</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot the difference (Trust minus Friendly) on the base face.</span></span>
-<span><span class="va">diff_signal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="st">"trust"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">sm</span><span class="op">[[</span><span class="st">"friendly"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span></span>
+<span><span class="co"># Plot the same diff_signal on the base face, but show it only</span></span>
+<span><span class="co"># where sig_mask is TRUE (inside a significant cluster).</span></span>
 <span><span class="fu"><a href="../reference/plot_ci_overlay.html">plot_ci_overlay</a></span><span class="op">(</span></span>
 <span>  <span class="va">diff_signal</span>,</span>
 <span>  base_image <span class="op">=</span> <span class="st">"base.jpg"</span>,</span>

@@ -95,14 +95,17 @@ See [*§1.2 Validation
 status*](https://olivethree.github.io/rcisignal/articles/rcisignal.html#validation-status)
 in the user guide for the breakdown of validated versus unvalidated
 metrics, and treat the unvalidated ones as exploratory in published
-work.
+work. The [*rcisignal vs
+rcicr*](https://olivethree.github.io/rcisignal/articles/validation_rcicr.html)
+vignette has the engine-equivalence receipts for the per-producer 2IFC
+infoVal claim and a Brief-RC signal-recovery sanity check.
 
 ## Citation
 
 If `rcisignal` helps your research, please cite it:
 
     Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
-    data and classification images (Version 0.1.1) [R package]. Zenodo.
+    data and classification images (Version 0.2.0) [R package]. Zenodo.
     https://doi.org/10.5281/zenodo.19961180
 
 Run `citation("rcisignal")` in R for a BibTeX entry.
