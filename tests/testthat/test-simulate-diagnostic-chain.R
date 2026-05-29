@@ -35,11 +35,11 @@ make_tiny_sim <- function(seed = 1L) {
   )
 }
 
-test_that("simulator + diagnose_infoval chain runs end-to-end", {
+test_that("simulator + infoval_report chain runs end-to-end", {
   sim <- make_tiny_sim()
   expect_true(file.exists(sim$rdata_path))
 
-  res <- diagnose_infoval(
+  res <- infoval_report(
     sim$data,
     method   = "2ifc",
     rdata    = sim$rdata_path,

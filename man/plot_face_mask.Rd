@@ -60,7 +60,7 @@ Invisibly returns the resolved logical matrix
 }
 \description{
 Renders a face mask so you can confirm it covers the region you
-intended before passing it to \code{\link[=diagnose_infoval]{diagnose_infoval()}} or \code{\link[=infoval]{infoval()}}.
+intended before passing it to \code{\link[=infoval_report]{infoval_report()}} or \code{\link[=infoval]{infoval()}}.
 Accepts the same input forms the diagnostics accept: a logical or
 numeric vector (column-major, with \code{img_dims} supplied), a
 logical/numeric matrix, or a path to a PNG/JPEG mask file.
@@ -79,5 +79,5 @@ plot_face_mask(m, img_dims = c(128L, 128L), main = "eyes region")
 }
 \seealso{
 \code{\link[=plot_mask_overlay]{plot_mask_overlay()}} (overlay on a specific base image),
-\code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=read_face_mask]{read_face_mask()}}, \code{\link[=diagnose_infoval]{diagnose_infoval()}}.
+\code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=read_face_mask]{read_face_mask()}}, \code{\link[=infoval_report]{infoval_report()}}.
 }

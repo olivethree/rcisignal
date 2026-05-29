@@ -372,7 +372,7 @@ summary.rcisignal_diag_report <- function(object, ...) {
 }
 
 # Diagnostic-side per-producer infoVal result. Wrapped by
-# `diagnose_infoval()` in an `rcisignal_diag_result` so it slots
+# `infoval_report()` in an `rcisignal_diag_result` so it slots
 # into `rcisignal_diag_report`.
 new_rcisignal_diag_infoval <- function(infoval, norms, reference,
                                       ref_median, ref_mad,

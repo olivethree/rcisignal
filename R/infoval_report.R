@@ -1,11 +1,15 @@
-#' Guided diagnostic for low or negative infoVal
+#' Per-producer infoVal report (with calibration sanity checks)
 #'
-#' Walks through six checks that explain why per-producer infoVal often
-#' looks "low" even on healthy data, and surfaces the numbers that
-#' actually belong in a methods section. Use this when individual
-#' producers' infoVal z-scores look suspiciously low or negative and
-#' you want to know whether the data is broken or merely structurally
-#' diluted.
+#' Runs the package's native infoVal computation for every producer
+#' and reports per-producer z-scores plus three sanity checks: a
+#' masked-vs-unmasked comparison, a group-mean z against a matched
+#' reference, and a random-responder calibration check. Works for
+#' both 2IFC and Brief-RC.
+#'
+#' Use this as the canonical per-producer infoVal entry point when
+#' you want both a summary and the calibration cross-checks. For the
+#' bare per-producer z-score vector with no calibration overlay,
+#' use [infoval()] directly.
 #'
 #' The six steps:
 #'
@@ -34,7 +38,7 @@
 #' decisions on individual cases. Neither paper computes a group-mean
 #' CI's z directly, but the mathematical extension (a group-mean CI
 #' compared against an N-producer-matched reference) is a useful
-#' aggregate when individual-level z is noisy, and `diagnose_infoval()`
+#' aggregate when individual-level z is noisy, and `infoval_report()`
 #' reports it.
 #'
 #' For `method = "2ifc"`, the function calls `rcicr` to reconstruct
@@ -110,16 +114,16 @@
 #' @examples
 #' \dontrun{
 #' sim <- simulate_2ifc_data(n_per_condition = 10, n_trials = 60, seed = 1)
-#' diagnose_infoval(sim$data, method = "2ifc",
-#'                  rdata = sim$rdata_path, iter = 200L)
+#' infoval_report(sim$data, method = "2ifc",
+#'                rdata = sim$rdata_path, iter = 200L)
 #'
 #' # Same call via the session-portable in-memory stimuli list:
-#' diagnose_infoval(sim$data, method = "2ifc",
-#'                  stimuli = sim$stimuli, iter = 200L)
+#' infoval_report(sim$data, method = "2ifc",
+#'                stimuli = sim$stimuli, iter = 200L)
 #' }
 #'
 #' @export
-diagnose_infoval <- function(responses,
+infoval_report <- function(responses,
                              method           = NULL,
                              rdata            = NULL,
                              stimuli          = NULL,

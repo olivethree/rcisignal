@@ -173,7 +173,7 @@ for (i in seq_along(traits)) {
   # Group-mean CI z, with a reference distribution matched to the
   # group construction (N random producers averaged together, each
   # at its real trial count). Uses the same internal helper that
-  # diagnose_infoval() relies on, so the two stay consistent.
+  # infoval_report() relies on, so the two stay consistent.
   # iter=500 here (not 1000) because each iteration is N=20x more
   # expensive than per-producer infoval; 500 gives single-z stability
   # of about +/- 0.07, which is fine for a publishable headline.

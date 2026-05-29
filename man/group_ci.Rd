@@ -50,7 +50,7 @@ counts;
 \item \code{attr(., "img_dims")} = inherited from
 \code{attr(signal_matrix, "img_dims")} if present;
 \item \code{attr(., "by_name")} = text description of the grouping;
-\item \code{attr(., "ci_stage") = "group"} = a one-string hint used by
+\item \code{attr(., "ci_level") = "group"} = a one-string hint used by
 \code{\link[=save_ci_images]{save_ci_images()}} to pick the filename prefix. Not a class;
 no S3 dispatch attached.
 }

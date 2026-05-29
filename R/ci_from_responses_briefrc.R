@@ -256,7 +256,7 @@ ci_from_responses_briefrc <- function(responses,
   }
   attr(signal_matrix, "img_dims") <- img_dims
   attr(signal_matrix, "source")   <- "raw"
-  attr(signal_matrix, "ci_stage") <- "individual"
+  attr(signal_matrix, "ci_level") <- "individual"
 
   out <- list(
     signal_matrix = signal_matrix,

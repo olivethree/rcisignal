@@ -16,13 +16,13 @@
 #'
 #' @details
 #' Filenames default to `<prefix><colname>.<ext>`, where `<prefix>` is
-#' chosen automatically from `attr(signal_matrix, "ci_stage")`:
+#' chosen automatically from `attr(signal_matrix, "ci_level")`:
 #'
 #' * `"individual"` (set by `ci_from_responses_*()` on the per-producer
 #'   `$signal_matrix`) -> `prefix = "ind_ci_"`.
 #' * `"group"` (set by [group_ci()] on its return matrix) ->
 #'   `prefix = "group_ci_"`.
-#' * No `ci_stage` attribute -> defaults to `prefix = "ind_ci_"`.
+#' * No `ci_level` attribute -> defaults to `prefix = "ind_ci_"`.
 #'
 #' Override the auto-prefix by passing `prefix =` explicitly.
 #'
@@ -133,8 +133,8 @@ save_ci_images <- function(signal_matrix,
   }
 
   if (is.null(prefix)) {
-    stage <- attr(signal_matrix, "ci_stage")
-    prefix <- if (identical(stage, "group")) "group_ci_" else "ind_ci_"
+    level <- attr(signal_matrix, "ci_level")
+    prefix <- if (identical(level, "group")) "group_ci_" else "ind_ci_"
   }
   if (!is.character(prefix) || length(prefix) != 1L) {
     cli::cli_abort("{.arg prefix} must be a single character string.")

@@ -1,7 +1,7 @@
 #' Plot a face mask for visual verification
 #'
 #' Renders a face mask so you can confirm it covers the region you
-#' intended before passing it to [diagnose_infoval()] or [infoval()].
+#' intended before passing it to [infoval_report()] or [infoval()].
 #' Accepts the same input forms the diagnostics accept: a logical or
 #' numeric vector (column-major, with `img_dims` supplied), a
 #' logical/numeric matrix, or a path to a PNG/JPEG mask file.
@@ -43,7 +43,7 @@
 #'   (`nrow` x `ncol`, top-left origin).
 #'
 #' @seealso [plot_mask_overlay()] (overlay on a specific base image),
-#'   [make_face_mask()], [read_face_mask()], [diagnose_infoval()].
+#'   [make_face_mask()], [read_face_mask()], [infoval_report()].
 #'
 #' @examples
 #' m <- make_face_mask(c(128L, 128L), region = "eyes")

@@ -90,7 +90,7 @@ output); pair with \code{params} to regenerate any noise image.
 written either to a session tempdir (when
 \code{rdata_dir = NULL}) or to the user-supplied \code{rdata_dir}.
 Suitable for \code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}} /
-\code{\link[=diagnose_infoval]{diagnose_infoval()}} and other downstream functions
+\code{\link[=infoval_report]{infoval_report()}} and other downstream functions
 that take an \code{rdata} argument. \strong{Not portable across R
 sessions} when \code{rdata_dir = NULL}.
 \item \code{base_image_path} — path to a standalone PNG of \code{base_face}

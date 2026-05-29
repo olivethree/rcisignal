@@ -205,7 +205,7 @@ cat("> Side-by-side results require the precompute output. ",
 ## 4. Brief-RC: signal-recovery sensitivity
 
 `rcicr` has no Brief-RC `computeInfoVal` path. `rcisignal` ships
-a native Brief-RC implementation via [`diagnose_infoval()`] /
+a native Brief-RC implementation via [`infoval_report()`] /
 [`infoval()`] using a per-trial-count reference distribution. No
 convergence comparison against `rcicr` is possible, so this
 section runs the next-best demonstration: a sensitivity check on

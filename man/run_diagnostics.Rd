@@ -33,7 +33,7 @@ names are configurable via the \verb{col_*} arguments.}
 
 \item{rdata}{Optional. Path to an rcicr \code{.RData} file. Enables
 \code{\link[=check_stimulus_alignment]{check_stimulus_alignment()}}, \code{\link[=check_version_compat]{check_version_compat()}} (2IFC),
-\code{\link[=diagnose_infoval]{diagnose_infoval()}}, \code{\link[=check_response_inversion]{check_response_inversion()}}, and
+\code{\link[=infoval_report]{infoval_report()}}, \code{\link[=check_response_inversion]{check_response_inversion()}}, and
 \code{\link[=check_rt_infoval_consistency]{check_rt_infoval_consistency()}}. Mutually exclusive
 alternative to \code{stimuli}.}
 
@@ -60,12 +60,12 @@ distribution; \code{NULL} disables infoVal checks even if \code{rdata} is
 supplied. Default \code{NULL} because the reference simulation is slow
 and unwanted by default; set e.g. \code{10000} to enable.}
 
-\item{face_mask}{Mask spec passed to \code{\link[=diagnose_infoval]{diagnose_infoval()}}. Default
+\item{face_mask}{Mask spec passed to \code{\link[=infoval_report]{infoval_report()}}. Default
 \code{"auto"} (Schmitz 2024 oval). Pass \code{NULL} to skip the masked-vs-
-unmasked comparison, or any value \code{\link[=diagnose_infoval]{diagnose_infoval()}} accepts.}
+unmasked comparison, or any value \code{\link[=infoval_report]{infoval_report()}} accepts.}
 
 \item{with_replacement}{Sampling regime forwarded to
-\code{\link[=diagnose_infoval]{diagnose_infoval()}} / \code{\link[=infoval]{infoval()}} for the across-trials reference
+\code{\link[=infoval_report]{infoval_report()}} / \code{\link[=infoval]{infoval()}} for the across-trials reference
 distribution. Default \code{"auto"} matches the standard Brief-RC
 convention.}
 

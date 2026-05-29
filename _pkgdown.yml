@@ -74,7 +74,7 @@ reference:
 - title: Data-quality diagnostics
   contents:
   - run_diagnostics
-  - diagnose_infoval
+  - infoval_report
   - starts_with("check_")
   - validate_noise_matrix
 

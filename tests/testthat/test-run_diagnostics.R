@@ -53,9 +53,9 @@ test_that("resolve_method aborts when both 2IFC and Brief-RC inputs supplied", {
   save(generator_version, n_trials, file = tmp_rdata)
   nm <- matrix(rnorm(64L * 4L), 64L, 4L)
   expect_error(
-    diagnose_infoval(responses, rdata = tmp_rdata,
-                     noise_matrix = nm, iter = 50L,
-                     progress = FALSE),
+    infoval_report(responses, rdata = tmp_rdata,
+                   noise_matrix = nm, iter = 50L,
+                   progress = FALSE),
     regexp = "Both 2IFC"
   )
 })

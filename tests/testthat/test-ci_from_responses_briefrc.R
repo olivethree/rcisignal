@@ -410,6 +410,6 @@ test_that("group_by= returns both signal_matrix and group_ci", {
   expect_equal(ncol(res$signal_matrix), 4L)
   expect_equal(ncol(res$group_ci), 2L)
   expect_setequal(colnames(res$group_ci), c("A", "B"))
-  expect_identical(attr(res$signal_matrix, "ci_stage"), "individual")
-  expect_identical(attr(res$group_ci, "ci_stage"), "group")
+  expect_identical(attr(res$signal_matrix, "ci_level"), "individual")
+  expect_identical(attr(res$group_ci, "ci_level"), "group")
 })

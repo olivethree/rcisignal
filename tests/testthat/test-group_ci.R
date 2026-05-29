@@ -28,7 +28,7 @@ test_that("group_ci returns one column per group with correct means", {
   expect_true(is.matrix(gcis))
   expect_equal(dim(gcis), c(256L, 2L))
   expect_setequal(colnames(gcis), c("A", "B"))
-  expect_identical(attr(gcis, "ci_stage"), "group")
+  expect_identical(attr(gcis, "ci_level"), "group")
 
   expect_equal(as.numeric(gcis[, "A"]),
                as.numeric(rowMeans(sm[, 1:4])))

@@ -6,7 +6,7 @@
   gone. The `rcisignal_group_ci` S3 class is dropped; `group_ci()`
   now returns a plain numeric matrix (with `attr(., "n")`,
   `attr(., "img_dims")`, `attr(., "by_name")`, and a lightweight
-  `attr(., "ci_stage") = "group"` hint for `save_ci_images()`).
+  `attr(., "ci_level") = "group"` hint for `save_ci_images()`).
   Stage-1 input guards (the 14+ `abort_if_group_ci()` calls across
   reliability, discriminability, and infoVal functions) are removed.
   The `_pkgdown.yml` "Stage 2 - Group-averaged CIs" reference section
@@ -14,13 +14,27 @@
   matrix, and MDS plot functions are no longer mis-classified as
   group-only.
 * **Removed `compute_infoval_summary()`** (no deprecation alias).
-  `diagnose_infoval()` covers the same use case and supports both
-  2IFC and Brief-RC natively. `check_response_inversion()` and
+  `infoval_report()` (the renamed `diagnose_infoval()`; see below)
+  covers the same use case and supports both 2IFC and Brief-RC
+  natively. `check_response_inversion()` and
   `check_rt_infoval_consistency()` no longer take `rdata`/`stimuli`
   as their only noise source: both now accept `noise_matrix =` for
   the Brief-RC path and use the package's native `infoval()`
   pipeline internally, so Brief-RC is fully supported (previously
   these checks returned `"skip"` for Brief-RC).
+* **Renamed `diagnose_infoval()` to `infoval_report()`** (no
+  deprecation alias). The new name better reflects what the
+  function actually does: it produces a per-producer infoVal
+  summary together with three sanity checks (masked-vs-unmasked z
+  lift, group-mean z against a matched reference, random-responder
+  calibration). The "diagnose" framing implied pathology-hunting,
+  but the function is the canonical entry point for any per-
+  producer infoVal report, healthy data included. Migration:
+  rename `diagnose_infoval(...)` -> `infoval_report(...)`. Same
+  arguments, same return value (still an `rcisignal_diag_result`).
+  Inside the `run_diagnostics()` output, the result is now at
+  `report$results$infoval_report` (was
+  `report$results$diagnose_infoval`).
 
 ## New features
 
@@ -35,7 +49,7 @@
   JPEG, one file per column of a `signal_matrix`. Works for both
   per-producer (filename prefix `ind_ci_`) and group-level (prefix
   `group_ci_`) matrices; prefix is auto-derived from the new
-  `ci_stage` attribute and can be overridden. Supports both the
+  `ci_level` attribute and can be overridden. Supports both the
   `"diverging"` and `"fire"` palettes via the same compositing path
   as `plot_ci_overlay()` and `plot_agreement_map()`.
 * `plot_agreement_map()` gains a `bar_label =` argument for
@@ -56,8 +70,10 @@
   in their perception.
 * Vignette: the "two-stage pattern" framing is removed. `group_ci()`
   is reintroduced as a convenience helper rather than an
-  architectural boundary. `compute_infoval_summary()` references are
-  rewritten as `diagnose_infoval()` calls.
+  architectural boundary. §1.3 gains a `save_ci_images()` example
+  block showing exports for both per-producer and group CIs.
+  `compute_infoval_summary()` references are rewritten as
+  `infoval_report()` calls.
 
 # rcisignal 0.2.0
 

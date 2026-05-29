@@ -55,7 +55,7 @@
 #'   - `attr(., "img_dims")` = inherited from
 #'     `attr(signal_matrix, "img_dims")` if present;
 #'   - `attr(., "by_name")` = text description of the grouping;
-#'   - `attr(., "ci_stage") = "group"` = a one-string hint used by
+#'   - `attr(., "ci_level") = "group"` = a one-string hint used by
 #'     [save_ci_images()] to pick the filename prefix. Not a class;
 #'     no S3 dispatch attached.
 #'
@@ -150,7 +150,7 @@ group_ci <- function(signal_matrix,
   src_dims <- attr(signal_matrix, "img_dims")
   if (!is.null(src_dims)) attr(out, "img_dims") <- src_dims
   attr(out, "by_name")  <- by_name
-  attr(out, "ci_stage") <- "group"
+  attr(out, "ci_level") <- "group"
   out
 }
 

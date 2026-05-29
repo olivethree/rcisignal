@@ -89,13 +89,13 @@ unipolar \verb{|t|}-style yellow-to-red on a per-pixel CI magnitude).
 }
 \details{
 Filenames default to \verb{<prefix><colname>.<ext>}, where \verb{<prefix>} is
-chosen automatically from \code{attr(signal_matrix, "ci_stage")}:
+chosen automatically from \code{attr(signal_matrix, "ci_level")}:
 \itemize{
 \item \code{"individual"} (set by \verb{ci_from_responses_*()} on the per-producer
 \verb{$signal_matrix}) -> \code{prefix = "ind_ci_"}.
 \item \code{"group"} (set by \code{\link[=group_ci]{group_ci()}} on its return matrix) ->
 \code{prefix = "group_ci_"}.
-\item No \code{ci_stage} attribute -> defaults to \code{prefix = "ind_ci_"}.
+\item No \code{ci_level} attribute -> defaults to \code{prefix = "ind_ci_"}.
 }
 
 Override the auto-prefix by passing \verb{prefix =} explicitly.

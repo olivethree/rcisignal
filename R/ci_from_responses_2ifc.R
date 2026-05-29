@@ -241,7 +241,7 @@ ci_from_responses_2ifc <- function(responses,
   }
   attr(signal_matrix, "img_dims") <- img_dims
   attr(signal_matrix, "source")   <- "raw"
-  attr(signal_matrix, "ci_stage") <- "individual"
+  attr(signal_matrix, "ci_level") <- "individual"
   if (!is.null(rendered)) {
     attr(rendered, "img_dims") <- img_dims
     attr(rendered, "source")   <- "rendered"

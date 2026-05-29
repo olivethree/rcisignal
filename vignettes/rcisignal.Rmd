@@ -36,8 +36,8 @@ spatial location?
 
 Two halves of the package address these questions in turn.
 The input-side diagnostics (`run_diagnostics()` and the
-`check_*` family, plus `diagnose_infoval()` for the focused
-"is my data informative at all?" walk-through) cover the first
+`check_*` family, plus `infoval_report()` for the focused
+"is my data informative at all?" summary) cover the first
 question. The output-side reliability and discriminability
 metrics (`run_reliability()`, `run_discriminability()`,
 `infoval()`, `agreement_map_test()`, together with the
@@ -187,10 +187,30 @@ works on the per-producer `$signal_matrix`, on `$group_ci`, on a
 named matrix you built with `cbind()`, or on a named list. Names
 become the labels in the figure.
 
-To export rendered CIs to PNG or JPEG, see `save_ci_images()`.
-Filenames default to `ind_ci_<id>.{png,jpeg}` for per-producer
-matrices and `group_ci_<condition>.{png,jpeg}` for the output of
-`group_ci()` (or the `$group_ci` field).
+### 1.4 Exporting CIs as PNG or JPEG
+
+`save_ci_images()` writes each column of a signal matrix to disk as
+its own image, composited over a base face. The same call works for
+per-producer matrices and for group-averaged matrices; the function
+picks a sensible filename prefix based on what you hand it.
+
+```{r save-cis, eval = FALSE}
+out_dir <- tempfile("oliveira_cis_"); dir.create(out_dir)
+
+# One PNG per producer: ind_ci_P001.png, ind_ci_P002.png, ...
+save_ci_images(res$signal_matrix, base_image = sim$base_face,
+               dir = out_dir)
+
+# One PNG per condition: group_ci_A.png, group_ci_B.png, ...
+save_ci_images(res$group_ci, base_image = sim$base_face,
+               dir = out_dir)
+```
+
+The default palette is `"diverging"` (matches `plot_ci_overlay()`,
+blue = positive, red = negative). Pass `palette = "fire"` for the
+unipolar `|t|`-style yellow-to-red ramp, `format = "jpeg"` to write
+JPEGs instead, or `prefix = "trust_"` (or any other string) to
+override the auto-derived prefix.
 
 ## 2. Installation
 
@@ -241,7 +261,7 @@ contamination).
   roughly one to three minutes, with a `cli` progress bar.)
 - **For 2IFC**, an `.Rdata` file in the format that
   `rcicr::generateStimuli2IFC()` writes, so
-  `ci_from_responses_2ifc()`, `diagnose_infoval()`, and every
+  `ci_from_responses_2ifc()`, `infoval_report()`, and every
   other function that asks for an `rdata` argument works out of
   the box.
 - **A self-contained `$stimuli` list** that round-trips through
@@ -494,19 +514,21 @@ the numbers. The `"matched"` (per-CI) scaling option, where each
 producer's mask is stretched to the base's dynamic range, breaks
 correlation-based metrics as well.
 
-`rcisignal` keeps track of which kind of matrix you have by
-labeling each signal matrix with a `source` tag (either
-`"raw"` or `"rendered"`). The variance-based functions check
-this tag before they run, and stop with an informative error if
-you pass a rendered matrix:
+The package marks each signal matrix as either `"raw"` (built by
+`ci_from_responses_*()`, the input shape every metric expects) or
+`"rendered"` (read in from PNGs via `read_cis()` /
+`read_signal_matrix()`, the visualization-only shape). When you
+pass a rendered matrix to a variance-based metric (`rel_icc()`,
+`pixel_t_test()`, the cluster test, the Euclidean half of
+`rel_dissimilarity()`), the call aborts with an explicit error
+rather than silently producing distorted numbers:
 
 - Functions that build raw masks (`ci_from_responses_2ifc()`,
-  `ci_from_responses_briefrc()`) label the resulting matrix as
+  `ci_from_responses_briefrc()`) mark the resulting matrix as
   `"raw"`.
 - Functions that read PNGs (`read_cis()`, `extract_signal()`,
-  `read_signal_matrix()`) label it as `"rendered"`.
-- Variance-based metrics check this label internally and stop
-  with an informative error when given a `"rendered"` matrix,
+  `read_signal_matrix()`) mark it as `"rendered"`.
+- Variance-based metrics refuse to run on a `"rendered"` matrix
   unless you pass `acknowledge_scaling = TRUE` to confirm you
   have read the caveat.
 
@@ -1193,10 +1215,10 @@ Before computing CIs, run the diagnostic battery. Two top-level
 entry points cover this step. `run_diagnostics()` (§5.1) invokes
 every implemented check whose required inputs are available and
 gathers the results into one printable report.
-`diagnose_infoval()` (§5.4) is a focused six-step walk-through
-of the single question "is my data informative at all?"; it is
-the diagnostic to reach for when the headline worry is signal
-strength rather than coding or balance.
+`infoval_report()` (§5.4) is the focused per-producer infoVal
+report for the single question "is my data informative at
+all?"; it is the function to reach for when the headline worry
+is signal strength rather than coding or balance.
 
 ### 5.1 A first run
 
@@ -1228,7 +1250,7 @@ Skipped checks:
   - check_rt (no col_rt)
   - check_stimulus_alignment (no rdata or noise_matrix)
   - check_version_compat (no rdata)
-  - diagnose_infoval (no rdata + infoval_iter)
+  - infoval_report (no rdata + infoval_iter)
   - check_response_inversion (no rdata + infoval_iter)
   - check_rt_infoval_consistency (no rdata + infoval_iter + col_rt)
 ```
@@ -1299,11 +1321,13 @@ returns an `rcisignal_diag_result`.
   responses. FAIL if >= 50% of producers are flagged as inverted;
   WARN if any are.
 
-### 5.4 `diagnose_infoval()`
+### 5.4 `infoval_report()`
 
-`diagnose_infoval()` is the recommended diagnostic for the
-question "is my data informative at all?". It runs a six-step
-walk-through that catches every common low-infoVal cause:
+`infoval_report()` is the canonical per-producer infoVal
+summary for the question "is my data informative at all?". It
+runs six steps that surface the per-producer z-scores plus the
+calibration cross-checks that show whether those numbers can be
+trusted:
 
 1. Compute observed Frobenius norm per producer (and group-mean).
 2. Compare against a reference distribution at each producer's
@@ -1318,8 +1342,8 @@ walk-through that catches every common low-infoVal cause:
 6. Report whether the group-mean CI clears z = 1.96 even when
    per-producer medians do not.
 
-```{r diagnose-infoval, eval = FALSE}
-iv <- diagnose_infoval(
+```{r infoval-report, eval = FALSE}
+iv <- infoval_report(
   responses,
   method    = "2ifc",
   rdata     = "rcic_stimuli.Rdata",
@@ -1361,7 +1385,7 @@ additional argument:
 | `check_rt`                        | `col_rt`                                                  |
 | `check_stimulus_alignment`        | `rdata` (2IFC) or `noise_matrix` (Brief-RC)               |
 | `check_version_compat`            | `rdata` (2IFC only)                                       |
-| `diagnose_infoval`                | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` |
+| `infoval_report`                | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` |
 | `check_response_inversion`        | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` |
 | `check_rt_infoval_consistency`    | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` + `col_rt` |
 
@@ -2096,7 +2120,7 @@ discriminability metrics (§8) when you want a fuller picture.
 
 A note on *group-mean infoVal*. The package also offers a
 group-mean version (`group_mean_z()`, called inside
-`diagnose_infoval()` as a supplementary statistic). It applies
+`infoval_report()` as a supplementary statistic). It applies
 the same Frobenius-norm logic to the group-averaged CI, using a
 matched-N reference distribution so the calibration is fair (see
 §15 for what goes wrong when that reference is mismatched).
@@ -2710,10 +2734,9 @@ sm_friendly  <- sm[["friendly"]]
 `sm` is now a named list of ten signal matrices, each
 65,536 x 20 (`n_pixels x n_producers`). The contrasts and
 metrics in the sections that follow use these matrices
-directly. If you want to see what `ci_from_responses_2ifc()`
-does internally (the noise-matrix lookup, the per-producer
-mask formula, and the `img_dims` / `source` attributes it
-sets), the recipe is broken into four short steps in §3.3.
+directly. If you want a detailed walkthrough of how the
+function builds the per-producer mask, the four-step recipe
+in §3.3 walks it through.
 
 ### 12.6 Within-condition reliability per trait
 
@@ -3602,7 +3625,7 @@ reasons in roughly the order they tend to apply.
    group CI rather than computing a single infoVal on the
    averaged noise pattern (their p. 13). The group-mean infoVal
    this package offers (`group_mean_z()`, called inside
-   `diagnose_infoval()`) is a package-level extension of that
+   `infoval_report()`) is a package-level extension of that
    recipe and has not been independently validated for social-
    face RC (see §1.2). The §12.4 worked example reports both
    numbers alongside; treat the group-mean z as a supplementary

@@ -1,4 +1,4 @@
-# diagnose_infoval() end-to-end tests, Brief-RC path (no rcicr required).
+# infoval_report() end-to-end tests, Brief-RC path (no rcicr required).
 
 make_random_briefrc_data <- function(n_prod = 12L, n_trials = 100L,
                                      n_pool = 200L, n_pix = 64L * 64L,
@@ -40,9 +40,9 @@ make_compliant_briefrc_data <- function(n_prod = 20L, n_trials = 200L,
   list(responses = resp, noise = noise)
 }
 
-test_that("diagnose_infoval returns a valid rcisignal_diag_result with rich data", {
+test_that("infoval_report returns a valid rcisignal_diag_result with rich data", {
   d <- make_random_briefrc_data()
-  res <- diagnose_infoval(
+  res <- infoval_report(
     d$responses, method = "briefrc", noise_matrix = d$noise,
     iter = 200L, face_mask = "auto", seed = 1L, progress = FALSE
   )
@@ -57,7 +57,7 @@ test_that("diagnose_infoval returns a valid rcisignal_diag_result with rich data
 
 test_that("random-responder data produces near-zero random_z and low group z", {
   d <- make_random_briefrc_data(n_prod = 16L, n_trials = 150L)
-  res <- diagnose_infoval(
+  res <- infoval_report(
     d$responses, method = "briefrc", noise_matrix = d$noise,
     iter = 500L, face_mask = NULL, seed = 1L, progress = FALSE
   )
@@ -69,7 +69,7 @@ test_that("random-responder data produces near-zero random_z and low group z", {
 test_that("compliant data produces high group z but low individual z (the typical pattern)", {
   skip_on_cran()
   d <- make_compliant_briefrc_data(n_prod = 20L, n_trials = 200L, bias = 0.06)
-  res <- diagnose_infoval(
+  res <- infoval_report(
     d$responses, method = "briefrc", noise_matrix = d$noise,
     iter = 500L, face_mask = "auto", seed = 1L, progress = FALSE
   )
@@ -82,7 +82,7 @@ test_that("compliant data produces high group z but low individual z (the typica
 
 test_that("face_mask = NULL skips the masked branch", {
   d <- make_random_briefrc_data()
-  res <- diagnose_infoval(
+  res <- infoval_report(
     d$responses, method = "briefrc", noise_matrix = d$noise,
     iter = 100L, face_mask = NULL, seed = 1L, progress = FALSE
   )
@@ -90,31 +90,31 @@ test_that("face_mask = NULL skips the masked branch", {
   expect_true(is.na(res$data$group_mean_z_masked))
 })
 
-test_that("diagnose_infoval rejects out-of-pool stimulus ids", {
+test_that("infoval_report rejects out-of-pool stimulus ids", {
   d <- make_random_briefrc_data(n_pool = 100L, n_trials = 50L)
   d$responses$stimulus[1L] <- 999L
   expect_error(
-    diagnose_infoval(d$responses, method = "briefrc",
+    infoval_report(d$responses, method = "briefrc",
                      noise_matrix = d$noise, iter = 100L, seed = 1L,
                      face_mask = NULL, progress = FALSE),
     "pool range"
   )
 })
 
-test_that("diagnose_infoval requires noise_matrix for briefrc", {
+test_that("infoval_report requires noise_matrix for briefrc", {
   d <- make_random_briefrc_data()
   expect_error(
-    diagnose_infoval(d$responses, method = "briefrc",
+    infoval_report(d$responses, method = "briefrc",
                      iter = 100L, face_mask = NULL, progress = FALSE),
     "noise_matrix"
   )
 })
 
 test_that("resolve_face_mask handles multiple input shapes", {
-  # The internal is not exported; round-trip via diagnose_infoval is enough.
+  # The internal is not exported; round-trip via infoval_report is enough.
   d <- make_random_briefrc_data(n_pix = 64L * 64L)
   custom_mask <- rep(c(TRUE, FALSE), length.out = 64L * 64L)
-  res <- diagnose_infoval(
+  res <- infoval_report(
     d$responses, method = "briefrc", noise_matrix = d$noise,
     iter = 100L, face_mask = custom_mask, seed = 1L, progress = FALSE
   )

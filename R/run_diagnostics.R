@@ -16,7 +16,7 @@
 #' @param method `"2ifc"` or `"briefrc"`, or `NULL` to auto-detect.
 #' @param rdata Optional. Path to an rcicr `.RData` file. Enables
 #'   [check_stimulus_alignment()], [check_version_compat()] (2IFC),
-#'   [diagnose_infoval()], [check_response_inversion()], and
+#'   [infoval_report()], [check_response_inversion()], and
 #'   [check_rt_infoval_consistency()]. Mutually exclusive
 #'   alternative to `stimuli`.
 #' @param stimuli Optional in-memory stimuli list (`$stimuli` from
@@ -36,11 +36,11 @@
 #'   distribution; `NULL` disables infoVal checks even if `rdata` is
 #'   supplied. Default `NULL` because the reference simulation is slow
 #'   and unwanted by default; set e.g. `10000` to enable.
-#' @param face_mask Mask spec passed to [diagnose_infoval()]. Default
+#' @param face_mask Mask spec passed to [infoval_report()]. Default
 #'   `"auto"` (Schmitz 2024 oval). Pass `NULL` to skip the masked-vs-
-#'   unmasked comparison, or any value [diagnose_infoval()] accepts.
+#'   unmasked comparison, or any value [infoval_report()] accepts.
 #' @param with_replacement Sampling regime forwarded to
-#'   [diagnose_infoval()] / [infoval()] for the across-trials reference
+#'   [infoval_report()] / [infoval()] for the across-trials reference
 #'   distribution. Default `"auto"` matches the standard Brief-RC
 #'   convention.
 #' @param ... Unused.
@@ -133,14 +133,14 @@ run_diagnostics <- function(responses,
     )
   }
 
-  # diagnose_infoval handles both paradigms (Brief-RC and 2IFC). It runs
+  # infoval_report handles both paradigms (Brief-RC and 2IFC). It runs
   # whenever infoval_iter is set and the relevant noise source is available.
-  can_diagnose <- !is.null(infoval_iter) &&
+  can_report <- !is.null(infoval_iter) &&
     ((method == "2ifc" && !is.null(rdata)) ||
        (method == "briefrc" && !is.null(noise_matrix)))
-  if (can_diagnose) {
-    results$diagnose_infoval <- tryCatch(
-      diagnose_infoval(
+  if (can_report) {
+    results$infoval_report <- tryCatch(
+      infoval_report(
         responses,
         method           = method,
         rdata            = rdata,
@@ -156,17 +156,17 @@ run_diagnostics <- function(responses,
       ),
       error = function(e) {
         rcisignal_diag_result(
-          "skip", "InfoVal diagnostic",
-          c("diagnose_infoval failed:", conditionMessage(e))
+          "skip", "InfoVal report",
+          c("infoval_report failed:", conditionMessage(e))
         )
       }
     )
   } else if (is.null(infoval_iter)) {
-    skipped <- c(skipped, "diagnose_infoval (need infoval_iter)")
+    skipped <- c(skipped, "infoval_report (need infoval_iter)")
   } else {
     skipped <- c(
       skipped,
-      "diagnose_infoval (need rdata for 2IFC or noise_matrix for Brief-RC)"
+      "infoval_report (need rdata for 2IFC or noise_matrix for Brief-RC)"
     )
   }
 

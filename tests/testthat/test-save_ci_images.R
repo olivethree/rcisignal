@@ -4,16 +4,16 @@ skip_if_not_installed("png")
 skip_if_not_installed("jpeg")
 
 make_ci_set <- function(n_pix = 1024L, n_p = 4L,
-                        stage = c("individual", "group"),
+                        level = c("individual", "group"),
                         seed = 1L) {
-  stage <- match.arg(stage)
+  level <- match.arg(level)
   sm <- make_sig(n_pix = n_pix, n_p = n_p, seed = seed)
-  colnames(sm) <- if (stage == "individual") {
+  colnames(sm) <- if (level == "individual") {
     sprintf("P%03d", seq_len(n_p))
   } else {
     sprintf("cond_%d", seq_len(n_p))
   }
-  attr(sm, "ci_stage") <- stage
+  attr(sm, "ci_level") <- level
   sm
 }
 
@@ -22,7 +22,7 @@ make_base <- function(img_dims) {
 }
 
 test_that("save_ci_images writes one PNG per column with ind_ci_ prefix", {
-  sm <- make_ci_set(n_pix = 1024L, n_p = 3L, stage = "individual")
+  sm <- make_ci_set(n_pix = 1024L, n_p = 3L, level = "individual")
   out <- tempfile("ci_test_")
   base <- make_base(attr(sm, "img_dims"))
 
@@ -35,8 +35,8 @@ test_that("save_ci_images writes one PNG per column with ind_ci_ prefix", {
   expect_equal(dim(img)[1:2], attr(sm, "img_dims"))
 })
 
-test_that("save_ci_images uses group_ci_ prefix on a group-stage matrix", {
-  sm <- make_ci_set(n_pix = 1024L, n_p = 2L, stage = "group")
+test_that("save_ci_images uses group_ci_ prefix on a group-level matrix", {
+  sm <- make_ci_set(n_pix = 1024L, n_p = 2L, level = "group")
   out <- tempfile("ci_test_grp_")
   base <- make_base(attr(sm, "img_dims"))
 
@@ -44,8 +44,8 @@ test_that("save_ci_images uses group_ci_ prefix on a group-stage matrix", {
   expect_match(basename(paths), "^group_ci_cond_\\d\\.png$", all = TRUE)
 })
 
-test_that("custom prefix overrides stage detection", {
-  sm <- make_ci_set(stage = "group")
+test_that("custom prefix overrides level detection", {
+  sm <- make_ci_set(level = "group")
   out <- tempfile("ci_test_pref_")
   base <- make_base(attr(sm, "img_dims"))
   paths <- save_ci_images(sm, base, out, prefix = "trust_",
