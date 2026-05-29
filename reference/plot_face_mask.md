@@ -2,7 +2,7 @@
 
 Renders a face mask so you can confirm it covers the region you intended
 before passing it to
-[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
+[`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
 or
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md).
 Accepts the same input forms the diagnostics accept: a logical or
@@ -105,7 +105,7 @@ warning.
 (overlay on a specific base image),
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md),
 [`read_face_mask()`](https://olivethree.github.io/rcisignal/reference/read_face_mask.md),
-[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md).
+[`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md).
 
 ## Examples
 

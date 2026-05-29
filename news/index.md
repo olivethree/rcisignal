@@ -1,5 +1,96 @@
 # Changelog
 
+## rcisignal 0.3.0
+
+### Breaking changes
+
+- **Architecture simplified.** The “stage 1 / stage 2” boundary is gone.
+  The `rcisignal_group_ci` S3 class is dropped;
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  now returns a plain numeric matrix (with `attr(., "n")`,
+  `attr(., "img_dims")`, `attr(., "by_name")`, and a lightweight
+  `attr(., "ci_level") = "group"` hint for
+  [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)).
+  Stage-1 input guards (the 14+ `abort_if_group_ci()` calls across
+  reliability, discriminability, and infoVal functions) are removed. The
+  `_pkgdown.yml` “Stage 2 - Group-averaged CIs” reference section is
+  replaced with “Compare multiple CIs”; correlogram, distance matrix,
+  and MDS plot functions are no longer mis-classified as group-only.
+- **Removed `compute_infoval_summary()`** (no deprecation alias).
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+  (the renamed `diagnose_infoval()`; see below) covers the same use case
+  and supports both 2IFC and Brief-RC natively.
+  [`check_response_inversion()`](https://olivethree.github.io/rcisignal/reference/check_response_inversion.md)
+  and
+  [`check_rt_infoval_consistency()`](https://olivethree.github.io/rcisignal/reference/check_rt_infoval_consistency.md)
+  no longer take `rdata`/`stimuli` as their only noise source: both now
+  accept `noise_matrix =` for the Brief-RC path and use the package’s
+  native
+  [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+  pipeline internally, so Brief-RC is fully supported (previously these
+  checks returned `"skip"` for Brief-RC).
+- **Renamed `diagnose_infoval()` to
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)**
+  (no deprecation alias). The new name better reflects what the function
+  actually does: it produces a per-producer infoVal summary together
+  with three sanity checks (masked-vs-unmasked z lift, group-mean z
+  against a matched reference, random-responder calibration). The
+  “diagnose” framing implied pathology-hunting, but the function is the
+  canonical entry point for any per- producer infoVal report, healthy
+  data included. Migration: rename `diagnose_infoval(...)` -\>
+  `infoval_report(...)`. Same arguments, same return value (still an
+  `rcisignal_diag_result`). Inside the
+  [`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md)
+  output, the result is now at `report$results$infoval_report` (was
+  `report$results$diagnose_infoval`).
+
+### New features
+
+- [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+  and
+  [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+  gain a `group_by =` argument. When supplied, the return list
+  additionally contains `$group_ci`, the per-group matrix built by
+  `group_ci(signal_matrix, responses, by = group_by, col_participant = col_participant)`
+  internally. The per-producer `$signal_matrix` is also returned. Pass
+  either or both to downstream functions.
+- **New export
+  [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md).**
+  Writes rendered CIs to PNG or JPEG, one file per column of a
+  `signal_matrix`. Works for both per-producer (filename prefix
+  `ind_ci_`) and group-level (prefix `group_ci_`) matrices; prefix is
+  auto-derived from the new `ci_level` attribute and can be overridden.
+  Supports both the `"diverging"` and `"fire"` palettes via the same
+  compositing path as
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  and
+  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md).
+- [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  gains a `bar_label =` argument for customizable colorbar labels.
+  Defaults to `"t"` for the diverging palette and `"|t|"` for the fire
+  palette. The new
+  [`plot.rcisignal_rel_agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/plot.rcisignal_rel_agreement_map_test.md)
+  method threads the argument through. Use e.g.
+  `bar_label = "Degree of agreement (|t|)"` for non-technical audiences.
+
+### Documentation
+
+- README: the “Showcase: Oliveira et al. (2019)” section is renamed to
+  “Using rcisignal on a real data set” and now leads with a 2x2
+  fire-palette agreement-map figure. The caption explains that brighter
+  pixels mark image regions where producers in the RC task agree more
+  strongly on the location of the target representation in their
+  perception.
+- Vignette: the “two-stage pattern” framing is removed.
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  is reintroduced as a convenience helper rather than an architectural
+  boundary. §1.3 gains a
+  [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
+  example block showing exports for both per-producer and group CIs.
+  `compute_infoval_summary()` references are rewritten as
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+  calls.
+
 ## rcisignal 0.2.0
 
 ### Breaking changes
@@ -96,9 +187,8 @@
   standard R unused-argument error.
 
 - The same rename cascades through the five downstream 2IFC diagnostic
-  functions and the noise reader:
-  [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md),
-  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md),
+  functions and the noise reader: `diagnose_infoval()`,
+  `compute_infoval_summary()`,
   [`check_rt_infoval_consistency()`](https://olivethree.github.io/rcisignal/reference/check_rt_infoval_consistency.md),
   [`check_response_inversion()`](https://olivethree.github.io/rcisignal/reference/check_response_inversion.md),
   [`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md),
@@ -477,11 +567,7 @@
 
 - New regression test `test-simulate-diagnostic-chain.R` exercises
   [`simulate_2ifc_data()`](https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.md)
-  -\>
-  [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
-  /
-  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md)
-  /
+  -\> `diagnose_infoval()` / `compute_infoval_summary()` /
   [`check_rt_infoval_consistency()`](https://olivethree.github.io/rcisignal/reference/check_rt_infoval_consistency.md)
   /
   [`check_response_inversion()`](https://olivethree.github.io/rcisignal/reference/check_response_inversion.md)
@@ -641,8 +727,7 @@
   `rdata_dir` to keep the stimuli `.Rdata` at a stable path, or hand
   `$stimuli` to downstream consumers in place of `$rdata_path`.
 - [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
-  [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md),
-  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md),
+  `diagnose_infoval()`, `compute_infoval_summary()`,
   [`check_response_inversion()`](https://olivethree.github.io/rcisignal/reference/check_response_inversion.md),
   [`check_rt_infoval_consistency()`](https://olivethree.github.io/rcisignal/reference/check_rt_infoval_consistency.md),
   and

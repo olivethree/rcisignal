@@ -1,16 +1,23 @@
 # Package index
 
-## Stage 1 — Per-producer CIs
+## Build per-producer CIs
 
-Build per-producer signal matrices and run every reliability,
-discriminability, and informational-value analysis on them. Every
-function in this group takes a pixels x n_producers `signal_matrix` (or
-two of them) as its primary input.
+Compute one classification image (CI) per producer from trial-level
+responses. Pass `group_by =` to also build group-averaged CIs in one
+call.
 
 - [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
   : Compute individual Brief-RC CIs from trial-level responses
 - [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
   : Compute individual 2IFC CIs from trial-level responses
+- [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  : Collapse a per-producer signal matrix into per-group means
+
+## Reliability and informational value
+
+Within-condition reliability of the per-producer signal and per-producer
+infoVal.
+
 - [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
   : Per-producer informational value with trial-count-matched reference
 - [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md)
@@ -23,39 +30,60 @@ two of them) as its primary input.
   : Leave-one-out influence screening
 - [`rel_loo_z()`](https://olivethree.github.io/rcisignal/reference/rel_loo_z.md)
   : Z-scored leave-one-out influence (accessor)
+- [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
+  : Run every within-condition reliability metric
+
+## Between-condition discriminability
+
+Between-condition spatial difference: pixel-wise t, cluster-based
+permutation, Frobenius-distance bootstrap.
+
+- [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md)
+  : Vectorised pixel-wise t-test (independent or paired)
 - [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
   : Cluster-based permutation test with family-wise error control
 - [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
   : Between-condition dissimilarity with bootstrap confidence intervals
-- [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
-  : Per-pixel inferential agreement map with FWER control
-- [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md)
-  : Vectorised pixel-wise t-test (independent or paired)
-- [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
-  : Run every within-condition reliability metric
 - [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
   : Run every between-condition discriminability metric
 - [`run_discriminability_pairwise()`](https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.md)
   : Run all pairwise between-condition comparisons across K conditions
-- [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md)
-  : Per-participant information-value (infoVal) summary
-- [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
-  : Guided diagnostic for low or negative infoVal
 
-## Stage 2 — Group-averaged CIs
+## Cross-producer agreement
 
-Collapse a per-producer signal matrix to per-group means for
-side-by-side comparison, RDM-style distance matrices, MDS, and
-correlogram views.
+Producer-level agreement maps (descriptive and FWE-controlled).
 
-- [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-  : Collapse a per-producer signal matrix into per-group means
+- [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md)
+  : Per-pixel inferential agreement map with FWER control
+- [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
+  : Per-pixel agreement heatmap for a producer signal matrix
+
+## Compare multiple CIs
+
+Cross-CI similarity, distance, and projection views. Accept any named
+collection of CIs (per-producer or group-level).
+
+- [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
+  : Pairwise Pearson-r correlogram across multiple group-mean CIs
 - [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
   : Pairwise Euclidean distance matrix across multiple group-mean CIs
 - [`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
   : Multidimensional-scaling (MDS) projection of multiple CIs
-- [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
-  : Pairwise Pearson-r correlogram across multiple group-mean CIs
+
+## Plot and export CIs
+
+- [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+  : Render a group CI as a translucent agreement-map overlay on a base
+  image
+- [`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
+  : Sanity-check a face mask against a base image
+- [`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md)
+  : Plot a face mask for visual verification
+- [`plot_dissimilarity_grid()`](https://olivethree.github.io/rcisignal/reference/plot_dissimilarity_grid.md)
+  : Compare Euclidean dissimilarity intervals across multiple contrasts
+  on a single plot
+- [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
+  : Write rendered CIs to PNG or JPEG files
 
 ## I/O and simulation
 
@@ -78,6 +106,8 @@ correlogram views.
 
 - [`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md)
   : Run the full battery of diagnostic checks
+- [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+  : Per-producer infoVal report (with calibration sanity checks)
 - [`check_duplicates()`](https://olivethree.github.io/rcisignal/reference/check_duplicates.md)
   : Check for duplicate rows in response data
 - [`check_response_bias()`](https://olivethree.github.io/rcisignal/reference/check_response_bias.md)
@@ -98,21 +128,6 @@ correlogram views.
   : Check rcicr version compatibility with a 2IFC rdata file
 - [`validate_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/validate_noise_matrix.md)
   : Validate a noise matrix
-
-## Plotting
-
-- [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
-  : Render a group CI as a translucent agreement-map overlay on a base
-  image
-- [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
-  : Per-pixel agreement heatmap for a producer signal matrix
-- [`plot_mask_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_mask_overlay.md)
-  : Sanity-check a face mask against a base image
-- [`plot_face_mask()`](https://olivethree.github.io/rcisignal/reference/plot_face_mask.md)
-  : Plot a face mask for visual verification
-- [`plot_dissimilarity_grid()`](https://olivethree.github.io/rcisignal/reference/plot_dissimilarity_grid.md)
-  : Compare Euclidean dissimilarity intervals across multiple contrasts
-  on a single plot
 
 ## Helpers
 

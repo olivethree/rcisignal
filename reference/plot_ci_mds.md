@@ -44,15 +44,14 @@ plot_ci_mds(
   CIs to project. The recommended form is a numeric matrix
   `n_pixels x n_cis` with named columns; each column is one CI (a group
   mean, a single producer's CI, or any mix). Build it outside the call
-  with `cbind(name = rowMeans(cis$signal_matrix), ...)`. Two other forms
-  are accepted for back-compatibility: a
+  with `cbind(name = rowMeans(cis$signal_matrix), ...)`, or use the
+  output of
   [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-  result (an
-  [rcisignal_group_ci](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-  matrix) and a named list of CIs (vectors of length `prod(img_dims)`,
-  single-column matrices, or per-producer `signal_matrix` objects from
-  `ci_from_responses_*()` which are reduced to group means internally).
-  At least three CIs are required for a meaningful 2D projection.
+  (a named matrix) directly. A named list of CIs is also accepted
+  (vectors of length `prod(img_dims)`, single-column matrices, or
+  per-producer `signal_matrix` objects from `ci_from_responses_*()`,
+  which are reduced to group means internally). At least three CIs are
+  required for a meaningful 2D projection.
 
 - img_dims:
 

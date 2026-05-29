@@ -23,7 +23,7 @@ masks ready for the reliability metrics."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,10 @@ masks ready for the reliability metrics."><meta property="og:image" content="htt
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/rcisignal.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/validation_rcicr.html">Validation: rcisignal vs rcicr infoVal convergence</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -74,6 +78,7 @@ masks ready for the reliability metrics.</p>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"briefrc12"</span>, <span class="st">"briefrc20"</span><span class="op">)</span>,</span>
 <span>  scaling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"matched"</span>, <span class="st">"constant"</span><span class="op">)</span>,</span>
 <span>  scaling_constant <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  base_image_path <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -133,6 +138,17 @@ unscaled mask.</p></dd>
 <code>scaling = "constant"</code>. Ignored otherwise.</p></dd>
 
 
+<dt id="arg-group-by">group_by<a class="anchor" aria-label="anchor" href="#arg-group-by"></a></dt>
+<dd><p>Optional character vector of column names in
+<code>responses</code> to group producers by. When supplied, the return
+list additionally contains <code>$group_ci</code>, a pixels x n_groups
+matrix built by calling <code><a href="group_ci.html">group_ci()</a></code> internally with the same
+<code>col_participant</code>. Single column (e.g. <code>"condition"</code>) gives
+one CI per level; length 2+ gives a factorial grouping with
+cell labels joined by <code>"_"</code>. Default <code>NULL</code> (no group CI
+built; only the per-producer <code>$signal_matrix</code> is returned).</p></dd>
+
+
 <dt id="arg-base-image-path">base_image_path<a class="anchor" aria-label="anchor" href="#arg-base-image-path"></a></dt>
 <dd><p><strong>Deprecated.</strong> Use <code>base_image</code> (which
 accepts both a numeric matrix and a path). The old name still
@@ -142,8 +158,9 @@ works for one release with a deprecation warning.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with <code>signal_matrix</code>, optionally <code>rendered_ci</code>,
-<code>participants</code>, <code>img_dims</code>, <code>scaling</code>, and <code>method</code> (the
-Brief-RC variant the call was made with).</p>
+<code>participants</code>, <code>img_dims</code>, <code>scaling</code>, <code>method</code> (the
+Brief-RC variant the call was made with), and optionally
+<code>group_ci</code> (when <code>group_by</code> is supplied).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -193,7 +210,8 @@ representations. <em>European Journal of Social Psychology</em>.
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>, <code><a href="run_reliability.html">run_reliability()</a></code>,
-<code><a href="run_discriminability.html">run_discriminability()</a></code>, <code><a href="group_ci.html">group_ci()</a></code> (stage 2, optional)</p></div>
+<code><a href="run_discriminability.html">run_discriminability()</a></code>, <code><a href="group_ci.html">group_ci()</a></code>,
+<code><a href="save_ci_images.html">save_ci_images()</a></code></p></div>
     </div>
 
     <div class="section level2">

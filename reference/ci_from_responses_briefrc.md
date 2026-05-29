@@ -24,6 +24,7 @@ ci_from_responses_briefrc(
   method = c("briefrc12", "briefrc20"),
   scaling = c("none", "matched", "constant"),
   scaling_constant = NULL,
+  group_by = NULL,
   base_image_path = NULL
 )
 ```
@@ -79,6 +80,17 @@ ci_from_responses_briefrc(
   Numeric multiplier used when `scaling = "constant"`. Ignored
   otherwise.
 
+- group_by:
+
+  Optional character vector of column names in `responses` to group
+  producers by. When supplied, the return list additionally contains
+  `$group_ci`, a pixels x n_groups matrix built by calling
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  internally with the same `col_participant`. Single column (e.g.
+  `"condition"`) gives one CI per level; length 2+ gives a factorial
+  grouping with cell labels joined by `"_"`. Default `NULL` (no group CI
+  built; only the per-producer `$signal_matrix` is returned).
+
 - base_image_path:
 
   **Deprecated.** Use `base_image` (which accepts both a numeric matrix
@@ -88,8 +100,8 @@ ci_from_responses_briefrc(
 ## Value
 
 A list with `signal_matrix`, optionally `rendered_ci`, `participants`,
-`img_dims`, `scaling`, and `method` (the Brief-RC variant the call was
-made with).
+`img_dims`, `scaling`, `method` (the Brief-RC variant the call was made
+with), and optionally `group_ci` (when `group_by` is supplied).
 
 ## Details
 
@@ -141,8 +153,8 @@ reverse correlation: an improved tool to assess visual representations.
 [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
 [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
 [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
-[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-(stage 2, optional)
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md),
+[`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
 
 ## Examples
 

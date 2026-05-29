@@ -48,7 +48,7 @@ run_diagnostics(
   [`check_stimulus_alignment()`](https://olivethree.github.io/rcisignal/reference/check_stimulus_alignment.md),
   [`check_version_compat()`](https://olivethree.github.io/rcisignal/reference/check_version_compat.md)
   (2IFC),
-  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md),
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md),
   [`check_response_inversion()`](https://olivethree.github.io/rcisignal/reference/check_response_inversion.md),
   and
   [`check_rt_infoval_consistency()`](https://olivethree.github.io/rcisignal/reference/check_rt_infoval_consistency.md).
@@ -95,16 +95,16 @@ run_diagnostics(
 - face_mask:
 
   Mask spec passed to
-  [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md).
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md).
   Default `"auto"` (Schmitz 2024 oval). Pass `NULL` to skip the
   masked-vs- unmasked comparison, or any value
-  [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
   accepts.
 
 - with_replacement:
 
   Sampling regime forwarded to
-  [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
   /
   [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
   for the across-trials reference distribution. Default `"auto"` matches
@@ -158,8 +158,7 @@ print(report)
 #> Skipped checks:
 #>   - check_stimulus_alignment (no rdata / noise_matrix)
 #>   - check_version_compat (no rdata)
-#>   - diagnose_infoval (need infoval_iter)
-#>   - compute_infoval_summary (need rdata + infoval_iter)
-#>   - check_response_inversion (needs infoval)
-#>   - check_rt_infoval_consistency (needs infoval)
+#>   - infoval_report (need infoval_iter)
+#>   - check_response_inversion (need rdata / noise_matrix + infoval_iter)
+#>   - check_rt_infoval_consistency (need rdata / noise_matrix + infoval_iter)
 ```

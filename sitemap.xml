@@ -4,6 +4,7 @@
 <url><loc>https://olivethree.github.io/rcisignal/LICENSE.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/articles/index.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/articles/rcisignal.html</loc></url>
+<url><loc>https://olivethree.github.io/rcisignal/articles/validation_rcicr.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/authors.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/index.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/news/index.html</loc></url>
@@ -19,12 +20,11 @@
 <url><loc>https://olivethree.github.io/rcisignal/reference/check_version_compat.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.html</loc></url>
-<url><loc>https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.html</loc></url>
-<url><loc>https://olivethree.github.io/rcisignal/reference/diagnose_infoval.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/extract_signal.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/group_ci.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/index.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/infoval.html</loc></url>
+<url><loc>https://olivethree.github.io/rcisignal/reference/infoval_report.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/is_rcisignal_diag_result.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/make_face_mask.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/pixel_t_test.html</loc></url>
@@ -58,6 +58,7 @@
 <url><loc>https://olivethree.github.io/rcisignal/reference/run_discriminability.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/run_discriminability_pairwise.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/run_reliability.html</loc></url>
+<url><loc>https://olivethree.github.io/rcisignal/reference/save_ci_images.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/shift_mask.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/simulate_2ifc_data.html</loc></url>
 <url><loc>https://olivethree.github.io/rcisignal/reference/simulate_briefrc_data.html</loc></url>

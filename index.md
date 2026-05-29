@@ -14,8 +14,8 @@ designs.
 
 **[User
 guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html) ·
-[Installation](#installation) ·
-[Showcase](#showcase-oliveira-et-al-2019) · [Citation](#citation)**
+[Installation](#installation) · [Using rcisignal on a real data
+set](#using-rcisignal-on-a-real-data-set) · [Citation](#citation)**
 
 ## Installation
 
@@ -45,27 +45,31 @@ Brief-RC users can skip `rcicr`; the Brief-RC code is fully native to
 > guide](https://olivethree.github.io/rcisignal/articles/rcisignal.html)
 > is kept in sync with new and updated functions.
 
-## Showcase: Oliveira et al. (2019)
+## Using rcisignal on a real data set
 
 A re-analysis of the open data from [Oliveira, Garcia-Marques, Dotsch &
 Garcia-Marques (2019)](https://doi.org/10.1002/ejsp.2569), 2IFC reverse
 correlation on a 256 x 256 grayscale male base face, 20 producers per
-trait, 300 trials each. Two contrasts are shown: **Trustworthy vs
-Friendly** and **Dominant vs Competent**.
+trait, 300 trials each.
 
-### Cross-producer agreement maps (descriptive)
+### Cross-producer agreement maps (fire palette)
 
-|  |  |
-|----|----|
-| **Trustworthy − Friendly** | **Dominant − Competent** |
-| ![Descriptive map: trust minus friendly](articles/figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png) | ![Descriptive map: dominant minus competent](articles/figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png) |
+![Cross-producer agreement maps for four traits (Trustworthy, Friendly,
+Competent, Dominant), fire palette, restricted to the full-face
+oval](articles/figures/oliveira_2019/agreement_maps_fire.png)
 
-### Cross-producer agreement maps (FWER-controlled)
+Cross-producer agreement maps for four traits (Trustworthy, Friendly,
+Competent, Dominant), fire palette, restricted to the full-face oval
 
-|  |  |
-|----|----|
-| **Trustworthy − Friendly** | **Dominant − Competent** |
-| ![FWER map: trust minus friendly](articles/figures/oliveira_2019/pairwise_trust_vs_friendly.png) | ![FWER map: dominant minus competent](articles/figures/oliveira_2019/pairwise_dominant_vs_competent.png) |
+For each trait, brighter pixels mark image regions where the 20
+producers in the RC task agreed more strongly on the location of the
+target representation in their perception. The colorbar shows the
+*degree of agreement (\|t\|)* from a per-pixel one-sample test of
+producer CIs against zero, computed within the full-face oval. Hot
+regions indicate consistent across-producer structure regardless of
+sign; pale regions indicate weak or inconsistent agreement. For the
+directional view (where the signal sits above or below the base), see
+the user guide.
 
 ### `infoval()` per face region
 
@@ -105,7 +109,7 @@ infoVal claim and a Brief-RC signal-recovery sanity check.
 If `rcisignal` helps your research, please cite it:
 
     Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
-    data and classification images (Version 0.2.0) [R package]. Zenodo.
+    data and classification images (Version 0.3.0) [R package]. Zenodo.
     https://doi.org/10.5281/zenodo.19961180
 
 Run `citation("rcisignal")` in R for a BibTeX entry.

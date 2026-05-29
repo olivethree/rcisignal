@@ -11,13 +11,13 @@ Source:
 [`DESCRIPTION`](https://github.com/olivethree/rcisignal/blob/main/DESCRIPTION)
 
 Oliveira M (2026). *rcisignal: Quality Checks for Reverse-Correlation
-Data and Classification Images*. R package version 0.2.0,
+Data and Classification Images*. R package version 0.3.0,
 <https://github.com/olivethree/rcisignal>.
 
     @Manual{,
       title = {rcisignal: Quality Checks for Reverse-Correlation Data and Classification Images},
       author = {Manuel Oliveira},
       year = {2026},
-      note = {R package version 0.2.0},
+      note = {R package version 0.3.0},
       url = {https://github.com/olivethree/rcisignal},
     }

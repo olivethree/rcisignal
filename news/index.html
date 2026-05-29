@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,6 +17,10 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/rcisignal.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/validation_rcicr.html">Validation: rcisignal vs rcicr infoVal convergence</a></li>
+  </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -32,6 +36,32 @@
       <small>Source: <a href="https://github.com/olivethree/rcisignal/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="rcisignal-030">rcisignal 0.3.0<a class="anchor" aria-label="anchor" href="#rcisignal-030"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-0"></a></h3>
+<ul><li>
+<strong>Architecture simplified.</strong> The “stage 1 / stage 2” boundary is gone. The <code>rcisignal_group_ci</code> S3 class is dropped; <code><a href="../reference/group_ci.html">group_ci()</a></code> now returns a plain numeric matrix (with <code>attr(., "n")</code>, <code>attr(., "img_dims")</code>, <code>attr(., "by_name")</code>, and a lightweight <code>attr(., "ci_level") = "group"</code> hint for <code><a href="../reference/save_ci_images.html">save_ci_images()</a></code>). Stage-1 input guards (the 14+ <code>abort_if_group_ci()</code> calls across reliability, discriminability, and infoVal functions) are removed. The <code>_pkgdown.yml</code> “Stage 2 - Group-averaged CIs” reference section is replaced with “Compare multiple CIs”; correlogram, distance matrix, and MDS plot functions are no longer mis-classified as group-only.</li>
+<li>
+<strong>Removed <code>compute_infoval_summary()</code></strong> (no deprecation alias). <code><a href="../reference/infoval_report.html">infoval_report()</a></code> (the renamed <code>diagnose_infoval()</code>; see below) covers the same use case and supports both 2IFC and Brief-RC natively. <code><a href="../reference/check_response_inversion.html">check_response_inversion()</a></code> and <code><a href="../reference/check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code> no longer take <code>rdata</code>/<code>stimuli</code> as their only noise source: both now accept <code>noise_matrix =</code> for the Brief-RC path and use the package’s native <code><a href="../reference/infoval.html">infoval()</a></code> pipeline internally, so Brief-RC is fully supported (previously these checks returned <code>"skip"</code> for Brief-RC).</li>
+<li>
+<strong>Renamed <code>diagnose_infoval()</code> to <code><a href="../reference/infoval_report.html">infoval_report()</a></code></strong> (no deprecation alias). The new name better reflects what the function actually does: it produces a per-producer infoVal summary together with three sanity checks (masked-vs-unmasked z lift, group-mean z against a matched reference, random-responder calibration). The “diagnose” framing implied pathology-hunting, but the function is the canonical entry point for any per- producer infoVal report, healthy data included. Migration: rename <code>diagnose_infoval(...)</code> -&gt; <code>infoval_report(...)</code>. Same arguments, same return value (still an <code>rcisignal_diag_result</code>). Inside the <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code> output, the result is now at <code>report$results$infoval_report</code> (was <code>report$results$diagnose_infoval</code>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
+<ul><li>
+<code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> and <code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> gain a <code>group_by =</code> argument. When supplied, the return list additionally contains <code>$group_ci</code>, the per-group matrix built by <code>group_ci(signal_matrix, responses, by = group_by, col_participant = col_participant)</code> internally. The per-producer <code>$signal_matrix</code> is also returned. Pass either or both to downstream functions.</li>
+<li>
+<strong>New export <code><a href="../reference/save_ci_images.html">save_ci_images()</a></code>.</strong> Writes rendered CIs to PNG or JPEG, one file per column of a <code>signal_matrix</code>. Works for both per-producer (filename prefix <code>ind_ci_</code>) and group-level (prefix <code>group_ci_</code>) matrices; prefix is auto-derived from the new <code>ci_level</code> attribute and can be overridden. Supports both the <code>"diverging"</code> and <code>"fire"</code> palettes via the same compositing path as <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code> and <code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code>.</li>
+<li>
+<code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code> gains a <code>bar_label =</code> argument for customizable colorbar labels. Defaults to <code>"t"</code> for the diverging palette and <code>"|t|"</code> for the fire palette. The new <code><a href="../reference/plot.rcisignal_rel_agreement_map_test.html">plot.rcisignal_rel_agreement_map_test()</a></code> method threads the argument through. Use e.g. <code>bar_label = "Degree of agreement (|t|)"</code> for non-technical audiences.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-3-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-3-0"></a></h3>
+<ul><li>README: the “Showcase: Oliveira et al. (2019)” section is renamed to “Using rcisignal on a real data set” and now leads with a 2x2 fire-palette agreement-map figure. The caption explains that brighter pixels mark image regions where producers in the RC task agree more strongly on the location of the target representation in their perception.</li>
+<li>Vignette: the “two-stage pattern” framing is removed. <code><a href="../reference/group_ci.html">group_ci()</a></code> is reintroduced as a convenience helper rather than an architectural boundary. §1.3 gains a <code><a href="../reference/save_ci_images.html">save_ci_images()</a></code> example block showing exports for both per-producer and group CIs. <code>compute_infoval_summary()</code> references are rewritten as <code><a href="../reference/infoval_report.html">infoval_report()</a></code> calls.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="rcisignal-020">rcisignal 0.2.0<a class="anchor" aria-label="anchor" href="#rcisignal-020"></a></h2>
 <div class="section level3">
@@ -69,7 +99,7 @@
 <div class="section level3">
 <h3 id="breaking-change-0-1-9">Breaking change<a class="anchor" aria-label="anchor" href="#breaking-change-0-1-9"></a></h3>
 <ul><li><p><code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> argument <code>baseimage</code> renamed to <code>base_image</code> to match <code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code>. The new argument now accepts the same three input forms as Brief-RC: a numeric matrix in <code>[0, 1]</code>, a path to a PNG / JPEG, or a string label naming an entry in the rdata’s <code>base_faces</code> list (the historical 2IFC form). Matrix and path inputs are injected into a fresh temporary copy of the rdata under a synthetic label before the call into rcicr. No deprecation alias; calls using <code>baseimage = "..."</code> will fail with the standard R unused-argument error.</p></li>
-<li><p>The same rename cascades through the five downstream 2IFC diagnostic functions and the noise reader: <code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code>, <code><a href="../reference/compute_infoval_summary.html">compute_infoval_summary()</a></code>, <code><a href="../reference/check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code>, <code><a href="../reference/check_response_inversion.html">check_response_inversion()</a></code>, <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code>, plus <code>read_noise_matrix(base_image = ...)</code>. All accept the same three forms via the same internal resolver.</p></li>
+<li><p>The same rename cascades through the five downstream 2IFC diagnostic functions and the noise reader: <code>diagnose_infoval()</code>, <code>compute_infoval_summary()</code>, <code><a href="../reference/check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code>, <code><a href="../reference/check_response_inversion.html">check_response_inversion()</a></code>, <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code>, plus <code>read_noise_matrix(base_image = ...)</code>. All accept the same three forms via the same internal resolver.</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-1-9">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-9"></a></h3>
@@ -177,7 +207,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="tests-0-1-5">Tests<a class="anchor" aria-label="anchor" href="#tests-0-1-5"></a></h3>
-<ul><li>New regression test <code>test-simulate-diagnostic-chain.R</code> exercises <code><a href="../reference/simulate_2ifc_data.html">simulate_2ifc_data()</a></code> -&gt; <code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code> / <code><a href="../reference/compute_infoval_summary.html">compute_infoval_summary()</a></code> / <code><a href="../reference/check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code> / <code><a href="../reference/check_response_inversion.html">check_response_inversion()</a></code> / <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code> end-to-end on the bundled simulator. Guards against recurrence of the v0.1.1 rdata-env bugs (CLAUDE.md §11.21: <code>base_label</code> and missing <code>noise_type</code> in the saved rdata file). Skip-gated on the <code>rcicr</code> Suggests dep and on CRAN-style runs.</li>
+<ul><li>New regression test <code>test-simulate-diagnostic-chain.R</code> exercises <code><a href="../reference/simulate_2ifc_data.html">simulate_2ifc_data()</a></code> -&gt; <code>diagnose_infoval()</code> / <code>compute_infoval_summary()</code> / <code><a href="../reference/check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code> / <code><a href="../reference/check_response_inversion.html">check_response_inversion()</a></code> / <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code> end-to-end on the bundled simulator. Guards against recurrence of the v0.1.1 rdata-env bugs (CLAUDE.md §11.21: <code>base_label</code> and missing <code>noise_type</code> in the saved rdata file). Skip-gated on the <code>rcicr</code> Suggests dep and on CRAN-style runs.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-1-5">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-5"></a></h3>
@@ -235,7 +265,7 @@
 <ul><li>
 <code><a href="../reference/simulate_2ifc_data.html">simulate_2ifc_data()</a></code> and <code><a href="../reference/simulate_briefrc_data.html">simulate_briefrc_data()</a></code> gain an <code>rdata_dir</code> argument and now return a self-contained <code>$stimuli</code> list. The simulation object survives <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code>/<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code> and knitr <code>cache = TRUE</code> across R sessions: pass an explicit <code>rdata_dir</code> to keep the stimuli <code>.Rdata</code> at a stable path, or hand <code>$stimuli</code> to downstream consumers in place of <code>$rdata_path</code>.</li>
 <li>
-<code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>, <code><a href="../reference/diagnose_infoval.html">diagnose_infoval()</a></code>, <code><a href="../reference/compute_infoval_summary.html">compute_infoval_summary()</a></code>, <code><a href="../reference/check_response_inversion.html">check_response_inversion()</a></code>, <code><a href="../reference/check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code>, and <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code> gain a <code>stimuli =</code> argument as an in-memory alternative to <code>rdata_path =</code> / <code>rdata =</code>. When both are supplied <code>stimuli</code> takes precedence and a warning is emitted.</li>
+<code><a href="../reference/ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code>, <code>diagnose_infoval()</code>, <code>compute_infoval_summary()</code>, <code><a href="../reference/check_response_inversion.html">check_response_inversion()</a></code>, <code><a href="../reference/check_rt_infoval_consistency.html">check_rt_infoval_consistency()</a></code>, and <code><a href="../reference/run_diagnostics.html">run_diagnostics()</a></code> gain a <code>stimuli =</code> argument as an in-memory alternative to <code>rdata_path =</code> / <code>rdata =</code>. When both are supplied <code>stimuli</code> takes precedence and a warning is emitted.</li>
 <li>
 <code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> argument <code>base_image_path</code> is renamed <code>base_image</code> and now accepts either a numeric matrix in <code>[0, 1]</code> (e.g. <code>sim$base_face</code>) or a file path. The argument is now optional when <code>scaling = "none"</code> (the default), since the base face only feeds the visualization-only <code>$rendered_ci</code> field. The old <code>base_image_path</code> keeps working for one release with a deprecation warning.</li>
 <li>

@@ -17,8 +17,8 @@ Two halves of the package address these questions in turn. The
 input-side diagnostics
 ([`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md)
 and the `check_*` family, plus
-[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
-for the focused “is my data informative at all?” walk-through) cover the
+[`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+for the focused “is my data informative at all?” summary) cover the
 first question. The output-side reliability and discriminability metrics
 ([`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md),
 [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md),
@@ -114,21 +114,16 @@ validation studies I have missed, I would be glad to update this section
 
 For the engine-equivalence receipts behind the per-producer 2IFC infoVal
 claim above (and a Brief-RC signal-recovery sanity check), see
-`vignette("validation_rcicr", package = "rcisignal")`.
+[`vignette("validation_rcicr", package = "rcisignal")`](https://olivethree.github.io/rcisignal/articles/validation_rcicr.md).
 
-### 1.3 The two-stage pattern
+### 1.3 Per-producer CIs and the optional `group_by =` shortcut
 
-rcisignal pipelines have two stages. Knowing which stage you are in
-tells you which functions are available, and the package will tell you
-(with a teaching error) if you try to cross the line.
-
-**Stage 1: per-producer CIs.** Computed by
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
-or
-[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md).
-The output `$signal_matrix` is a numeric matrix of
-`pixels x n_producers`. Every reliability, discriminability, and
-informational-value function takes this object as its primary input:
+and
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+produce a `$signal_matrix` of `pixels x n_producers` (one column per
+producer). Every reliability, discriminability, and informational- value
+function in the package takes this object as its primary input:
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
 [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md),
 [`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md),
@@ -137,9 +132,7 @@ informational-value function takes this object as its primary input:
 [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
 [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
 [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md),
-plus the three `run_*` orchestrators. Anything that needs producer-level
-information (reference distributions, permutations across producers,
-bootstrap of pairwise distances, agreement maps) lives here.
+plus the three `run_*` orchestrators.
 
 ``` r
 
@@ -147,60 +140,71 @@ cis <- ci_from_responses_briefrc(responses,
                                  noise_matrix = noise_matrix)
 cis$signal_matrix          # pixels x n_producers
 run_reliability(cis$signal_matrix, n_permutations = 200L)
-infoval(cis$signal_matrix, noise_matrix, trial_counts,
-        iter = 500L)
+infoval(cis$signal_matrix, noise_matrix,
+        responses = responses, iter = 500L)
 ```
 
-**Stage 2: group-averaged CIs (optional).** Computed by
-[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md).
-The output is a numeric matrix of `pixels x n_groups`, classed
-`rcisignal_group_ci`. Use it for side-by-side group plots, pairwise
-distance matrices
-([`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)),
-correlogram views
-([`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)),
-and MDS projections
-([`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)).
-The function does not accept `trial_counts`, `noise_matrix`, or `mask`,
-anything that needs producer-level information has to happen in stage 1.
+When you want CIs averaged by condition (or another grouping column),
+the cheapest way is to pass `group_by =` to the generator and read both
+matrices off the same return list:
 
 ``` r
 
-# `responses` is the same trial-level data frame you handed to
-# ci_from_responses_*(). `by` names the column that holds the
-# grouping label (one row per trial; rcisignal extracts the
-# producer -> condition map for you).
-gcis <- group_ci(cis$signal_matrix, responses, by = "condition")
-gcis                       # pixels x n_groups, with attr "n"
-plot_ci_distance_matrix(gcis)
+# `group_by` names a column (or columns) in `responses`. The
+# generator calls `group_ci()` for you and returns both matrices.
+res <- ci_from_responses_briefrc(
+  responses, noise_matrix = noise_matrix, group_by = "condition"
+)
+res$signal_matrix          # pixels x n_producers (as before)
+res$group_ci               # pixels x n_groups
+plot_ci_distance_matrix(res$group_ci)
 ```
 
-The two stages are named contracts, not just a convention. If you hand a
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-result to a stage-1 function (eg `rel_split_half(gcis)`), the function
-aborts with a message that names the issue and points back at this
-section. This is deliberate: a stage-2 matrix has no producer-level
-spread for reliability, no producer-level reference for infoVal, and no
-producer-level grouping for permutation testing. The error message is
-the cheapest way to teach the architecture at the moment of confusion.
+is also exported as a standalone helper. Use it when you already have a
+per-producer signal matrix in hand (eg one read back from disk) and want
+to collapse producers into per-group means with the same validation
+(each producer’s `by` value(s) must be constant across their rows;
+producers in `colnames(signal_matrix)` must be present in `responses`).
 
-The metric sections that follow are stage-1 functions unless they say
-otherwise.
-
-The three stage-2 plot functions
-([`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
+The plot functions
+[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
 [`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md),
-[`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md))
-are flexible about input shape: they accept a
-[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-result directly, a named numeric matrix of `pixels x n_groups`
-(e.g. built with `cbind(name = rowMeans(...), ...)`), or the historical
-named-list form (per-producer matrices, single-column matrices, or pixel
-vectors mixed in one list). Use
-[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-whenever you have a single per-producer signal matrix plus the responses
-data frame that fed into it; use the matrix or list form when your
-per-condition CIs already live in separate objects.
+and
+[`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
+accept any named collection of CIs (per-producer or group-level), so the
+same call works on the per-producer `$signal_matrix`, on `$group_ci`, on
+a named matrix you built with
+[`cbind()`](https://rdrr.io/r/base/cbind.html), or on a named list.
+Names become the labels in the figure.
+
+### 1.4 Exporting CIs as PNG or JPEG
+
+[`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
+writes each column of a signal matrix to disk as its own image,
+composited over a base face. The same call works for per-producer
+matrices and for group-averaged matrices; the function picks a sensible
+filename prefix based on what you hand it.
+
+``` r
+
+out_dir <- tempfile("oliveira_cis_"); dir.create(out_dir)
+
+# One PNG per producer: ind_ci_P001.png, ind_ci_P002.png, ...
+save_ci_images(res$signal_matrix, base_image = sim$base_face,
+               dir = out_dir)
+
+# One PNG per condition: group_ci_A.png, group_ci_B.png, ...
+save_ci_images(res$group_ci, base_image = sim$base_face,
+               dir = out_dir)
+```
+
+The default palette is `"diverging"` (matches
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md),
+blue = positive, red = negative). Pass `palette = "fire"` for the
+unipolar `|t|`-style yellow-to-red ramp, `format = "jpeg"` to write
+JPEGs instead, or `prefix = "trust_"` (or any other string) to override
+the auto-derived prefix.
 
 ## 2. Installation
 
@@ -260,7 +264,7 @@ reliability and discriminability metrics, sensitivity to contamination).
   [`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html)
   writes, so
   [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
-  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md),
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md),
   and every other function that asks for an `rdata` argument works out
   of the box.
 - **A self-contained `$stimuli` list** that round-trips through
@@ -543,23 +547,33 @@ scaling distorts the numbers. The `"matched"` (per-CI) scaling option,
 where each producer’s mask is stretched to the base’s dynamic range,
 breaks correlation-based metrics as well.
 
-`rcisignal` keeps track of which kind of matrix you have by labeling
-each signal matrix with a `source` tag (either `"raw"` or `"rendered"`).
-The variance-based functions check this tag before they run, and stop
-with an informative error if you pass a rendered matrix:
+The package marks each signal matrix as either `"raw"` (built by
+`ci_from_responses_*()`, the input shape every metric expects) or
+`"rendered"` (read in from PNGs via
+[`read_cis()`](https://olivethree.github.io/rcisignal/reference/read_cis.md)
+/
+[`read_signal_matrix()`](https://olivethree.github.io/rcisignal/reference/read_signal_matrix.md),
+the visualization-only shape). When you pass a rendered matrix to a
+variance-based metric
+([`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md),
+[`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md),
+the cluster test, the Euclidean half of
+[`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)),
+the call aborts with an explicit error rather than silently producing
+distorted numbers:
 
 - Functions that build raw masks
   ([`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
   [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md))
-  label the resulting matrix as `"raw"`.
+  mark the resulting matrix as `"raw"`.
 - Functions that read PNGs
   ([`read_cis()`](https://olivethree.github.io/rcisignal/reference/read_cis.md),
   [`extract_signal()`](https://olivethree.github.io/rcisignal/reference/extract_signal.md),
   [`read_signal_matrix()`](https://olivethree.github.io/rcisignal/reference/read_signal_matrix.md))
-  label it as `"rendered"`.
-- Variance-based metrics check this label internally and stop with an
-  informative error when given a `"rendered"` matrix, unless you pass
-  `acknowledge_scaling = TRUE` to confirm you have read the caveat.
+  mark it as `"rendered"`.
+- Variance-based metrics refuse to run on a `"rendered"` matrix unless
+  you pass `acknowledge_scaling = TRUE` to confirm you have read the
+  caveat.
 
 ``` r
 
@@ -1413,10 +1427,11 @@ points cover this step.
 [`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md)
 (§5.1) invokes every implemented check whose required inputs are
 available and gathers the results into one printable report.
-[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
-(§5.4) is a focused six-step walk-through of the single question “is my
-data informative at all?”; it is the diagnostic to reach for when the
-headline worry is signal strength rather than coding or balance.
+[`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+(§5.4) is the focused per-producer infoVal report for the single
+question “is my data informative at all?”; it is the function to reach
+for when the headline worry is signal strength rather than coding or
+balance.
 
 ### 5.1 A first run
 
@@ -1448,7 +1463,7 @@ The output looks like:
       - check_rt (no col_rt)
       - check_stimulus_alignment (no rdata or noise_matrix)
       - check_version_compat (no rdata)
-      - compute_infoval_summary (no rdata + infoval_iter)
+      - infoval_report (no rdata + infoval_iter)
       - check_response_inversion (no rdata + infoval_iter)
       - check_rt_infoval_consistency (no rdata + infoval_iter + col_rt)
 
@@ -1514,18 +1529,19 @@ takes `responses` plus its check-specific arguments and returns an
   version. PASS if matching; WARN otherwise. The warning is
   informational (older datasets remain usable, and the flag simply
   prompts a spot-check).
-- **`check_response_inversion(rdata = ..., infoval_iter = ...)`**
-  detects whole-batch sign-flipped data by computing per-producer
-  infoVal with the original responses and again with the negated
-  responses. FAIL if \>= 50% of producers are flagged as inverted; WARN
-  if any are.
+- **`check_response_inversion(rdata = ...` (2IFC) `| noise_matrix = ...`
+  (Brief-RC)`, infoval_iter = ...)`** detects whole-batch sign-flipped
+  data by computing per-producer infoVal with the original responses and
+  again with the negated responses. FAIL if \>= 50% of producers are
+  flagged as inverted; WARN if any are.
 
-### 5.4 `diagnose_infoval()`
+### 5.4 `infoval_report()`
 
-[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
-is the recommended diagnostic for the question “is my data informative
-at all?”. It runs a six-step walk-through that catches every common
-low-infoVal cause:
+[`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+is the canonical per-producer infoVal summary for the question “is my
+data informative at all?”. It runs six steps that surface the
+per-producer z-scores plus the calibration cross-checks that show
+whether those numbers can be trusted:
 
 1.  Compute observed Frobenius norm per producer (and group-mean).
 2.  Compare against a reference distribution at each producer’s actual
@@ -1543,7 +1559,7 @@ low-infoVal cause:
 
 ``` r
 
-iv <- diagnose_infoval(
+iv <- infoval_report(
   responses,
   method    = "2ifc",
   rdata     = "rcic_stimuli.Rdata",
@@ -1565,29 +1581,17 @@ The status logic:
 - **WARN**: anything in between. Usually means the per-producer signal
   is genuinely modest but the group CI is informative.
 
-### 5.5 `compute_infoval_summary()`
-
-A small convenience function around
-[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
-for the legacy 2IFC path. It returns a per-participant z table plus a
-pass/warn summary, useful for direct comparison with previously
-published `rcicr` numbers. For the Brief-RC path or for the
-trial-count-matched reference, prefer
-[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
-or
-[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
-directly.
-
-### 5.6 `check_rt_infoval_consistency()`
+### 5.5 `check_rt_infoval_consistency()`
 
 Cross-validates infoVal against RT quality by correlating per-producer
 infoVal with per-producer median RT. A strong negative correlation
 (correlation \<= -0.30) suggests that fast clickers are also producing
 low-infoVal masks, indicating a population-level pattern rather than a
 single-producer fluke. WARN if the correlation passes the threshold;
-PASS otherwise.
+PASS otherwise. Works with both 2IFC (`rdata = ...`) and Brief-RC
+(`noise_matrix = ...`) data.
 
-### 5.7 Conditional checks and required arguments
+### 5.6 Conditional checks and required arguments
 
 When the call carries only response data, four checks run and six are
 skipped. Each skipped check requires a specific additional argument:
@@ -1597,9 +1601,9 @@ skipped. Each skipped check requires a specific additional argument:
 | `check_rt` | `col_rt` |
 | `check_stimulus_alignment` | `rdata` (2IFC) or `noise_matrix` (Brief-RC) |
 | `check_version_compat` | `rdata` (2IFC only) |
-| `compute_infoval_summary` | `rdata` + `infoval_iter` |
-| `check_response_inversion` | `rdata` + `infoval_iter` |
-| `check_rt_infoval_consistency` | `rdata` + `infoval_iter` + `col_rt` |
+| `infoval_report` | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` |
+| `check_response_inversion` | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` |
+| `check_rt_infoval_consistency` | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` + `col_rt` |
 
 `infoval_iter` defaults to `NULL` because the reference distribution
 simulation at 10,000 iterations takes minutes on first call. Opt in
@@ -1677,9 +1681,10 @@ matrix).
 
 Both builders return one column per producer in `$signal_matrix`. To
 average across producers into a single group CI (or several side-by-side
-group CIs for between-condition comparisons), see
+group CIs for between-condition comparisons), pass `group_by =` to the
+builder, or call
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-and the two-stage pattern in section 1.3.
+directly. See section 1.3.
 
 ### 6.2 From pre-rendered CIs
 
@@ -2339,7 +2344,7 @@ picture.
 
 A note on *group-mean infoVal*. The package also offers a group-mean
 version (`group_mean_z()`, called inside
-[`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md)
+[`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
 as a supplementary statistic). It applies the same Frobenius-norm logic
 to the group-averaged CI, using a matched-N reference distribution so
 the calibration is fair (see §15 for what goes wrong when that reference
@@ -2388,6 +2393,49 @@ typically smaller than `n_pool`, a pool-size reference biases infoVal
 downward.
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
 uses each producer’s actual recorded trial count.
+
+### 9.1 Validation against `rcicr` on real data
+
+Because
+[`rcisignal::infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+is a reimplementation, it is useful to know how its numbers line up with
+the established
+[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html).
+The companion vignette *Validation: rcisignal vs rcicr infoVal
+convergence* runs both implementations on the open data from Oliveira,
+Garcia-Marques, Dotsch & Garcia-Marques (2019), ten traits, twenty
+producers per trait, 300 trials each. The headline table:
+
+| trait | n | median z (rcisignal) | median z (rcicr) | n ≥ 1.96 (rcisignal) | n ≥ 1.96 (rcicr) | Pearson r |
+|----|----|----|----|----|----|----|
+| competent | 20 | 0.089 | 0.083 | 2 | 2 | 1.000 |
+| dominant | 20 | 0.268 | 0.267 | 4 | 4 | 1.000 |
+| friendly | 20 | 0.703 | 0.713 | 1 | 1 | 1.000 |
+| incompetent | 20 | 0.243 | 0.241 | 0 | 0 | 1.000 |
+| intelligent | 20 | 0.584 | 0.591 | 2 | 2 | 1.000 |
+| submissive | 20 | 0.525 | 0.530 | 4 | 4 | 1.000 |
+| trust | 20 | 0.323 | 0.323 | 2 | 2 | 1.000 |
+| unfriendly | 20 | 0.712 | 0.722 | 3 | 3 | 1.000 |
+| unintelligent | 20 | 0.233 | 0.231 | 1 | 1 | 1.000 |
+| untrust | 20 | 0.664 | 0.673 | 5 | 5 | 1.000 |
+
+Two patterns stand out. First, the per-producer correlation is 1.000 in
+every trait, so the two implementations rank producers identically and
+produce the same headcount of producers clearing the conventional z =
+1.96 threshold. Second, median z values differ between the two
+implementations by at most about 0.01, which is well within the noise of
+a Monte-Carlo reference distribution. In practical terms the choice
+between
+[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+and
+[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
+makes no difference to the conclusions you would draw about individual
+producers on a 2IFC dataset of this size.
+
+For the engine-equivalence math (random-responder reference
+distributions match to within rounding) and a Brief-RC signal-recovery
+sanity check, see
+[`vignette("validation_rcicr", package = "rcisignal")`](https://olivethree.github.io/rcisignal/articles/validation_rcicr.md).
 
 **Interpreting infoVal.** The Frobenius norm is a magnitude statistic,
 answering “is this mask larger than chance?” rather than “is it pointing
@@ -2978,11 +3026,9 @@ sm_friendly  <- sm[["friendly"]]
 
 `sm` is now a named list of ten signal matrices, each 65,536 x 20
 (`n_pixels x n_producers`). The contrasts and metrics in the sections
-that follow use these matrices directly. If you want to see what
-[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
-does internally (the noise-matrix lookup, the per-producer mask formula,
-and the `img_dims` / `source` attributes it sets), the recipe is broken
-into four short steps in §3.3.
+that follow use these matrices directly. If you want a detailed
+walkthrough of how the function builds the per-producer mask, the
+four-step recipe in §3.3 walks it through.
 
 ### 12.6 Within-condition reliability per trait
 
@@ -3973,7 +4019,7 @@ data problem. Five reasons in roughly the order they tend to apply.
     contributing to the group CI rather than computing a single infoVal
     on the averaged noise pattern (their p. 13). The group-mean infoVal
     this package offers (`group_mean_z()`, called inside
-    [`diagnose_infoval()`](https://olivethree.github.io/rcisignal/reference/diagnose_infoval.md))
+    [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md))
     is a package-level extension of that recipe and has not been
     independently validated for social- face RC (see §1.2). The §12.4
     worked example reports both numbers alongside; treat the group-mean
@@ -4091,7 +4137,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira M (2026). _rcisignal: Quality Checks for Reverse-Correlation
-#>   Data and Classification Images_. R package version 0.2.0,
+#>   Data and Classification Images_. R package version 0.3.0,
 #>   <https://github.com/olivethree/rcisignal>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -4101,7 +4147,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> Images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.2.0},
+#>     note = {R package version 0.3.0},
 #>     url = {https://github.com/olivethree/rcisignal},
 #>   }
 ```

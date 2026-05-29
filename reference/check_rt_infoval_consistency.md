@@ -12,12 +12,14 @@ check_rt_infoval_consistency(
   method = c("2ifc", "briefrc"),
   rdata = NULL,
   stimuli = NULL,
+  noise_matrix = NULL,
   base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
   col_rt = "rt",
-  iter = 10000L,
+  iter = 1000L,
+  seed = NULL,
   ...
 )
 ```
@@ -39,8 +41,8 @@ check_rt_infoval_consistency(
 
 - rdata:
 
-  Path to the rcicr `.RData` file. Either `rdata` or `stimuli` must be
-  supplied for the 2IFC path.
+  Path to the rcicr `.RData` file (2IFC). Either `rdata` or `stimuli`
+  must be supplied for the 2IFC path.
 
 - stimuli:
 
@@ -49,9 +51,16 @@ check_rt_infoval_consistency(
   (e.g. after [`saveRDS()`](https://rdrr.io/r/base/readRDS.html)/
   [`readRDS()`](https://rdrr.io/r/base/readRDS.html) across R sessions).
 
+- noise_matrix:
+
+  Noise matrix for the Brief-RC path. Either a numeric matrix of
+  `n_pixels x pool_size`, or a path to a text / `.rds` file (see
+  [`read_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/read_noise_matrix.md)).
+
 - base_image:
 
-  Name of the base image in `rdata$base_face_files`.
+  Name of the base image in `rdata$base_face_files` (2IFC only). Default
+  `"base"`.
 
 - col_participant, col_stimulus, col_response, col_rt:
 
@@ -59,7 +68,11 @@ check_rt_infoval_consistency(
 
 - iter:
 
-  Reference-distribution iterations. Default `10000`.
+  Reference-distribution iterations. Default `1000L`.
+
+- seed:
+
+  Optional integer; RNG state restored on exit.
 
 - ...:
 
@@ -78,20 +91,16 @@ two.
 1.  High infoVal with fast median RT. A participant producing a
     seemingly informative CI while responding faster than others is more
     likely to have produced a spurious signal than genuine meaningful
-    information — the signal may be an artefact of a button-mashing
+    information – the signal may be an artefact of a button-mashing
     strategy that happens to correlate with the noise.
 
 2.  A negative correlation between infoVal and median RT across
     participants. If fast responders systematically score higher on
     infoVal, something about the measurement is off.
 
-The function computes `cor(infoval, median_rt)` across participants and
-returns the value plus a per-participant table for further inspection.
-It does not auto-exclude anyone; interpretation requires judgement about
-the specific experiment.
-
-Requires `rcicr` via
-[`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md).
+Per-producer infoVal z-scores are computed via the package-native
+[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+pipeline; both Brief-RC and 2IFC paradigms are supported.
 
 ## Examples
 

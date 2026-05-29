@@ -137,7 +137,7 @@ An object of class `"rcisignal_sim"` with elements:
   `rdata_dir`. Suitable for
   [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
   /
-  [`compute_infoval_summary()`](https://olivethree.github.io/rcisignal/reference/compute_infoval_summary.md)
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
   and other downstream functions that take an `rdata` argument. **Not
   portable across R sessions** when `rdata_dir = NULL`.
 

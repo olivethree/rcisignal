@@ -22,7 +22,8 @@ ci_from_responses_2ifc(
   scaling = "autoscale",
   keep_rendered = FALSE,
   targetpath = tempfile("rcisignal_2ifc_"),
-  save_as_png = FALSE
+  save_as_png = FALSE,
+  group_by = NULL
 )
 ```
 
@@ -97,10 +98,22 @@ ci_from_responses_2ifc(
   Whether rcicr writes individual CI PNGs. Defaults to `FALSE` for speed
   in a pure reliability pipeline.
 
+- group_by:
+
+  Optional character vector of column names in `responses` to group
+  producers by. When supplied, the return list additionally contains
+  `$group_ci`, a pixels x n_groups matrix built by calling
+  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
+  internally with the same `col_participant`. Single column (e.g.
+  `"condition"`) gives one CI per level; length 2+ gives a factorial
+  grouping with cell labels joined by `"_"`. Default `NULL` (no group CI
+  built; only the per-producer `$signal_matrix` is returned).
+
 ## Value
 
 A list with `signal_matrix`, optionally `rendered_ci`, `participants`,
-`img_dims`, `scaling`, and `rcicr_result`.
+`img_dims`, `scaling`, `rcicr_result`, and optionally `group_ci` (when
+`group_by` is supplied).
 
 ## Details
 
@@ -148,8 +161,8 @@ What the wrapper does for you:
 
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md),
 [`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html),
-[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-(stage 2, optional)
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md),
+[`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
 
 ## Examples
 

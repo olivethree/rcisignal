@@ -31,7 +31,7 @@ progress bar is shown."><meta property="og:image" content="https://olivethree.gi
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,10 @@ progress bar is shown."><meta property="og:image" content="https://olivethree.gi
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/rcisignal.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/validation_rcicr.html">Validation: rcisignal vs rcicr infoVal convergence</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -188,7 +192,7 @@ output); pair with <code>params</code> to regenerate any noise image.</p></li>
 written either to a session tempdir (when
 <code>rdata_dir = NULL</code>) or to the user-supplied <code>rdata_dir</code>.
 Suitable for <code><a href="ci_from_responses_2ifc.html">ci_from_responses_2ifc()</a></code> /
-<code><a href="compute_infoval_summary.html">compute_infoval_summary()</a></code> and other downstream functions
+<code><a href="infoval_report.html">infoval_report()</a></code> and other downstream functions
 that take an <code>rdata</code> argument. <strong>Not portable across R
 sessions</strong> when <code>rdata_dir = NULL</code>.</p></li>
 <li><p><code>base_image_path</code> — path to a standalone PNG of <code>base_face</code>

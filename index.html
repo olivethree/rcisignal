@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,12 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/rcisignal.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/validation_rcicr.html">Validation: rcisignal vs rcicr infoVal convergence</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -60,7 +66,7 @@
 <blockquote>
 <p>Package is not on CRAN, distribution is GitHub-only.</p>
 </blockquote>
-<p><strong><a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html">User guide</a> · <a href="#installation">Installation</a> · <a href="#showcase-oliveira-et-al-2019">Showcase</a> · <a href="#citation">Citation</a></strong></p>
+<p><strong><a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html">User guide</a> · <a href="#installation">Installation</a> · <a href="#using-rcisignal-on-a-real-data-set">Using rcisignal on a real data set</a> · <a href="#citation">Citation</a></strong></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -77,48 +83,16 @@
 </blockquote>
 </div>
 <div class="section level2">
-<h2 id="showcase-oliveira-et-al-2019">Showcase: Oliveira et al. (2019)<a class="anchor" aria-label="anchor" href="#showcase-oliveira-et-al-2019"></a>
+<h2 id="using-rcisignal-on-a-real-data-set">Using rcisignal on a real data set<a class="anchor" aria-label="anchor" href="#using-rcisignal-on-a-real-data-set"></a>
 </h2>
-<p>A re-analysis of the open data from <a href="https://doi.org/10.1002/ejsp.2569" class="external-link">Oliveira, Garcia-Marques, Dotsch &amp; Garcia-Marques (2019)</a>, 2IFC reverse correlation on a 256 x 256 grayscale male base face, 20 producers per trait, 300 trials each. Two contrasts are shown: <strong>Trustworthy vs Friendly</strong> and <strong>Dominant vs Competent</strong>.</p>
+<p>A re-analysis of the open data from <a href="https://doi.org/10.1002/ejsp.2569" class="external-link">Oliveira, Garcia-Marques, Dotsch &amp; Garcia-Marques (2019)</a>, 2IFC reverse correlation on a 256 x 256 grayscale male base face, 20 producers per trait, 300 trials each.</p>
 <div class="section level3">
-<h3 id="cross-producer-agreement-maps-descriptive">Cross-producer agreement maps (descriptive)<a class="anchor" aria-label="anchor" href="#cross-producer-agreement-maps-descriptive"></a>
+<h3 id="cross-producer-agreement-maps-fire-palette">Cross-producer agreement maps (fire palette)<a class="anchor" aria-label="anchor" href="#cross-producer-agreement-maps-fire-palette"></a>
 </h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<tbody>
-<tr>
-<td><strong>Trustworthy − Friendly</strong></td>
-<td><strong>Dominant − Competent</strong></td>
-</tr>
-<tr>
-<td><img src="articles/figures/oliveira_2019/pairwise_descriptive_trust_vs_friendly.png" alt="Descriptive map: trust minus friendly"></td>
-<td><img src="articles/figures/oliveira_2019/pairwise_descriptive_dominant_vs_competent.png" alt="Descriptive map: dominant minus competent"></td>
-</tr>
-</tbody>
-</table>
+<div class="float">
+<img src="articles/figures/oliveira_2019/agreement_maps_fire.png" alt="Cross-producer agreement maps for four traits (Trustworthy, Friendly, Competent, Dominant), fire palette, restricted to the full-face oval"><div class="figcaption">Cross-producer agreement maps for four traits (Trustworthy, Friendly, Competent, Dominant), fire palette, restricted to the full-face oval</div>
 </div>
-<div class="section level3">
-<h3 id="cross-producer-agreement-maps-fwer-controlled">Cross-producer agreement maps (FWER-controlled)<a class="anchor" aria-label="anchor" href="#cross-producer-agreement-maps-fwer-controlled"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<tbody>
-<tr>
-<td><strong>Trustworthy − Friendly</strong></td>
-<td><strong>Dominant − Competent</strong></td>
-</tr>
-<tr>
-<td><img src="articles/figures/oliveira_2019/pairwise_trust_vs_friendly.png" alt="FWER map: trust minus friendly"></td>
-<td><img src="articles/figures/oliveira_2019/pairwise_dominant_vs_competent.png" alt="FWER map: dominant minus competent"></td>
-</tr>
-</tbody>
-</table>
+<p>For each trait, brighter pixels mark image regions where the 20 producers in the RC task agreed more strongly on the location of the target representation in their perception. The colorbar shows the <em>degree of agreement (|t|)</em> from a per-pixel one-sample test of producer CIs against zero, computed within the full-face oval. Hot regions indicate consistent across-producer structure regardless of sign; pale regions indicate weak or inconsistent agreement. For the directional view (where the signal sits above or below the base), see the user guide.</p>
 </div>
 <div class="section level3">
 <h3 id="infoval-per-face-region">
@@ -184,7 +158,7 @@
 </h2>
 <p>If <code>rcisignal</code> helps your research, please cite it:</p>
 <pre><code>Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
-data and classification images (Version 0.2.0) [R package]. Zenodo.
+data and classification images (Version 0.3.0) [R package]. Zenodo.
 https://doi.org/10.5281/zenodo.19961180</code></pre>
 <p>Run <code>citation("rcisignal")</code> in R for a BibTeX entry.</p>
 <p>Please also cite the methodological sources appropriate to your pipeline:</p>

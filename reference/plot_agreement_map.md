@@ -26,6 +26,7 @@ plot_agreement_map(
   alpha_max = 0.7,
   main = "Per-pixel producer agreement (t-map)",
   show_n = TRUE,
+  bar_label = NULL,
   ...
 )
 ```
@@ -105,6 +106,14 @@ plot_agreement_map(
   Logical. When `TRUE` (default), draw the "N = ... producers, W x H
   pixels" subtitle line below the title. Set `FALSE` for multi-panel
   layouts where this information is already in the caption.
+
+- bar_label:
+
+  Optional character scalar overriding the colorbar axis label. When
+  `NULL` (default), uses `"t"` for `palette = "diverging"` and `"|t|"`
+  for `palette = "fire"`. Override e.g. with
+  `"Degree of agreement (|t|)"` for a fire palette figure aimed at
+  non-technical readers.
 
 - ...:
 
