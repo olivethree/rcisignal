@@ -79,11 +79,21 @@
 #'   unscaled mask.
 #' @param scaling_constant Numeric multiplier used when
 #'   `scaling = "constant"`. Ignored otherwise.
+#' @param group_by Optional character vector of column names in
+#'   `responses` to group producers by. When supplied, the return
+#'   list additionally contains `$group_ci`, a pixels x n_groups
+#'   matrix built by calling [group_ci()] internally with the same
+#'   `col_participant`. Single column (e.g. `"condition"`) gives
+#'   one CI per level; length 2+ gives a factorial grouping with
+#'   cell labels joined by `"_"`. Default `NULL` (no group CI
+#'   built; only the per-producer `$signal_matrix` is returned).
 #' @return A list with `signal_matrix`, optionally `rendered_ci`,
-#'   `participants`, `img_dims`, `scaling`, and `method` (the
-#'   Brief-RC variant the call was made with).
+#'   `participants`, `img_dims`, `scaling`, `method` (the
+#'   Brief-RC variant the call was made with), and optionally
+#'   `group_ci` (when `group_by` is supplied).
 #' @seealso [ci_from_responses_2ifc()], [run_reliability()],
-#'   [run_discriminability()], [group_ci()] (stage 2, optional)
+#'   [run_discriminability()], [group_ci()],
+#'   [save_ci_images()]
 #' @references
 #' Schmitz, M., Rougier, M., & Yzerbyt, V. (2024). Introducing the
 #' brief reverse correlation: an improved tool to assess visual
@@ -121,6 +131,7 @@ ci_from_responses_briefrc <- function(responses,
                                                            "matched",
                                                            "constant"),
                                       scaling_constant = NULL,
+                                      group_by         = NULL,
                                       base_image_path  = NULL) {
   method  <- match.arg(method)
   scaling <- match.arg(scaling)
@@ -245,6 +256,7 @@ ci_from_responses_briefrc <- function(responses,
   }
   attr(signal_matrix, "img_dims") <- img_dims
   attr(signal_matrix, "source")   <- "raw"
+  attr(signal_matrix, "ci_stage") <- "individual"
 
   out <- list(
     signal_matrix = signal_matrix,
@@ -263,6 +275,15 @@ ci_from_responses_briefrc <- function(responses,
     )
     attr(out$rendered_ci, "img_dims") <- img_dims
     attr(out$rendered_ci, "source")   <- "rendered"
+  }
+
+  if (!is.null(group_by)) {
+    out$group_ci <- group_ci(
+      signal_matrix   = signal_matrix,
+      responses       = responses,
+      by              = group_by,
+      col_participant = col_participant
+    )
   }
 
   out

@@ -74,7 +74,6 @@ run_reliability <- function(signal_matrix,
                             seed                = NULL,
                             progress            = TRUE,
                             acknowledge_scaling = FALSE) {
-  abort_if_group_ci(signal_matrix, fn = "run_reliability")
   null <- match.arg(null)
   if (identical(null, "random_responders") && is.null(noise_matrix)) {
     cli::cli_abort(c(

@@ -9,12 +9,14 @@ check_response_inversion(
   method = c("2ifc", "briefrc"),
   rdata = NULL,
   stimuli = NULL,
+  noise_matrix = NULL,
   base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
   margin = 1.96,
-  iter = 10000L,
+  iter = 1000L,
+  seed = NULL,
   ...
 )
 }
@@ -27,24 +29,31 @@ columns: \code{participant_id}, \code{stimulus}, \code{response} (values in
 
 \item{method}{\code{"2ifc"} or \code{"briefrc"}.}
 
-\item{rdata}{Path to the rcicr \code{.RData} file. Either \code{rdata}
-or \code{stimuli} must be supplied for the 2IFC path.}
+\item{rdata}{Path to the rcicr \code{.RData} file (2IFC). Either
+\code{rdata} or \code{stimuli} must be supplied for the 2IFC path.}
 
 \item{stimuli}{In-memory stimuli list (the \verb{$stimuli} element
 of an \code{rcisignal_sim} object). Use in place of \code{rdata} when
 the file path no longer resolves (e.g. after \code{\link[=saveRDS]{saveRDS()}}/
 \code{\link[=readRDS]{readRDS()}} across R sessions).}
 
-\item{base_image}{Name of the base image in \code{rdata$base_face_files}.}
+\item{noise_matrix}{Noise matrix for the Brief-RC path. Either a
+numeric matrix of \verb{n_pixels x pool_size}, or a path to a text /
+\code{.rds} file (see \code{\link[=read_noise_matrix]{read_noise_matrix()}}).}
+
+\item{base_image}{Name of the base image in \code{rdata$base_face_files}
+(2IFC only). Default \code{"base"}.}
 
 \item{col_participant, col_stimulus, col_response}{Column names.}
 
 \item{margin}{Numeric. Flagging threshold: flipped infoVal must
 exceed original infoVal by at least this amount. Default \code{1.96}.}
 
-\item{iter}{Reference-distribution iterations. Default \code{10000}.}
+\item{iter}{Reference-distribution iterations. Default \code{1000L}.}
 
-\item{...}{Passed through to \code{\link[=compute_infoval_summary]{compute_infoval_summary()}}.}
+\item{seed}{Optional integer; RNG state restored on exit.}
+
+\item{...}{Unused.}
 }
 \value{
 An \code{\link[=rcisignal_diag_result]{rcisignal_diag_result()}} object. \code{data$per_participant} has
@@ -57,19 +66,19 @@ response codes flipped relative to the convention \code{rcicr} expects:
 \code{+1} means "inverted version chosen" when the analyst intended
 "original chosen", or the CSV export inadvertently negated the
 response column. A straightforward way to detect this is to compute
-the infoVal twice per participant — once with the original codes
-and once with every response negated — and compare. For correctly
+the infoVal twice per participant -- once with the original codes
+and once with every response negated -- and compare. For correctly
 coded data, the original should score higher; if the flipped CI
 scores meaningfully higher, the response column is probably inverted.
 }
 \details{
-This check calls \code{\link[=compute_infoval_summary]{compute_infoval_summary()}} twice and reports
-participants whose flipped infoVal exceeds the original by \code{margin}
-or more. A non-zero count is a strong signal that the response
-column is miscoded for those participants.
-
-Requires \code{rcicr} (same as \code{\link[=compute_infoval_summary]{compute_infoval_summary()}}). Runs two
-infoVal sweeps, so it takes roughly twice as long.
+This check computes per-producer infoVal z-scores via the
+package-native \code{\link[=infoval]{infoval()}} pipeline twice (original and
+sign-flipped) and reports participants whose flipped infoVal
+exceeds the original by \code{margin} or more. Supports both 2IFC and
+Brief-RC. A non-zero count is a strong signal that the response
+column is miscoded for those participants. Runs two infoVal sweeps,
+so it takes roughly twice as long.
 }
 \examples{
 \dontrun{

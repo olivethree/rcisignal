@@ -82,11 +82,21 @@
 #'   auto-cleaned tempdir so the working directory is not polluted.
 #' @param save_as_png Whether rcicr writes individual CI PNGs.
 #'   Defaults to `FALSE` for speed in a pure reliability pipeline.
+#' @param group_by Optional character vector of column names in
+#'   `responses` to group producers by. When supplied, the return
+#'   list additionally contains `$group_ci`, a pixels x n_groups
+#'   matrix built by calling [group_ci()] internally with the same
+#'   `col_participant`. Single column (e.g. `"condition"`) gives
+#'   one CI per level; length 2+ gives a factorial grouping with
+#'   cell labels joined by `"_"`. Default `NULL` (no group CI
+#'   built; only the per-producer `$signal_matrix` is returned).
 #' @return A list with `signal_matrix`, optionally `rendered_ci`,
-#'   `participants`, `img_dims`, `scaling`, and `rcicr_result`.
+#'   `participants`, `img_dims`, `scaling`, `rcicr_result`, and
+#'   optionally `group_ci` (when `group_by` is supplied).
 #' @seealso [ci_from_responses_briefrc()],
 #'   [rcicr::batchGenerateCI2IFC()],
-#'   [group_ci()] (stage 2, optional)
+#'   [group_ci()],
+#'   [save_ci_images()]
 #' @export
 #' @examples
 #' \dontrun{
@@ -121,7 +131,8 @@ ci_from_responses_2ifc <- function(responses,
                                    scaling         = "autoscale",
                                    keep_rendered   = FALSE,
                                    targetpath      = tempfile("rcisignal_2ifc_"),
-                                   save_as_png     = FALSE) {
+                                   save_as_png     = FALSE,
+                                   group_by        = NULL) {
   rdata_path <- resolve_rdata_input(rdata_path, stimuli,
                                     method = "2ifc")
   if (!requireNamespace("rcicr", quietly = TRUE)) {
@@ -230,6 +241,7 @@ ci_from_responses_2ifc <- function(responses,
   }
   attr(signal_matrix, "img_dims") <- img_dims
   attr(signal_matrix, "source")   <- "raw"
+  attr(signal_matrix, "ci_stage") <- "individual"
   if (!is.null(rendered)) {
     attr(rendered, "img_dims") <- img_dims
     attr(rendered, "source")   <- "rendered"
@@ -243,6 +255,16 @@ ci_from_responses_2ifc <- function(responses,
     rcicr_result  = cis
   )
   if (!is.null(rendered)) out$rendered_ci <- rendered
+
+  if (!is.null(group_by)) {
+    out$group_ci <- group_ci(
+      signal_matrix   = signal_matrix,
+      responses       = responses,
+      by              = group_by,
+      col_participant = col_participant
+    )
+  }
+
   out
 }
 

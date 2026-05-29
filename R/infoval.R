@@ -158,7 +158,6 @@ infoval <- function(signal_matrix,
                     cache_path       = NULL,
                     seed             = NULL,
                     progress         = TRUE) {
-  abort_if_group_ci(signal_matrix, fn = "infoval")
   if (is.character(with_replacement)) {
     with_replacement <- match.arg(with_replacement)
   } else if (!isTRUE(with_replacement) &&

@@ -143,16 +143,6 @@ run_discriminability_pairwise <- function(signal_matrices,
        matrices."
     )
   }
-  is_group <- vapply(signal_matrices,
-                     function(x) inherits(x, "rcisignal_group_ci"),
-                     logical(1L))
-  if (any(is_group)) {
-    bad <- names(signal_matrices)[is_group]
-    abort_if_group_ci(signal_matrices[[bad[1L]]],
-                      fn  = "run_discriminability_pairwise",
-                      arg = sprintf("signal_matrices[[\"%s\"]]",
-                                    bad[1L]))
-  }
   if (length(signal_matrices) < 2L) {
     cli::cli_abort(c(
       "{.arg signal_matrices} must contain at least 2 conditions.",

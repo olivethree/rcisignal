@@ -25,10 +25,10 @@ test_that("group_ci returns one column per group with correct means", {
   responses <- make_responses_two_conditions(n_p = 8L)
   gcis <- group_ci(sm, responses, by = "condition")
 
-  expect_s3_class(gcis, "rcisignal_group_ci")
   expect_true(is.matrix(gcis))
   expect_equal(dim(gcis), c(256L, 2L))
   expect_setequal(colnames(gcis), c("A", "B"))
+  expect_identical(attr(gcis, "ci_stage"), "group")
 
   expect_equal(as.numeric(gcis[, "A"]),
                as.numeric(rowMeans(sm[, 1:4])))
@@ -149,44 +149,6 @@ test_that("group_ci preserves img_dims attribute", {
   gcis <- group_ci(sm, responses, by = "condition")
   expect_equal(attr(gcis, "img_dims"),
                attr(sm, "img_dims"))
-})
-
-test_that("group_ci aborts when handed its own output", {
-  sm <- make_sig_with_pids(n_pix = 64L, n_p = 4L, seed = 10L)
-  responses <- data.frame(
-    participant_id = sprintf("p%02d", 1:4),
-    condition      = c("A", "A", "B", "B"),
-    stringsAsFactors = FALSE
-  )
-  gcis <- group_ci(sm, responses, by = "condition")
-  expect_error(group_ci(gcis, responses, by = "condition"),
-               regexp = "stage-2")
-})
-
-test_that("print.rcisignal_group_ci surfaces group sizes", {
-  sm <- make_sig_with_pids(n_pix = 64L, n_p = 6L, seed = 11L)
-  responses <- data.frame(
-    participant_id = rep(sprintf("p%02d", 1:6), each = 4L),
-    condition      = rep(c("A", "A", "B", "B", "C", "C"), each = 4L),
-    stringsAsFactors = FALSE
-  )
-  gcis <- group_ci(sm, responses, by = "condition")
-  out <- utils::capture.output(print(gcis))
-  expect_true(any(grepl("3 groups", out)))
-  expect_true(any(grepl("\\bA\\b\\s+n = 2", out)))
-})
-
-test_that("as.list.rcisignal_group_ci returns named per-group vectors", {
-  sm <- make_sig_with_pids(n_pix = 64L, n_p = 4L, seed = 12L)
-  responses <- data.frame(
-    participant_id = sprintf("p%02d", 1:4),
-    condition      = c("A", "A", "B", "B"),
-    stringsAsFactors = FALSE
-  )
-  gcis <- group_ci(sm, responses, by = "condition")
-  L <- as.list(gcis)
-  expect_named(L, c("A", "B"))
-  expect_equal(length(L[[1L]]), nrow(sm))
 })
 
 test_that("group_ci output feeds plot_ci_distance_matrix", {

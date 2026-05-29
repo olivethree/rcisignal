@@ -2,7 +2,6 @@
 % Please edit documentation in R/group_ci.R
 \name{group_ci}
 \alias{group_ci}
-\alias{rcisignal_group_ci}
 \title{Collapse a per-producer signal matrix into per-group means}
 \usage{
 group_ci(
@@ -43,51 +42,45 @@ dropped from the output. When \code{FALSE}, empty cells are
 present as \code{NA} columns with \code{n = 0L}.}
 }
 \value{
-A numeric matrix of pixels x n_groups, classed
-\code{c("rcisignal_group_ci", "matrix", "array")}. Carries:
+A numeric matrix of pixels x n_groups. Carries:
 \itemize{
 \item column names = group labels;
-\item \code{attr(., "n")} = named integer vector of per-group
-producer counts;
+\item \code{attr(., "n")} = named integer vector of per-group producer
+counts;
 \item \code{attr(., "img_dims")} = inherited from
-\code{attr(signal_matrix, "img_dims")} if present.
+\code{attr(signal_matrix, "img_dims")} if present;
+\item \code{attr(., "by_name")} = text description of the grouping;
+\item \code{attr(., "ci_stage") = "group"} = a one-string hint used by
+\code{\link[=save_ci_images]{save_ci_images()}} to pick the filename prefix. Not a class;
+no S3 dispatch attached.
 }
 }
 \description{
-Stage-2 aggregator of the rcisignal pipeline. Collapses a
-per-producer \code{signal_matrix} (pixels x n_producers, the
-object returned by \code{\link[=ci_from_responses_briefrc]{ci_from_responses_briefrc()}} /
-\code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}}) into a per-group matrix
-(pixels x n_groups) for use with the distance-matrix, MDS, and
-correlogram plot functions.
+Convenience helper that takes a per-producer \code{signal_matrix}
+(pixels x n_producers, the object returned by
+\code{\link[=ci_from_responses_briefrc]{ci_from_responses_briefrc()}} / \code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}}) and
+a trial-level \code{responses} data frame, and collapses producers into
+per-group means via \code{\link[=rowMeans]{rowMeans()}}.
 
-Uses the same "data frame plus column name" idiom as every
-other responses-consuming function in the package: pass the
-trial-level \code{responses} data frame, plus the name of the
-column you want to group by. Producer-to-group alignment
-happens internally via \code{colnames(signal_matrix)}.
+Uses the same "data frame plus column name" idiom as every other
+responses-consuming function in the package: pass \code{responses} plus
+the name of the column(s) you want to group by. Producer-to-group
+alignment happens internally via \code{colnames(signal_matrix)}.
+
+\verb{ci_from_responses_*()} will call this for you if you pass them a
+\verb{group_by =} argument, so most users do not need to call
+\code{group_ci()} directly. Reach for it when you want to build group
+CIs from a signal matrix you already have in hand (e.g. one read
+back from disk).
 }
 \details{
-The package has two stages. Stage 1 (per-producer
-\code{signal_matrix}) is the only object accepted by reliability,
-discriminability, and informational-value functions. Stage 2
-(group-averaged matrix) is for plotting, RDM-style comparison,
-and MDS. \code{group_ci()} is the stage-1-to-stage-2 transformer.
-
 For each group, the corresponding output column is
-\code{rowMeans(signal_matrix[, producers_in_group, drop = FALSE])}.
-For a factorial \code{by} (length 2+), the cell label is the levels
-joined by \code{"_"} in the column order given.
-
-\code{group_ci()} does not accept (and will never accept)
-\code{trial_counts}, \code{noise_matrix}, or \code{mask}. Anything that needs
-producer-level information lives in stage 1: do the analysis
-first, then aggregate.
+\code{rowMeans(signal_matrix[, producers_in_group, drop = FALSE])}. For a
+factorial \code{by} (length 2+), the cell label is the levels joined by
+\code{"_"} in the column order given.
 }
 \examples{
 \dontrun{
-# End-to-end: simulate two conditions, build per-producer CIs,
-# collapse into one CI per condition.
 sim <- simulate_briefrc_data(
   n_per_condition = 10, n_trials = 60,
   conditions = c("A", "B"), seed = 1
@@ -98,14 +91,18 @@ gcis <- group_ci(cis$signal_matrix, sim$data, by = "condition")
 gcis                              # n_pixels x 2 (A and B)
 attr(gcis, "n")                   # per-group producer counts
 
-# Factorial grouping via two columns:
-# gcis_fact <- group_ci(cis$signal_matrix, sim$data,
-#                       by = c("condition", "sex"))
+# Or skip the standalone call: pass group_by to the generator and
+# get both per-producer and group matrices in one shot.
+both <- ci_from_responses_briefrc(sim$data,
+                                  noise_matrix = sim$noise_matrix,
+                                  group_by     = "condition")
+identical(both$group_ci, gcis)
 }
 }
 \seealso{
-Upstream (stage 1): \code{\link[=ci_from_responses_briefrc]{ci_from_responses_briefrc()}},
-\code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}}.
-Downstream (stage 2): \code{\link[=plot_ci_distance_matrix]{plot_ci_distance_matrix()}},
-\code{\link[=plot_ci_mds]{plot_ci_mds()}}, \code{\link[=plot_ci_correlogram]{plot_ci_correlogram()}}.
+\code{\link[=ci_from_responses_briefrc]{ci_from_responses_briefrc()}},
+\code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}} (their \verb{group_by =} argument calls
+this internally); \code{\link[=plot_ci_distance_matrix]{plot_ci_distance_matrix()}}, \code{\link[=plot_ci_mds]{plot_ci_mds()}},
+\code{\link[=plot_ci_correlogram]{plot_ci_correlogram()}} (compare multiple CIs, accept either
+per-producer or group-level matrices); \code{\link[=save_ci_images]{save_ci_images()}}.
 }

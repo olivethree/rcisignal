@@ -115,7 +115,6 @@ rel_split_half <- function(signal_matrix,
                            mask           = NULL,
                            seed           = NULL,
                            progress       = TRUE) {
-  abort_if_group_ci(signal_matrix, fn = "rel_split_half")
   validate_signal_matrix(signal_matrix)
   signal_matrix <- apply_mask_to_signal(signal_matrix, mask)
   if (looks_scaled(signal_matrix)) warn_looks_scaled("signal_matrix")

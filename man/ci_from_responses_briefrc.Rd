@@ -15,6 +15,7 @@ ci_from_responses_briefrc(
   method = c("briefrc12", "briefrc20"),
   scaling = c("none", "matched", "constant"),
   scaling_constant = NULL,
+  group_by = NULL,
   base_image_path = NULL
 )
 }
@@ -56,14 +57,24 @@ unscaled mask.}
 \item{scaling_constant}{Numeric multiplier used when
 \code{scaling = "constant"}. Ignored otherwise.}
 
+\item{group_by}{Optional character vector of column names in
+\code{responses} to group producers by. When supplied, the return
+list additionally contains \verb{$group_ci}, a pixels x n_groups
+matrix built by calling \code{\link[=group_ci]{group_ci()}} internally with the same
+\code{col_participant}. Single column (e.g. \code{"condition"}) gives
+one CI per level; length 2+ gives a factorial grouping with
+cell labels joined by \code{"_"}. Default \code{NULL} (no group CI
+built; only the per-producer \verb{$signal_matrix} is returned).}
+
 \item{base_image_path}{\strong{Deprecated.} Use \code{base_image} (which
 accepts both a numeric matrix and a path). The old name still
 works for one release with a deprecation warning.}
 }
 \value{
 A list with \code{signal_matrix}, optionally \code{rendered_ci},
-\code{participants}, \code{img_dims}, \code{scaling}, and \code{method} (the
-Brief-RC variant the call was made with).
+\code{participants}, \code{img_dims}, \code{scaling}, \code{method} (the
+Brief-RC variant the call was made with), and optionally
+\code{group_ci} (when \code{group_by} is supplied).
 }
 \description{
 Native implementation of Schmitz, Rougier & Yzerbyt (2024)'s
@@ -147,5 +158,6 @@ representations. \emph{European Journal of Social Psychology}.
 }
 \seealso{
 \code{\link[=ci_from_responses_2ifc]{ci_from_responses_2ifc()}}, \code{\link[=run_reliability]{run_reliability()}},
-\code{\link[=run_discriminability]{run_discriminability()}}, \code{\link[=group_ci]{group_ci()}} (stage 2, optional)
+\code{\link[=run_discriminability]{run_discriminability()}}, \code{\link[=group_ci]{group_ci()}},
+\code{\link[=save_ci_images]{save_ci_images()}}
 }

@@ -24,12 +24,11 @@ plot_ci_correlogram(
 matrix \verb{n_pixels x n_cis} with named columns; each column is
 one CI (a group mean, a single producer's CI, or any mix).
 Build it outside the call with
-\code{cbind(name = rowMeans(cis$signal_matrix), ...)}. Two other
-forms are accepted for back-compatibility: a \code{\link[=group_ci]{group_ci()}}
-result (an \link{rcisignal_group_ci} matrix) and a named list of
-CIs (vectors of length \code{prod(img_dims)}, single-column
-matrices, or per-producer \code{signal_matrix} objects from
-\verb{ci_from_responses_*()} which are reduced to group means
+\code{cbind(name = rowMeans(cis$signal_matrix), ...)}, or use the
+output of \code{\link[=group_ci]{group_ci()}} (a named matrix) directly. A named list
+of CIs is also accepted (vectors of length \code{prod(img_dims)},
+single-column matrices, or per-producer \code{signal_matrix} objects
+from \verb{ci_from_responses_*()}, which are reduced to group means
 internally). Names become the row / column / diagonal labels
 in the figure. At least two CIs are required.}
 

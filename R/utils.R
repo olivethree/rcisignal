@@ -664,3 +664,76 @@ composite_rgb_over_gray <- function(base_gray, fg_rgb_array, alpha_raster) {
   composed[composed > 1] <- 1
   composed
 }
+
+# rcicr's batch CI functions return lists named
+# "<base_image>_<by>_<id>"; recover the <id> component.
+extract_participant_ids <- function(nms, base_image, by) {
+  prefix <- paste0("^", base_image, "_", by, "_")
+  sub(prefix, "", nms)
+}
+
+#' Compute per-producer infoVal z-scores via the package-native pipeline
+#'
+#' Shared private worker used by `check_rt_infoval_consistency()` and
+#' `check_response_inversion()`. Builds per-producer CIs via the
+#' method-appropriate `ci_from_responses_*()` builder, loads the noise
+#' matrix, derives trial counts from `responses`, and calls `infoval()`
+#' to get the per-producer z-scores. Method-agnostic: works for both
+#' 2IFC (`rdata` / `stimuli`) and Brief-RC (`noise_matrix`).
+#'
+#' @return Named numeric vector of length n_producers; values are the
+#'   infoVal z-scores; names are producer ids.
+#' @keywords internal
+#' @noRd
+per_producer_infoval <- function(responses,
+                                 method,
+                                 rdata           = NULL,
+                                 stimuli         = NULL,
+                                 noise_matrix    = NULL,
+                                 base_image      = "base",
+                                 col_participant = "participant_id",
+                                 col_stimulus    = "stimulus",
+                                 col_response    = "response",
+                                 iter            = 1000L,
+                                 seed            = NULL) {
+  if (identical(method, "2ifc")) {
+    rdata <- resolve_rdata_input(rdata, stimuli, method = "2ifc")
+    cis <- ci_from_responses_2ifc(
+      responses,
+      rdata_path      = rdata,
+      base_image      = base_image,
+      col_participant = col_participant,
+      col_stimulus    = col_stimulus,
+      col_response    = col_response
+    )
+    noise <- read_noise_matrix(rdata, base_image = base_image)
+  } else {
+    if (is.null(noise_matrix)) {
+      cli::cli_abort(
+        "{.arg noise_matrix} is required for the Brief-RC path."
+      )
+    }
+    noise <- if (is.character(noise_matrix)) {
+      read_noise_matrix(noise_matrix)
+    } else {
+      as.matrix(noise_matrix)
+    }
+    cis <- ci_from_responses_briefrc(
+      responses,
+      noise_matrix    = noise,
+      col_participant = col_participant,
+      col_stimulus    = col_stimulus,
+      col_response    = col_response
+    )
+  }
+  iv <- infoval(
+    signal_matrix   = cis$signal_matrix,
+    noise_matrix    = noise,
+    responses       = responses,
+    col_participant = col_participant,
+    iter            = as.integer(iter),
+    seed            = seed,
+    progress        = FALSE
+  )
+  iv$infoval
+}

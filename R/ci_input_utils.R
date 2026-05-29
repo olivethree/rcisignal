@@ -8,9 +8,8 @@
 #' @noRd
 prepare_ci_matrix <- function(cis, img_dims = NULL,
                               min_cis = 2L) {
-  if (inherits(cis, "rcisignal_group_ci") ||
-        (is.matrix(cis) && is.numeric(cis) &&
-           !is.null(colnames(cis)))) {
+  if (is.matrix(cis) && is.numeric(cis) &&
+        !is.null(colnames(cis))) {
     src_dims <- attr(cis, "img_dims")
     cis <- stats::setNames(
       lapply(seq_len(ncol(cis)), function(j) cis[, j]),
@@ -22,8 +21,8 @@ prepare_ci_matrix <- function(cis, img_dims = NULL,
   }
   if (!is.list(cis)) {
     cli::cli_abort(c(
-      "{.arg cis} must be a named list of CIs, a numeric matrix \\
-       with named columns, or an {.cls rcisignal_group_ci} object.",
+      "{.arg cis} must be a named list of CIs or a numeric matrix \\
+       with named columns (one column per CI).",
       "i" = "Got: {.cls {class(cis)[1L]}}."
     ))
   }

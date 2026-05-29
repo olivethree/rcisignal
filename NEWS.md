@@ -1,3 +1,64 @@
+# rcisignal 0.3.0
+
+## Breaking changes
+
+* **Architecture simplified.** The "stage 1 / stage 2" boundary is
+  gone. The `rcisignal_group_ci` S3 class is dropped; `group_ci()`
+  now returns a plain numeric matrix (with `attr(., "n")`,
+  `attr(., "img_dims")`, `attr(., "by_name")`, and a lightweight
+  `attr(., "ci_stage") = "group"` hint for `save_ci_images()`).
+  Stage-1 input guards (the 14+ `abort_if_group_ci()` calls across
+  reliability, discriminability, and infoVal functions) are removed.
+  The `_pkgdown.yml` "Stage 2 - Group-averaged CIs" reference section
+  is replaced with "Compare multiple CIs"; correlogram, distance
+  matrix, and MDS plot functions are no longer mis-classified as
+  group-only.
+* **Removed `compute_infoval_summary()`** (no deprecation alias).
+  `diagnose_infoval()` covers the same use case and supports both
+  2IFC and Brief-RC natively. `check_response_inversion()` and
+  `check_rt_infoval_consistency()` no longer take `rdata`/`stimuli`
+  as their only noise source: both now accept `noise_matrix =` for
+  the Brief-RC path and use the package's native `infoval()`
+  pipeline internally, so Brief-RC is fully supported (previously
+  these checks returned `"skip"` for Brief-RC).
+
+## New features
+
+* `ci_from_responses_briefrc()` and `ci_from_responses_2ifc()` gain a
+  `group_by =` argument. When supplied, the return list additionally
+  contains `$group_ci`, the per-group matrix built by
+  `group_ci(signal_matrix, responses, by = group_by,
+  col_participant = col_participant)` internally. The per-producer
+  `$signal_matrix` is also returned. Pass either or both to downstream
+  functions.
+* **New export `save_ci_images()`.** Writes rendered CIs to PNG or
+  JPEG, one file per column of a `signal_matrix`. Works for both
+  per-producer (filename prefix `ind_ci_`) and group-level (prefix
+  `group_ci_`) matrices; prefix is auto-derived from the new
+  `ci_stage` attribute and can be overridden. Supports both the
+  `"diverging"` and `"fire"` palettes via the same compositing path
+  as `plot_ci_overlay()` and `plot_agreement_map()`.
+* `plot_agreement_map()` gains a `bar_label =` argument for
+  customizable colorbar labels. Defaults to `"t"` for the diverging
+  palette and `"|t|"` for the fire palette. The new
+  `plot.rcisignal_rel_agreement_map_test()` method threads the
+  argument through. Use e.g.
+  `bar_label = "Degree of agreement (|t|)"` for non-technical
+  audiences.
+
+## Documentation
+
+* README: the "Showcase: Oliveira et al. (2019)" section is renamed to
+  "Using rcisignal on a real data set" and now leads with a 2x2
+  fire-palette agreement-map figure. The caption explains that
+  brighter pixels mark image regions where producers in the RC task
+  agree more strongly on the location of the target representation
+  in their perception.
+* Vignette: the "two-stage pattern" framing is removed. `group_ci()`
+  is reintroduced as a convenience helper rather than an
+  architectural boundary. `compute_infoval_summary()` references are
+  rewritten as `diagnose_infoval()` calls.
+
 # rcisignal 0.2.0
 
 ## Breaking changes

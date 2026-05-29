@@ -15,7 +15,8 @@ ci_from_responses_2ifc(
   scaling = "autoscale",
   keep_rendered = FALSE,
   targetpath = tempfile("rcisignal_2ifc_"),
-  save_as_png = FALSE
+  save_as_png = FALSE,
+  group_by = NULL
 )
 }
 \arguments{
@@ -68,10 +69,20 @@ auto-cleaned tempdir so the working directory is not polluted.}
 
 \item{save_as_png}{Whether rcicr writes individual CI PNGs.
 Defaults to \code{FALSE} for speed in a pure reliability pipeline.}
+
+\item{group_by}{Optional character vector of column names in
+\code{responses} to group producers by. When supplied, the return
+list additionally contains \verb{$group_ci}, a pixels x n_groups
+matrix built by calling \code{\link[=group_ci]{group_ci()}} internally with the same
+\code{col_participant}. Single column (e.g. \code{"condition"}) gives
+one CI per level; length 2+ gives a factorial grouping with
+cell labels joined by \code{"_"}. Default \code{NULL} (no group CI
+built; only the per-producer \verb{$signal_matrix} is returned).}
 }
 \value{
 A list with \code{signal_matrix}, optionally \code{rendered_ci},
-\code{participants}, \code{img_dims}, \code{scaling}, and \code{rcicr_result}.
+\code{participants}, \code{img_dims}, \code{scaling}, \code{rcicr_result}, and
+optionally \code{group_ci} (when \code{group_by} is supplied).
 }
 \description{
 Thin wrapper around \code{\link[rcicr:batchGenerateCI2IFC]{rcicr::batchGenerateCI2IFC()}} that handles
@@ -153,5 +164,6 @@ res4 <- ci_from_responses_2ifc(sim$data, rdata_path = sim$rdata_path,
 \seealso{
 \code{\link[=ci_from_responses_briefrc]{ci_from_responses_briefrc()}},
 \code{\link[rcicr:batchGenerateCI2IFC]{rcicr::batchGenerateCI2IFC()}},
-\code{\link[=group_ci]{group_ci()}} (stage 2, optional)
+\code{\link[=group_ci]{group_ci()}},
+\code{\link[=save_ci_images]{save_ci_images()}}
 }

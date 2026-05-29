@@ -138,76 +138,59 @@ For the engine-equivalence receipts behind the per-producer
 sanity check), see
 `vignette("validation_rcicr", package = "rcisignal")`.
 
-### 1.3 The two-stage pattern
+### 1.3 Per-producer CIs and the optional `group_by =` shortcut
 
-rcisignal pipelines have two stages. Knowing which stage you are
-in tells you which functions are available, and the package will
-tell you (with a teaching error) if you try to cross the line.
-
-**Stage 1: per-producer CIs.** Computed by
-`ci_from_responses_briefrc()` or `ci_from_responses_2ifc()`.
-The output `$signal_matrix` is a numeric matrix of
-`pixels x n_producers`. Every reliability, discriminability, and
-informational-value function takes this object as its primary
+`ci_from_responses_briefrc()` and `ci_from_responses_2ifc()` produce
+a `$signal_matrix` of `pixels x n_producers` (one column per
+producer). Every reliability, discriminability, and informational-
+value function in the package takes this object as its primary
 input: `infoval()`, `rel_split_half()`, `rel_icc()`, `rel_loo()`,
 `rel_cluster_test()`, `rel_dissimilarity()`,
 `agreement_map_test()`, `pixel_t_test()`, plus the three `run_*`
-orchestrators. Anything that needs producer-level information
-(reference distributions, permutations across producers,
-bootstrap of pairwise distances, agreement maps) lives here.
+orchestrators.
 
-```{r stage1, eval = FALSE}
+```{r ci-basic, eval = FALSE}
 cis <- ci_from_responses_briefrc(responses,
                                  noise_matrix = noise_matrix)
 cis$signal_matrix          # pixels x n_producers
 run_reliability(cis$signal_matrix, n_permutations = 200L)
-infoval(cis$signal_matrix, noise_matrix, trial_counts,
-        iter = 500L)
+infoval(cis$signal_matrix, noise_matrix,
+        responses = responses, iter = 500L)
 ```
 
-**Stage 2: group-averaged CIs (optional).** Computed by
-`group_ci()`. The output is a numeric matrix of
-`pixels x n_groups`, classed `rcisignal_group_ci`. Use it for
-side-by-side group plots, pairwise distance matrices
-(`plot_ci_distance_matrix()`), correlogram views
-(`plot_ci_correlogram()`), and MDS projections (`plot_ci_mds()`).
-The function does not accept `trial_counts`, `noise_matrix`, or
-`mask`, anything that needs producer-level information has to
-happen in stage 1.
+When you want CIs averaged by condition (or another grouping
+column), the cheapest way is to pass `group_by =` to the generator
+and read both matrices off the same return list:
 
-```{r stage2, eval = FALSE}
-# `responses` is the same trial-level data frame you handed to
-# ci_from_responses_*(). `by` names the column that holds the
-# grouping label (one row per trial; rcisignal extracts the
-# producer -> condition map for you).
-gcis <- group_ci(cis$signal_matrix, responses, by = "condition")
-gcis                       # pixels x n_groups, with attr "n"
-plot_ci_distance_matrix(gcis)
+```{r ci-grouped, eval = FALSE}
+# `group_by` names a column (or columns) in `responses`. The
+# generator calls `group_ci()` for you and returns both matrices.
+res <- ci_from_responses_briefrc(
+  responses, noise_matrix = noise_matrix, group_by = "condition"
+)
+res$signal_matrix          # pixels x n_producers (as before)
+res$group_ci               # pixels x n_groups
+plot_ci_distance_matrix(res$group_ci)
 ```
 
-The two stages are named contracts, not just a convention. If
-you hand a `group_ci()` result to a stage-1 function (eg
-`rel_split_half(gcis)`), the function aborts with a message
-that names the issue and points back at this section. This is
-deliberate: a stage-2 matrix has no producer-level spread for
-reliability, no producer-level reference for infoVal, and no
-producer-level grouping for permutation testing. The error
-message is the cheapest way to teach the architecture at the
-moment of confusion.
+`group_ci()` is also exported as a standalone helper. Use it when
+you already have a per-producer signal matrix in hand (eg one read
+back from disk) and want to collapse producers into per-group
+means with the same validation (each producer's `by` value(s)
+must be constant across their rows; producers in
+`colnames(signal_matrix)` must be present in `responses`).
 
-The metric sections that follow are stage-1 functions unless
-they say otherwise.
+The plot functions `plot_ci_distance_matrix()`,
+`plot_ci_mds()`, and `plot_ci_correlogram()` accept any named
+collection of CIs (per-producer or group-level), so the same call
+works on the per-producer `$signal_matrix`, on `$group_ci`, on a
+named matrix you built with `cbind()`, or on a named list. Names
+become the labels in the figure.
 
-The three stage-2 plot functions (`plot_ci_distance_matrix()`,
-`plot_ci_mds()`, `plot_ci_correlogram()`) are flexible about
-input shape: they accept a `group_ci()` result directly, a
-named numeric matrix of `pixels x n_groups` (e.g. built with
-`cbind(name = rowMeans(...), ...)`), or the historical
-named-list form (per-producer matrices, single-column matrices,
-or pixel vectors mixed in one list). Use `group_ci()` whenever
-you have a single per-producer signal matrix plus the responses
-data frame that fed into it; use the matrix or list form when
-your per-condition CIs already live in separate objects.
+To export rendered CIs to PNG or JPEG, see `save_ci_images()`.
+Filenames default to `ind_ci_<id>.{png,jpeg}` for per-producer
+matrices and `group_ci_<condition>.{png,jpeg}` for the output of
+`group_ci()` (or the `$group_ci` field).
 
 ## 2. Installation
 
@@ -258,9 +241,9 @@ contamination).
   roughly one to three minutes, with a `cli` progress bar.)
 - **For 2IFC**, an `.Rdata` file in the format that
   `rcicr::generateStimuli2IFC()` writes, so
-  `ci_from_responses_2ifc()`, `compute_infoval_summary()`, and
-  every other function that asks for an `rdata` argument works
-  out of the box.
+  `ci_from_responses_2ifc()`, `diagnose_infoval()`, and every
+  other function that asks for an `rdata` argument works out of
+  the box.
 - **A self-contained `$stimuli` list** that round-trips through
   `saveRDS()`/`readRDS()` and a **`$base_image_path`** PNG
   written next to the stimuli `.Rdata`. The first survives
@@ -1245,7 +1228,7 @@ Skipped checks:
   - check_rt (no col_rt)
   - check_stimulus_alignment (no rdata or noise_matrix)
   - check_version_compat (no rdata)
-  - compute_infoval_summary (no rdata + infoval_iter)
+  - diagnose_infoval (no rdata + infoval_iter)
   - check_response_inversion (no rdata + infoval_iter)
   - check_rt_infoval_consistency (no rdata + infoval_iter + col_rt)
 ```
@@ -1358,16 +1341,7 @@ The status logic:
 - **WARN**: anything in between. Usually means the per-producer
   signal is genuinely modest but the group CI is informative.
 
-### 5.5 `compute_infoval_summary()`
-
-A small convenience function around `rcicr::computeInfoVal2IFC()`
-for the legacy 2IFC path. It returns a per-participant z table
-plus a pass/warn summary, useful for direct comparison with
-previously published `rcicr` numbers. For the Brief-RC path or for the
-trial-count-matched reference, prefer `diagnose_infoval()` or
-`infoval()` directly.
-
-### 5.6 `check_rt_infoval_consistency()`
+### 5.5 `check_rt_infoval_consistency()`
 
 Cross-validates infoVal against RT quality by correlating
 per-producer infoVal with per-producer median RT. A strong
@@ -1376,7 +1350,7 @@ clickers are also producing low-infoVal masks, indicating a
 population-level pattern rather than a single-producer fluke.
 WARN if the correlation passes the threshold; PASS otherwise.
 
-### 5.7 Conditional checks and required arguments
+### 5.6 Conditional checks and required arguments
 
 When the call carries only response data, four checks run and
 six are skipped. Each skipped check requires a specific
@@ -1387,9 +1361,9 @@ additional argument:
 | `check_rt`                        | `col_rt`                                                  |
 | `check_stimulus_alignment`        | `rdata` (2IFC) or `noise_matrix` (Brief-RC)               |
 | `check_version_compat`            | `rdata` (2IFC only)                                       |
-| `compute_infoval_summary`         | `rdata` + `infoval_iter`                                  |
-| `check_response_inversion`        | `rdata` + `infoval_iter`                                  |
-| `check_rt_infoval_consistency`    | `rdata` + `infoval_iter` + `col_rt`                       |
+| `diagnose_infoval`                | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` |
+| `check_response_inversion`        | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` |
+| `check_rt_infoval_consistency`    | `rdata` (2IFC) or `noise_matrix` (Brief-RC) + `infoval_iter` + `col_rt` |
 
 `infoval_iter` defaults to `NULL` because the reference
 distribution simulation at 10,000 iterations takes minutes on
@@ -1466,8 +1440,8 @@ OSF text matrix).
 Both builders return one column per producer in
 `$signal_matrix`. To average across producers into a single
 group CI (or several side-by-side group CIs for between-condition
-comparisons), see `group_ci()` and the two-stage pattern in
-section 1.3.
+comparisons), pass `group_by =` to the builder, or call
+`group_ci()` directly. See section 1.3.
 
 ### 6.2 From pre-rendered CIs
 

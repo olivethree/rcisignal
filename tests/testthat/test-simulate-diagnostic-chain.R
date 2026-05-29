@@ -50,17 +50,6 @@ test_that("simulator + diagnose_infoval chain runs end-to-end", {
   expect_s3_class(res, "rcisignal_diag_result")
 })
 
-test_that("simulator + compute_infoval_summary chain runs end-to-end", {
-  sim <- make_tiny_sim(seed = 2L)
-  res <- compute_infoval_summary(
-    sim$data,
-    method = "2ifc",
-    rdata  = sim$rdata_path,
-    iter   = 50L
-  )
-  expect_s3_class(res, "rcisignal_diag_result")
-})
-
 test_that("simulator + check_rt_infoval_consistency chain runs", {
   sim <- make_tiny_sim(seed = 3L)
   res <- check_rt_infoval_consistency(

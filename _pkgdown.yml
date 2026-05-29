@@ -3,41 +3,63 @@ template:
   bootstrap: 5
 
 reference:
-- title: Stage 1 — Per-producer CIs
+- title: Build per-producer CIs
   desc: >
-    Build per-producer signal matrices and run every reliability,
-    discriminability, and informational-value analysis on them.
-    Every function in this group takes a pixels x n_producers
-    `signal_matrix` (or two of them) as its primary input.
+    Compute one classification image (CI) per producer from
+    trial-level responses. Pass `group_by =` to also build
+    group-averaged CIs in one call.
   contents:
   - ci_from_responses_briefrc
   - ci_from_responses_2ifc
+  - group_ci
+
+- title: Reliability and informational value
+  desc: >
+    Within-condition reliability of the per-producer signal and
+    per-producer infoVal.
+  contents:
   - infoval
   - rel_split_half
   - rel_split_half_null
   - rel_icc
   - rel_loo
   - rel_loo_z
+  - run_reliability
+
+- title: Between-condition discriminability
+  desc: >
+    Between-condition spatial difference: pixel-wise t, cluster-based
+    permutation, Frobenius-distance bootstrap.
+  contents:
+  - pixel_t_test
   - rel_cluster_test
   - rel_dissimilarity
-  - agreement_map_test
-  - pixel_t_test
-  - run_reliability
   - run_discriminability
   - run_discriminability_pairwise
-  - compute_infoval_summary
-  - diagnose_infoval
 
-- title: Stage 2 — Group-averaged CIs
+- title: Cross-producer agreement
   desc: >
-    Collapse a per-producer signal matrix to per-group means for
-    side-by-side comparison, RDM-style distance matrices, MDS,
-    and correlogram views.
+    Producer-level agreement maps (descriptive and FWE-controlled).
   contents:
-  - group_ci
+  - agreement_map_test
+  - plot_agreement_map
+
+- title: Compare multiple CIs
+  desc: >
+    Cross-CI similarity, distance, and projection views. Accept any
+    named collection of CIs (per-producer or group-level).
+  contents:
+  - plot_ci_correlogram
   - plot_ci_distance_matrix
   - plot_ci_mds
-  - plot_ci_correlogram
+
+- title: Plot and export CIs
+  contents:
+  - plot_ci_overlay
+  - plot_mask_overlay
+  - plot_face_mask
+  - plot_dissimilarity_grid
+  - save_ci_images
 
 - title: I/O and simulation
   contents:
@@ -52,16 +74,9 @@ reference:
 - title: Data-quality diagnostics
   contents:
   - run_diagnostics
+  - diagnose_infoval
   - starts_with("check_")
   - validate_noise_matrix
-
-- title: Plotting
-  contents:
-  - plot_ci_overlay
-  - plot_agreement_map
-  - plot_mask_overlay
-  - plot_face_mask
-  - plot_dissimilarity_grid
 
 - title: Helpers
   contents:

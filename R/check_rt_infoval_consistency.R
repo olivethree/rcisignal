@@ -7,18 +7,15 @@
 #' 1. High infoVal with fast median RT. A participant producing a
 #'   seemingly informative CI while responding faster than others is
 #'   more likely to have produced a spurious signal than genuine
-#'   meaningful information — the signal may be an artefact of a
+#'   meaningful information -- the signal may be an artefact of a
 #'   button-mashing strategy that happens to correlate with the noise.
 #' 2. A negative correlation between infoVal and median RT across
 #'   participants. If fast responders systematically score higher on
 #'   infoVal, something about the measurement is off.
 #'
-#' The function computes `cor(infoval, median_rt)` across participants
-#' and returns the value plus a per-participant table for further
-#' inspection. It does not auto-exclude anyone; interpretation requires
-#' judgement about the specific experiment.
-#'
-#' Requires `rcicr` via [compute_infoval_summary()].
+#' Per-producer infoVal z-scores are computed via the package-native
+#' [infoval()] pipeline; both Brief-RC and 2IFC paradigms are
+#' supported.
 #'
 #' @param responses Data frame with one row per trial. Required
 #'   columns: `participant_id`, `stimulus`, `response` (values in
@@ -26,16 +23,21 @@
 #'   from CSV via [read_responses()] or [utils::read.csv()]; column
 #'   names are configurable via the `col_*` arguments.
 #' @param method `"2ifc"` or `"briefrc"`.
-#' @param rdata Path to the rcicr `.RData` file. Either `rdata`
-#'   or `stimuli` must be supplied for the 2IFC path.
+#' @param rdata Path to the rcicr `.RData` file (2IFC). Either
+#'   `rdata` or `stimuli` must be supplied for the 2IFC path.
 #' @param stimuli In-memory stimuli list (the `$stimuli` element
 #'   of an `rcisignal_sim` object). Use in place of `rdata` when
 #'   the file path no longer resolves (e.g. after [saveRDS()]/
 #'   [readRDS()] across R sessions).
-#' @param base_image Name of the base image in `rdata$base_face_files`.
+#' @param noise_matrix Noise matrix for the Brief-RC path. Either a
+#'   numeric matrix of `n_pixels x pool_size`, or a path to a text /
+#'   `.rds` file (see [read_noise_matrix()]).
+#' @param base_image Name of the base image in `rdata$base_face_files`
+#'   (2IFC only). Default `"base"`.
 #' @param col_participant,col_stimulus,col_response,col_rt Column names.
 #'   `col_rt` is required.
-#' @param iter Reference-distribution iterations. Default `10000`.
+#' @param iter Reference-distribution iterations. Default `1000L`.
+#' @param seed Optional integer; RNG state restored on exit.
 #' @param ... Unused.
 #'
 #' @return An [rcisignal_diag_result()] object. `data$per_participant` has
@@ -54,27 +56,17 @@ check_rt_infoval_consistency <- function(responses,
                                       method = c("2ifc", "briefrc"),
                                       rdata = NULL,
                                       stimuli = NULL,
+                                      noise_matrix = NULL,
                                       base_image = "base",
                                       col_participant = "participant_id",
                                       col_stimulus = "stimulus",
                                       col_response = "response",
                                       col_rt = "rt",
-                                      iter = 10000L,
+                                      iter = 1000L,
+                                      seed = NULL,
                                       ...) {
   method <- match.arg(method)
   label  <- "RT vs infoVal"
-
-  if (method == "briefrc") {
-    return(rcisignal_diag_result(
-      "skip", label,
-      c(
-        "RT x infoVal cross-validation is not supported for Brief-RC in",
-        "rcisignal. It depends on compute_infoval_summary(), which",
-        "is not implemented for Brief-RC (see that function's help)."
-      ),
-      data = list(method = "briefrc")
-    ))
-  }
 
   if (!col_rt %in% names(responses)) {
     cli::cli_abort(c(
@@ -83,11 +75,18 @@ check_rt_infoval_consistency <- function(responses,
     ))
   }
 
-  iv_result <- compute_infoval_summary(
-    responses, method = method, rdata = rdata, stimuli = stimuli,
-    base_image = base_image,
-    col_participant = col_participant, col_stimulus = col_stimulus,
-    col_response = col_response, iter = iter
+  iv_z <- per_producer_infoval(
+    responses,
+    method          = method,
+    rdata           = rdata,
+    stimuli         = stimuli,
+    noise_matrix    = noise_matrix,
+    base_image      = base_image,
+    col_participant = col_participant,
+    col_stimulus    = col_stimulus,
+    col_response    = col_response,
+    iter            = iter,
+    seed            = seed
   )
 
   dt <- data.table::as.data.table(responses)
@@ -96,7 +95,9 @@ check_rt_infoval_consistency <- function(responses,
   data.table::setnames(rt_per_p, col_participant, "participant_id")
 
   per_p <- merge(
-    iv_result$data$per_participant[, c("participant_id", "infoval")],
+    data.frame(participant_id = names(iv_z),
+               infoval        = unname(iv_z),
+               stringsAsFactors = FALSE),
     as.data.frame(rt_per_p), by = "participant_id"
   )
 

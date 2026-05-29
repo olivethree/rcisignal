@@ -51,12 +51,11 @@
 #'   matrix `n_pixels x n_cis` with named columns; each column is
 #'   one CI (a group mean, a single producer's CI, or any mix).
 #'   Build it outside the call with
-#'   `cbind(name = rowMeans(cis$signal_matrix), ...)`. Two other
-#'   forms are accepted for back-compatibility: a [group_ci()]
-#'   result (an [rcisignal_group_ci] matrix) and a named list of
-#'   CIs (vectors of length `prod(img_dims)`, single-column
-#'   matrices, or per-producer `signal_matrix` objects from
-#'   `ci_from_responses_*()` which are reduced to group means
+#'   `cbind(name = rowMeans(cis$signal_matrix), ...)`, or use the
+#'   output of [group_ci()] (a named matrix) directly. A named list
+#'   of CIs is also accepted (vectors of length `prod(img_dims)`,
+#'   single-column matrices, or per-producer `signal_matrix` objects
+#'   from `ci_from_responses_*()`, which are reduced to group means
 #'   internally). Names become the row / column / diagonal labels
 #'   in the figure. At least two CIs are required.
 #' @param img_dims Integer `c(nrow, ncol)`. If `NULL`, inferred

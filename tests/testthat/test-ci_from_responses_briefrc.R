@@ -390,3 +390,26 @@ test_that("base_image_path is a deprecated alias for base_image", {
   )
   expect_equal(res_old$signal_matrix, res_new$signal_matrix)
 })
+
+test_that("group_by= returns both signal_matrix and group_ci", {
+  set.seed(1)
+  n_pix <- 16L * 16L
+  noise_matrix <- matrix(rnorm(n_pix * 100L), n_pix, 100L)
+  responses <- data.frame(
+    participant_id = rep(c("p1", "p2", "p3", "p4"), each = 20L),
+    condition      = rep(c("A", "A", "B", "B"), each = 20L),
+    trial          = rep(seq_len(20L), 4L),
+    stimulus       = sample.int(100L, 80L, replace = TRUE),
+    response       = sample(c(-1L, 1L), 80L, replace = TRUE)
+  )
+  res <- ci_from_responses_briefrc(
+    responses, noise_matrix = noise_matrix, group_by = "condition"
+  )
+  expect_true(!is.null(res$signal_matrix))
+  expect_true(!is.null(res$group_ci))
+  expect_equal(ncol(res$signal_matrix), 4L)
+  expect_equal(ncol(res$group_ci), 2L)
+  expect_setequal(colnames(res$group_ci), c("A", "B"))
+  expect_identical(attr(res$signal_matrix, "ci_stage"), "individual")
+  expect_identical(attr(res$group_ci, "ci_stage"), "group")
+})

@@ -100,7 +100,7 @@
 #'     written either to a session tempdir (when
 #'     `rdata_dir = NULL`) or to the user-supplied `rdata_dir`.
 #'     Suitable for [ci_from_responses_2ifc()] /
-#'     [compute_infoval_summary()] and other downstream functions
+#'     [diagnose_infoval()] and other downstream functions
 #'     that take an `rdata` argument. **Not portable across R
 #'     sessions** when `rdata_dir = NULL`.
 #'   * `base_image_path` — path to a standalone PNG of `base_face`

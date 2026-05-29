@@ -122,6 +122,11 @@
 #'   "N = ... producers, W x H pixels" subtitle line below the
 #'   title. Set `FALSE` for multi-panel layouts where this
 #'   information is already in the caption.
+#' @param bar_label Optional character scalar overriding the
+#'   colorbar axis label. When `NULL` (default), uses `"t"` for
+#'   `palette = "diverging"` and `"|t|"` for `palette = "fire"`.
+#'   Override e.g. with `"Degree of agreement (|t|)"` for a fire
+#'   palette figure aimed at non-technical readers.
 #' @param ... Passed to `graphics::image()`.
 #' @return Invisibly, a list with `t_map` (numeric vector of t values
 #'   per pixel; always signed regardless of palette), `n` (producer
@@ -181,6 +186,7 @@ plot_agreement_map <- function(signal_matrix,
                                alpha_max  = 0.7,
                                main      = "Per-pixel producer agreement (t-map)",
                                show_n    = TRUE,
+                               bar_label = NULL,
                                ...) {
   if (!is.matrix(signal_matrix) || !is.numeric(signal_matrix)) {
     cli::cli_abort("{.arg signal_matrix} must be a numeric matrix.")
@@ -222,6 +228,7 @@ plot_agreement_map <- function(signal_matrix,
     main       = main,
     sub_n      = n,
     show_n     = show_n,
+    bar_label  = bar_label,
     ...
   )
   invisible(list(t_map = t_map, n = n,
@@ -250,6 +257,7 @@ render_agreement_t_map <- function(t_map,
                                    main       = NULL,
                                    sub_n      = NULL,
                                    show_n     = TRUE,
+                                   bar_label  = NULL,
                                    ...) {
   palette <- match.arg(palette)
   img_dims <- as.integer(img_dims)
@@ -279,7 +287,9 @@ render_agreement_t_map <- function(t_map,
   } else {
     grDevices::hcl.colors(256L, "YlOrRd", rev = TRUE)
   }
-  bar_label <- if (palette == "fire") "|t|" else "t"
+  if (is.null(bar_label)) {
+    bar_label <- if (palette == "fire") "|t|" else "t"
+  }
 
   # Save only the params we modify, not the full par() state. Using
   # par(no.readonly = TRUE) here would capture and later restore mfrow

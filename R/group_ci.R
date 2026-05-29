@@ -1,35 +1,28 @@
 #' Collapse a per-producer signal matrix into per-group means
 #'
 #' @description
-#' Stage-2 aggregator of the rcisignal pipeline. Collapses a
-#' per-producer `signal_matrix` (pixels x n_producers, the
-#' object returned by [ci_from_responses_briefrc()] /
-#' [ci_from_responses_2ifc()]) into a per-group matrix
-#' (pixels x n_groups) for use with the distance-matrix, MDS, and
-#' correlogram plot functions.
+#' Convenience helper that takes a per-producer `signal_matrix`
+#' (pixels x n_producers, the object returned by
+#' [ci_from_responses_briefrc()] / [ci_from_responses_2ifc()]) and
+#' a trial-level `responses` data frame, and collapses producers into
+#' per-group means via [rowMeans()].
 #'
-#' Uses the same "data frame plus column name" idiom as every
-#' other responses-consuming function in the package: pass the
-#' trial-level `responses` data frame, plus the name of the
-#' column you want to group by. Producer-to-group alignment
-#' happens internally via `colnames(signal_matrix)`.
+#' Uses the same "data frame plus column name" idiom as every other
+#' responses-consuming function in the package: pass `responses` plus
+#' the name of the column(s) you want to group by. Producer-to-group
+#' alignment happens internally via `colnames(signal_matrix)`.
+#'
+#' `ci_from_responses_*()` will call this for you if you pass them a
+#' `group_by =` argument, so most users do not need to call
+#' `group_ci()` directly. Reach for it when you want to build group
+#' CIs from a signal matrix you already have in hand (e.g. one read
+#' back from disk).
 #'
 #' @details
-#' The package has two stages. Stage 1 (per-producer
-#' `signal_matrix`) is the only object accepted by reliability,
-#' discriminability, and informational-value functions. Stage 2
-#' (group-averaged matrix) is for plotting, RDM-style comparison,
-#' and MDS. `group_ci()` is the stage-1-to-stage-2 transformer.
-#'
 #' For each group, the corresponding output column is
-#' `rowMeans(signal_matrix[, producers_in_group, drop = FALSE])`.
-#' For a factorial `by` (length 2+), the cell label is the levels
-#' joined by `"_"` in the column order given.
-#'
-#' `group_ci()` does not accept (and will never accept)
-#' `trial_counts`, `noise_matrix`, or `mask`. Anything that needs
-#' producer-level information lives in stage 1: do the analysis
-#' first, then aggregate.
+#' `rowMeans(signal_matrix[, producers_in_group, drop = FALSE])`. For a
+#' factorial `by` (length 2+), the cell label is the levels joined by
+#' `"_"` in the column order given.
 #'
 #' @param signal_matrix Numeric matrix of pixels x n_producers, as
 #'   returned by [ci_from_responses_briefrc()] or
@@ -55,26 +48,25 @@
 #'   dropped from the output. When `FALSE`, empty cells are
 #'   present as `NA` columns with `n = 0L`.
 #'
-#' @return A numeric matrix of pixels x n_groups, classed
-#'   `c("rcisignal_group_ci", "matrix", "array")`. Carries:
+#' @return A numeric matrix of pixels x n_groups. Carries:
 #'   - column names = group labels;
-#'   - `attr(., "n")` = named integer vector of per-group
-#'     producer counts;
+#'   - `attr(., "n")` = named integer vector of per-group producer
+#'     counts;
 #'   - `attr(., "img_dims")` = inherited from
-#'     `attr(signal_matrix, "img_dims")` if present.
+#'     `attr(signal_matrix, "img_dims")` if present;
+#'   - `attr(., "by_name")` = text description of the grouping;
+#'   - `attr(., "ci_stage") = "group"` = a one-string hint used by
+#'     [save_ci_images()] to pick the filename prefix. Not a class;
+#'     no S3 dispatch attached.
 #'
-#' @seealso
-#' Upstream (stage 1): [ci_from_responses_briefrc()],
-#'   [ci_from_responses_2ifc()].
-#' Downstream (stage 2): [plot_ci_distance_matrix()],
-#'   [plot_ci_mds()], [plot_ci_correlogram()].
-#'
-#' @aliases rcisignal_group_ci
+#' @seealso [ci_from_responses_briefrc()],
+#'   [ci_from_responses_2ifc()] (their `group_by =` argument calls
+#'   this internally); [plot_ci_distance_matrix()], [plot_ci_mds()],
+#'   [plot_ci_correlogram()] (compare multiple CIs, accept either
+#'   per-producer or group-level matrices); [save_ci_images()].
 #'
 #' @examples
 #' \dontrun{
-#' # End-to-end: simulate two conditions, build per-producer CIs,
-#' # collapse into one CI per condition.
 #' sim <- simulate_briefrc_data(
 #'   n_per_condition = 10, n_trials = 60,
 #'   conditions = c("A", "B"), seed = 1
@@ -85,9 +77,12 @@
 #' gcis                              # n_pixels x 2 (A and B)
 #' attr(gcis, "n")                   # per-group producer counts
 #'
-#' # Factorial grouping via two columns:
-#' # gcis_fact <- group_ci(cis$signal_matrix, sim$data,
-#' #                       by = c("condition", "sex"))
+#' # Or skip the standalone call: pass group_by to the generator and
+#' # get both per-producer and group matrices in one shot.
+#' both <- ci_from_responses_briefrc(sim$data,
+#'                                   noise_matrix = sim$noise_matrix,
+#'                                   group_by     = "condition")
+#' identical(both$group_ci, gcis)
 #' }
 #' @export
 group_ci <- function(signal_matrix,
@@ -95,16 +90,6 @@ group_ci <- function(signal_matrix,
                      by,
                      col_participant = "participant_id",
                      drop            = TRUE) {
-  if (inherits(signal_matrix, "rcisignal_group_ci")) {
-    cli::cli_abort(c(
-      "{.arg signal_matrix} is already a stage-2 \\
-       {.cls rcisignal_group_ci} object.",
-      "i" = "{.fn group_ci} consumes a per-producer matrix \\
-             (stage 1) and produces a group-averaged matrix \\
-             (stage 2). Calling it on its own output would \\
-             collapse twice."
-    ))
-  }
   if (!is.matrix(signal_matrix) || !is.numeric(signal_matrix)) {
     cli::cli_abort(
       "{.arg signal_matrix} must be a numeric matrix \\
@@ -164,8 +149,8 @@ group_ci <- function(signal_matrix,
   attr(out, "n") <- n_per
   src_dims <- attr(signal_matrix, "img_dims")
   if (!is.null(src_dims)) attr(out, "img_dims") <- src_dims
-  attr(out, "by_name") <- by_name
-  class(out) <- c("rcisignal_group_ci", "matrix", "array")
+  attr(out, "by_name")  <- by_name
+  attr(out, "ci_stage") <- "group"
   out
 }
 
@@ -260,73 +245,4 @@ build_grouping_from_responses <- function(signal_matrix, responses,
   }
   arg_text <- if (length(by) == 1L) by else paste(by, collapse = " x ")
   list(factor = f, arg_text = arg_text)
-}
-
-#' @export
-print.rcisignal_group_ci <- function(x, ...) {
-  n_per <- attr(x, "n")
-  n_grp <- ncol(x)
-  n_pix <- nrow(x)
-  by_text <- attr(x, "by_name") %||% "by"
-  cat(sprintf("<rcisignal_group_ci: %d group%s, %d pixels>\n",
-              n_grp, if (n_grp == 1L) "" else "s", n_pix))
-  cat(sprintf("  grouping     : %s\n", by_text))
-  if (!is.null(n_per)) {
-    cat("  group sizes  :\n")
-    show <- if (length(n_per) > 10L) c(head(n_per, 8L),
-                                       stats::setNames(NA, "...")) else n_per
-    for (nm in names(show)) {
-      v <- show[[nm]]
-      if (is.na(v)) {
-        cat(sprintf("    %s (and %d more)\n",
-                    nm, length(n_per) - 8L))
-      } else {
-        cat(sprintf("    %-20s n = %d\n", nm, v))
-      }
-    }
-  }
-  dims <- attr(x, "img_dims")
-  if (!is.null(dims)) {
-    cat(sprintf("  image dims   : %d x %d px\n", dims[1L], dims[2L]))
-  }
-  cat("Note: per-producer information has been averaged out.\n")
-  cat("For reliability, infoVal, or discriminability, use the\n")
-  cat("per-producer signal_matrix returned by ci_from_responses_*()\n")
-  cat("(stage 1).\n")
-  invisible(x)
-}
-
-#' @export
-as.list.rcisignal_group_ci <- function(x, ...) {
-  out <- lapply(seq_len(ncol(x)), function(j) x[, j])
-  names(out) <- colnames(x)
-  out
-}
-
-#' Abort if `x` is a stage-2 (group-averaged) CI matrix
-#'
-#' Two-line guard used at the top of every stage-1 function. The
-#' error message names the calling function and points at the
-#' two-stage pattern, so users who arrive via Stack Overflow /
-#' Slack / vibes coding learn the architecture from the error
-#' itself.
-#'
-#' @keywords internal
-#' @noRd
-abort_if_group_ci <- function(x, fn, arg = "signal_matrix") {
-  if (!inherits(x, "rcisignal_group_ci")) {
-    return(invisible(NULL))
-  }
-  cli::cli_abort(c(
-    "{.fn {fn}} requires a per-producer CI matrix \\
-     (stage 1), not a group-averaged matrix (stage 2).",
-    "i" = "Pass the {.var signal_matrix} returned by \\
-           {.fn ci_from_responses_briefrc} / \\
-           {.fn ci_from_responses_2ifc} (one column per producer), \\
-           not the matrix returned by {.fn group_ci} (one column \\
-           per group).",
-    "i" = "See {.code vignette(\"rcisignal\")} for the \\
-           two-stage pattern."
-  ),
-  call = NULL)
 }

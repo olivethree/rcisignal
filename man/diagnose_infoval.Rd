@@ -161,5 +161,5 @@ brief reverse correlation: an improved tool to assess visual
 representations. \emph{European Journal of Social Psychology}.
 }
 \seealso{
-\code{\link[=infoval]{infoval()}}, \code{\link[=make_face_mask]{make_face_mask()}}, \code{\link[=compute_infoval_summary]{compute_infoval_summary()}}.
+\code{\link[=infoval]{infoval()}}, \code{\link[=make_face_mask]{make_face_mask()}}.
 }

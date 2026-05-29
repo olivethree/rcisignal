@@ -15,6 +15,7 @@
   contour_col = "black",
   contour_lwd = 1,
   main = "Agreement t-map (FWE contours)",
+  bar_label = NULL,
   ...
 )
 }

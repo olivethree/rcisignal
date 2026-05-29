@@ -95,7 +95,7 @@
 #'   * `mask` -- logical vector or `NULL`.
 #'   * `interpretation` -- character vector of human-readable bullets.
 #'
-#' @seealso [infoval()], [make_face_mask()], [compute_infoval_summary()].
+#' @seealso [infoval()], [make_face_mask()].
 #'
 #' @references
 #' Brinkman, L., Goffin, S., van de Schoot, R., van Haren, N. E. M.,
@@ -572,7 +572,6 @@ random_responder_calibration <- function(noise_matrix, n_trials, mask,
 group_mean_z <- function(signal_matrix, noise_matrix, trial_counts, iter,
                          mask = NULL, with_replacement = "auto",
                          seed = NULL, progress = TRUE) {
-  abort_if_group_ci(signal_matrix, fn = "group_mean_z")
   grp <- rowMeans(signal_matrix)
   if (!is.null(mask)) grp <- grp[mask]
   norm_obs <- sqrt(sum(grp * grp))

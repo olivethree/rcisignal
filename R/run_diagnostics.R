@@ -16,7 +16,7 @@
 #' @param method `"2ifc"` or `"briefrc"`, or `NULL` to auto-detect.
 #' @param rdata Optional. Path to an rcicr `.RData` file. Enables
 #'   [check_stimulus_alignment()], [check_version_compat()] (2IFC),
-#'   [compute_infoval_summary()], [check_response_inversion()], and
+#'   [diagnose_infoval()], [check_response_inversion()], and
 #'   [check_rt_infoval_consistency()]. Mutually exclusive
 #'   alternative to `stimuli`.
 #' @param stimuli Optional in-memory stimuli list (`$stimuli` from
@@ -170,27 +170,15 @@ run_diagnostics <- function(responses,
     )
   }
 
-  can_infoval <- !is.null(rdata) && !is.null(infoval_iter)
+  can_infoval <- !is.null(infoval_iter) &&
+    ((method == "2ifc" && !is.null(rdata)) ||
+       (method == "briefrc" && !is.null(noise_matrix)))
   if (can_infoval) {
-    # Each of these three handles its own Brief-RC skip internally.
-    # The tryCatch here is only for 2IFC error paths (e.g., rcicr failures).
-    results$infoval <- tryCatch(
-      compute_infoval_summary(
-        responses, method = method, rdata = rdata, base_image = base_image,
-        col_participant = col_participant, col_stimulus = col_stimulus,
-        col_response = col_response, iter = infoval_iter
-      ),
-      error = function(e) {
-        rcisignal_diag_result(
-          "skip", "Information value",
-          c("compute_infoval_summary failed:", conditionMessage(e))
-        )
-      }
-    )
-
     results$response_inversion <- tryCatch(
       check_response_inversion(
-        responses, method = method, rdata = rdata, base_image = base_image,
+        responses, method = method,
+        rdata = rdata, noise_matrix = noise_matrix,
+        base_image = base_image,
         col_participant = col_participant, col_stimulus = col_stimulus,
         col_response = col_response, iter = infoval_iter
       ),
@@ -205,7 +193,9 @@ run_diagnostics <- function(responses,
     if (!is.null(col_rt) && col_rt %in% names(responses)) {
       results$rt_infoval <- tryCatch(
         check_rt_infoval_consistency(
-          responses, method = method, rdata = rdata, base_image = base_image,
+          responses, method = method,
+          rdata = rdata, noise_matrix = noise_matrix,
+          base_image = base_image,
           col_participant = col_participant, col_stimulus = col_stimulus,
           col_response = col_response, col_rt = col_rt, iter = infoval_iter
         ),
@@ -222,9 +212,8 @@ run_diagnostics <- function(responses,
   } else {
     skipped <- c(
       skipped,
-      "compute_infoval_summary (need rdata + infoval_iter)",
-      "check_response_inversion (needs infoval)",
-      "check_rt_infoval_consistency (needs infoval)"
+      "check_response_inversion (need rdata / noise_matrix + infoval_iter)",
+      "check_rt_infoval_consistency (need rdata / noise_matrix + infoval_iter)"
     )
   }
 

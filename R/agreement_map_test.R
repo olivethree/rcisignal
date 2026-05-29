@@ -104,7 +104,6 @@ agreement_map_test <- function(signal_matrix,
                                seed                = NULL,
                                progress            = TRUE,
                                acknowledge_scaling = FALSE) {
-  abort_if_group_ci(signal_matrix, fn = "agreement_map_test")
   validate_signal_matrix(signal_matrix)
   assert_raw_signal(signal_matrix, acknowledge_scaling)
   n_pix_full <- nrow(signal_matrix)
@@ -287,6 +286,7 @@ plot.rcisignal_rel_agreement_map_test <- function(x,
                                                   contour_col  = "black",
                                                   contour_lwd  = 1.0,
                                                   main         = "Agreement t-map (FWE contours)",
+                                                  bar_label    = NULL,
                                                   ...) {
   palette <- match.arg(palette)
   if (is.null(x$img_dims) || length(x$img_dims) != 2L) {
@@ -312,7 +312,8 @@ plot.rcisignal_rel_agreement_map_test <- function(x,
     base_image = base_image,
     alpha_max  = alpha_max,
     main       = main,
-    sub_n      = x$n_participants
+    sub_n      = x$n_participants,
+    bar_label  = bar_label
   )
 
   if (isTRUE(show_contour) && any(x$significant_mask, na.rm = TRUE)) {

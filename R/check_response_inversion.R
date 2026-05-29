@@ -5,18 +5,18 @@
 #' `+1` means "inverted version chosen" when the analyst intended
 #' "original chosen", or the CSV export inadvertently negated the
 #' response column. A straightforward way to detect this is to compute
-#' the infoVal twice per participant — once with the original codes
-#' and once with every response negated — and compare. For correctly
+#' the infoVal twice per participant -- once with the original codes
+#' and once with every response negated -- and compare. For correctly
 #' coded data, the original should score higher; if the flipped CI
 #' scores meaningfully higher, the response column is probably inverted.
 #'
-#' This check calls [compute_infoval_summary()] twice and reports
-#' participants whose flipped infoVal exceeds the original by `margin`
-#' or more. A non-zero count is a strong signal that the response
-#' column is miscoded for those participants.
-#'
-#' Requires `rcicr` (same as [compute_infoval_summary()]). Runs two
-#' infoVal sweeps, so it takes roughly twice as long.
+#' This check computes per-producer infoVal z-scores via the
+#' package-native [infoval()] pipeline twice (original and
+#' sign-flipped) and reports participants whose flipped infoVal
+#' exceeds the original by `margin` or more. Supports both 2IFC and
+#' Brief-RC. A non-zero count is a strong signal that the response
+#' column is miscoded for those participants. Runs two infoVal sweeps,
+#' so it takes roughly twice as long.
 #'
 #' @param responses Data frame with one row per trial. Required
 #'   columns: `participant_id`, `stimulus`, `response` (values in
@@ -24,18 +24,23 @@
 #'   [utils::read.csv()]; column names are configurable via the
 #'   `col_*` arguments.
 #' @param method `"2ifc"` or `"briefrc"`.
-#' @param rdata Path to the rcicr `.RData` file. Either `rdata`
-#'   or `stimuli` must be supplied for the 2IFC path.
+#' @param rdata Path to the rcicr `.RData` file (2IFC). Either
+#'   `rdata` or `stimuli` must be supplied for the 2IFC path.
 #' @param stimuli In-memory stimuli list (the `$stimuli` element
 #'   of an `rcisignal_sim` object). Use in place of `rdata` when
 #'   the file path no longer resolves (e.g. after [saveRDS()]/
 #'   [readRDS()] across R sessions).
-#' @param base_image Name of the base image in `rdata$base_face_files`.
+#' @param noise_matrix Noise matrix for the Brief-RC path. Either a
+#'   numeric matrix of `n_pixels x pool_size`, or a path to a text /
+#'   `.rds` file (see [read_noise_matrix()]).
+#' @param base_image Name of the base image in `rdata$base_face_files`
+#'   (2IFC only). Default `"base"`.
 #' @param col_participant,col_stimulus,col_response Column names.
 #' @param margin Numeric. Flagging threshold: flipped infoVal must
 #'   exceed original infoVal by at least this amount. Default `1.96`.
-#' @param iter Reference-distribution iterations. Default `10000`.
-#' @param ... Passed through to [compute_infoval_summary()].
+#' @param iter Reference-distribution iterations. Default `1000L`.
+#' @param seed Optional integer; RNG state restored on exit.
+#' @param ... Unused.
 #'
 #' @return An [rcisignal_diag_result()] object. `data$per_participant` has
 #'   `participant_id`, `infoval_original`, `infoval_flipped`, and
@@ -53,53 +58,58 @@ check_response_inversion <- function(responses,
                                      method = c("2ifc", "briefrc"),
                                      rdata = NULL,
                                      stimuli = NULL,
+                                     noise_matrix = NULL,
                                      base_image = "base",
                                      col_participant = "participant_id",
                                      col_stimulus = "stimulus",
                                      col_response = "response",
                                      margin = 1.96,
-                                     iter = 10000L,
+                                     iter = 1000L,
+                                     seed = NULL,
                                      ...) {
   method <- match.arg(method)
   label  <- "Response inversion"
 
-  if (method == "briefrc") {
-    return(rcisignal_diag_result(
-      "skip", label,
-      c(
-        "Response-inversion detection is not supported for Brief-RC in",
-        "rcisignal. It depends on compute_infoval_summary(), which",
-        "is not implemented for Brief-RC (see that function's help)."
-      ),
-      data = list(method = "briefrc")
-    ))
-  }
-
-  original <- compute_infoval_summary(
-    responses, method = method, rdata = rdata, stimuli = stimuli,
-    base_image = base_image,
-    col_participant = col_participant, col_stimulus = col_stimulus,
-    col_response = col_response, iter = iter, ...
+  iv_orig <- per_producer_infoval(
+    responses,
+    method          = method,
+    rdata           = rdata,
+    stimuli         = stimuli,
+    noise_matrix    = noise_matrix,
+    base_image      = base_image,
+    col_participant = col_participant,
+    col_stimulus    = col_stimulus,
+    col_response    = col_response,
+    iter            = iter,
+    seed            = seed
   )
 
   flipped_responses <- responses
   flipped_responses[[col_response]] <- -flipped_responses[[col_response]]
-  flipped <- compute_infoval_summary(
-    flipped_responses, method = method, rdata = rdata, stimuli = stimuli,
-    base_image = base_image,
-    col_participant = col_participant, col_stimulus = col_stimulus,
-    col_response = col_response, iter = iter, ...
+  iv_flip <- per_producer_infoval(
+    flipped_responses,
+    method          = method,
+    rdata           = rdata,
+    stimuli         = stimuli,
+    noise_matrix    = noise_matrix,
+    base_image      = base_image,
+    col_participant = col_participant,
+    col_stimulus    = col_stimulus,
+    col_response    = col_response,
+    iter            = iter,
+    seed            = seed
   )
 
-  per_p <- merge(
-    original$data$per_participant[, c("participant_id", "infoval")],
-    flipped$data$per_participant[, c("participant_id", "infoval")],
-    by = "participant_id", suffixes = c("_original", "_flipped")
+  per_p <- data.frame(
+    participant_id    = names(iv_orig),
+    infoval_original  = unname(iv_orig),
+    infoval_flipped   = unname(iv_flip[names(iv_orig)]),
+    stringsAsFactors  = FALSE
   )
   per_p$delta <- per_p$infoval_flipped - per_p$infoval_original
   per_p$likely_inverted <- per_p$delta >= margin
 
-  n_inv <- sum(per_p$likely_inverted)
+  n_inv <- sum(per_p$likely_inverted, na.rm = TRUE)
   n_p   <- nrow(per_p)
 
   status <- if (n_inv == 0L) {

@@ -116,7 +116,6 @@ rel_loo <- function(signal_matrix,
                     flag_method       = c("mad", "sd"),
                     flag_threshold_sd = NULL,
                     mask              = NULL) {
-  abort_if_group_ci(signal_matrix, fn = "rel_loo")
   validate_signal_matrix(signal_matrix)
   signal_matrix <- apply_mask_to_signal(signal_matrix, mask)
   if (looks_scaled(signal_matrix)) warn_looks_scaled("signal_matrix")

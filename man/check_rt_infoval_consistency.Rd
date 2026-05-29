@@ -9,12 +9,14 @@ check_rt_infoval_consistency(
   method = c("2ifc", "briefrc"),
   rdata = NULL,
   stimuli = NULL,
+  noise_matrix = NULL,
   base_image = "base",
   col_participant = "participant_id",
   col_stimulus = "stimulus",
   col_response = "response",
   col_rt = "rt",
-  iter = 10000L,
+  iter = 1000L,
+  seed = NULL,
   ...
 )
 }
@@ -27,20 +29,27 @@ names are configurable via the \verb{col_*} arguments.}
 
 \item{method}{\code{"2ifc"} or \code{"briefrc"}.}
 
-\item{rdata}{Path to the rcicr \code{.RData} file. Either \code{rdata}
-or \code{stimuli} must be supplied for the 2IFC path.}
+\item{rdata}{Path to the rcicr \code{.RData} file (2IFC). Either
+\code{rdata} or \code{stimuli} must be supplied for the 2IFC path.}
 
 \item{stimuli}{In-memory stimuli list (the \verb{$stimuli} element
 of an \code{rcisignal_sim} object). Use in place of \code{rdata} when
 the file path no longer resolves (e.g. after \code{\link[=saveRDS]{saveRDS()}}/
 \code{\link[=readRDS]{readRDS()}} across R sessions).}
 
-\item{base_image}{Name of the base image in \code{rdata$base_face_files}.}
+\item{noise_matrix}{Noise matrix for the Brief-RC path. Either a
+numeric matrix of \verb{n_pixels x pool_size}, or a path to a text /
+\code{.rds} file (see \code{\link[=read_noise_matrix]{read_noise_matrix()}}).}
+
+\item{base_image}{Name of the base image in \code{rdata$base_face_files}
+(2IFC only). Default \code{"base"}.}
 
 \item{col_participant, col_stimulus, col_response, col_rt}{Column names.
 \code{col_rt} is required.}
 
-\item{iter}{Reference-distribution iterations. Default \code{10000}.}
+\item{iter}{Reference-distribution iterations. Default \code{1000L}.}
+
+\item{seed}{Optional integer; RNG state restored on exit.}
 
 \item{...}{Unused.}
 }
@@ -59,19 +68,16 @@ individually plausible but jointly suspicious:
 \item High infoVal with fast median RT. A participant producing a
 seemingly informative CI while responding faster than others is
 more likely to have produced a spurious signal than genuine
-meaningful information — the signal may be an artefact of a
+meaningful information -- the signal may be an artefact of a
 button-mashing strategy that happens to correlate with the noise.
 \item A negative correlation between infoVal and median RT across
 participants. If fast responders systematically score higher on
 infoVal, something about the measurement is off.
 }
 
-The function computes \code{cor(infoval, median_rt)} across participants
-and returns the value plus a per-participant table for further
-inspection. It does not auto-exclude anyone; interpretation requires
-judgement about the specific experiment.
-
-Requires \code{rcicr} via \code{\link[=compute_infoval_summary]{compute_infoval_summary()}}.
+Per-producer infoVal z-scores are computed via the package-native
+\code{\link[=infoval]{infoval()}} pipeline; both Brief-RC and 2IFC paradigms are
+supported.
 }
 \examples{
 \dontrun{

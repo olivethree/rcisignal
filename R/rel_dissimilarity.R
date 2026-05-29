@@ -164,10 +164,6 @@ rel_dissimilarity <- function(signal_matrix_a,
                               seed                = NULL,
                               progress            = TRUE,
                               acknowledge_scaling = FALSE) {
-  abort_if_group_ci(signal_matrix_a, fn = "rel_dissimilarity",
-                    arg = "signal_matrix_a")
-  abort_if_group_ci(signal_matrix_b, fn = "rel_dissimilarity",
-                    arg = "signal_matrix_b")
   validate_two_signal_matrices(signal_matrix_a, signal_matrix_b)
   if (isTRUE(paired)) {
     validate_paired_matrices(signal_matrix_a, signal_matrix_b)
