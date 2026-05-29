@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   rcisignal: rcisignal.html
   validation_rcicr: validation_rcicr.html
-last_built: 2026-05-29T13:26Z
+last_built: 2026-05-29T13:33Z
 urls:
   reference: https://olivethree.github.io/rcisignal/reference
   article: https://olivethree.github.io/rcisignal/articles
