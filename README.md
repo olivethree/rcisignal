@@ -53,10 +53,10 @@ Brief-RC users can skip `rcicr`; the Brief-RC code is fully native to
 
 A re-analysis of the open data from [Oliveira, Garcia-Marques,
 Dotsch & Garcia-Marques (2019)](https://doi.org/10.1002/ejsp.2569),
-2IFC reverse correlation on a 256 x 256 grayscale male base face,
-20 producers per trait, 300 trials each.
+2IFC reverse correlation on a 256 x 256 grayscale male base face, target mental represeations are social traits (e.g. trustworthy,competent, friendly),
+20 producers per trait, 300 trials per session. Data collected in a lab setting.
 
-### Cross-producer agreement maps (fire palette)
+### Cross-producer agreement maps
 
 ![Cross-producer agreement maps for four traits (Trustworthy,
 Friendly, Competent, Dominant), fire palette, restricted to the
@@ -66,7 +66,7 @@ For each trait, brighter pixels mark image regions where the 20
 producers in the RC task agreed more strongly on the location of
 the target representation in their perception. The colorbar shows
 the *degree of agreement (|t|)* from a per-pixel one-sample test of
-producer CIs against zero, computed within the full-face oval. Hot
+producer CIs against zero, computed within the full-face oval mask applied to the base face image. Hot
 regions indicate consistent across-producer structure regardless of
 sign; pale regions indicate weak or inconsistent agreement. For the
 directional view (where the signal sits above or below the base),
@@ -94,7 +94,7 @@ Oliveira et al. (2019), Study 1* section.
 ## Validation status
 
 Several metrics in this package are package-level extensions whose
-behavior on social-face RC data has not been independently
+behavior on social perception-related RC data has not been independently
 validated. See [*§1.2 Validation
 status*](https://olivethree.github.io/rcisignal/articles/rcisignal.html#validation-status)
 in the user guide for the breakdown of validated versus unvalidated
