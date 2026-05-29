@@ -1315,7 +1315,7 @@ returns an `rcisignal_diag_result`.
   `rcicr` version. PASS if matching; WARN otherwise. The warning
   is informational (older datasets remain usable, and the flag
   simply prompts a spot-check).
-- **`check_response_inversion(rdata = ..., infoval_iter = ...)`**
+- **`check_response_inversion(rdata = ...` (2IFC) `| noise_matrix = ...` (Brief-RC)`, infoval_iter = ...)`**
   detects whole-batch sign-flipped data by computing per-producer
   infoVal with the original responses and again with the negated
   responses. FAIL if >= 50% of producers are flagged as inverted;
@@ -1373,6 +1373,8 @@ negative correlation (correlation <= -0.30) suggests that fast
 clickers are also producing low-infoVal masks, indicating a
 population-level pattern rather than a single-producer fluke.
 WARN if the correlation passes the threshold; PASS otherwise.
+Works with both 2IFC (`rdata = ...`) and Brief-RC
+(`noise_matrix = ...`) data.
 
 ### 5.6 Conditional checks and required arguments
 
@@ -2167,6 +2169,45 @@ where the recorded number of mask contributions equals
 `n_trials` and is typically smaller than `n_pool`, a pool-size
 reference biases infoVal downward. `infoval()` uses each
 producer's actual recorded trial count.
+
+### 9.1 Validation against `rcicr` on real data
+
+Because `rcisignal::infoval()` is a reimplementation, it is
+useful to know how its numbers line up with the established
+`rcicr::computeInfoVal2IFC()`. The companion vignette
+*Validation: rcisignal vs rcicr infoVal convergence* runs both
+implementations on the open data from Oliveira, Garcia-Marques,
+Dotsch & Garcia-Marques (2019), ten traits, twenty producers
+per trait, 300 trials each. The headline table:
+
+| trait         | n  | median z (rcisignal) | median z (rcicr) | n ≥ 1.96 (rcisignal) | n ≥ 1.96 (rcicr) | Pearson r |
+|---------------|----|---------------------|------------------|---------------------|------------------|-----------|
+| competent     | 20 | 0.089               | 0.083            | 2                   | 2                | 1.000     |
+| dominant      | 20 | 0.268               | 0.267            | 4                   | 4                | 1.000     |
+| friendly      | 20 | 0.703               | 0.713            | 1                   | 1                | 1.000     |
+| incompetent   | 20 | 0.243               | 0.241            | 0                   | 0                | 1.000     |
+| intelligent   | 20 | 0.584               | 0.591            | 2                   | 2                | 1.000     |
+| submissive    | 20 | 0.525               | 0.530            | 4                   | 4                | 1.000     |
+| trust         | 20 | 0.323               | 0.323            | 2                   | 2                | 1.000     |
+| unfriendly    | 20 | 0.712               | 0.722            | 3                   | 3                | 1.000     |
+| unintelligent | 20 | 0.233               | 0.231            | 1                   | 1                | 1.000     |
+| untrust       | 20 | 0.664               | 0.673            | 5                   | 5                | 1.000     |
+
+Two patterns stand out. First, the per-producer correlation is
+1.000 in every trait, so the two implementations rank
+producers identically and produce the same headcount of
+producers clearing the conventional z = 1.96 threshold.
+Second, median z values differ between the two implementations
+by at most about 0.01, which is well within the noise of a
+Monte-Carlo reference distribution. In practical terms the
+choice between `infoval()` and `rcicr::computeInfoVal2IFC()`
+makes no difference to the conclusions you would draw about
+individual producers on a 2IFC dataset of this size.
+
+For the engine-equivalence math (random-responder reference
+distributions match to within rounding) and a Brief-RC
+signal-recovery sanity check, see
+`vignette("validation_rcicr", package = "rcisignal")`.
 
 **Interpreting infoVal.** The Frobenius norm is a magnitude
 statistic, answering "is this mask larger than chance?" rather

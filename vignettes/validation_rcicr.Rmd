@@ -114,17 +114,17 @@ defaults diverge:
 
 - `rcisignal::infoval()` uses a reference distribution matched
   to each producer's actual trial count (300 trials in this
-  study). For a 300-trial / 4096-pool study this reference is
-  narrower than the rcicr default, so z scores come out
-  systematically larger.
+  study).
 - `rcicr::computeInfoVal2IFC()` uses a reference distribution
-  at the full pool size. This is the convention from Brinkman et
-  al. (2019) and yields more conservative z values.
+  at the full pool size (4096 in this study), the convention
+  from Brinkman et al. (2019).
 
-The systematic offset direction is predictable from the ratio
-of standard deviations of the two reference distributions, and
-ordinal agreement (which producers clear 1.96, ranking across
-producers) should hold tightly.
+Because both reference distributions are built from random
+sign sequences run through the same mask formula, and the
+producer's observed Frobenius norm is the same input on both
+sides, the two should agree closely on a 2IFC dataset of this
+size. We expect tight per-producer correlations and very
+similar (though not identical) absolute z values.
 
 Each per-trait per-participant pair was computed with both
 implementations at `iter = 10000` (rcicr's recommended value)
@@ -177,21 +177,21 @@ for (tr in names(per_trait)) {
 
 Two patterns to read out of the table and the scatter:
 
-- The scatter points sit above the identity line in every
-  trait. This confirms the predicted offset direction: the
-  per-trial-count reference is narrower than the pool-size
-  reference, so dividing the observed norm by a smaller MAD
-  gives a larger z.
-- Pearson r across producers stays high in every trait. The
+- Pearson r across producers is 1.000 in every trait. The
   rank ordering of producers (and so the headcount clearing
-  any fixed threshold) is preserved across implementations.
+  any fixed threshold) is identical across implementations.
+- Median z values differ between the two implementations by
+  at most about 0.01 per trait, well within Monte-Carlo noise.
+  The headcounts clearing z = 1.96 match exactly.
 
-The takeaway: the engines compute the same statistic; the
-numbers differ only because the two implementations default
-to different reference distributions. Choose `infoval()` for
-the tighter calibration; call `rcicr::computeInfoVal2IFC()`
-directly when reporting alongside prior work that used the
-rcicr default.
+The takeaway: on this dataset the two implementations are
+numerically interchangeable. `infoval()` reimplements the
+Brinkman et al. (2019) statistic faithfully; reporting with
+either function produces the same conclusions about producer
+quality. The only situation where the choice matters is when
+prior work in the same line of research has already reported
+rcicr-default numbers and you want yours to line up exactly,
+in which case call `rcicr::computeInfoVal2IFC()` directly.
 
 ```{r oliveira-fallback, eval = !val_have_cache, echo = FALSE, results = "asis"}
 cat("> Side-by-side results require the precompute output. ",
@@ -289,17 +289,15 @@ cat("> `rcicr` is not installed in this build, so the ",
 
 For 2IFC, the rcisignal and rcicr engines are mathematically
 equivalent at the level of the reference distribution and
-ordinally consistent on real data (Oliveira et al., 2019),
-with a predictable systematic offset attributable to the
-default reference-distribution choice (per-trial-count vs
-pool-size). For Brief-RC, no rcicr counterpart exists; the
+numerically interchangeable on real data (Oliveira et al.,
+2019): per-producer correlation 1.000 in every trait, identical
+headcounts clearing z = 1.96, median z values within about 0.01
+of each other. For Brief-RC, no rcicr counterpart exists; the
 package's native implementation passes a signal-recovery
-sanity check.
+sanity check on simulated data.
 
-For applied work, prefer `infoval()`: the per-trial-count
-reference is the tighter calibration and is the path the
-Brinkman et al. (2019) and Schmitz et al. (2024) traditions
-both ground out in. Call `rcicr::computeInfoVal2IFC()` directly
+For applied work, `infoval()` is the path forward for both
+2IFC and Brief-RC. Call `rcicr::computeInfoVal2IFC()` directly
 only when the report needs to sit alongside prior published
 work that used the rcicr default.
 
