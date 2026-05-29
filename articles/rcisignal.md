@@ -206,251 +206,6 @@ unipolar `|t|`-style yellow-to-red ramp, `format = "jpeg"` to write
 JPEGs instead, or `prefix = "trust_"` (or any other string) to override
 the auto-derived prefix.
 
-### 1.5 Working with your CIs: a task-oriented tour
-
-This subsection answers the workflow questions most users arrive with
-after their first call to
-[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
-or
-[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md):
-what is inside the result object, how do I look at the individual or
-group CIs, how do I pull a single CI out for follow-up analysis, and how
-do I mix per-producer and group CIs in the same comparison. The code
-below uses placeholder object names (`res`, `responses`, `base`); the
-worked example in §12 carries the same idioms against real Oliveira et
-al. (2019) data.
-
-#### Anatomy of a CI object
-
-`ci_from_responses_*()` returns a plain list. The two fields most
-analyses consume are `$signal_matrix` and (when `group_by =` is
-supplied) `$group_ci`:
-
-``` r
-
-res <- ci_from_responses_briefrc(
-  responses,
-  noise_matrix = noise,
-  group_by     = "condition"     # builds $group_ci as well
-)
-
-names(res)
-#> [1] "signal_matrix" "rendered_ci"  "participants" "img_dims"
-#> [5] "scaling"       "method"       "group_ci"
-
-str(res, max.level = 1)
-#> $ signal_matrix : num [1:65536, 1:40]   pixels x producers, raw mask
-#> $ rendered_ci   : num [1:65536, 1:40]   visualisation only, do not feed to metrics
-#> $ participants  : chr [1:40]            producer ids
-#> $ img_dims      : int [1:2]             c(256L, 256L)
-#> $ scaling       : chr "constant"
-#> $ method        : chr "briefrc12"
-#> $ group_ci      : num [1:65536, 1:2]    pixels x conditions, group-averaged
-```
-
-Field-by-field:
-
-- `$signal_matrix` is the canonical input to every downstream metric
-  ([`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md),
-  `rel_*()`,
-  [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md),
-  [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
-  [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
-  [`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
-  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md),
-  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)).
-  Each column is one producer’s raw mask; the column name is the
-  producer id pulled from `responses[[col_participant]]`.
-- `$group_ci` is the per-condition averaged CI matrix, one column per
-  group, built internally by
-  [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-  when `group_by =` is supplied. Column names are the group labels (or
-  the underscore-joined factorial labels when `group_by =` is a
-  multi-column character vector).
-- `$rendered_ci` is the same producer-level information rescaled to
-  `[0, 1]` for visualisation. It is the matrix
-  [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
-  and
-  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
-  composite onto the base face. Never feed it to metrics: the scaling
-  distorts the variance the reliability and infoVal calculations depend
-  on. The package marks each matrix as raw or rendered via the
-  `attr(., "source")` hint and aborts when a rendered matrix is passed
-  to a metric that expects the raw mask.
-- `$participants`, `$img_dims`, `$scaling`, `$method` are metadata.
-  `$participants` is what `colnames(res$signal_matrix)` also returns.
-- A lightweight attribute, `attr(res$signal_matrix, "ci_level")`,
-  carries the value `"individual"` (and `"group"` on `res$group_ci`). It
-  is read only by
-  [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
-  to pick filename prefixes; no metric inspects it.
-
-For
-[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
-the layout is the same modulo two small differences: no `$method` field,
-and an extra `$rcicr_result` field carrying the raw rcicr return list
-(rarely needed).
-
-#### Viewing individual (producer-level) CIs
-
-Three patterns cover the common cases:
-
-``` r
-
-# (a) One CI on screen.
-plot_ci_overlay(res$signal_matrix[, "P012"],
-                base_image = base,
-                img_dims   = res$img_dims)
-
-# (b) All CIs to disk, one PNG per producer.
-save_ci_images(res$signal_matrix, base_image = base,
-               dir = "out/ind")
-# -> ind_ci_P001.png, ind_ci_P002.png, ..., ind_ci_P040.png
-
-# (c) Quick visual sweep across producers in a multi-panel grid.
-op <- par(mfrow = c(4, 5), mar = c(1, 1, 2, 1))
-for (id in colnames(res$signal_matrix)) {
-  plot_ci_overlay(res$signal_matrix[, id],
-                  base_image = base,
-                  img_dims   = res$img_dims,
-                  main       = id)
-}
-par(op)
-```
-
-Pattern (b) is the default recommendation for any dataset large enough
-that pattern (c) becomes unreadable. The `ind_ci_` prefix comes from the
-`ci_level = "individual"` attribute and can be overridden via `prefix =`
-if you want a different naming scheme.
-
-#### Viewing group (condition-level) CIs
-
-If the CI object already carries `$group_ci` (because you passed
-`group_by =` to the generator), the same three patterns apply to that
-matrix:
-
-``` r
-
-# (a) One group CI on screen.
-plot_ci_overlay(res$group_ci[, "happy"],
-                base_image = base,
-                img_dims   = res$img_dims)
-
-# (b) All group CIs to disk, one PNG per condition.
-save_ci_images(res$group_ci, base_image = base,
-               dir = "out/group")
-# -> group_ci_happy.png, group_ci_sad.png, ...
-```
-
-If you computed `$signal_matrix` without `group_by =`, build the group
-matrix post-hoc with
-[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
-(it just averages columns within each group, using the responses table
-to map producers to groups):
-
-``` r
-
-grp <- group_ci(res$signal_matrix, responses, by = "condition")
-plot_ci_overlay(grp[, "happy"], base_image = base, img_dims = res$img_dims)
-save_ci_images(grp, base_image = base, dir = "out/group")
-```
-
-A factorial grouping (e.g., `by = c("condition", "sex")`) produces
-columns named with underscore-joined cell labels (`"happy_female"`,
-`"happy_male"`, …).
-
-#### Subsetting CIs for follow-up analyses
-
-Every column of `$signal_matrix` is one producer’s CI; every column of
-`$group_ci` is one condition’s CI. Standard matrix subsetting pulls them
-out, with one important detail: keep the result a matrix
-(`drop = FALSE`), because every downstream function in the package
-expects a pixels-by-CIs matrix shape, not a bare vector.
-
-``` r
-
-colnames(res$signal_matrix)
-#> [1] "P001" "P002" "P003" ... "P040"
-
-colnames(res$group_ci)
-#> [1] "happy" "sad"
-
-# One individual CI, kept as a 1-column matrix.
-one_ind <- res$signal_matrix[, "P012", drop = FALSE]
-
-# A chosen subset of individual CIs.
-some_inds <- res$signal_matrix[, c("P012", "P015", "P019"),
-                               drop = FALSE]
-
-# One group CI.
-one_group <- res$group_ci[, "happy", drop = FALSE]
-
-# Two specific group CIs (e.g., for a contrast).
-two_groups <- res$group_ci[, c("happy", "sad"), drop = FALSE]
-```
-
-Bracket-subsetting drops the `ci_level` attribute. The downstream
-metrics do not care (they ignore the attribute), but if you want
-[`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
-to use the `"group_ci_"` prefix on a subset of group CIs, pass
-`prefix = "group_ci_"` explicitly.
-
-#### Mixing individual and group CIs in one comparison
-
-[`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md),
-[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
-and
-[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
-all take a single matrix where each column is one CI. The columns can be
-a mix of individual producers, group averages, or anything else you can
-shape into a pixels-by-CIs matrix.
-[`cbind()`](https://rdrr.io/r/base/cbind.html) is the recipe:
-
-``` r
-
-# One specific producer alongside several group CIs.
-all_cis <- cbind(
-  P012      = res$signal_matrix[, "P012"],
-  res$group_ci      # all conditions
-)
-
-plot_ci_correlogram(all_cis,
-                    img_dims = res$img_dims,
-                    mask     = "face")
-
-plot_ci_distance_matrix(all_cis,
-                        img_dims = res$img_dims,
-                        mask     = "face",
-                        method   = "normalised")
-```
-
-The column names become the panel labels, so name them in a way that
-makes the figure self-explanatory (e.g.,
-`P012_individual = res$signal_matrix[, "P012"]`,
-`happy_group = res$group_ci[, "happy"]`).
-
-#### Where to go next
-
-Once you can see, subset, and combine CIs, the rest of the guide covers
-the metrics you can run on them:
-
-- Per-producer infoVal on individual CIs, on a chosen subset, or on
-  group CIs (§9).
-- Within-condition agreement maps
-  ([`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
-  [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)):
-  how much do producers in the same condition agree pixel-by-pixel on
-  the CI (§10.1, §10.2).
-- Within-condition reliability of the group CI
-  ([`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md),
-  [`rel_icc()`](https://olivethree.github.io/rcisignal/reference/rel_icc.md),
-  §7).
-- Between-CI dissimilarity
-  ([`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md),
-  §8.3), cluster-based discriminability
-  ([`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md),
-  §8.2), and all-vs-all distance / correlation summaries (§10.5-10.7).
-
 ## 2. Installation
 
 ``` r
@@ -715,7 +470,7 @@ You don’t build the noise mask or the `signal_matrix` by hand:
 and
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
 do it for you and return a list whose `$signal_matrix` element is the
-matrix you pass to the metrics in §7-§9.
+matrix you pass to the metrics in §8-§10.
 
 A small terminology trap. The word *mask* above means *image-shaped
 overlay* (one number per pixel, defined over the whole image grid). It
@@ -1046,7 +801,7 @@ pattern; `response = +1` if original chosen, `-1` if inverted.
 Unselected faces are absent from the data; do not pad them as zero rows.
 The same row format applies to both validated Brief-RC variants
 (Brief-RC 12 with `k = 6`, Brief-RC 20 with `k = 10`); the analysis
-pipeline is identical (see §13.1 for the formula being symmetric in
+pipeline is identical (see §14.1 for the formula being symmetric in
 `k`).
 
 A Brief-RC 12 dataset with the same three participants and four trials
@@ -1665,7 +1420,7 @@ level via
 [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md)
 instead.
 
-## 5. Step 1: diagnose the inputs
+## 5. Diagnose the inputs
 
 Before computing CIs, run the diagnostic battery. Two top-level entry
 points cover this step.
@@ -1870,7 +1625,7 @@ report <- run_diagnostics(
 
 With every input supplied, the “Skipped checks” block is empty.
 
-## 6. Step 2: compute classification images
+## 6. Compute classification images
 
 Once the diagnostics pass, compute CIs.
 
@@ -1984,7 +1739,150 @@ the choice does not matter (it reads `$ci` internally). For Brief-RC,
 treat any non-`none` scaling as visualization-only and never pass it to
 `rel_*` or to hand-rolled `infoVal`.
 
-## 7. Step 3: within-condition reliability
+## 7. Working with CIs: Typical workflow tour
+
+With CIs computed in §6, this short hub answers four practical questions
+before the deeper metric chapters: which downstream section answers
+which analytical question, what is inside the result object, how do I
+pull one CI or a subset out for follow-up, and how do I view or mix CIs
+across the package’s visual surfaces. Every recipe here is a quick
+pointer; the metric chapters carry the depth.
+
+### 7.1 Which section answers which question
+
+| Analytical question | Where in this guide |
+|----|----|
+| Are my CIs informative at all? (per-producer infoVal) | §10 |
+| Are producers in a condition consistent with each other? (within-condition reliability) | §8 |
+| Where do producers agree in pixel space, and where reliably? | §11.1, §11.2 |
+| Are two conditions distinguishable spatially? (cluster-based discriminability) | §9.2 |
+| How different in overall magnitude are two CIs, and is that above chance? | §9.3 |
+| How do several CIs order against each other? (correlogram / distance matrix / MDS) | §11.5-§11.7 |
+| How do I restrict any analysis to eyes / mouth / etc.? | §12 |
+| How do I get publication-ready PNGs of every CI to disk? | §1.4 ([`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)) |
+
+### 7.2 What’s inside the CI result object
+
+[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+and
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+return a plain list. The fields downstream code consumes:
+
+- `$signal_matrix` (pixels x producers, **raw mask**): the canonical
+  input to every metric in §8-§11. Column names are the producer ids.
+- `$group_ci` (pixels x groups): present when `group_by =` was supplied
+  to the generator. Column names are the group labels (or
+  underscore-joined factorial cell labels).
+- `$rendered_ci` (pixels x producers, **rescaled** for display): never
+  feed this to a metric (see §3.2 for the raw vs rendered distinction;
+  the package aborts if a rendered matrix reaches a function that
+  expects the raw mask).
+- `$participants`, `$img_dims`, `$scaling`, `$method` are metadata.
+
+``` r
+
+res <- ci_from_responses_briefrc(
+  responses,
+  noise_matrix = noise,
+  group_by     = "condition"     # also returns $group_ci
+)
+
+names(res)
+str(res, max.level = 1)
+colnames(res$signal_matrix)       # producer ids
+colnames(res$group_ci)            # condition labels
+```
+
+For the deeper anatomy (raw vs rendered, the `source` / `ci_level`
+attributes, the three pixel matrices that all sound similar) see §3.
+
+### 7.3 Pulling one CI or a subset out
+
+Every column of `$signal_matrix` is one producer’s CI; every column of
+`$group_ci` is one group’s CI. Standard matrix subsetting pulls them
+out, with one detail: keep the result a matrix (`drop = FALSE`), because
+every downstream function expects a pixels-by-CIs matrix, not a bare
+vector.
+
+``` r
+
+# One individual CI.
+one_ind   <- res$signal_matrix[, "P012", drop = FALSE]
+
+# A chosen subset of individual CIs.
+some_inds <- res$signal_matrix[, c("P012", "P015", "P019"),
+                               drop = FALSE]
+
+# One or more group CIs.
+one_group  <- res$group_ci[, "happy", drop = FALSE]
+two_groups <- res$group_ci[, c("happy", "sad"), drop = FALSE]
+```
+
+If you didn’t pass `group_by =` to the generator, build group CIs after
+the fact with
+[`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md):
+
+``` r
+
+grp <- group_ci(res$signal_matrix, responses, by = "condition")
+```
+
+`by =` accepts a single column name or a character vector for factorial
+groupings (`c("condition", "sex")`; cell labels joined with `"_"`).
+
+### 7.4 Viewing CIs
+
+Two patterns cover almost every case:
+
+``` r
+
+# One CI on screen (individual or group).
+plot_ci_overlay(res$signal_matrix[, "P012"],
+                base_image = base, img_dims = res$img_dims)
+plot_ci_overlay(res$group_ci[, "happy"],
+                base_image = base, img_dims = res$img_dims)
+
+# All CIs to disk, one PNG per column.
+save_ci_images(res$signal_matrix, base_image = base, dir = "out/ind")
+save_ci_images(res$group_ci,      base_image = base, dir = "out/group")
+```
+
+See §1.4 for
+[`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
+options (palette, JPEG output, custom prefix). See §11.3 for
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+options (mask, contours from
+[`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
+alpha).
+
+### 7.5 Mixing individual and group CIs in one comparison
+
+[`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md),
+[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
+and
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+each take a single matrix where every column is one CI. The columns can
+be any mix of individual producers and group averages. Build the matrix
+with [`cbind()`](https://rdrr.io/r/base/cbind.html):
+
+``` r
+
+all_cis <- cbind(
+  P012        = res$signal_matrix[, "P012"],
+  res$group_ci      # all group columns
+)
+plot_ci_correlogram(all_cis,    img_dims = res$img_dims, mask = "face")
+plot_ci_distance_matrix(all_cis, img_dims = res$img_dims, mask = "face",
+                                method = "normalised")
+```
+
+Column names become the panel labels in the resulting figure; choose
+names that make the figure self-explanatory (e.g.,
+`P012_individual = res$signal_matrix[, "P012"]`,
+`happy_group = res$group_ci[, "happy"]`). See §11.5-§11.7 for the full
+options on each plot function.
+
+## 8. Within-condition reliability
 
 With the signal matrix in hand, the question is whether each condition’s
 group-level CI is stable: would you obtain the same group pattern from a
@@ -2019,7 +1917,7 @@ the same CI? Whether the CI accurately captures the producer’s mental
 representation of the trait is a separate validity question, typically
 addressed by an external rater study, and sits outside the package.
 
-### 7.1 `rel_split_half()`
+### 8.1 `rel_split_half()`
 
 *Background.* Split-half reliability is an old psychometric trick
 (Spearman, 1910; Brown, 1910): if a measurement is internally
@@ -2089,7 +1987,7 @@ Report `$r_sb` as the headline; `$r_sb_excess` as the above-chance
 increment when a null is requested. `$ci_95` / `$ci_95_sb` are
 percentile 95% CIs on the observed distribution.
 
-### 7.2 `rel_icc()`
+### 8.2 `rel_icc()`
 
 *Background.* The intraclass correlation coefficient (ICC) is a family
 of statistics for asking how much of the variability in repeated
@@ -2147,15 +2045,15 @@ is requested, flagging that ICC(3,k) tends toward 1 at large image sizes
 (it is not resolution-comparable). Report ICC(3,1) as the primary
 statistic for cross-resolution comparisons.
 
-Empirically, ICC(3,k) and the group-mean infoVal z (see §9) track each
+Empirically, ICC(3,k) and the group-mean infoVal z (see §10) track each
 other very closely on real data: both quantify how aligned the producers
 are on the pixel-level signal, ICC(3,k) as a variance ratio and
 group-mean z as the magnitude of the surviving group-mean signal against
-a matched reference. §12.6 shows the empirical relationship across ten
+a matched reference. §13.6 shows the empirical relationship across ten
 trait conditions on the Oliveira et al. (2019) data (Pearson *r* ≈
 0.97).
 
-### 7.3 `rel_loo()`
+### 8.3 `rel_loo()`
 
 *Background.* Leave-one-out (LOO) is a jackknife-style influence
 diagnostic (Tukey, 1958; Cook, 1977): for each producer in turn,
@@ -2196,7 +2094,7 @@ A flag prompts inspection rather than exclusion. Investigate first
 [`run_diagnostics()`](https://olivethree.github.io/rcisignal/reference/run_diagnostics.md)
 to rule out coding errors before excluding any producer.
 
-### 7.4 `run_reliability()`
+### 8.4 `run_reliability()`
 
 Top-level convenience function that runs
 [`rel_split_half()`](https://olivethree.github.io/rcisignal/reference/rel_split_half.md)
@@ -2223,7 +2121,7 @@ since LOO is an influence-screening diagnostic and bundling it into a
 reliability report invites misreading `r_loo`’s near-1 values as
 reliability.
 
-## 8. Step 4: between-condition discriminability
+## 9. Between-condition discriminability
 
 When the design has two or more conditions, the question becomes whether
 their group CIs are distinguishable, both in overall magnitude and in
@@ -2290,7 +2188,7 @@ two arguments can be:
   far is this one producer from the group mean of another condition?”.
 - **all-vs-all descriptive distance** for a set that mixes individuals
   and groups: build a single matrix with
-  [`cbind()`](https://rdrr.io/r/base/cbind.html) (see §1.5) and hand it
+  [`cbind()`](https://rdrr.io/r/base/cbind.html) (see §7.5) and hand it
   to
   [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
   or
@@ -2298,7 +2196,7 @@ two arguments can be:
   These do not run inferential statistics; they report the descriptive
   distance / correlation between every pair.
 
-### 8.1 `pixel_t_test()`
+### 9.1 `pixel_t_test()`
 
 *Background.* The pixel-wise t-test is the building block of everything
 in this section: at each pixel, compare the two conditions’
@@ -2308,13 +2206,13 @@ image-shaped statistical map of where the conditions differ.
 
 This map is informative, but it is not a valid statistical test on its
 own. With tens of thousands of pixels and no multiplicity correction,
-raw per-pixel p-values overstate the strength of evidence (see the §8
+raw per-pixel p-values overstate the strength of evidence (see the §9
 intro above). For that reason
 [`pixel_t_test()`](https://olivethree.github.io/rcisignal/reference/pixel_t_test.md)
 returns the t-vector and stops there; turning it into inference is the
 job of
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
-(§8.2), which feeds these per-pixel t-values into a permutation-based
+(§9.2), which feeds these per-pixel t-values into a permutation-based
 FWER procedure.
 
 In code:
@@ -2337,13 +2235,13 @@ and is not intended as a standalone inferential test (no FWER control at
 the per-pixel level). For paired mode, the two matrices must have
 identical `ncol` and matching column names.
 
-### 8.2 `rel_cluster_test()`
+### 9.2 `rel_cluster_test()`
 
 *Background.* The cluster-based permutation test (Maris & Oostenveld,
 2007) treats the spatial coherence of CI signal as a feature, not a
 nuisance. The procedure is in three conceptual steps:
 
-1.  Compute the per-pixel t-statistic (as in §8.1), and threshold its
+1.  Compute the per-pixel t-statistic (as in §9.1), and threshold its
     absolute value at some cutoff (e.g., `|t| > 2`). Each pixel is
     either supra-threshold or not.
 2.  Group the supra-threshold pixels into spatially contiguous
@@ -2442,7 +2340,7 @@ For a **paired design**, pass `paired = TRUE`; the per-pixel statistic
 becomes paired t and the null is built by random sign-flip on
 per-producer differences (exact under exchangeability of pair sign).
 
-### 8.3 `rel_dissimilarity()`
+### 9.3 `rel_dissimilarity()`
 
 *Background.* The Euclidean distance between two CIs is the square root
 of the summed squared pixel differences (equivalently, the Frobenius
@@ -2464,7 +2362,7 @@ D_{\mathrm{norm}}(A, B) = \frac{D(A, B)}{\sqrt{\left| \mathcal{M} \right|}}
 divides by the square root of the mask cardinality to make distances
 comparable across different image resolutions or different region masks
 (Brinkman et al., 2019, use the same Frobenius-norm reduction to
-single-number magnitudes for the related infoVal metric; see §9). This
+single-number magnitudes for the related infoVal metric; see §10). This
 is the standard Euclidean distance on the flattened difference image.
 Other distance metrics exist (cosine, Mahalanobis, correlation distance)
 but rcisignal commits to Euclidean throughout, so that the single-pair
@@ -2484,7 +2382,7 @@ contrast, comparable across studies, with a percentile bootstrap CI
 for uncertainty. The trade-off is loss of spatial detail, which is
 exactly what
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
-(§8.2) is for. Reported together, the two metrics complement each other:
+(§9.2) is for. Reported together, the two metrics complement each other:
 the cluster test localises the difference, the dissimilarity quantifies
 its overall size.
 
@@ -2568,7 +2466,7 @@ designs) and recomputing *r*. Euclidean distance is also not strictly
 baseline-free, but in practice the shared scaffolding contributes a
 roughly constant additive distance, so relative comparisons (“which two
 CIs are closest?”) survive without an explicit null. The worked example
-in §12.6 shows that the relative ordering of condition pairs by Pearson
+in §13.6 shows that the relative ordering of condition pairs by Pearson
 *r* matches the ordering by Euclidean distance on the Oliveira et
 al. (2019) data, but only the distance gives an interpretable absolute
 magnitude.
@@ -2580,7 +2478,7 @@ secondary relative ordering inside a set of contrasts, and pair it with
 a permutation null if you need to make any “above-chance” claim about
 *r* itself.
 
-### 8.4 `run_discriminability()`
+### 9.4 `run_discriminability()`
 
 Orchestrator that runs
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)
@@ -2612,7 +2510,7 @@ plot(rep$results$dissimilarity,
      main = "US vs PT - bootstrap dissimilarity")
 ```
 
-### 8.5 `run_discriminability_pairwise()`
+### 9.5 `run_discriminability_pairwise()`
 
 Generalises
 [`run_discriminability()`](https://olivethree.github.io/rcisignal/reference/run_discriminability.md)
@@ -2653,7 +2551,7 @@ each pair’s dissimilarity child to
 [`plot_dissimilarity_grid()`](https://olivethree.github.io/rcisignal/reference/plot_dissimilarity_grid.md).
 
 When the comparison is many conditions at once (rather than a short list
-of pairs), the all-vs-all summaries in §10.6 and §10.7 are the natural
+of pairs), the all-vs-all summaries in §11.6 and §11.7 are the natural
 tools:
 [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
 for a pairwise Euclidean-distance heatmap across N conditions, and
@@ -2668,7 +2566,7 @@ from the underlying
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)).
 A pair with no clusters contributes `p_min = 1.0`.
 
-## 9. Step 5: per-producer informational value
+## 10. Per-producer informational value
 
 *Background.* Per-producer infoVal (Brinkman et al., 2019) asks a single
 question: is this producer’s CI larger in magnitude than what a random
@@ -2689,7 +2587,7 @@ who clicked consistently but in a way that encodes an unrelated visual
 pattern (for example, their CI looks like an upper-left versus
 lower-right contrast rather than a trait-relevant face feature) can
 still score high on infoVal. Pair infoVal with the reliability metrics
-(§7) and the discriminability metrics (§8) when you want a fuller
+(§8) and the discriminability metrics (§9) when you want a fuller
 picture.
 
 A note on *group-mean infoVal*. The package also offers a group-mean
@@ -2697,7 +2595,7 @@ version (`group_mean_z()`, called inside
 [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
 as a supplementary statistic). It applies the same Frobenius-norm logic
 to the group-averaged CI, using a matched-N reference distribution so
-the calibration is fair (see §15 for what goes wrong when that reference
+the calibration is fair (see §16 for what goes wrong when that reference
 is mismatched). Brinkman et al. (2019) recommend reporting the
 *distribution* of per-producer infoVals as the primary group-level
 summary, not a single group z. The group-mean version is offered here as
@@ -2775,7 +2673,7 @@ derives for you). For group CIs the reference must be matched to the
 group CI is built from N producer masks summed (then averaged) at their
 individual trial counts. Passing a per-producer trial count for a group
 column would calibrate the reference against the wrong N and return a
-misleading z (see §15 for what goes wrong in detail; the per-producer /
+misleading z (see §16 for what goes wrong in detail; the per-producer /
 group-mean distinction there carries the same matching requirement).
 
 The function unifies 2IFC and Brief-RC infoVal under one implementation.
@@ -2797,7 +2695,7 @@ downward.
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
 uses each producer’s actual recorded trial count.
 
-### 9.1 Validation against `rcicr` on real data
+### 10.1 Validation against `rcicr` on real data
 
 Because
 [`rcisignal::infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
@@ -2862,7 +2760,7 @@ at the right pattern?”. Two consequences follow.
   with these to triangulate.
 
 If most per-producer z-scores in your data come out near zero or
-negative, that is not unusual; see Appendix §15 for a five-reason
+negative, that is not unusual; see Appendix §16 for a five-reason
 walkthrough and a diagnostic recipe before drawing conclusions about
 producers’ engagement.
 
@@ -2879,7 +2777,7 @@ indexed by the simulation settings (`iter`, pool size, mask, and
 again with the same settings, it loads the cached reference; otherwise
 it recomputes.
 
-## 10. Step 6: agreement maps and paper figures
+## 11. Agreement maps and publication-ready figures
 
 Three composable plot surfaces share one base-overlay convention:
 [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
@@ -2890,7 +2788,7 @@ shows between-condition t-maps. All three accept a `base_image` argument
 with the same semantics, so any of them can be rendered as a flat panel
 or composited on the base face with one call.
 
-### 10.1 `agreement_map_test()`
+### 11.1 `agreement_map_test()`
 
 Within a single condition, tests at each pixel whether the
 producer-level signal differs from zero (one-sample t). The null is
@@ -2919,7 +2817,7 @@ descriptive agreement map plotted by
 [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
 is this $`t_i`$ field reshaped to the image grid; the `palette = "fire"`
 variant displays $`|t_i|`$ on a single-hue ramp when only the strength
-of agreement is needed (see §10.2).
+of agreement is needed (see §11.2).
 
 The pixel-wise one-sample t against zero applied to reverse-correlation
 CIs is the same logic as the pixel test introduced by Chauvin,
@@ -2956,10 +2854,10 @@ am$significant_mask  # logical vector: which pixels survive FWER
 The result has its own
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method that
 renders the observed t-map with FWE-significant pixels outlined in
-black. This is the one-call form of the standard pairing; see §10.2 for
+black. This is the one-call form of the standard pairing; see §11.2 for
 what it does and the color conventions it inherits.
 
-### 10.2 `plot_agreement_map()` and `plot(agreement_map_test_result)`
+### 11.2 `plot_agreement_map()` and `plot(agreement_map_test_result)`
 
 Renders the per-pixel one-sample t-map as a color image, with optional
 thresholding and an optional base-face overlay:
@@ -3011,7 +2909,7 @@ plot(am,
      palette    = "diverging")  # FWE-significant pixels outlined
 ```
 
-### 10.3 `plot_ci_overlay()`
+### 11.3 `plot_ci_overlay()`
 
 The headline figure for most papers. Renders the group-mean CI as a
 translucent layer over the base face, optionally restricted to the
@@ -3039,7 +2937,7 @@ the agreement map when the question is “where do producers *agree*”; use
 the CI overlay when the question is “what does the group mean look like
 in the face”.
 
-### 10.4 `plot_dissimilarity_grid()`
+### 11.4 `plot_dissimilarity_grid()`
 
 Lays out multiple
 [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
@@ -3059,11 +2957,11 @@ plot_dissimilarity_grid(
 )
 ```
 
-### 10.5 `plot_ci_correlogram()`
+### 11.5 `plot_ci_correlogram()`
 
 A publication-ready Pearson-*r* matrix across multiple group-mean CIs.
 The function takes a single matrix where each column is one CI (a group
-mean, an individual producer, or any mix; see §1.5 for the
+mean, an individual producer, or any mix; see §7.5 for the
 [`cbind()`](https://rdrr.io/r/base/cbind.html) recipe that mixes
 per-producer and group CIs in one call). Useful as a compact visual
 summary of which conditions covary across the image.
@@ -3124,7 +3022,7 @@ plot_ci_correlogram(gcis)
 Same diverging convention as the rest of the package’s direction-bearing
 plots: positive `r` = blue, negative = red; saturation encodes
 magnitude. The color scale is fixed at `c(-1, 1)` so panels are
-comparable across runs and across paper figures. The §12.6 worked
+comparable across runs and across paper figures. The §13.6 worked
 example uses this function on the four-trait subset.
 
 Read the result carefully: Pearson `r` between two base-subtracted CIs
@@ -3135,14 +3033,14 @@ similarity claim. Use the correlogram for **relative** comparisons
 baseline-free magnitude summary, pair with
 [`rel_dissimilarity()`](#id_83-rel_dissimilarity).
 
-### 10.6 `plot_ci_distance_matrix()`
+### 11.6 `plot_ci_distance_matrix()`
 
 A publication-ready Euclidean distance matrix across multiple group-mean
 CIs. Same input format as
 [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md):
 one matrix with one CI per column, individual or group or any mix (the
-§1.5 [`cbind()`](https://rdrr.io/r/base/cbind.html) recipe applies here
-too). Uses the magnitude metric recommended by §8.3 instead of Pearson
+§7.5 [`cbind()`](https://rdrr.io/r/base/cbind.html) recipe applies here
+too). Uses the magnitude metric recommended by §9.3 instead of Pearson
 correlation, with the same Euclidean-distance formula defined there
 ($`D(A, B) = \sqrt{\sum_{i \in \mathcal{M}} (\bar{A}_i -
 \bar{B}_i)^2}`$; the `method = "normalised"` branch divides by
@@ -3180,7 +3078,7 @@ exposes both `$distance_matrix` (raw or normalised per `method`) and
 `$distance_raw` (always raw, useful for downstream
 [`hclust()`](https://rdrr.io/r/stats/hclust.html) or MDS).
 
-### 10.7 `plot_ci_mds()`
+### 11.7 `plot_ci_mds()`
 
 Projects multiple CIs into a low-dimensional Euclidean scatter where
 distances between points reproduce the Euclidean distances between CIs
@@ -3245,14 +3143,14 @@ plot_ci_mds(
 )
 ```
 
-See §8.3 for
+See §9.3 for
 [`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
-(the two-condition Euclidean distance with bootstrap CI) and §10.6 for
+(the two-condition Euclidean distance with bootstrap CI) and §11.6 for
 the all-vs-all distance matrix
 [`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
 projects internally.
 
-## 11. Region-restricted analyses
+## 12. Region-restricted analyses
 
 Every `rel_*()` and
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
@@ -3287,7 +3185,7 @@ for (region in c("eyes", "nose", "mouth",
 }
 ```
 
-## 12. Worked example: Oliveira et al. (2019), Study 1
+## 13. Worked example on real dataset
 
 This section runs the package end-to-end on a published 2IFC dataset.
 The original paper reports the per-trait classification images and judge
@@ -3313,7 +3211,7 @@ numbers and figures alongside each chunk were computed on the open OSF
 data for this study. Copy the chunks into a fresh R session and run them
 on your own data to reproduce the analysis pattern.
 
-### 12.1 Loading the data
+### 13.1 Loading the data
 
 The original CSV is semicolon-separated. We read it with
 [`read.csv2()`](https://rdrr.io/r/utils/read.table.html), then rename
@@ -3339,7 +3237,7 @@ head(raw)
 #> ...
 ```
 
-### 12.2 Modernizing the legacy `rcicr` 0.3.0 rdata
+### 13.2 Modernizing the legacy `rcicr` 0.3.0 rdata
 
 The 2015 rdata stores its noise basis under `s$sinusoids` and
 `s$sinIdx`; current rcicr expects `p$patches` and `p$patchIdx`. Patch
@@ -3360,7 +3258,7 @@ save(list = ls(), file = "stimuli_modernised.RData")
 
 The new `stimuli_modernised.RData` is the file the package will read.
 
-### 12.3 Diagnostics
+### 13.3 Diagnostics
 
 The diagnostic battery runs in one call:
 
@@ -3408,7 +3306,7 @@ trait_bias[["competent"]]
 
 For this dataset, all ten trait conditions return PASS.
 
-### 12.4 Per-trait infoVal
+### 13.4 Per-trait infoVal
 
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
 reports a per-producer Frobenius-norm z-score against a
@@ -3436,7 +3334,7 @@ Frobenius norms aggregate over the whole image and dilute localised
 signal, so individual z values are systematically smaller than the
 group-mean equivalent on the same data.
 
-### 12.5 Building the per-trait signal matrices
+### 13.5 Building the per-trait signal matrices
 
 The package builds the signal matrix for one trait in a single call. The
 output is a list whose `$signal_matrix` is what every downstream metric
@@ -3484,7 +3382,7 @@ that follow use these matrices directly. If you want a detailed
 walkthrough of how the function builds the per-producer mask, the
 four-step recipe in §3.3 walks it through.
 
-### 12.6 Within-condition reliability per trait
+### 13.6 Within-condition reliability per trait
 
 [`run_reliability()`](https://olivethree.github.io/rcisignal/reference/run_reliability.md)
 returns split-half (with Spearman-Brown projection) and ICC(3,\*) on a
@@ -3562,7 +3460,7 @@ are redundant.
 
 #### Cross-trait distances (Euclidean)
 
-Per §8.3, Pearson `r` between base-subtracted CIs carries a positive
+Per §9.3, Pearson `r` between base-subtracted CIs carries a positive
 baseline from shared image-domain structure and is not a clean
 similarity score; Euclidean distance does not share this baseline issue.
 [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
@@ -3571,7 +3469,7 @@ produces the companion magnitude view on the same four traits:
 ``` r
 
 # `sm` is the named list of ten per-trait signal matrices built
-# in §12.5. `plot_ci_distance_matrix()` reduces each matrix to
+# in §13.5. `plot_ci_distance_matrix()` reduces each matrix to
 # its group mean internally; no manual averaging is needed.
 plot_ci_distance_matrix(
   list(Trust     = sm[["trust"]],
@@ -3625,7 +3523,7 @@ that hypothesis uses `k = 2L`:
 ``` r
 
 # `sm` is the named list of ten per-trait signal matrices built
-# in §12.5. Pick the ten traits in display order, then relabel
+# in §13.5. Pick the ten traits in display order, then relabel
 # them with the pretty (display) names. `plot_ci_mds()` reduces
 # per-producer matrices to group means internally, so we pass
 # the matrices as-is.
@@ -3715,7 +3613,7 @@ read.
 
 #### ICC and group-mean infoVal z track each other across traits
 
-Per-trait reliability and per-trait group-mean infoVal z (see §9) are
+Per-trait reliability and per-trait group-mean infoVal z (see §10) are
 tightly coupled across the ten conditions in this dataset: Pearson *r* =
 0.97, 95% CI \[0.88, 0.99\], *t*(8) = 11.41, *p* \< 0.001. Both quantify
 producer alignment on the pixel-level signal: ICC(3,k) as a variance
@@ -3736,7 +3634,7 @@ et al. (2019) Study 1 data. Each point is one of the ten trait
 conditions; the line is the OLS fit and the band is its 95% confidence
 band. The dotted reference line marks group-mean z = 1.96.
 
-### 12.7 Multi-contrast discriminability (full face)
+### 13.7 Multi-contrast discriminability (full face)
 
 Three motivating questions you can put to this dataset, going beyond the
 original paper:
@@ -3759,7 +3657,7 @@ and lay them out side-by-side:
 # Three contrasts. Each is a named list with `$a` and `$b`: the
 # two per-trait signal matrices to compare. Building it this way
 # means the same `contrasts` object can drive both the full-face
-# tests below and the region-by-region tests in §12.8.
+# tests below and the region-by-region tests in §13.8.
 contrasts <- list(
   "Trust vs Friendly"     = list(a = sm[["trust"]],
                                  b = sm[["friendly"]]),
@@ -3840,7 +3738,7 @@ themselves; the figure shows that all three contrasts diverge clearly on
 this dataset, with the lower bound of the 95% percentile CI well above
 zero.
 
-### 12.8 Region-by-region cluster tests
+### 13.8 Region-by-region cluster tests
 
 A typical follow-up question is whether the divergences are uniform
 across the face or driven by specific anatomical regions. Run the
@@ -3912,7 +3810,7 @@ significant clusters in any single region, the divergence is broad
 rather than localised; when the opposite holds, you have evidence for a
 localised contrast driven by one anatomical area.
 
-### 12.9 Per-region informational value
+### 13.9 Per-region informational value
 
 Per-producer informational value also varies by region. A trait whose
 group CI looks weak overall may carry stronger signal in one specific
@@ -3970,7 +3868,7 @@ On this dataset, the resulting grid is:
 | competent | upper_face | +0.21             |                    3 |
 | dominant  | upper_face | +0.37             |                    5 |
 
-Compared with the full-face infoVal table in §12.4, this
+Compared with the full-face infoVal table in §13.4, this
 region-restricted view often shifts the picture. A trait whose group CI
 looks weak overall may carry stronger signal in one specific region, and
 a trait that looks strong overall may localise to one region rather than
@@ -3987,14 +3885,14 @@ peak, and competent’s signal is the most evenly spread across regions,
 though at uniformly modest levels. The headline full-face median for
 each trait masks these regional contrasts.
 
-The two grids (the cluster grid from §12.8 and the infoVal grid here)
+The two grids (the cluster grid from §13.8 and the infoVal grid here)
 answer two different questions about the same masked region. The cluster
 test asks where conditions A and B disagree; infoVal asks how
 informative a single condition’s mask is when restricted to this region.
 Reporting both side-by-side gives a fuller picture of how producers’
 representations organize across the face.
 
-### 12.10 Pairwise cluster maps for two motivating contrasts
+### 13.10 Pairwise cluster maps for two motivating contrasts
 
 The two contrasts highlighted in this section are chosen because they
 sit at opposite ends of a methodological prediction. **Trust versus
@@ -4150,9 +4048,9 @@ Competent map retains noticeably more spatial extent than the Trust vs
 Friendly map. These maps extend Oliveira et al. (2019) by adding a
 between-condition inferential filter the original paper did not run.
 
-### 12.11 Producer agreement maps (within-condition)
+### 13.11 Producer agreement maps (within-condition)
 
-The pairwise maps in §12.10 ask *where two conditions differ*. A
+The pairwise maps in §13.10 ask *where two conditions differ*. A
 complementary question is *where, within one condition, do producers
 agree with each other?*.
 [`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
@@ -4237,10 +4135,10 @@ plot_ci_overlay() or palette = diverging.
 
 Among the four traits on this dataset, friendly and dominant show the
 broadest spread of red across the face; competent’s agreement map looks
-more diffuse, consistent with its weaker group-mean infoVal (§12.4) and
-its low per-region median z (§12.9).
+more diffuse, consistent with its weaker group-mean infoVal (§13.4) and
+its low per-region median z (§13.9).
 
-## 13. Brief-RC end-to-end
+## 14. Brief-RC end-to-end
 
 The Brief-RC workflow follows the same diagnose, compute, and assess
 flow with two practical differences. First, the response data has
@@ -4248,7 +4146,7 @@ multiple alternatives per trial (12 or 20, recorded as one row per trial
 carrying the chosen pool id and sign). Second, the noise matrix is
 consumed directly, without an `rcicr` wrapper.
 
-### 13.1 Brief-RC variants currently supported
+### 14.1 Brief-RC variants currently supported
 
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
 accepts two `method` values, both matching the variants validated in
@@ -4275,11 +4173,11 @@ Other split sizes (Brief-RC 4, 6, 8, 10) are mentioned in the Schmitz et
 al. (2024) discussion as possible future variants worth investigating,
 but they have not been validated and are not exposed in `rcisignal`. If
 you genuinely need to compute masks for one of those configurations, the
-§12.5 hand-rolled five-step recipe applies unchanged (the formula is
+§13.5 hand-rolled five-step recipe applies unchanged (the formula is
 symmetric in the per-trial split), but the result should be reported as
 exploratory.
 
-### 13.2 End-to-end Brief-RC example
+### 14.2 End-to-end Brief-RC example
 
 ``` r
 
@@ -4331,7 +4229,7 @@ res_render <- ci_from_responses_briefrc(
 # res_render$rendered_ci is base + matched(mask), ready for PNG
 ```
 
-## 14. Caveats and reporting notes
+## 15. Caveats and reporting notes
 
 A summary of what to keep in mind when reporting results.
 
@@ -4356,7 +4254,7 @@ metrics, and renders to PNG only for visualization.
 **Group-mean z and per-producer z carry different information.**
 Per-producer Frobenius norms aggregate over the whole image and dilute
 localised signal, so individual z values are systematically lower than
-group-mean z even when the group CI is highly informative (the §12.4
+group-mean z even when the group CI is highly informative (the §13.4
 pattern). Report both, framed as different-grain statistics.
 
 **FWER scope.**
@@ -4397,9 +4295,9 @@ names and defaults may change between minor versions, particularly when
 a change makes a sharp edge less easy to cut yourself on. The release
 notes (`news(package = "rcisignal")`) list every breaking change.
 
-## 15. Appendix: troubleshooting low or negative infoVal
+## 16. Appendix: troubleshooting low or negative infoVal
 
-This appendix expands on the brief interpretation note in §9. If you
+This appendix expands on the brief interpretation note in §10. If you
 compute
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
 and find that *most* or *all* per-producer z-scores sit well below 1.96,
@@ -4458,7 +4356,7 @@ data problem. Five reasons in roughly the order they tend to apply.
     above the per-producer floor. If producer templates are
     idiosyncratic, averaging cancels signal as well as noise and the
     group-mean z stays modest. The Oliveira et al. (2019) reanalysis in
-    §12.4 shows both regimes in the same dataset: friendly / unfriendly,
+    §13.4 shows both regimes in the same dataset: friendly / unfriendly,
     where per-producer signal is broadly shared, land at group-mean z of
     roughly 15-18; incompetent / unintelligent, where alignment is
     weaker, sit near z = 2. The ratio `group_z / per_producer_median` is
@@ -4475,12 +4373,12 @@ data problem. Five reasons in roughly the order they tend to apply.
     this package offers (`group_mean_z()`, called inside
     [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md))
     is a package-level extension of that recipe and has not been
-    independently validated for social- face RC (see §1.2). The §12.4
+    independently validated for social- face RC (see §1.2). The §13.4
     worked example reports both numbers alongside; treat the group-mean
     z as a supplementary headline, not a replacement for the
     Brinkman-style per- producer distribution.
 
-### 15.1 Diagnostic recipe
+### 16.1 Diagnostic recipe
 
 If a per-producer infoVal table looks worryingly low, work through these
 steps before reporting it:
@@ -4521,12 +4419,12 @@ names(tc_grp) <- "group"
 iv_grp <- infoval(group, noise_matrix, tc_grp,
                   iter = 1000L, seed = 1L)
 iv_grp$infoval                 # value depends on signal alignment;
-                               # see paragraph 5 of §15
+                               # see paragraph 5 of §16
 
 # 4. Sanity-check the chance baseline. A random-mask producer
 # should give z ~ 0 within MAD noise. Build a fake producer's
 # mask out of 300 random stimuli and 300 random +/-1 responses,
-# the same way Step 3 of §12.5 builds a real one.
+# the same way Step 3 of §13.5 builds a real one.
 rnd_stim <- sample(ncol(noise_matrix), 300L, replace = TRUE)
 rnd_resp <- sample(c(-1, 1),           300L, replace = TRUE)
 random_mask <- (noise_matrix[, rnd_stim] %*% rnd_resp) / 300
@@ -4543,7 +4441,7 @@ iv_rand <- infoval(rnd_signal, noise_matrix, tc_rnd,
 iv_rand$infoval                 # should be ~ 0 within MAD noise
 ```
 
-### 15.2 What’s up with negative z-scores?
+### 16.2 What’s up with negative z-scores?
 
 A negative z indicates that the observed mask carries less Frobenius
 energy than the chance reference. This is informative rather than a
@@ -4555,7 +4453,7 @@ toward zero. Cross-check
 response-time distributions, and any other attention checks before
 drawing conclusions.
 
-### 15.3 What to report
+### 16.3 What to report
 
 For a publishable summary we typically recommend two complementary
 statistics:
@@ -4566,7 +4464,7 @@ statistics:
 - The **group-mean CI’s infoVal z** as a supplementary headline number.
   Under signal alignment this can be substantially larger than the
   per-producer median, with a sqrt(N)-style upper envelope; under weak
-  alignment it stays close to per-producer values (paragraph 5 of §15
+  alignment it stays close to per-producer values (paragraph 5 of §16
   spells out why). This metric is a package-level extension and has not
   been independently validated for social-face RC (§1.2), so report it
   as exploratory rather than primary.
@@ -4575,7 +4473,7 @@ The two numbers answer different questions. The median tells you how
 informative a *typical individual CI* is; the group-mean z tells you how
 informative the *condition’s average CI* is.
 
-## 16. Citation
+## 17. Citation
 
 ``` r
 
@@ -4606,7 +4504,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #>   }
 ```
 
-## 17. References
+## 18. References
 
 Brinkman, L., Goffin, S., van de Schoot, R., van Haren, N. E. M.,
 Dotsch, R., & Aarts, H. (2019). Quantifying the informational value of
