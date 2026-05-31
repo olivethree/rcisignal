@@ -109,7 +109,7 @@ vignette has the engine-equivalence receipts for the per-producer
 If `rcisignal` helps your research, please cite it:
 
 > Oliveira, M. (2026). *rcisignal: Quality checks for reverse-correlation
-> data and classification images* (Version 0.3.0) [R package]. Zenodo.
+> data and classification images* (Version 0.3.1) [R package]. Zenodo.
 > https://doi.org/10.5281/zenodo.19961180
 
 Run `citation("rcisignal")` in R for a BibTeX entry.
