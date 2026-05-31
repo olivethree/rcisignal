@@ -4708,7 +4708,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira, M. (2026). rcisignal: Quality checks for
-#>   reverse-correlation data and classification images (Version 0.3.0) [R
+#>   reverse-correlation data and classification images (Version 0.3.1) [R
 #>   package]. Zenodo. https://doi.org/10.5281/zenodo.19961180
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -4717,7 +4717,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #>     title = {rcisignal: Quality checks for reverse-correlation data and classification images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.3.0},
+#>     note = {R package version 0.3.1},
 #>     doi = {10.5281/zenodo.19961180},
 #>     url = {https://doi.org/10.5281/zenodo.19961180},
 #>   }
