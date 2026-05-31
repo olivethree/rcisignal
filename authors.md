@@ -8,16 +8,17 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/olivethree/rcisignal/blob/main/DESCRIPTION)
+[`inst/CITATION`](https://github.com/olivethree/rcisignal/blob/main/inst/CITATION)
 
-Oliveira M (2026). *rcisignal: Quality Checks for Reverse-Correlation
-Data and Classification Images*. R package version 0.3.0,
-<https://github.com/olivethree/rcisignal>.
+Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
+data and classification images (Version 0.3.0) \[R package\]. Zenodo.
+https://doi.org/10.5281/zenodo.19961180
 
     @Manual{,
-      title = {rcisignal: Quality Checks for Reverse-Correlation Data and Classification Images},
+      title = {rcisignal: Quality checks for reverse-correlation data and classification images},
       author = {Manuel Oliveira},
       year = {2026},
       note = {R package version 0.3.0},
-      url = {https://github.com/olivethree/rcisignal},
+      doi = {10.5281/zenodo.19961180},
+      url = {https://doi.org/10.5281/zenodo.19961180},
     }
