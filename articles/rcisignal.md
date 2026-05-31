@@ -153,13 +153,13 @@ matrices off the same return list:
 ``` r
 
 # `group_by` names a column (or columns) in `responses`. The
-# generator calls `group_ci()` for you and returns both matrices.
+# generator calls `group_ci()` for you and returns both matrices
+# on the same return list.
 res <- ci_from_responses_briefrc(
   responses, noise_matrix = noise_matrix, group_by = "condition"
 )
 res$signal_matrix          # pixels x n_producers (as before)
-res$group_ci               # pixels x n_groups
-plot_ci_distance_matrix(res$group_ci)
+res$group_ci               # pixels x n_groups (one column per condition)
 ```
 
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
@@ -169,16 +169,25 @@ to collapse producers into per-group means with the same validation
 (each producer’s `by` value(s) must be constant across their rows;
 producers in `colnames(signal_matrix)` must be present in `responses`).
 
-The plot functions
-[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md),
-[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md),
-and
+Once you have `$group_ci`, the per-condition CIs sit in one matrix and
+are ready to be compared. The package ships three plot functions for
+asking how similar the group CIs are to each other:
+[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
+for all-vs-all Euclidean distance,
 [`plot_ci_correlogram()`](https://olivethree.github.io/rcisignal/reference/plot_ci_correlogram.md)
-accept any named collection of CIs (per-producer or group-level), so the
-same call works on the per-producer `$signal_matrix`, on `$group_ci`, on
-a named matrix you built with
-[`cbind()`](https://rdrr.io/r/base/cbind.html), or on a named list.
-Names become the labels in the figure.
+for pairwise Pearson r, and
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md)
+for a 2D map of the same distances. All three accept any named
+collection of CIs (per-producer or group-level), so the same call works
+on `$signal_matrix`, `$group_ci`, a named matrix built with
+[`cbind()`](https://rdrr.io/r/base/cbind.html), or a named list. Column
+names become the labels in the figure.
+
+``` r
+
+# How distinct are the per-condition CIs from each other?
+plot_ci_distance_matrix(res$group_ci)
+```
 
 ### 1.4 Exporting CIs as PNG or JPEG
 
