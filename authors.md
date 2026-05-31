@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/olivethree/rcisignal/blob/v0.3.1/inst/CITATION)
+[`inst/CITATION`](https://github.com/olivethree/rcisignal/blob/main/inst/CITATION)
 
 Oliveira, M. (2026). rcisignal: Quality checks for reverse-correlation
 data and classification images (Version 0.3.1) \[R package\]. Zenodo.
