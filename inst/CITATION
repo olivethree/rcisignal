@@ -1,0 +1,16 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "rcisignal: Quality checks for reverse-correlation data and classification images",
+  author   = person("Manuel", "Oliveira",
+                    comment = c(ORCID = "0000-0002-6220-0695")),
+  year     = "2026",
+  note     = "R package version 0.3.0",
+  doi      = "10.5281/zenodo.19961180",
+  url      = "https://doi.org/10.5281/zenodo.19961180",
+  textVersion = paste(
+    "Oliveira, M. (2026).",
+    "rcisignal: Quality checks for reverse-correlation data and",
+    "classification images (Version 0.3.0) [R package].",
+    "Zenodo. https://doi.org/10.5281/zenodo.19961180"
+  )
+)
