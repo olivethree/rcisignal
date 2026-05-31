@@ -41,6 +41,27 @@
 #' aggregate when individual-level z is noisy, and `infoval_report()`
 #' reports it.
 #'
+#' Note on the group-mean z (`group_mean_z_unmasked` /
+#' `group_mean_z_masked` in the return value). This is *not*
+#' Brinkman's per-producer infoVal applied to a group CI. It is a
+#' related-but-distinct statistic: the modified-z of the
+#' producer-averaged CI's Frobenius norm against a Monte-Carlo
+#' reference of `N` random producers (one per real producer, at
+#' matched trial counts) averaged together. The reference correctly
+#' accounts for the ~`1/sqrt(N)` shrinkage of random-producer norms
+#' under averaging, so the z is calibrated; but Brinkman et al.'s
+#' Type-I and power validation work was done at the per-producer
+#' level and does not transfer to the group statistic. Brinkman et
+#' al. recommend reporting the *distribution* of per-producer
+#' infoVals (median z, % above 1.96 — both available from the
+#' `tally` and `infoval_*` fields) as the primary group-level
+#' summary. Treat the group-mean z as a supplementary headline
+#' number, not a replacement. `vignette("rcisignal")` §11 unpacks
+#' how `group_mean_z()` builds its reference distribution, how it
+#' differs from per-producer infoVal, and how to read it
+#' appropriately — with a side-by-side illustration of the two
+#' nulls.
+#'
 #' For `method = "2ifc"`, the function calls `rcicr` to reconstruct
 #' per-trial noise patterns from `stimuli_params` and `p` (the
 #' `.RData` does not store the patterns themselves; see vignette
@@ -91,10 +112,19 @@
 #' @param ... Unused.
 #'
 #' @return An [rcisignal_diag_result()]. `data` carries the rich output:
-#'   * `random_responder_z` -- numeric scalar.
+#'   * `random_responder_z` -- numeric scalar; a simulated random producer's
+#'     z against the per-producer reference. Should land near 0; `|z| > 2`
+#'     indicates the reference is mis-calibrated.
 #'   * `infoval_unmasked` -- `rcisignal_diag_infoval` object (see [infoval()]).
 #'   * `infoval_masked` -- `rcisignal_diag_infoval`; `NULL` when no mask.
-#'   * `group_mean_z_unmasked`, `group_mean_z_masked` -- scalars.
+#'   * `group_mean_z_unmasked`, `group_mean_z_masked` -- numeric scalars;
+#'     the modified-z of the group-mean (across producers) CI's Frobenius
+#'     norm against a reference distribution of `N` matched random producers
+#'     averaged together (one simulated producer per real producer, at
+#'     matched trial counts). Supplementary to the per-producer z
+#'     distribution -- treat the per-producer summary as primary
+#'     (Brinkman et al., 2019). See **Details** above and
+#'     `vignette("rcisignal")` §11.
 #'   * `tally` -- named integer vector with counts per z band.
 #'   * `mask` -- logical vector or `NULL`.
 #'   * `interpretation` -- character vector of human-readable bullets.
@@ -255,7 +285,10 @@ infoval_report <- function(responses,
   detail <- c(
     sprintf("Random-responder z = %+.2f (expected near 0).", random_z),
     sprintf(
-      "Group-mean CI z = %+.2f (unmasked)%s.",
+      paste0(
+        "Group-mean CI z = %+.2f (unmasked)%s ",
+        "(matched-N random-responder null; see ?infoval_report)."
+      ),
       grp_z_unmasked,
       if (!is.na(grp_z_masked))
         sprintf(", %+.2f (masked)", grp_z_masked) else ""
@@ -570,9 +603,27 @@ random_responder_calibration <- function(noise_matrix, n_trials, mask,
     stats::mad(reference_norms)
 }
 
-# Group-mean CI z: reduce signal_matrix to a single column-mean mask, build
-# a reference distribution of group-mean norms by averaging N random
-# producer masks (matched to the actual trial counts), and z-score.
+# Group-mean CI z. Intentionally internal (not exported, no man page); the
+# function is exposed only through `infoval_report()` because (a) the
+# inputs that make its reference calibration correct -- a noise matrix in
+# raw producers-by-stimulus form plus a per-producer trial-count vector --
+# are awkward to assemble outside that pipeline, and (b) the metric is a
+# supplementary headline number, not the primary group-level summary.
+# Promoting it to a public API would invite reading the returned z as
+# "group infoVal," which is exactly the framing the docs (?infoval_report,
+# vignette("rcisignal") §11) discourage. If users want the statistic, they
+# pull `data$group_mean_z_unmasked` / `data$group_mean_z_masked` from the
+# `infoval_report()` result.
+#
+# Recipe (matching vignette("rcisignal") §11.1):
+#   1. Observed: rowMeans() the signal_matrix to a single column, optional
+#      mask, Frobenius norm.
+#   2. Reference (per iter): simulate one random producer per real
+#      producer at each real producer's actual trial count, average them
+#      (rowMeans-equivalent), optional mask, Frobenius norm.
+#   3. Return (norm_obs - median(ref)) / mad(ref).
+#
+# Returns a single numeric scalar.
 group_mean_z <- function(signal_matrix, noise_matrix, trial_counts, iter,
                          mask = NULL, with_replacement = "auto",
                          seed = NULL, progress = TRUE) {
@@ -665,7 +716,7 @@ interpret_infoval <- function(random_z, iv_unmasked, iv_masked,
   best_grp <- max(c(grp_z_unmasked, grp_z_masked), na.rm = TRUE)
   if (is.finite(best_grp) && best_grp >= 1.96) {
     out <- c(out, sprintf(
-      "Group-mean CI is informative (z = %+.2f); this is the number to report in a methods section.",
+      "Group-mean CI exceeds the matched-N random-responder null (z = %+.2f). Necessary but not sufficient for interpretability -- pair with the per-producer infoVal distribution (Brinkman-style primary group summary) and a per-pixel agreement map.",
       best_grp
     ))
   } else if (is.finite(best_grp)) {

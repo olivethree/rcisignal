@@ -81,10 +81,19 @@ equals the pool size by construction.}
 \value{
 An \code{\link[=rcisignal_diag_result]{rcisignal_diag_result()}}. \code{data} carries the rich output:
 \itemize{
-\item \code{random_responder_z} -- numeric scalar.
+\item \code{random_responder_z} -- numeric scalar; a simulated random producer's
+z against the per-producer reference. Should land near 0; \verb{|z| > 2}
+indicates the reference is mis-calibrated.
 \item \code{infoval_unmasked} -- \code{rcisignal_diag_infoval} object (see \code{\link[=infoval]{infoval()}}).
 \item \code{infoval_masked} -- \code{rcisignal_diag_infoval}; \code{NULL} when no mask.
-\item \code{group_mean_z_unmasked}, \code{group_mean_z_masked} -- scalars.
+\item \code{group_mean_z_unmasked}, \code{group_mean_z_masked} -- numeric scalars;
+the modified-z of the group-mean (across producers) CI's Frobenius
+norm against a reference distribution of \code{N} matched random producers
+averaged together (one simulated producer per real producer, at
+matched trial counts). Supplementary to the per-producer z
+distribution -- treat the per-producer summary as primary
+(Brinkman et al., 2019). See \strong{Details} above and
+\code{vignette("rcisignal")} §11.
 \item \code{tally} -- named integer vector with counts per z band.
 \item \code{mask} -- logical vector or \code{NULL}.
 \item \code{interpretation} -- character vector of human-readable bullets.
@@ -133,6 +142,27 @@ CI's z directly, but the mathematical extension (a group-mean CI
 compared against an N-producer-matched reference) is a useful
 aggregate when individual-level z is noisy, and \code{infoval_report()}
 reports it.
+
+Note on the group-mean z (\code{group_mean_z_unmasked} /
+\code{group_mean_z_masked} in the return value). This is \emph{not}
+Brinkman's per-producer infoVal applied to a group CI. It is a
+related-but-distinct statistic: the modified-z of the
+producer-averaged CI's Frobenius norm against a Monte-Carlo
+reference of \code{N} random producers (one per real producer, at
+matched trial counts) averaged together. The reference correctly
+accounts for the ~\code{1/sqrt(N)} shrinkage of random-producer norms
+under averaging, so the z is calibrated; but Brinkman et al.'s
+Type-I and power validation work was done at the per-producer
+level and does not transfer to the group statistic. Brinkman et
+al. recommend reporting the \emph{distribution} of per-producer
+infoVals (median z, \% above 1.96 — both available from the
+\code{tally} and \verb{infoval_*} fields) as the primary group-level
+summary. Treat the group-mean z as a supplementary headline
+number, not a replacement. \code{vignette("rcisignal")} §11 unpacks
+how \code{group_mean_z()} builds its reference distribution, how it
+differs from per-producer infoVal, and how to read it
+appropriately — with a side-by-side illustration of the two
+nulls.
 
 For \code{method = "2ifc"}, the function calls \code{rcicr} to reconstruct
 per-trial noise patterns from \code{stimuli_params} and \code{p} (the
