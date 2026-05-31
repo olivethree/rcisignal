@@ -1,5 +1,35 @@
 # Changelog
 
+## rcisignal 0.3.1
+
+### Breaking changes
+
+- **[`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
+  default output now matches rcicr.** The default is
+  `palette = "grayscale"`, which writes the raw pixel luminance image
+  (no color palette) that
+  [`rcicr::generateCI()`](https://rdrr.io/pkg/rcicr/man/generateCI.html)
+  /
+  [`rcicr::generateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/generateCI2IFC.html)
+  would produce for the same CI. For each column of `signal_matrix`, the
+  raw noise is scaled into `[0, 1]` via the chosen `scaling` method and
+  averaged with the base via `(scaled + base) / 2` before writing. Two
+  new arguments mirror rcicr’s API:
+  - `scaling = c("independent", "constant", "matched", "none")` (default
+    `"independent"`, matching rcicr).
+  - `scaling_constant = 0.1` (default matches rcicr). Callers that
+    explicitly want the previous colored overlay can pass
+    `palette = "diverging"`; `palette = "fire"` continues to produce the
+    unipolar `|t|`-style yellow-to-red ramp. Code that called
+    `save_ci_images(sm, base, dir)` and relied on the diverging overlay
+    needs to add `palette = "diverging"` to preserve the prior output.
+
+### Documentation
+
+- [`?save_ci_images`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
+  and vignette §1.4 rewritten to describe the grayscale default and the
+  rcicr-style `scaling` / `scaling_constant` arguments.
+
 ## rcisignal (development version)
 
 ### Documentation

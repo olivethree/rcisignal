@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,24 @@
       <small>Source: <a href="https://github.com/olivethree/rcisignal/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1" id="rcisignal-031">rcisignal 0.3.1<a class="anchor" aria-label="anchor" href="#rcisignal-031"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-3-1">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-1"></a></h3>
+<ul><li>
+<strong><code><a href="../reference/save_ci_images.html">save_ci_images()</a></code> default output now matches rcicr.</strong> The default is <code>palette = "grayscale"</code>, which writes the raw pixel luminance image (no color palette) that <code><a href="https://rdrr.io/pkg/rcicr/man/generateCI.html" class="external-link">rcicr::generateCI()</a></code> / <code><a href="https://rdrr.io/pkg/rcicr/man/generateCI2IFC.html" class="external-link">rcicr::generateCI2IFC()</a></code> would produce for the same CI. For each column of <code>signal_matrix</code>, the raw noise is scaled into <code>[0, 1]</code> via the chosen <code>scaling</code> method and averaged with the base via <code>(scaled + base) / 2</code> before writing. Two new arguments mirror rcicr’s API:
+<ul><li>
+<code>scaling = c("independent", "constant", "matched", "none")</code> (default <code>"independent"</code>, matching rcicr).</li>
+<li>
+<code>scaling_constant = 0.1</code> (default matches rcicr). Callers that explicitly want the previous colored overlay can pass <code>palette = "diverging"</code>; <code>palette = "fire"</code> continues to produce the unipolar <code>|t|</code>-style yellow-to-red ramp. Code that called <code>save_ci_images(sm, base, dir)</code> and relied on the diverging overlay needs to add <code>palette = "diverging"</code> to preserve the prior output.</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-3-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-3-1"></a></h3>
+<ul><li>
+<code><a href="../reference/save_ci_images.html">?save_ci_images</a></code> and vignette §1.4 rewritten to describe the grayscale default and the rcicr-style <code>scaling</code> / <code>scaling_constant</code> arguments.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="rcisignal-development-version">rcisignal (development version)<a class="anchor" aria-label="anchor" href="#rcisignal-development-version"></a></h2>
 <div class="section level3">

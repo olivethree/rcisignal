@@ -1,20 +1,24 @@
-# Write rendered CIs to PNG or JPEG files
+# Write CIs to PNG or JPEG files
 
-Renders each column of a `signal_matrix` (one CI) over a base face image
-and writes the result to disk. Works for both per-producer matrices (one
-column per producer, the `$signal_matrix` returned by
-`ci_from_responses_*()`) and group-level matrices (one column per group,
-the output of
+Writes each column of a `signal_matrix` (one CI) to disk as its own
+image. The default output matches what
+[`rcicr::generateCI()`](https://rdrr.io/pkg/rcicr/man/generateCI.html) /
+[`rcicr::generateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/generateCI2IFC.html)
+would write for the same CI: a grayscale luminance image of the CI noise
+scaled into `[0, 1]` and averaged with the base face (no color palette).
+Two palette overlays are available as opt-ins for visualization:
+`"diverging"` (matches
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md),
+signed signal, blue = positive, red = negative) and `"fire"` (matches
+`plot_agreement_map(palette = "fire")`, unipolar `|t|`-style
+yellow-to-red).
+
+Works for both per-producer matrices (one column per producer, the
+`$signal_matrix` returned by `ci_from_responses_*()`) and group-level
+matrices (one column per group, the output of
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md)
 or `$group_ci` when the generator is called with `group_by =`).
 Filenames are derived from the column names of `signal_matrix`.
-
-Each rendered image uses the same alpha-over compositing path as
-[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
-(default, signed signal with blue=positive, red=negative) or
-[`plot_agreement_map()`](https://olivethree.github.io/rcisignal/reference/plot_agreement_map.md)
-(`palette = "fire"`, unipolar `|t|`-style yellow-to-red on a per-pixel
-CI magnitude).
 
 ## Usage
 
@@ -24,7 +28,9 @@ save_ci_images(
   base_image,
   dir,
   format = c("png", "jpeg"),
-  palette = c("diverging", "fire"),
+  palette = c("grayscale", "diverging", "fire"),
+  scaling = c("independent", "constant", "matched", "none"),
+  scaling_constant = 0.1,
   prefix = NULL,
   threshold = NULL,
   mask = NULL,
@@ -60,10 +66,25 @@ save_ci_images(
 
 - palette:
 
-  Color palette. `"diverging"` (default; signed CI, blue=positive,
-  red=negative, matching
-  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md))
-  or `"fire"` (unipolar `|t|`-style, yellow-to-red on `abs(CI)`).
+  Color palette. `"grayscale"` (default; raw pixel luminance, matches
+  rcicr), `"diverging"` (signed CI on a blue/red ramp, matches
+  [`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)),
+  or `"fire"` (unipolar `|t|`-style yellow-to-red).
+
+- scaling:
+
+  Scaling method for the `"grayscale"` palette, matching rcicr's
+  `generateCI(scaling = ...)`: `"independent"` (default; per-CI
+  symmetric scaling by `max(|ci|)`), `"constant"` (scale by a
+  user-supplied `scaling_constant`, comparable across CIs), `"matched"`
+  (range-match each CI to the base image range), or `"none"` (write the
+  raw `ci + base` with no scaling; rarely what you want). Ignored when
+  `palette != "grayscale"`.
+
+- scaling_constant:
+
+  Numeric constant used when `scaling = "constant"`. Default `0.1`,
+  matching rcicr.
 
 - prefix:
 
@@ -75,23 +96,23 @@ save_ci_images(
 - threshold:
 
   Optional numeric. Pixels with absolute CI value below `threshold` are
-  forced to neutral (transparent overlay).
+  forced to 0 (grayscale) or to neutral (palette overlays).
 
 - mask:
 
   Optional logical vector of length `nrow(signal_matrix)`. Pixels with
-  `mask = FALSE` render as base only.
+  `mask = FALSE` are set to `NA` (grayscale, matching rcicr's
+  `applyMask()` semantics) or rendered as base only (palette overlays).
 
 - zlim:
 
-  Optional `c(lo, hi)` color-scale endpoints. When `NULL` (default),
-  each image is auto-scaled to its own maximum-absolute value (so colors
-  are comparable within a producer / group, not across).
+  Optional `c(lo, hi)` color-scale endpoints. Used only for
+  `palette = "diverging"` and `palette = "fire"`. Ignored for grayscale.
 
 - alpha_max:
 
   Numeric in `[0, 1]`. Maximum opacity of the heatmap at the color-scale
-  top. Default `0.7`.
+  top. Used only for palette overlays. Default `0.7`.
 
 - img_dims:
 
@@ -134,6 +155,17 @@ chosen automatically from `attr(signal_matrix, "ci_level")`:
 
 Override the auto-prefix by passing `prefix =` explicitly.
 
+The default `palette = "grayscale"` reproduces rcicr's
+`generateCI(..., save_as_png = TRUE)` output exactly: for each CI
+column, the raw noise is scaled into `[0, 1]` via the chosen `scaling`
+method (default `"independent"`, matching rcicr's default), then
+averaged with the base via `(scaled + base) / 2`, then written via
+[`png::writePNG()`](https://rdrr.io/pkg/png/man/writePNG.html) (or
+[`jpeg::writeJPEG()`](https://rdrr.io/pkg/jpeg/man/writeJPEG.html)) as a
+grayscale image. Pass `palette = "diverging"` or `"fire"` instead to
+write a colored overlay rendered the same way as the on-screen plot
+functions.
+
 ## See also
 
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md),
@@ -157,12 +189,18 @@ res <- ci_from_responses_briefrc(
 
 out <- tempfile("ci_export_"); dir.create(out)
 
-# Per-producer CIs (files: ind_ci_P001.png, ind_ci_P002.png, ...)
+# Default: rcicr-style grayscale (raw luminance, no palette).
+# Files: ind_ci_P001.png, ind_ci_P002.png, ...
 save_ci_images(res$signal_matrix, base_image = sim$base_face,
                dir = out)
 
-# Group-level CIs (files: group_ci_A.png, group_ci_B.png)
+# Group-level CIs, same rcicr-style grayscale output.
 save_ci_images(res$group_ci, base_image = sim$base_face,
-               dir = out, palette = "fire")
+               dir = out)
+
+# Diverging blue/red overlay (rcisignal visualization, not rcicr).
+save_ci_images(res$group_ci, base_image = sim$base_face,
+               dir = out, palette = "diverging",
+               prefix = "diverging_")
 } # }
 ```

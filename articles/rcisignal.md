@@ -192,10 +192,9 @@ plot_ci_distance_matrix(res$group_ci)
 ### 1.4 Exporting CIs as PNG or JPEG
 
 [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
-writes each column of a signal matrix to disk as its own image,
-composited over a base face. The same call works for per-producer
-matrices and for group-averaged matrices; the function picks a sensible
-filename prefix based on what you hand it.
+writes each column of a signal matrix to disk as its own image. The same
+call works for per-producer matrices and for group-averaged matrices;
+the function picks a sensible filename prefix based on what you hand it.
 
 ``` r
 
@@ -210,12 +209,22 @@ save_ci_images(res$group_ci, base_image = sim$base_face,
                dir = out_dir)
 ```
 
-The default palette is `"diverging"` (matches
-[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md),
-blue = positive, red = negative). Pass `palette = "fire"` for the
-unipolar `|t|`-style yellow-to-red ramp, `format = "jpeg"` to write
-JPEGs instead, or `prefix = "trust_"` (or any other string) to override
-the auto-derived prefix.
+The default output is a grayscale luminance image that matches what
+[`rcicr::generateCI()`](https://rdrr.io/pkg/rcicr/man/generateCI.html) /
+[`rcicr::generateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/generateCI2IFC.html)
+would write for the same CI: the raw signed noise is scaled into
+`[0, 1]` via the chosen `scaling` method (default `"independent"`,
+matching rcicr’s default) and then averaged with the base via
+`(scaled + base) / 2`. No color palette is involved. The four `scaling`
+options (`"independent"`, `"constant"`, `"matched"`, `"none"`) and the
+`scaling_constant` argument are the rcicr ones, with the same meanings.
+
+Two color palettes are available as opt-ins for visualization:
+`palette = "diverging"` (signed CI on the same blue/red ramp
+[`plot_ci_overlay()`](https://olivethree.github.io/rcisignal/reference/plot_ci_overlay.md)
+uses) and `palette = "fire"` (unipolar `|t|`-style yellow-to-red). Pass
+`format = "jpeg"` to write JPEGs instead, or `prefix = "trust_"` (or any
+other string) to override the auto-derived filename prefix.
 
 ## 2. Installation
 

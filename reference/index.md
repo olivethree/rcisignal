@@ -83,7 +83,7 @@ collection of CIs (per-producer or group-level).
   : Compare Euclidean dissimilarity intervals across multiple contrasts
   on a single plot
 - [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
-  : Write rendered CIs to PNG or JPEG files
+  : Write CIs to PNG or JPEG files
 
 ## I/O and simulation
 
