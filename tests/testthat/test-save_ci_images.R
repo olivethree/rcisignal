@@ -32,6 +32,85 @@ test_that("save_ci_images writes one PNG per column with ind_ci_ prefix", {
   expect_match(basename(paths), "^ind_ci_P\\d{3}\\.png$", all = TRUE)
 
   img <- png::readPNG(paths[1L])
+  # Default palette is "grayscale": writePNG of a 2D matrix returns a
+  # 2D matrix on read (no third color-channel dim).
+  expect_length(dim(img), 2L)
+  expect_equal(dim(img), attr(sm, "img_dims"))
+})
+
+test_that("grayscale default matches rcicr's applyScaling + combine pipeline", {
+  # Replicate rcicr::generateCI() PNG output exactly for one CI:
+  # scaled = applyScaling(base, ci, "independent", 0.1)
+  # combined = (scaled + base) / 2
+  # png::writePNG(combined)
+  sm <- make_ci_set(n_pix = 1024L, n_p = 1L, level = "individual")
+  img_dims <- attr(sm, "img_dims")
+  set.seed(42L)
+  base <- matrix(runif(prod(img_dims), 0.3, 0.7),
+                 img_dims[1L], img_dims[2L])
+
+  out <- tempfile("rcicr_match_"); dir.create(out)
+  paths <- save_ci_images(sm, base, out, quiet = TRUE)
+  written <- png::readPNG(paths[1L])
+
+  # Reference: rcicr's exact pipeline (independent scaling).
+  ci <- as.vector(sm[, 1L])
+  k <- max(abs(range(ci)))
+  scaled <- (ci + k) / (2 * k)
+  combined <- (scaled + as.vector(base)) / 2
+  combined[combined < 0] <- 0
+  combined[combined > 1] <- 1
+  reference <- matrix(combined, img_dims[1L], img_dims[2L])
+
+  # 8-bit PNG quantization tolerance: 1/255.
+  expect_equal(written, reference, tolerance = 1.5 / 255)
+})
+
+test_that("grayscale + scaling = 'constant' matches rcicr formula", {
+  sm <- make_ci_set(n_pix = 1024L, n_p = 1L, level = "individual")
+  img_dims <- attr(sm, "img_dims")
+  base <- matrix(0.5, img_dims[1L], img_dims[2L])
+
+  out <- tempfile("rcicr_const_"); dir.create(out)
+  paths <- suppressWarnings(
+    save_ci_images(sm, base, out, scaling = "constant",
+                   scaling_constant = 0.5, quiet = TRUE)
+  )
+  written <- png::readPNG(paths[1L])
+
+  ci <- as.vector(sm[, 1L])
+  scaled <- (ci + 0.5) / (2 * 0.5)
+  combined <- (scaled + as.vector(base)) / 2
+  combined[combined < 0] <- 0
+  combined[combined > 1] <- 1
+  reference <- matrix(combined, img_dims[1L], img_dims[2L])
+
+  expect_equal(written, reference, tolerance = 1.5 / 255)
+})
+
+test_that("grayscale + scaling = 'constant' warns when out of [0,1]", {
+  sm <- make_ci_set(n_pix = 1024L, n_p = 1L, level = "individual",
+                    seed = 7L)
+  # Inflate so (ci + 0.01) / 0.02 blows past 1.
+  sm[, 1L] <- sm[, 1L] * 10
+  img_dims <- attr(sm, "img_dims")
+  base <- matrix(0.5, img_dims[1L], img_dims[2L])
+  out <- tempfile("rcicr_warn_"); dir.create(out)
+  expect_warning(
+    save_ci_images(sm, base, out, scaling = "constant",
+                   scaling_constant = 0.01, quiet = TRUE),
+    regexp = "clipping|outside"
+  )
+})
+
+test_that("palette = 'diverging' still produces an RGB image", {
+  sm <- make_ci_set(n_pix = 1024L, n_p = 1L, level = "individual")
+  base <- make_base(attr(sm, "img_dims"))
+  out <- tempfile("ci_div_")
+  paths <- save_ci_images(sm, base, out, palette = "diverging",
+                          quiet = TRUE)
+  img <- png::readPNG(paths[1L])
+  expect_length(dim(img), 3L)
   expect_equal(dim(img)[1:2], attr(sm, "img_dims"))
 })
 

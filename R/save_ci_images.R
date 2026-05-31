@@ -1,18 +1,22 @@
-#' Write rendered CIs to PNG or JPEG files
+#' Write CIs to PNG or JPEG files
 #'
 #' @description
-#' Renders each column of a `signal_matrix` (one CI) over a base face
-#' image and writes the result to disk. Works for both per-producer
-#' matrices (one column per producer, the `$signal_matrix` returned by
-#' `ci_from_responses_*()`) and group-level matrices (one column per
-#' group, the output of [group_ci()] or `$group_ci` when the generator
-#' is called with `group_by =`). Filenames are derived from the column
-#' names of `signal_matrix`.
+#' Writes each column of a `signal_matrix` (one CI) to disk as its own
+#' image. The default output matches what `rcicr::generateCI()` /
+#' `rcicr::generateCI2IFC()` would write for the same CI: a grayscale
+#' luminance image of the CI noise scaled into `[0, 1]` and averaged
+#' with the base face (no color palette). Two palette overlays are
+#' available as opt-ins for visualization: `"diverging"` (matches
+#' `plot_ci_overlay()`, signed signal, blue = positive, red = negative)
+#' and `"fire"` (matches `plot_agreement_map(palette = "fire")`,
+#' unipolar `|t|`-style yellow-to-red).
 #'
-#' Each rendered image uses the same alpha-over compositing path as
-#' [plot_ci_overlay()] (default, signed signal with blue=positive,
-#' red=negative) or [plot_agreement_map()] (`palette = "fire"`,
-#' unipolar `|t|`-style yellow-to-red on a per-pixel CI magnitude).
+#' Works for both per-producer matrices (one column per producer, the
+#' `$signal_matrix` returned by `ci_from_responses_*()`) and
+#' group-level matrices (one column per group, the output of
+#' [group_ci()] or `$group_ci` when the generator is called with
+#' `group_by =`). Filenames are derived from the column names of
+#' `signal_matrix`.
 #'
 #' @details
 #' Filenames default to `<prefix><colname>.<ext>`, where `<prefix>` is
@@ -26,6 +30,16 @@
 #'
 #' Override the auto-prefix by passing `prefix =` explicitly.
 #'
+#' The default `palette = "grayscale"` reproduces rcicr's
+#' `generateCI(..., save_as_png = TRUE)` output exactly: for each CI
+#' column, the raw noise is scaled into `[0, 1]` via the chosen
+#' `scaling` method (default `"independent"`, matching rcicr's
+#' default), then averaged with the base via `(scaled + base) / 2`,
+#' then written via `png::writePNG()` (or `jpeg::writeJPEG()`) as a
+#' grayscale image. Pass `palette = "diverging"` or `"fire"` instead
+#' to write a colored overlay rendered the same way as the on-screen
+#' plot functions.
+#'
 #' @param signal_matrix Numeric matrix with non-empty, unique column
 #'   names. Per-producer or group-level; both are accepted.
 #' @param base_image Base face image. Either a numeric matrix in
@@ -33,23 +47,36 @@
 #'   underlay for every rendered CI.
 #' @param dir Output directory. Created (recursively) if missing.
 #' @param format Output format. `"png"` (default) or `"jpeg"`.
-#' @param palette Color palette. `"diverging"` (default; signed CI,
-#'   blue=positive, red=negative, matching `plot_ci_overlay()`) or
-#'   `"fire"` (unipolar `|t|`-style, yellow-to-red on `abs(CI)`).
+#' @param palette Color palette. `"grayscale"` (default; raw pixel
+#'   luminance, matches rcicr), `"diverging"` (signed CI on a
+#'   blue/red ramp, matches `plot_ci_overlay()`), or `"fire"`
+#'   (unipolar `|t|`-style yellow-to-red).
+#' @param scaling Scaling method for the `"grayscale"` palette,
+#'   matching rcicr's `generateCI(scaling = ...)`: `"independent"`
+#'   (default; per-CI symmetric scaling by `max(|ci|)`), `"constant"`
+#'   (scale by a user-supplied `scaling_constant`, comparable across
+#'   CIs), `"matched"` (range-match each CI to the base image range),
+#'   or `"none"` (write the raw `ci + base` with no scaling; rarely
+#'   what you want). Ignored when `palette != "grayscale"`.
+#' @param scaling_constant Numeric constant used when
+#'   `scaling = "constant"`. Default `0.1`, matching rcicr.
 #' @param prefix Optional character scalar overriding the
 #'   auto-derived filename prefix (`"ind_ci_"` for per-producer
 #'   matrices, `"group_ci_"` for group-level). Pass any string to
 #'   force a custom convention (e.g. `prefix = "trust_"`).
 #' @param threshold Optional numeric. Pixels with absolute CI value
-#'   below `threshold` are forced to neutral (transparent overlay).
+#'   below `threshold` are forced to 0 (grayscale) or to neutral
+#'   (palette overlays).
 #' @param mask Optional logical vector of length `nrow(signal_matrix)`.
-#'   Pixels with `mask = FALSE` render as base only.
-#' @param zlim Optional `c(lo, hi)` color-scale endpoints. When
-#'   `NULL` (default), each image is auto-scaled to its own
-#'   maximum-absolute value (so colors are comparable within a
-#'   producer / group, not across).
+#'   Pixels with `mask = FALSE` are set to `NA` (grayscale, matching
+#'   rcicr's `applyMask()` semantics) or rendered as base only
+#'   (palette overlays).
+#' @param zlim Optional `c(lo, hi)` color-scale endpoints. Used only
+#'   for `palette = "diverging"` and `palette = "fire"`. Ignored for
+#'   grayscale.
 #' @param alpha_max Numeric in `[0, 1]`. Maximum opacity of the
-#'   heatmap at the color-scale top. Default `0.7`.
+#'   heatmap at the color-scale top. Used only for palette overlays.
+#'   Default `0.7`.
 #' @param img_dims Optional integer `c(nrow, ncol)`. Inferred from
 #'   `attr(signal_matrix, "img_dims")` or from a square root of
 #'   `nrow(signal_matrix)`.
@@ -79,29 +106,40 @@
 #'
 #' out <- tempfile("ci_export_"); dir.create(out)
 #'
-#' # Per-producer CIs (files: ind_ci_P001.png, ind_ci_P002.png, ...)
+#' # Default: rcicr-style grayscale (raw luminance, no palette).
+#' # Files: ind_ci_P001.png, ind_ci_P002.png, ...
 #' save_ci_images(res$signal_matrix, base_image = sim$base_face,
 #'                dir = out)
 #'
-#' # Group-level CIs (files: group_ci_A.png, group_ci_B.png)
+#' # Group-level CIs, same rcicr-style grayscale output.
 #' save_ci_images(res$group_ci, base_image = sim$base_face,
-#'                dir = out, palette = "fire")
+#'                dir = out)
+#'
+#' # Diverging blue/red overlay (rcisignal visualization, not rcicr).
+#' save_ci_images(res$group_ci, base_image = sim$base_face,
+#'                dir = out, palette = "diverging",
+#'                prefix = "diverging_")
 #' }
 #' @export
 save_ci_images <- function(signal_matrix,
                            base_image,
                            dir,
-                           format    = c("png", "jpeg"),
-                           palette   = c("diverging", "fire"),
-                           prefix    = NULL,
-                           threshold = NULL,
-                           mask      = NULL,
-                           zlim      = NULL,
-                           alpha_max = 0.7,
-                           img_dims  = NULL,
-                           quality   = 90,
-                           overwrite = FALSE,
-                           quiet     = FALSE) {
+                           format           = c("png", "jpeg"),
+                           palette          = c("grayscale",
+                                                "diverging", "fire"),
+                           scaling          = c("independent",
+                                                "constant",
+                                                "matched", "none"),
+                           scaling_constant = 0.1,
+                           prefix           = NULL,
+                           threshold        = NULL,
+                           mask             = NULL,
+                           zlim             = NULL,
+                           alpha_max        = 0.7,
+                           img_dims         = NULL,
+                           quality          = 90,
+                           overwrite        = FALSE,
+                           quiet            = FALSE) {
   if (!is.matrix(signal_matrix) || !is.numeric(signal_matrix)) {
     cli::cli_abort("{.arg signal_matrix} must be a numeric matrix.")
   }
@@ -122,6 +160,7 @@ save_ci_images <- function(signal_matrix,
   }
   format  <- match.arg(format)
   palette <- match.arg(palette)
+  scaling <- match.arg(scaling)
   ext <- switch(format, png = "png", jpeg = "jpeg")
 
   pkg <- switch(format, png = "png", jpeg = "jpeg")
@@ -198,8 +237,34 @@ save_ci_images <- function(signal_matrix,
     }
   }
 
+  base_vec <- as.vector(base_mat)
+
   for (j in seq_len(ncol(signal_matrix))) {
     sig <- signal_matrix[, j]
+
+    if (palette == "grayscale") {
+      ci_vec <- sig
+      if (!is.null(threshold)) {
+        ci_vec[abs(ci_vec) < threshold] <- 0
+      }
+      if (!is.null(mask)) {
+        ci_vec[!mask] <- NA_real_
+      }
+      scaled <- apply_rcicr_scaling(base_vec, ci_vec,
+                                    scaling, scaling_constant)
+      combined <- (scaled + base_vec) / 2
+      combined[combined < 0 & !is.na(combined)] <- 0
+      combined[combined > 1 & !is.na(combined)] <- 1
+      combined_mat <- matrix(combined, img_dims[1L], img_dims[2L])
+
+      if (format == "png") {
+        png::writePNG(combined_mat, target = paths[j])
+      } else {
+        jpeg::writeJPEG(combined_mat, target = paths[j],
+                        quality = quality / 100)
+      }
+      next
+    }
 
     display <- sig
     if (!is.null(threshold)) {
@@ -245,4 +310,54 @@ save_ci_images <- function(signal_matrix,
     ))
   }
   invisible(paths)
+}
+
+#' Apply rcicr-style scaling to a raw CI noise vector
+#'
+#' Ports `rcicr:::applyScaling()` so `save_ci_images(palette =
+#' "grayscale")` produces the same scaled noise rcicr would write.
+#' `base_vec` and `ci` are flat numeric vectors over the same pixel
+#' grid; `ci` may contain `NA`s (from `mask = FALSE`).
+#'
+#' @keywords internal
+#' @noRd
+apply_rcicr_scaling <- function(base_vec, ci, scaling, constant) {
+  switch(
+    scaling,
+    none = ci,
+    constant = {
+      out <- (ci + constant) / (2 * constant)
+      finite_out <- out[is.finite(out)]
+      if (length(finite_out) &&
+            (max(finite_out) > 1 || min(finite_out) < 0)) {
+        cli::cli_warn(c(
+          "{.code scaling_constant = {constant}} produced pixels \\
+           outside {.code [0, 1]}; clipping will occur.",
+          "i" = "Pick a larger {.arg scaling_constant} to avoid \\
+                 clipping (matches rcicr's behavior)."
+        ))
+      }
+      out
+    },
+    matched = {
+      base_min <- min(base_vec, na.rm = TRUE)
+      base_max <- max(base_vec, na.rm = TRUE)
+      ci_finite <- ci[!is.na(ci)]
+      ci_min <- min(ci_finite)
+      ci_max <- max(ci_finite)
+      ci_rng <- ci_max - ci_min
+      if (!is.finite(ci_rng) || ci_rng == 0) {
+        rep(base_min, length(ci))
+      } else {
+        base_min + (base_max - base_min) * (ci - ci_min) / ci_rng
+      }
+    },
+    independent = {
+      ci_finite <- ci[!is.na(ci)]
+      r <- range(ci_finite)
+      k <- max(abs(r))
+      if (!is.finite(k) || k == 0) k <- 1
+      (ci + k) / (2 * k)
+    }
+  )
 }

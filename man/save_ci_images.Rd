@@ -2,14 +2,16 @@
 % Please edit documentation in R/save_ci_images.R
 \name{save_ci_images}
 \alias{save_ci_images}
-\title{Write rendered CIs to PNG or JPEG files}
+\title{Write CIs to PNG or JPEG files}
 \usage{
 save_ci_images(
   signal_matrix,
   base_image,
   dir,
   format = c("png", "jpeg"),
-  palette = c("diverging", "fire"),
+  palette = c("grayscale", "diverging", "fire"),
+  scaling = c("independent", "constant", "matched", "none"),
+  scaling_constant = 0.1,
   prefix = NULL,
   threshold = NULL,
   mask = NULL,
@@ -33,9 +35,21 @@ underlay for every rendered CI.}
 
 \item{format}{Output format. \code{"png"} (default) or \code{"jpeg"}.}
 
-\item{palette}{Color palette. \code{"diverging"} (default; signed CI,
-blue=positive, red=negative, matching \code{plot_ci_overlay()}) or
-\code{"fire"} (unipolar \verb{|t|}-style, yellow-to-red on \code{abs(CI)}).}
+\item{palette}{Color palette. \code{"grayscale"} (default; raw pixel
+luminance, matches rcicr), \code{"diverging"} (signed CI on a
+blue/red ramp, matches \code{plot_ci_overlay()}), or \code{"fire"}
+(unipolar \verb{|t|}-style yellow-to-red).}
+
+\item{scaling}{Scaling method for the \code{"grayscale"} palette,
+matching rcicr's \code{generateCI(scaling = ...)}: \code{"independent"}
+(default; per-CI symmetric scaling by \verb{max(|ci|)}), \code{"constant"}
+(scale by a user-supplied \code{scaling_constant}, comparable across
+CIs), \code{"matched"} (range-match each CI to the base image range),
+or \code{"none"} (write the raw \code{ci + base} with no scaling; rarely
+what you want). Ignored when \code{palette != "grayscale"}.}
+
+\item{scaling_constant}{Numeric constant used when
+\code{scaling = "constant"}. Default \code{0.1}, matching rcicr.}
 
 \item{prefix}{Optional character scalar overriding the
 auto-derived filename prefix (\code{"ind_ci_"} for per-producer
@@ -43,18 +57,21 @@ matrices, \code{"group_ci_"} for group-level). Pass any string to
 force a custom convention (e.g. \code{prefix = "trust_"}).}
 
 \item{threshold}{Optional numeric. Pixels with absolute CI value
-below \code{threshold} are forced to neutral (transparent overlay).}
+below \code{threshold} are forced to 0 (grayscale) or to neutral
+(palette overlays).}
 
 \item{mask}{Optional logical vector of length \code{nrow(signal_matrix)}.
-Pixels with \code{mask = FALSE} render as base only.}
+Pixels with \code{mask = FALSE} are set to \code{NA} (grayscale, matching
+rcicr's \code{applyMask()} semantics) or rendered as base only
+(palette overlays).}
 
-\item{zlim}{Optional \code{c(lo, hi)} color-scale endpoints. When
-\code{NULL} (default), each image is auto-scaled to its own
-maximum-absolute value (so colors are comparable within a
-producer / group, not across).}
+\item{zlim}{Optional \code{c(lo, hi)} color-scale endpoints. Used only
+for \code{palette = "diverging"} and \code{palette = "fire"}. Ignored for
+grayscale.}
 
 \item{alpha_max}{Numeric in \verb{[0, 1]}. Maximum opacity of the
-heatmap at the color-scale top. Default \code{0.7}.}
+heatmap at the color-scale top. Used only for palette overlays.
+Default \code{0.7}.}
 
 \item{img_dims}{Optional integer \code{c(nrow, ncol)}. Inferred from
 \code{attr(signal_matrix, "img_dims")} or from a square root of
@@ -74,18 +91,22 @@ files are silently replaced.}
 Invisibly, a character vector of the file paths written.
 }
 \description{
-Renders each column of a \code{signal_matrix} (one CI) over a base face
-image and writes the result to disk. Works for both per-producer
-matrices (one column per producer, the \verb{$signal_matrix} returned by
-\verb{ci_from_responses_*()}) and group-level matrices (one column per
-group, the output of \code{\link[=group_ci]{group_ci()}} or \verb{$group_ci} when the generator
-is called with \verb{group_by =}). Filenames are derived from the column
-names of \code{signal_matrix}.
+Writes each column of a \code{signal_matrix} (one CI) to disk as its own
+image. The default output matches what \code{rcicr::generateCI()} /
+\code{rcicr::generateCI2IFC()} would write for the same CI: a grayscale
+luminance image of the CI noise scaled into \verb{[0, 1]} and averaged
+with the base face (no color palette). Two palette overlays are
+available as opt-ins for visualization: \code{"diverging"} (matches
+\code{plot_ci_overlay()}, signed signal, blue = positive, red = negative)
+and \code{"fire"} (matches \code{plot_agreement_map(palette = "fire")},
+unipolar \verb{|t|}-style yellow-to-red).
 
-Each rendered image uses the same alpha-over compositing path as
-\code{\link[=plot_ci_overlay]{plot_ci_overlay()}} (default, signed signal with blue=positive,
-red=negative) or \code{\link[=plot_agreement_map]{plot_agreement_map()}} (\code{palette = "fire"},
-unipolar \verb{|t|}-style yellow-to-red on a per-pixel CI magnitude).
+Works for both per-producer matrices (one column per producer, the
+\verb{$signal_matrix} returned by \verb{ci_from_responses_*()}) and
+group-level matrices (one column per group, the output of
+\code{\link[=group_ci]{group_ci()}} or \verb{$group_ci} when the generator is called with
+\verb{group_by =}). Filenames are derived from the column names of
+\code{signal_matrix}.
 }
 \details{
 Filenames default to \verb{<prefix><colname>.<ext>}, where \verb{<prefix>} is
@@ -99,6 +120,16 @@ chosen automatically from \code{attr(signal_matrix, "ci_level")}:
 }
 
 Override the auto-prefix by passing \verb{prefix =} explicitly.
+
+The default \code{palette = "grayscale"} reproduces rcicr's
+\code{generateCI(..., save_as_png = TRUE)} output exactly: for each CI
+column, the raw noise is scaled into \verb{[0, 1]} via the chosen
+\code{scaling} method (default \code{"independent"}, matching rcicr's
+default), then averaged with the base via \code{(scaled + base) / 2},
+then written via \code{png::writePNG()} (or \code{jpeg::writeJPEG()}) as a
+grayscale image. Pass \code{palette = "diverging"} or \code{"fire"} instead
+to write a colored overlay rendered the same way as the on-screen
+plot functions.
 }
 \examples{
 \dontrun{
@@ -113,13 +144,19 @@ res <- ci_from_responses_briefrc(
 
 out <- tempfile("ci_export_"); dir.create(out)
 
-# Per-producer CIs (files: ind_ci_P001.png, ind_ci_P002.png, ...)
+# Default: rcicr-style grayscale (raw luminance, no palette).
+# Files: ind_ci_P001.png, ind_ci_P002.png, ...
 save_ci_images(res$signal_matrix, base_image = sim$base_face,
                dir = out)
 
-# Group-level CIs (files: group_ci_A.png, group_ci_B.png)
+# Group-level CIs, same rcicr-style grayscale output.
 save_ci_images(res$group_ci, base_image = sim$base_face,
-               dir = out, palette = "fire")
+               dir = out)
+
+# Diverging blue/red overlay (rcisignal visualization, not rcicr).
+save_ci_images(res$group_ci, base_image = sim$base_face,
+               dir = out, palette = "diverging",
+               prefix = "diverging_")
 }
 }
 \seealso{
