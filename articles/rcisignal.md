@@ -51,8 +51,8 @@ directly on producer-level pixel signal and thereby sidestep that
 pitfall.
 
 The intended audience is RC researchers at an intermediate R level with
-basic familiarity with the `rcicr` package or with the Schmitz et
-al. (2024) Brief-RC structure. No prior expertise in `data.table`,
+basic familiarity with the `rcicr` package or with the Schmitz et al.
+(2024) Brief-RC structure. No prior expertise in `data.table`,
 permutation testing, or intraclass correlation is assumed.
 
 ### 1.2 Validation status
@@ -70,7 +70,7 @@ Reporting accordingly matters.
 
 - **Per-producer infoVal for 2IFC** (Brinkman et al., 2019). The z-score
   derivation, reference distribution, and the `z >= 1.96` threshold all
-  originate from the Brinkman et al. paper, which validated the metric
+  originate from the Brinkman et al. paper, which validated the metric
   on social-face 2IFC data.
 - **Pixel-test methodology** (Chauvin et al., 2005). The Welch-style
   per-pixel t-statistic, plus its smoothing and inferential framing, are
@@ -1730,8 +1730,8 @@ that PNG-derived signals are scaled. Silence with
 exposes a `scaling` argument with five values:
 
 - `"autoscale"`: stretches each producer’s mask to a fixed symmetric
-  range. The rcicr default and the convention used in Schmitz et
-  al. (2024) Experiment 2.
+  range. The rcicr default and the convention used in Schmitz et al.
+  2024. Experiment 2.
 - `"matched"`: stretches each mask to the base image’s range. Per-CI, so
   it breaks correlation-based metrics as well (a uniform scaling
   preserves Pearson, but a per-CI stretch does not).
@@ -2479,8 +2479,8 @@ baseline-free, but in practice the shared scaffolding contributes a
 roughly constant additive distance, so relative comparisons (“which two
 CIs are closest?”) survive without an explicit null. The worked example
 in §14.6 shows that the relative ordering of condition pairs by Pearson
-*r* matches the ordering by Euclidean distance on the Oliveira et
-al. (2019) data, but only the distance gives an interpretable absolute
+*r* matches the ordering by Euclidean distance on the Oliveira et al.
+(2019) data, but only the distance gives an interpretable absolute
 magnitude.
 
 Practical recommendation: report Euclidean distance (raw, or normalised
@@ -2788,8 +2788,8 @@ it recomputes.
 ## 11. Group-level signal summaries
 
 The natural follow-up question to per-producer infoVal (§10) is whether
-the *group-averaged* CI — the one shown in a paper figure for a
-condition — carries above-chance signal. The package offers three
+the *group-averaged* CI, the one shown in a paper figure for a
+condition, carries above-chance signal. The package offers three
 complementary group-level summaries, in roughly increasing resolution:
 
 - **The distribution of per-producer infoVals.** Brinkman et al.
@@ -2800,18 +2800,19 @@ complementary group-level summaries, in roughly increasing resolution:
         (§10) and surfaced inside
         [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
         (§5.4).
-- **Group-mean z** (`group_mean_z()`, the focus of this section). A
-  single scalar summarising whether the magnitude of the group-mean CI
-  exceeds what an equally-sized panel of random responders would
-  produce. Useful as a headline number alongside the per-producer
-  distribution, **not** as a substitute for it.
+- **Group-mean z** (`group_mean_z()`). A single scalar summarizing
+  whether the magnitude of the group-mean CI exceeds what an
+  equally-sized panel of random responders would produce. Useful as a
+  headline number alongside the per-producer distribution, **NOT** as a
+  substitute for it.
 - **Per-pixel agreement maps**
   ([`agreement_map_test()`](https://olivethree.github.io/rcisignal/reference/agreement_map_test.md),
-  §12.1). The spatial counterpart: where in the image are producers
-  significantly agreeing? The most informative of the three when the
-  question is *where* the group signal lives.
+  §12.1). The spatial counterpart of this metric: Where in the image are
+  producers significantly agreeing? This may be the most informative of
+  the three listed here when the question is *where* the group signal
+  lives.
 
-This section unpacks the middle option in detail — what it computes, how
+This section unpacks the middle option in detail: what it computes, how
 it differs from Brinkman’s per-producer metric, and how to read it
 without overclaiming.
 
@@ -2852,7 +2853,7 @@ explicit:
 
 | Aspect | Per-producer infoVal ([`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)) | Group-mean z (`group_mean_z()`) |
 |----|----|----|
-| What is normed | Each producer’s CI, one at a time | The producer-averaged CI, once |
+| What is normed? | Each producer’s CI, one at a time | The producer-averaged CI, once |
 | Reference distribution | One random producer at the same trial count | `N` random producers (one per real producer) averaged, at matched per-producer trial counts |
 | Null tested | “this individual CI could have come from chance responding” | “this group-mean CI could have come from `N` random producers averaged” |
 | Output shape | One z per producer (vector) | One z per call (scalar) |
@@ -2871,13 +2872,13 @@ this specific construction.
 
 ### 11.3 Reading the group-mean z appropriately
 
-Three reading rules:
+Consider this:
 
 - **It is necessary, not sufficient, for interpretability.** With
   `N >= ~10` producers the random reference becomes tight (its norm
   shrinks as ~`1/sqrt(N)`), so a small amount of shared signal will
   clear the conventional `z = 1.96` threshold. A significant group-mean
-  z says the averaged CI is above the matched-`N` noise floor; it does
+  z says the averaged CI is above the matched-`N` noise floor. It does
   *not* by itself tell you that individual producers are doing the task
   seriously, that the spatial pattern is interpretable, or that the
   result would replicate.
@@ -2888,20 +2889,20 @@ Three reading rules:
   from §12.1. Reporting only the group-mean z hides whether the signal
   comes from a coherent panel or from a handful of outliers averaged
   with noise.
-- **Suggested manuscript framing.** *“The group-mean CI exceeded the
-  matched-N random-responder null (group-mean z = X.XX); per-producer
-  infoVal had median z = Y.YY with Z out of N producers above 1.96;
-  pixel-wise agreement testing identified K FWER-significant clusters
-  (Figure A).”*
+- **Suggested framing when writing a report.** *“The group-mean CI
+  exceeded the matched-N random-responder null (group-mean z = X.XX).
+  Per-producer infoVal had median z = Y.YY with Z out of N producers
+  above 1.96. Pixel-wise agreement testing identified K FWER-significant
+  clusters (Figure A).”*
 
-### 11.4 Reference distributions illustrated
+### 11.4 Reference distributions
 
-The pedagogical point — that averaging `N` random producers *before*
-taking the norm shrinks the noise floor relative to a single random
-producer — is easier to see than to describe. The figure below simulates
-both reference distributions on a synthetic noise matrix at 60 trials
-per producer, with the per-producer null on the left and the `N = 20`
-group-mean null on the right.
+The pedagogical point conveyed here is that averaging `N` random
+producers *before* taking the norm shrinks the noise floor relative to a
+single random producer, which is perhaps better illustrated visually.
+The figure below simulates both reference distributions on a synthetic
+noise matrix at 60 trials per producer, with the per-producer null on
+the left and the `N = 20` group-mean null on the right.
 
 ![Reference distributions for the per-producer and group-mean nulls,
 built on the same synthetic noise matrix (1024 pixels, 360-stimulus
@@ -2954,13 +2955,13 @@ CI.
 The same logic applies under real noise matrices. The exact shrinkage
 factor depends on the noise structure (the synthetic noise above is iid
 standard normal; real sinusoidal-noise CIs also shrink, just with a
-different constant), but the qualitative picture — tight right-hand
-distribution, wide left-hand distribution — survives. The observed
+different constant), but the qualitative picture (tight right-hand
+distribution, wide left-hand distribution) survives. The observed
 group-mean CI’s Frobenius norm is what gets compared against the red
-line on the right; `group_mean_z()` returns how many MADs above that
+line on the right. `group_mean_z()` returns how many MADs above that
 median the observation sits.
 
-### 11.5 Why `group_mean_z()` is not exported
+### 11.5 Why `group_mean_z()` is not part of the library?
 
 The function is offered only through
 [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
@@ -4360,7 +4361,7 @@ Schmitz, Rougier, & Yzerbyt (2024):
 - `"briefrc12"` (default): 12 alternatives per trial, 6 original + 6
   inverted, arranged in a 3 x 4 grid in the Schmitz et al. study.
 - `"briefrc20"`: 20 alternatives per trial, 10 original + 10 inverted,
-  arranged in a 4 x 5 grid in the Schmitz et al. study.
+  arranged in a 4 x 5 grid in the Schmitz et al. study.
 
 The CI computation is identical for both variants. Schmitz’s `genMask()`
 formula does not depend on how many alternatives are shown per trial; it
@@ -4461,10 +4462,10 @@ Per-producer Frobenius norms aggregate over the whole image and dilute
 localised signal, so individual z values are systematically lower than
 group-mean z even when the group CI is highly informative (the §14.4
 pattern). Report **both**, with the per-producer distribution (median z,
-% above 1.96) as the primary group-level summary per Brinkman et
-al. (2019) and the group-mean z as a supplementary headline number. The
-full reasoning — including a side-by-side simulation of the two
-reference distributions — is in §11.
+% above 1.96) as the primary group-level summary per Brinkman et al.
+(2019) and the group-mean z as a supplementary headline number. The full
+reasoning — including a side-by-side simulation of the two reference
+distributions — is in §11.
 
 **FWER scope.**
 [`rel_cluster_test()`](https://olivethree.github.io/rcisignal/reference/rel_cluster_test.md)

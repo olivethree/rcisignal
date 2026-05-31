@@ -316,55 +316,55 @@ sim_signal <- simulate_briefrc_data(
   seed            = 11L
 )
 #> Generating noise pool ■                                  1% | ETA:  4m
-#> Generating noise pool ■                                  1% | ETA:  3m
-#> Generating noise pool ■■                                 3% | ETA:  3m
-#> Generating noise pool ■■■                                5% | ETA:  2m
-#> Generating noise pool ■■■                                8% | ETA:  2m
-#> Generating noise pool ■■■■                              10% | ETA:  2m
-#> Generating noise pool ■■■■■                             12% | ETA:  2m
+#> Generating noise pool ■■                                 2% | ETA:  3m
+#> Generating noise pool ■■                                 5% | ETA:  2m
+#> Generating noise pool ■■■                                7% | ETA:  2m
+#> Generating noise pool ■■■■                               9% | ETA:  2m
+#> Generating noise pool ■■■■                              11% | ETA:  2m
 #> Generating noise pool ■■■■■                             14% | ETA:  2m
-#> Generating noise pool ■■■■■■                            17% | ETA:  2m
-#> Generating noise pool ■■■■■■■                           19% | ETA:  2m
-#> Generating noise pool ■■■■■■■                           22% | ETA:  2m
-#> Generating noise pool ■■■■■■■■                          24% | ETA:  2m
-#> Generating noise pool ■■■■■■■■■                         26% | ETA:  2m
+#> Generating noise pool ■■■■■■                            16% | ETA:  2m
+#> Generating noise pool ■■■■■■                            18% | ETA:  2m
+#> Generating noise pool ■■■■■■■                           20% | ETA:  2m
+#> Generating noise pool ■■■■■■■■                          22% | ETA:  2m
+#> Generating noise pool ■■■■■■■■                          25% | ETA:  2m
+#> Generating noise pool ■■■■■■■■■                         27% | ETA:  2m
 #> Generating noise pool ■■■■■■■■■■                        29% | ETA:  2m
-#> Generating noise pool ■■■■■■■■■■                        31% | ETA:  2m
-#> Generating noise pool ■■■■■■■■■■■                       33% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■                       32% | ETA:  2m
+#> Generating noise pool ■■■■■■■■■■■                       34% | ETA:  1m
 #> Generating noise pool ■■■■■■■■■■■■                      36% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■                      38% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■                     40% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■                    42% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■                   45% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■                   47% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■                  49% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■                 52% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■                 54% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■                57% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■               59% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■               61% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■                     39% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■                     41% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■                    43% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■                   46% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■                   48% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■                  51% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■■                 53% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■                55% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■                58% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■               60% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■              62% | ETA: 50s
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■■              64% | ETA: 47s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             66% | ETA: 44s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             68% | ETA: 41s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■            71% | ETA: 38s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■           73% | ETA: 35s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■          75% | ETA: 32s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■          78% | ETA: 29s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA: 26s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■        82% | ETA: 23s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■        85% | ETA: 20s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       87% | ETA: 17s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      89% | ETA: 14s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     92% | ETA: 11s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     94% | ETA:  8s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■    96% | ETA:  5s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■   99% | ETA:  2s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             67% | ETA: 43s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■            69% | ETA: 40s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■           72% | ETA: 37s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■           74% | ETA: 34s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■          76% | ETA: 31s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         79% | ETA: 28s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         81% | ETA: 25s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■        83% | ETA: 22s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       86% | ETA: 18s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% | ETA: 16s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      91% | ETA: 12s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     93% | ETA:  9s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■    95% | ETA:  6s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■    98% | ETA:  3s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 #> ℹ Wrote stimuli to
-#>   /tmp/RtmpYHWxMA/rcisignal_sim_20e95dfc3d96/rcisignal_sim_briefrc_stimuli.Rdata
+#>   /tmp/RtmpAPeZf7/rcisignal_sim_21434ff81e81/rcisignal_sim_briefrc_stimuli.Rdata
 #>   (session tempdir).
 #> ℹ Wrote base face to
-#>   /tmp/RtmpYHWxMA/rcisignal_sim_20e95dfc3d96/rcisignal_sim_briefrc_base_face.png
+#>   /tmp/RtmpAPeZf7/rcisignal_sim_21434ff81e81/rcisignal_sim_briefrc_base_face.png
 #>   (session tempdir).
 #>   Pass `rdata_dir` to persist across R sessions, or hand `$stimuli` to
 #>   downstream consumers.
@@ -375,57 +375,58 @@ sim_noise <- simulate_briefrc_data(
   seed            = 12L
 )
 #> Generating noise pool ■                                  1% | ETA:  3m
-#> Generating noise pool ■■                                 3% | ETA:  2m
-#> Generating noise pool ■■■                                5% | ETA:  2m
-#> Generating noise pool ■■■                                8% | ETA:  2m
-#> Generating noise pool ■■■■                              10% | ETA:  2m
-#> Generating noise pool ■■■■■                             12% | ETA:  2m
-#> Generating noise pool ■■■■■                             14% | ETA:  2m
-#> Generating noise pool ■■■■■■                            16% | ETA:  2m
-#> Generating noise pool ■■■■■■■                           18% | ETA:  2m
-#> Generating noise pool ■■■■■■■                           21% | ETA:  2m
-#> Generating noise pool ■■■■■■■■                          23% | ETA:  2m
-#> Generating noise pool ■■■■■■■■                          25% | ETA:  2m
-#> Generating noise pool ■■■■■■■■■                         27% | ETA:  2m
-#> Generating noise pool ■■■■■■■■■■                        29% | ETA:  2m
+#> Generating noise pool ■■                                 2% | ETA:  2m
+#> Generating noise pool ■■                                 4% | ETA:  2m
+#> Generating noise pool ■■■                                6% | ETA:  2m
+#> Generating noise pool ■■■■                               9% | ETA:  2m
+#> Generating noise pool ■■■■                              11% | ETA:  2m
+#> Generating noise pool ■■■■■                             13% | ETA:  2m
+#> Generating noise pool ■■■■■■                            15% | ETA:  2m
+#> Generating noise pool ■■■■■■                            17% | ETA:  2m
+#> Generating noise pool ■■■■■■■                           19% | ETA:  2m
+#> Generating noise pool ■■■■■■■                           22% | ETA:  2m
+#> Generating noise pool ■■■■■■■■                          24% | ETA:  2m
+#> Generating noise pool ■■■■■■■■■                         26% | ETA:  2m
+#> Generating noise pool ■■■■■■■■■                         28% | ETA:  2m
 #> Generating noise pool ■■■■■■■■■■                        31% | ETA:  2m
 #> Generating noise pool ■■■■■■■■■■■                       33% | ETA:  2m
-#> Generating noise pool ■■■■■■■■■■■■                      36% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■                      38% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■                     40% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■                    42% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■                       35% | ETA:  2m
+#> Generating noise pool ■■■■■■■■■■■■                      37% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■                     39% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■                     41% | ETA:  1m
 #> Generating noise pool ■■■■■■■■■■■■■■                    44% | ETA:  1m
 #> Generating noise pool ■■■■■■■■■■■■■■■                   46% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■                  49% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■                  51% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■                 53% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■                 55% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■                   48% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■                  50% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■■                 52% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■■                 54% | ETA:  1m
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■                57% | ETA:  1m
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■               59% | ETA:  1m
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■               61% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■              64% | ETA:  1m
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             66% | ETA: 47s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             68% | ETA: 44s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■            70% | ETA: 42s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■           72% | ETA: 38s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■           74% | ETA: 35s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■          77% | ETA: 32s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         79% | ETA: 29s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         81% | ETA: 26s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■              63% | ETA:  1m
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             65% | ETA: 48s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             68% | ETA: 45s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■            69% | ETA: 42s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■           72% | ETA: 39s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■           74% | ETA: 36s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■          76% | ETA: 33s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         78% | ETA: 30s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         81% | ETA: 27s
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■        83% | ETA: 24s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       85% | ETA: 20s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% | ETA: 17s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      90% | ETA: 14s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     92% | ETA: 11s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     94% | ETA:  8s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■    96% | ETA:  5s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■   98% | ETA:  2s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■        85% | ETA: 21s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       87% | ETA: 18s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      89% | ETA: 15s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      91% | ETA: 12s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     93% | ETA:  9s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■    96% | ETA:  6s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■    98% | ETA:  3s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 #> ℹ Wrote stimuli to
-#>   /tmp/RtmpYHWxMA/rcisignal_sim_20e9442a0bb8/rcisignal_sim_briefrc_stimuli.Rdata
+#>   /tmp/RtmpAPeZf7/rcisignal_sim_214322b85ea3/rcisignal_sim_briefrc_stimuli.Rdata
 #>   (session tempdir).
 #> ℹ Wrote base face to
-#>   /tmp/RtmpYHWxMA/rcisignal_sim_20e9442a0bb8/rcisignal_sim_briefrc_base_face.png
+#>   /tmp/RtmpAPeZf7/rcisignal_sim_214322b85ea3/rcisignal_sim_briefrc_base_face.png
 #>   (session tempdir).
 #>   Pass `rdata_dir` to persist across R sessions, or hand `$stimuli` to
 #>   downstream consumers.

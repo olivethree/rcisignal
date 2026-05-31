@@ -109,7 +109,7 @@ operate directly on producer-level pixel signal and thereby sidestep
 that pitfall.</p>
 <p>The intended audience is RC researchers at an intermediate R level
 with basic familiarity with the <code>rcicr</code> package or with the
-Schmitz et al. (2024) Brief-RC structure. No prior expertise in
+Schmitz et al. (2024) Brief-RC structure. No prior expertise in
 <code>data.table</code>, permutation testing, or intraclass correlation
 is assumed.</p>
 </div>
@@ -130,7 +130,7 @@ targets. Reporting accordingly matters.</p>
 <strong>Per-producer infoVal for 2IFC</strong> (Brinkman et al.,
 2019). The z-score derivation, reference distribution, and the
 <code>z &gt;= 1.96</code> threshold all originate from the Brinkman et
-al. paper, which validated the metric on social-face 2IFC data.</li>
+al. paper, which validated the metric on social-face 2IFC data.</li>
 <li>
 <strong>Pixel-test methodology</strong> (Chauvin et al., 2005). The
 Welch-style per-pixel t-statistic, plus its smoothing and inferential
@@ -599,10 +599,10 @@ that may be easy to confuse. In <code>rcisignal</code>, each one has
 exactly one job:</p>
 <table class="table">
 <colgroup>
-<col width="17%">
-<col width="46%">
-<col width="22%">
-<col width="13%">
+<col width="20%">
+<col width="39%">
+<col width="20%">
+<col width="20%">
 </colgroup>
 <thead><tr class="header">
 <th>Data type</th>
@@ -877,9 +877,9 @@ face mask.</p>
 Required columns:</p>
 <table class="table">
 <colgroup>
-<col width="15%">
-<col width="9%">
-<col width="74%">
+<col width="17%">
+<col width="17%">
+<col width="64%">
 </colgroup>
 <thead><tr class="header">
 <th>Column</th>
@@ -1053,11 +1053,11 @@ opposite signs, the two cancel and it contributes zero. The
 <div class="section level4">
 <h4 id="structural-differences-between-2ifc-and-brief-rc-data">Structural differences between 2IFC and Brief-RC data<a class="anchor" aria-label="anchor" href="#structural-differences-between-2ifc-and-brief-rc-data"></a>
 </h4>
-<table style="width:100%;" class="table">
+<table class="table">
 <colgroup>
 <col width="25%">
-<col width="22%">
-<col width="51%">
+<col width="25%">
+<col width="50%">
 </colgroup>
 <thead><tr class="header">
 <th>Aspect</th>
@@ -1604,7 +1604,7 @@ WARN otherwise.</li>
 <li>
 <strong><code>check_response_bias(bias_threshold = 0.6)</code></strong>
 flags constant responders (FAIL) and producers with
-<code>|mean(response)| &gt; bias_threshold</code> (WARN; default 0.6
+<code>|mean(response)| &gt;   bias_threshold</code> (WARN; default 0.6
 corresponds to roughly an 80/20 split).</li>
 <li>
 <strong><code>check_rt(col_rt = ...)</code></strong> scans response
@@ -1698,8 +1698,8 @@ threshold; PASS otherwise. Works with both 2IFC
 skipped. Each skipped check requires a specific additional argument:</p>
 <table class="table">
 <colgroup>
-<col width="36%">
-<col width="63%">
+<col width="37%">
+<col width="62%">
 </colgroup>
 <thead><tr class="header">
 <th>Check</th>
@@ -1842,7 +1842,11 @@ warning that PNG-derived signals are scaled. Silence with
 <li>
 <code>"autoscale"</code>: stretches each producer’s mask to a fixed
 symmetric range. The rcicr default and the convention used in Schmitz et
-al. (2024) Experiment 2.</li>
+al.
+<ol start="2024" style="list-style-type: decimal">
+<li>Experiment 2.</li>
+</ol>
+</li>
 <li>
 <code>"matched"</code>: stretches each mask to the base image’s
 range. Per-CI, so it breaks correlation-based metrics as well (a uniform
@@ -2578,7 +2582,7 @@ contributes a roughly constant additive distance, so relative
 comparisons (“which two CIs are closest?”) survive without an explicit
 null. The worked example in §14.6 shows that the relative ordering of
 condition pairs by Pearson <em>r</em> matches the ordering by Euclidean
-distance on the Oliveira et al. (2019) data, but only the distance gives
+distance on the Oliveira et al. (2019) data, but only the distance gives
 an interpretable absolute magnitude.</p>
 <p>Practical recommendation: report Euclidean distance (raw, or
 normalised by
@@ -2782,13 +2786,13 @@ implementations on the open data from Oliveira, Garcia-Marques, Dotsch
 trials each. The headline table:</p>
 <table style="width:100%;" class="table">
 <colgroup>
-<col width="13%">
-<col width="3%">
-<col width="19%">
-<col width="16%">
-<col width="19%">
-<col width="16%">
-<col width="10%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
 </colgroup>
 <thead><tr class="header">
 <th>trait</th>
@@ -2942,8 +2946,8 @@ loads the cached reference; otherwise it recomputes.</p>
 <h2 id="group-level-signal-summaries">11. Group-level signal summaries<a class="anchor" aria-label="anchor" href="#group-level-signal-summaries"></a>
 </h2>
 <p>The natural follow-up question to per-producer infoVal (§10) is
-whether the <em>group-averaged</em> CI — the one shown in a paper figure
-for a condition — carries above-chance signal. The package offers three
+whether the <em>group-averaged</em> CI, the one shown in a paper figure
+for a condition, carries above-chance signal. The package offers three
 complementary group-level summaries, in roughly increasing
 resolution:</p>
 <ul>
@@ -2958,20 +2962,19 @@ the percentage of producers above z = 1.96, both already returned by
 </ol>
 </li>
 <li>
-<strong>Group-mean z</strong> (<code>group_mean_z()</code>, the
-focus of this section). A single scalar summarising whether the
-magnitude of the group-mean CI exceeds what an equally-sized panel of
-random responders would produce. Useful as a headline number alongside
-the per-producer distribution, <strong>not</strong> as a substitute for
-it.</li>
+<strong>Group-mean z</strong> (<code>group_mean_z()</code>). A
+single scalar summarizing whether the magnitude of the group-mean CI
+exceeds what an equally-sized panel of random responders would produce.
+Useful as a headline number alongside the per-producer distribution,
+<strong>NOT</strong> as a substitute for it.</li>
 <li>
 <strong>Per-pixel agreement maps</strong>
-(<code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>, §12.1). The spatial counterpart:
-where in the image are producers significantly agreeing? The most
-informative of the three when the question is <em>where</em> the group
-signal lives.</li>
+(<code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>, §12.1). The spatial counterpart of
+this metric: Where in the image are producers significantly agreeing?
+This may be the most informative of the three listed here when the
+question is <em>where</em> the group signal lives.</li>
 </ul>
-<p>This section unpacks the middle option in detail — what it computes,
+<p>This section unpacks the middle option in detail: what it computes,
 how it differs from Brinkman’s per-producer metric, and how to read it
 without overclaiming.</p>
 <div class="section level3">
@@ -3026,7 +3029,7 @@ differences explicit:</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>What is normed</td>
+<td>What is normed?</td>
 <td>Each producer’s CI, one at a time</td>
 <td>The producer-averaged CI, once</td>
 </tr>
@@ -3076,7 +3079,7 @@ construction.</p>
 <div class="section level3">
 <h3 id="reading-the-group-mean-z-appropriately">11.3 Reading the group-mean z appropriately<a class="anchor" aria-label="anchor" href="#reading-the-group-mean-z-appropriately"></a>
 </h3>
-<p>Three reading rules:</p>
+<p>Consider this:</p>
 <ul>
 <li>
 <strong>It is necessary, not sufficient, for
@@ -3085,36 +3088,36 @@ random reference becomes tight (its norm shrinks as
 ~<code>1/sqrt(N)</code>), so a small amount of shared signal will clear
 the conventional <code>z = 1.96</code> threshold. A significant
 group-mean z says the averaged CI is above the matched-<code>N</code>
-noise floor; it does <em>not</em> by itself tell you that individual
+noise floor. It does <em>not</em> by itself tell you that individual
 producers are doing the task seriously, that the spatial pattern is
 interpretable, or that the result would replicate.</li>
 <li>
 <strong>Pair it with the per-producer distribution and the spatial
 map.</strong> The diagnostic triplet is
-<code>(median per-producer z, % producers above 1.96)</code> from §10 /
-§5.4, the group-mean z from this section, and the FWER-controlled
+<code>(median per-producer z, %   producers above 1.96)</code> from §10
+/ §5.4, the group-mean z from this section, and the FWER-controlled
 agreement map from §12.1. Reporting only the group-mean z hides whether
 the signal comes from a coherent panel or from a handful of outliers
 averaged with noise.</li>
 <li>
-<strong>Suggested manuscript framing.</strong> <em>“The group-mean
-CI exceeded the matched-N random-responder null (group-mean z = X.XX);
-per-producer infoVal had median z = Y.YY with Z out of N producers above
-1.96; pixel-wise agreement testing identified K FWER-significant
-clusters (Figure A).”</em>
+<strong>Suggested framing when writing a report.</strong> <em>“The
+group-mean CI exceeded the matched-N random-responder null (group-mean z
+= X.XX). Per-producer infoVal had median z = Y.YY with Z out of N
+producers above 1.96. Pixel-wise agreement testing identified K
+FWER-significant clusters (Figure A).”</em>
 </li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="reference-distributions-illustrated">11.4 Reference distributions illustrated<a class="anchor" aria-label="anchor" href="#reference-distributions-illustrated"></a>
+<h3 id="reference-distributions">11.4 Reference distributions<a class="anchor" aria-label="anchor" href="#reference-distributions"></a>
 </h3>
-<p>The pedagogical point — that averaging <code>N</code> random
-producers <em>before</em> taking the norm shrinks the noise floor
-relative to a single random producer — is easier to see than to
-describe. The figure below simulates both reference distributions on a
-synthetic noise matrix at 60 trials per producer, with the per-producer
-null on the left and the <code>N = 20</code> group-mean null on the
-right.</p>
+<p>The pedagogical point conveyed here is that averaging <code>N</code>
+random producers <em>before</em> taking the norm shrinks the noise floor
+relative to a single random producer, which is perhaps better
+illustrated visually. The figure below simulates both reference
+distributions on a synthetic noise matrix at 60 trials per producer,
+with the per-producer null on the left and the <code>N = 20</code>
+group-mean null on the right.</p>
 <div class="figure">
 <img src="rcisignal_files/figure-html/group-mean-illustration-1.png" class="r-plt" alt="Reference distributions for the per-producer and group-mean nulls, built on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at 60 trials per producer. Left: 300 simulated CIs from a single random responder, the reference used by per-producer `infoval()`. Right: 300 simulated *group-mean* CIs each built by averaging 20 random responders, the reference used by `group_mean_z()` at N = 20. Both panels share the x-axis. The right distribution sits near zero because averaging cancels independent noise; this ~1/sqrt(N) shrinkage is the calibration `group_mean_z()` uses when scoring the observed group-mean CI." width="100%"><p class="caption">
 Reference distributions for the per-producer and group-mean nulls, built
@@ -3146,14 +3149,15 @@ scoring the observed group-mean CI.
 <p>The same logic applies under real noise matrices. The exact shrinkage
 factor depends on the noise structure (the synthetic noise above is iid
 standard normal; real sinusoidal-noise CIs also shrink, just with a
-different constant), but the qualitative picture — tight right-hand
-distribution, wide left-hand distribution — survives. The observed
+different constant), but the qualitative picture (tight right-hand
+distribution, wide left-hand distribution) survives. The observed
 group-mean CI’s Frobenius norm is what gets compared against the red
-line on the right; <code>group_mean_z()</code> returns how many MADs
+line on the right. <code>group_mean_z()</code> returns how many MADs
 above that median the observation sits.</p>
 </div>
 <div class="section level3">
-<h3 id="why-group_mean_z-is-not-exported">11.5 Why <code>group_mean_z()</code> is not exported<a class="anchor" aria-label="anchor" href="#why-group_mean_z-is-not-exported"></a>
+<h3 id="why-group_mean_z-is-not-part-of-the-library">11.5 Why <code>group_mean_z()</code> is not part of the
+library?<a class="anchor" aria-label="anchor" href="#why-group_mean_z-is-not-part-of-the-library"></a>
 </h3>
 <p>The function is offered only through <code><a href="../reference/infoval_report.html">infoval_report()</a></code>
 (as the <code>group_mean_z_unmasked</code> and
@@ -4779,7 +4783,7 @@ original + 6 inverted, arranged in a 3 x 4 grid in the Schmitz et
 al. study.</li>
 <li>
 <code>"briefrc20"</code>: 20 alternatives per trial, 10 original +
-10 inverted, arranged in a 4 x 5 grid in the Schmitz et al. study.</li>
+10 inverted, arranged in a 4 x 5 grid in the Schmitz et al. study.</li>
 </ul>
 <p>The CI computation is identical for both variants. Schmitz’s
 <code>genMask()</code> formula does not depend on how many alternatives
@@ -4880,7 +4884,7 @@ whole image and dilute localised signal, so individual z values are
 systematically lower than group-mean z even when the group CI is highly
 informative (the §14.4 pattern). Report <strong>both</strong>, with the
 per-producer distribution (median z, % above 1.96) as the primary
-group-level summary per Brinkman et al. (2019) and the group-mean z as a
+group-level summary per Brinkman et al. (2019) and the group-mean z as a
 supplementary headline number. The full reasoning — including a
 side-by-side simulation of the two reference distributions — is in
 §11.</p>
