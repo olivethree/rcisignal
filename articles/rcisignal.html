@@ -154,7 +154,9 @@ per-producer infoVal to the group-average CI, with a trial-count-matched
 reference. Brinkman et al. (2019) recommend reporting the distribution
 of per-producer infoVals rather than a single group z; the group-mean
 version is offered here as a supplementary summary, not as a replacement
-for the per- producer reporting.</li>
+for the per- producer reporting. See §11 for the full description, how
+the matched-N reference distribution is constructed, and a calibration
+illustration.</li>
 <li>
 <strong>Between-condition discriminability tests</strong>
 (cluster-based permutation and TFCE). The underlying machinery is
@@ -962,7 +964,7 @@ the chosen noise pattern; <code>response = +1</code> if original chosen,
 do not pad them as zero rows. The same row format applies to both
 validated Brief-RC variants (Brief-RC 12 with <code>k = 6</code>,
 Brief-RC 20 with <code>k = 10</code>); the analysis pipeline is
-identical (see §14.1 for the formula being symmetric in
+identical (see §15.1 for the formula being symmetric in
 <code>k</code>).</p>
 <p>A Brief-RC 12 dataset with the same three participants and four
 trials each illustrates the format:</p>
@@ -1888,34 +1890,38 @@ pointer; the metric chapters carry the depth.</p>
 <td>§10</td>
 </tr>
 <tr class="even">
+<td>Does the group-mean CI carry above-chance signal?</td>
+<td>§11</td>
+</tr>
+<tr class="odd">
 <td>Are producers in a condition consistent with each other?
 (within-condition reliability)</td>
 <td>§8</td>
 </tr>
-<tr class="odd">
-<td>Where do producers agree in pixel space, and where reliably?</td>
-<td>§11.1, §11.2</td>
-</tr>
 <tr class="even">
+<td>Where do producers agree in pixel space, and where reliably?</td>
+<td>§12.1, §12.2</td>
+</tr>
+<tr class="odd">
 <td>Are two conditions distinguishable spatially? (cluster-based
 discriminability)</td>
 <td>§9.2</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>How different in overall magnitude are two CIs, and is that above
 chance?</td>
 <td>§9.3</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>How do several CIs order against each other? (correlogram / distance
 matrix / MDS)</td>
-<td>§11.5-§11.7</td>
-</tr>
-<tr class="odd">
-<td>How do I restrict any analysis to eyes / mouth / etc.?</td>
-<td>§12</td>
+<td>§12.5-§12.7</td>
 </tr>
 <tr class="even">
+<td>How do I restrict any analysis to eyes / mouth / etc.?</td>
+<td>§13</td>
+</tr>
+<tr class="odd">
 <td>How do I get publication-ready PNGs of every CI to disk?</td>
 <td>§1.4 (<code><a href="../reference/save_ci_images.html">save_ci_images()</a></code>)</td>
 </tr>
@@ -1931,7 +1937,7 @@ downstream code consumes:</p>
 <ul>
 <li>
 <code>$signal_matrix</code> (pixels x producers, <strong>raw
-mask</strong>): the canonical input to every metric in §8-§11. Column
+mask</strong>): the canonical input to every metric in §8-§12. Column
 names are the producer ids.</li>
 <li>
 <code>$group_ci</code> (pixels x groups): present when
@@ -2003,7 +2009,7 @@ joined with <code>"_"</code>).</p>
 <span><span class="fu"><a href="../reference/save_ci_images.html">save_ci_images</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">signal_matrix</span>, base_image <span class="op">=</span> <span class="va">base</span>, dir <span class="op">=</span> <span class="st">"out/ind"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/save_ci_images.html">save_ci_images</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">group_ci</span>,      base_image <span class="op">=</span> <span class="va">base</span>, dir <span class="op">=</span> <span class="st">"out/group"</span><span class="op">)</span></span></code></pre></div>
 <p>See §1.4 for <code><a href="../reference/save_ci_images.html">save_ci_images()</a></code> options (palette, JPEG
-output, custom prefix). See §11.3 for <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code>
+output, custom prefix). See §12.3 for <code><a href="../reference/plot_ci_overlay.html">plot_ci_overlay()</a></code>
 options (mask, contours from <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>,
 alpha).</p>
 </div>
@@ -2026,7 +2032,7 @@ with <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbi
 <p>Column names become the panel labels in the resulting figure; choose
 names that make the figure self-explanatory (e.g.,
 <code>P012_individual = res$signal_matrix[, "P012"]</code>,
-<code>happy_group = res$group_ci[, "happy"]</code>). See §11.5-§11.7 for
+<code>happy_group = res$group_ci[, "happy"]</code>). See §12.5-§12.7 for
 the full options on each plot function.</p>
 </div>
 </div>
@@ -2189,7 +2195,7 @@ cross-resolution comparisons.</p>
 each other very closely on real data: both quantify how aligned the
 producers are on the pixel-level signal, ICC(3,k) as a variance ratio
 and group-mean z as the magnitude of the surviving group-mean signal
-against a matched reference. §13.6 shows the empirical relationship
+against a matched reference. §14.6 shows the empirical relationship
 across ten trait conditions on the Oliveira et al. (2019) data (Pearson
 <em>r</em> ≈ 0.97).</p>
 </div>
@@ -2564,7 +2570,7 @@ paired designs) and recomputing <em>r</em>. Euclidean distance is also
 not strictly baseline-free, but in practice the shared scaffolding
 contributes a roughly constant additive distance, so relative
 comparisons (“which two CIs are closest?”) survive without an explicit
-null. The worked example in §13.6 shows that the relative ordering of
+null. The worked example in §14.6 shows that the relative ordering of
 condition pairs by Pearson <em>r</em> matches the ordering by Euclidean
 distance on the Oliveira et al. (2019) data, but only the distance gives
 an interpretable absolute magnitude.</p>
@@ -2633,7 +2639,7 @@ inspect a single pair on its own, or to override the title:</p>
 pass each pair’s dissimilarity child to
 <code><a href="../reference/plot_dissimilarity_grid.html">plot_dissimilarity_grid()</a></code>.</p>
 <p>When the comparison is many conditions at once (rather than a short
-list of pairs), the all-vs-all summaries in §11.6 and §11.7 are the
+list of pairs), the all-vs-all summaries in §12.6 and §12.7 are the
 natural tools: <code><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix()</a></code> for a pairwise
 Euclidean-distance heatmap across N conditions, and
 <code><a href="../reference/plot_ci_mds.html">plot_ci_mds()</a></code> to project the same N CIs into a 2D / 3D / kD
@@ -2670,17 +2676,12 @@ versus lower-right contrast rather than a trait-relevant face feature)
 can still score high on infoVal. Pair infoVal with the reliability
 metrics (§8) and the discriminability metrics (§9) when you want a
 fuller picture.</p>
-<p>A note on <em>group-mean infoVal</em>. The package also offers a
-group-mean version (<code>group_mean_z()</code>, called inside
-<code><a href="../reference/infoval_report.html">infoval_report()</a></code> as a supplementary statistic). It applies
-the same Frobenius-norm logic to the group-averaged CI, using a
-matched-N reference distribution so the calibration is fair (see §16 for
-what goes wrong when that reference is mismatched). Brinkman et
-al. (2019) recommend reporting the <em>distribution</em> of per-producer
-infoVals as the primary group-level summary, not a single group z. The
-group-mean version is offered here as a supplementary headline number
-and is not independently validated for social-face RC; treat it as
-exploratory (§1.2).</p>
+<p><em>Group-level signal summaries.</em> For the group-mean z statistic
+(<code>group_mean_z()</code>, surfaced inside
+<code><a href="../reference/infoval_report.html">infoval_report()</a></code>), the Brinkman-recommended primary
+group-level summary (the distribution of per-producer infoVals), and
+per-pixel agreement maps — including the reasoning behind the matched-N
+reference and a calibration illustration — see §11.</p>
 <p>In code:</p>
 <p><code><a href="../reference/infoval.html">infoval()</a></code> reports a per-producer Frobenius-norm z-score
 against a reference distribution matched to that producer’s actual trial
@@ -2743,7 +2744,7 @@ derives for you). For group CIs the reference must be matched to the
 the group CI is built from N producer masks summed (then averaged) at
 their individual trial counts. Passing a per-producer trial count for a
 group column would calibrate the reference against the wrong N and
-return a misleading z (see §16 for what goes wrong in detail; the
+return a misleading z (see §17 for what goes wrong in detail; the
 per-producer / group-mean distinction there carries the same matching
 requirement).</p>
 <p>The function unifies 2IFC and Brief-RC infoVal under one
@@ -2916,7 +2917,7 @@ whether the signal is stable; <code><a href="../reference/rel_cluster_test.html"
 separable. Pair <code><a href="../reference/infoval.html">infoval()</a></code> with these to triangulate.</li>
 </ul>
 <p>If most per-producer z-scores in your data come out near zero or
-negative, that is not unusual; see Appendix §16 for a five-reason
+negative, that is not unusual; see Appendix §17 for a five-reason
 walkthrough and a diagnostic recipe before drawing conclusions about
 producers’ engagement.</p>
 <p>The <code>with_replacement</code> argument controls how stimulus ids
@@ -2932,7 +2933,245 @@ loads the cached reference; otherwise it recomputes.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="agreement-maps-and-publication-ready-figures">11. Agreement maps and publication-ready figures<a class="anchor" aria-label="anchor" href="#agreement-maps-and-publication-ready-figures"></a>
+<h2 id="group-level-signal-summaries">11. Group-level signal summaries<a class="anchor" aria-label="anchor" href="#group-level-signal-summaries"></a>
+</h2>
+<p>The natural follow-up question to per-producer infoVal (§10) is
+whether the <em>group-averaged</em> CI — the one shown in a paper figure
+for a condition — carries above-chance signal. The package offers three
+complementary group-level summaries, in roughly increasing
+resolution:</p>
+<ul>
+<li>
+<strong>The distribution of per-producer infoVals.</strong> Brinkman
+et al.
+<ol start="2019" style="list-style-type: decimal">
+<li>recommend this as the primary group-level report: the median z and
+the percentage of producers above z = 1.96, both already returned by
+<code><a href="../reference/infoval.html">infoval()</a></code> (§10) and surfaced inside
+<code><a href="../reference/infoval_report.html">infoval_report()</a></code> (§5.4).</li>
+</ol>
+</li>
+<li>
+<strong>Group-mean z</strong> (<code>group_mean_z()</code>, the
+focus of this section). A single scalar summarising whether the
+magnitude of the group-mean CI exceeds what an equally-sized panel of
+random responders would produce. Useful as a headline number alongside
+the per-producer distribution, <strong>not</strong> as a substitute for
+it.</li>
+<li>
+<strong>Per-pixel agreement maps</strong>
+(<code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code>, §12.1). The spatial counterpart:
+where in the image are producers significantly agreeing? The most
+informative of the three when the question is <em>where</em> the group
+signal lives.</li>
+</ul>
+<p>This section unpacks the middle option in detail — what it computes,
+how it differs from Brinkman’s per-producer metric, and how to read it
+without overclaiming.</p>
+<div class="section level3">
+<h3 id="what-group_mean_z-actually-computes">11.1 What <code>group_mean_z()</code> actually computes<a class="anchor" aria-label="anchor" href="#what-group_mean_z-actually-computes"></a>
+</h3>
+<p><code>group_mean_z()</code> is an internal helper called from inside
+<code><a href="../reference/infoval_report.html">infoval_report()</a></code>; it returns one scalar z. The three-step
+recipe:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Observed.</strong> Collapse the producer × pixel
+<code>signal_matrix</code> to a single column with
+<code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans()</a></code>, optionally restrict to in-mask pixels, take the
+Frobenius norm
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><mover><mi>S</mi><mo accent="true">‾</mo></mover><mo stretchy="false" form="postfix">∥</mo><mo>=</mo><msqrt><mrow><msub><mo>∑</mo><mi>i</mi></msub><msubsup><mover><mi>S</mi><mo accent="true">‾</mo></mover><mi>i</mi><mn>2</mn></msubsup></mrow></msqrt></mrow><annotation encoding="application/x-tex">\|\bar S\| = \sqrt{\sum_i \bar S_i^2}</annotation></semantics></math>.</li>
+<li>
+<strong>Reference (per Monte-Carlo iteration).</strong> Simulate
+<strong>one random producer per real producer</strong> at each real
+producer’s actual trial count (independent random
+<code>(stimulus, ±1)</code> sequences), average those <code>N</code>
+simulated masks with the same <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans()</a></code> step, optionally
+mask, take the Frobenius norm. Repeat <code>iter</code> times to build
+the reference distribution.</li>
+<li>
+<strong>Report</strong>
+<code>(norm_obs - median(reference)) / mad(reference)</code> — the same
+modified-z used by per-producer <code><a href="../reference/infoval.html">infoval()</a></code>.</li>
+</ol>
+<p>The reference is built once per call. Because the simulated producers
+are averaged <em>before</em> the norm is taken (not normed and then
+averaged), the reference distribution correctly accounts for the
+~<code>1/sqrt(N)</code> shrinkage that random-producer norms undergo
+under averaging. That calibration choice is what makes the resulting z
+meaningful — see §11.4 for the visual receipt.</p>
+</div>
+<div class="section level3">
+<h3 id="how-it-differs-from-brinkmans-per-producer-infoval">11.2 How it differs from Brinkman’s per-producer infoVal<a class="anchor" aria-label="anchor" href="#how-it-differs-from-brinkmans-per-producer-infoval"></a>
+</h3>
+<p><code>group_mean_z()</code> is not “infoVal applied to a group CI.”
+It is a separate statistic with its own null. The table makes the
+differences explicit:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Aspect</th>
+<th>Per-producer infoVal (<code><a href="../reference/infoval.html">infoval()</a></code>)</th>
+<th>Group-mean z (<code>group_mean_z()</code>)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>What is normed</td>
+<td>Each producer’s CI, one at a time</td>
+<td>The producer-averaged CI, once</td>
+</tr>
+<tr class="even">
+<td>Reference distribution</td>
+<td>One random producer at the same trial count</td>
+<td>
+<code>N</code> random producers (one per real producer) averaged, at
+matched per-producer trial counts</td>
+</tr>
+<tr class="odd">
+<td>Null tested</td>
+<td>“this individual CI could have come from chance responding”</td>
+<td>“this group-mean CI could have come from <code>N</code> random
+producers averaged”</td>
+</tr>
+<tr class="even">
+<td>Output shape</td>
+<td>One z per producer (vector)</td>
+<td>One z per call (scalar)</td>
+</tr>
+<tr class="odd">
+<td>Validation status</td>
+<td>Brinkman et al. (2019): Type-I and power validated on social-face
+2IFC</td>
+<td>Calibration argument only; not independently validated for
+social-face RC</td>
+</tr>
+<tr class="even">
+<td>Recommended primary use</td>
+<td>Yes, with the distribution as the group summary</td>
+<td>Supplementary headline number only</td>
+</tr>
+</tbody>
+</table>
+<p>To keep the two straight in writing, prefer <strong>group-mean
+magnitude z</strong> (or just <em>group-mean z</em>) over <em>group-mean
+infoVal</em>. The metric is structurally similar to Brinkman’s infoVal
+(a modified z on a Frobenius norm against a chance reference), but
+Brinkman’s validation work was done at the per-producer level and does
+not automatically extend to the group statistic. The phrase
+<em>group-mean infoVal</em> is the package’s older nomenclature, kept
+here for continuity with earlier rcisignal releases; treat it as
+shorthand and not as a claim that Brinkman et al. endorsed this specific
+construction.</p>
+</div>
+<div class="section level3">
+<h3 id="reading-the-group-mean-z-appropriately">11.3 Reading the group-mean z appropriately<a class="anchor" aria-label="anchor" href="#reading-the-group-mean-z-appropriately"></a>
+</h3>
+<p>Three reading rules:</p>
+<ul>
+<li>
+<strong>It is necessary, not sufficient, for
+interpretability.</strong> With <code>N &gt;= ~10</code> producers the
+random reference becomes tight (its norm shrinks as
+~<code>1/sqrt(N)</code>), so a small amount of shared signal will clear
+the conventional <code>z = 1.96</code> threshold. A significant
+group-mean z says the averaged CI is above the matched-<code>N</code>
+noise floor; it does <em>not</em> by itself tell you that individual
+producers are doing the task seriously, that the spatial pattern is
+interpretable, or that the result would replicate.</li>
+<li>
+<strong>Pair it with the per-producer distribution and the spatial
+map.</strong> The diagnostic triplet is
+<code>(median per-producer z, % producers above 1.96)</code> from §10 /
+§5.4, the group-mean z from this section, and the FWER-controlled
+agreement map from §12.1. Reporting only the group-mean z hides whether
+the signal comes from a coherent panel or from a handful of outliers
+averaged with noise.</li>
+<li>
+<strong>Suggested manuscript framing.</strong> <em>“The group-mean
+CI exceeded the matched-N random-responder null (group-mean z = X.XX);
+per-producer infoVal had median z = Y.YY with Z out of N producers above
+1.96; pixel-wise agreement testing identified K FWER-significant
+clusters (Figure A).”</em>
+</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="reference-distributions-illustrated">11.4 Reference distributions illustrated<a class="anchor" aria-label="anchor" href="#reference-distributions-illustrated"></a>
+</h3>
+<p>The pedagogical point — that averaging <code>N</code> random
+producers <em>before</em> taking the norm shrinks the noise floor
+relative to a single random producer — is easier to see than to
+describe. The figure below simulates both reference distributions on a
+synthetic noise matrix at 60 trials per producer, with the per-producer
+null on the left and the <code>N = 20</code> group-mean null on the
+right.</p>
+<div class="figure">
+<img src="rcisignal_files/figure-html/group-mean-illustration-1.png" class="r-plt" alt="Reference distributions for the per-producer and group-mean nulls, built on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at 60 trials per producer. Left: 300 simulated CIs from a single random responder, the reference used by per-producer `infoval()`. Right: 300 simulated *group-mean* CIs each built by averaging 20 random responders, the reference used by `group_mean_z()` at N = 20. Both panels share the x-axis. The right distribution sits near zero because averaging cancels independent noise; this ~1/sqrt(N) shrinkage is the calibration `group_mean_z()` uses when scoring the observed group-mean CI." width="100%"><p class="caption">
+Reference distributions for the per-producer and group-mean nulls, built
+on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at
+60 trials per producer. Left: 300 simulated CIs from a single random
+responder, the reference used by per-producer <code><a href="../reference/infoval.html">infoval()</a></code>.
+Right: 300 simulated <em>group-mean</em> CIs each built by averaging 20
+random responders, the reference used by <code>group_mean_z()</code> at
+N = 20. Both panels share the x-axis. The right distribution sits near
+zero because averaging cancels independent noise; this ~1/sqrt(N)
+shrinkage is the calibration <code>group_mean_z()</code> uses when
+scoring the observed group-mean CI.
+</p>
+</div>
+<div class="figure">
+<img src="rcisignal_files/figure-html/group-mean-illustration-2.png" class="r-plt" alt="Reference distributions for the per-producer and group-mean nulls, built on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at 60 trials per producer. Left: 300 simulated CIs from a single random responder, the reference used by per-producer `infoval()`. Right: 300 simulated *group-mean* CIs each built by averaging 20 random responders, the reference used by `group_mean_z()` at N = 20. Both panels share the x-axis. The right distribution sits near zero because averaging cancels independent noise; this ~1/sqrt(N) shrinkage is the calibration `group_mean_z()` uses when scoring the observed group-mean CI." width="100%"><p class="caption">
+Reference distributions for the per-producer and group-mean nulls, built
+on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at
+60 trials per producer. Left: 300 simulated CIs from a single random
+responder, the reference used by per-producer <code><a href="../reference/infoval.html">infoval()</a></code>.
+Right: 300 simulated <em>group-mean</em> CIs each built by averaging 20
+random responders, the reference used by <code>group_mean_z()</code> at
+N = 20. Both panels share the x-axis. The right distribution sits near
+zero because averaging cancels independent noise; this ~1/sqrt(N)
+shrinkage is the calibration <code>group_mean_z()</code> uses when
+scoring the observed group-mean CI.
+</p>
+</div>
+<p>The same logic applies under real noise matrices. The exact shrinkage
+factor depends on the noise structure (the synthetic noise above is iid
+standard normal; real sinusoidal-noise CIs also shrink, just with a
+different constant), but the qualitative picture — tight right-hand
+distribution, wide left-hand distribution — survives. The observed
+group-mean CI’s Frobenius norm is what gets compared against the red
+line on the right; <code>group_mean_z()</code> returns how many MADs
+above that median the observation sits.</p>
+</div>
+<div class="section level3">
+<h3 id="why-group_mean_z-is-not-exported">11.5 Why <code>group_mean_z()</code> is not exported<a class="anchor" aria-label="anchor" href="#why-group_mean_z-is-not-exported"></a>
+</h3>
+<p>The function is offered only through <code><a href="../reference/infoval_report.html">infoval_report()</a></code>
+(as the <code>group_mean_z_unmasked</code> and
+<code>group_mean_z_masked</code> scalars on its returned
+<code>data</code> list). Two reasons. First, the inputs that make the
+reference calibration correct (a noise matrix in raw
+producers-by-stimulus form, plus a named integer vector of per-producer
+trial counts) are awkward to assemble outside the
+<code><a href="../reference/infoval_report.html">infoval_report()</a></code> pipeline. Second, exposing the function as
+a public entry point would invite people to read its output as
+<em>the</em> group-level number, which is exactly the framing this
+section is asking you to avoid. If you want the statistic, run
+<code><a href="../reference/infoval_report.html">infoval_report()</a></code> and pull
+<code>data$group_mean_z_unmasked</code> or
+<code>data$group_mean_z_masked</code>; if you want the full Monte-Carlo
+machinery in a different context, calling <code><a href="../reference/infoval.html">infoval()</a></code> on a
+single group-CI column with the right <code>trial_counts</code> (the
+<em>sum</em> of the producer trial counts in the group, per §10’s
+group-CI recipe) returns the analogous comparison built from the
+per-producer engine.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="agreement-maps-and-publication-ready-figures">12. Agreement maps and publication-ready figures<a class="anchor" aria-label="anchor" href="#agreement-maps-and-publication-ready-figures"></a>
 </h2>
 <p>Three composable plot surfaces share one base-overlay convention:
 <code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code> shows the per-pixel one-sample t
@@ -2942,7 +3181,7 @@ between-condition t-maps. All three accept a <code>base_image</code>
 argument with the same semantics, so any of them can be rendered as a
 flat panel or composited on the base face with one call.</p>
 <div class="section level3">
-<h3 id="agreement_map_test">11.1 <code>agreement_map_test()</code><a class="anchor" aria-label="anchor" href="#agreement_map_test"></a>
+<h3 id="agreement_map_test">12.1 <code>agreement_map_test()</code><a class="anchor" aria-label="anchor" href="#agreement_map_test"></a>
 </h3>
 <p>Within a single condition, tests at each pixel whether the
 producer-level signal differs from zero (one-sample t). The null is
@@ -2981,7 +3220,7 @@ field reshaped to the image grid; the <code>palette = "fire"</code>
 variant displays
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><msub><mi>t</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">|t_i|</annotation></semantics></math>
 on a single-hue ramp when only the strength of agreement is needed (see
-§11.2).</p>
+§12.2).</p>
 <p>The pixel-wise one-sample t against zero applied to
 reverse-correlation CIs is the same logic as the pixel test introduced
 by Chauvin, Mermillod, Guyader, and Marendaz (2005), and is used in this
@@ -3021,11 +3260,11 @@ even one such pixel under H0 is bounded by
 <span><span class="va">am</span><span class="op">$</span><span class="va">significant_mask</span>  <span class="co"># logical vector: which pixels survive FWER</span></span></code></pre></div>
 <p>The result has its own <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method that renders the
 observed t-map with FWE-significant pixels outlined in black. This is
-the one-call form of the standard pairing; see §11.2 for what it does
+the one-call form of the standard pairing; see §12.2 for what it does
 and the color conventions it inherits.</p>
 </div>
 <div class="section level3">
-<h3 id="plot_agreement_map-and-plotagreement_map_test_result">11.2 <code>plot_agreement_map()</code> and
+<h3 id="plot_agreement_map-and-plotagreement_map_test_result">12.2 <code>plot_agreement_map()</code> and
 <code>plot(agreement_map_test_result)</code><a class="anchor" aria-label="anchor" href="#plot_agreement_map-and-plotagreement_map_test_result"></a>
 </h3>
 <p>Renders the per-pixel one-sample t-map as a color image, with
@@ -3071,7 +3310,7 @@ re-threaded:</p>
 <span>     palette    <span class="op">=</span> <span class="st">"diverging"</span><span class="op">)</span>  <span class="co"># FWE-significant pixels outlined</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="plot_ci_overlay">11.3 <code>plot_ci_overlay()</code><a class="anchor" aria-label="anchor" href="#plot_ci_overlay"></a>
+<h3 id="plot_ci_overlay">12.3 <code>plot_ci_overlay()</code><a class="anchor" aria-label="anchor" href="#plot_ci_overlay"></a>
 </h3>
 <p>The headline figure for most papers. Renders the group-mean CI as a
 translucent layer over the base face, optionally restricted to the
@@ -3093,7 +3332,7 @@ producers <em>agree</em>”; use the CI overlay when the question is “what
 does the group mean look like in the face”.</p>
 </div>
 <div class="section level3">
-<h3 id="plot_dissimilarity_grid">11.4 <code>plot_dissimilarity_grid()</code><a class="anchor" aria-label="anchor" href="#plot_dissimilarity_grid"></a>
+<h3 id="plot_dissimilarity_grid">12.4 <code>plot_dissimilarity_grid()</code><a class="anchor" aria-label="anchor" href="#plot_dissimilarity_grid"></a>
 </h3>
 <p>Lays out multiple <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code> results
 side-by-side as labelled CI bars. Useful for paper figures showing
@@ -3110,7 +3349,7 @@ read four numbers from a table:</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="plot_ci_correlogram">11.5 <code>plot_ci_correlogram()</code><a class="anchor" aria-label="anchor" href="#plot_ci_correlogram"></a>
+<h3 id="plot_ci_correlogram">12.5 <code>plot_ci_correlogram()</code><a class="anchor" aria-label="anchor" href="#plot_ci_correlogram"></a>
 </h3>
 <p>A publication-ready Pearson-<em>r</em> matrix across multiple
 group-mean CIs. The function takes a single matrix where each column is
@@ -3163,7 +3402,7 @@ matrix:</p>
 direction-bearing plots: positive <code>r</code> = blue, negative = red;
 saturation encodes magnitude. The color scale is fixed at
 <code>c(-1, 1)</code> so panels are comparable across runs and across
-paper figures. The §13.6 worked example uses this function on the
+paper figures. The §14.6 worked example uses this function on the
 four-trait subset.</p>
 <p>Read the result carefully: Pearson <code>r</code> between two
 base-subtracted CIs has a positive chance baseline from shared
@@ -3174,7 +3413,7 @@ covary more than others) rather than absolute claims. For a
 baseline-free magnitude summary, pair with <a href="#id_83-rel_dissimilarity"><code>rel_dissimilarity()</code></a>.</p>
 </div>
 <div class="section level3">
-<h3 id="plot_ci_distance_matrix">11.6 <code>plot_ci_distance_matrix()</code><a class="anchor" aria-label="anchor" href="#plot_ci_distance_matrix"></a>
+<h3 id="plot_ci_distance_matrix">12.6 <code>plot_ci_distance_matrix()</code><a class="anchor" aria-label="anchor" href="#plot_ci_distance_matrix"></a>
 </h3>
 <p>A publication-ready Euclidean distance matrix across multiple
 group-mean CIs. Same input format as <code><a href="../reference/plot_ci_correlogram.html">plot_ci_correlogram()</a></code>:
@@ -3217,7 +3456,7 @@ normalised per <code>method</code>) and <code>$distance_raw</code>
 (always raw, useful for downstream <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">hclust()</a></code> or MDS).</p>
 </div>
 <div class="section level3">
-<h3 id="plot_ci_mds">11.7 <code>plot_ci_mds()</code><a class="anchor" aria-label="anchor" href="#plot_ci_mds"></a>
+<h3 id="plot_ci_mds">12.7 <code>plot_ci_mds()</code><a class="anchor" aria-label="anchor" href="#plot_ci_mds"></a>
 </h3>
 <p>Projects multiple CIs into a low-dimensional Euclidean scatter where
 distances between points reproduce the Euclidean distances between CIs
@@ -3283,12 +3522,12 @@ shows)</li>
 <span>  file     <span class="op">=</span> <span class="st">"fig_mds.pdf"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>See §9.3 for <code><a href="../reference/rel_dissimilarity.html">rel_dissimilarity()</a></code> (the two-condition
-Euclidean distance with bootstrap CI) and §11.6 for the all-vs-all
+Euclidean distance with bootstrap CI) and §12.6 for the all-vs-all
 distance matrix <code><a href="../reference/plot_ci_mds.html">plot_ci_mds()</a></code> projects internally.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="region-restricted-analyses">12. Region-restricted analyses<a class="anchor" aria-label="anchor" href="#region-restricted-analyses"></a>
+<h2 id="region-restricted-analyses">13. Region-restricted analyses<a class="anchor" aria-label="anchor" href="#region-restricted-analyses"></a>
 </h2>
 <p>Every <code>rel_*()</code> and <code><a href="../reference/infoval.html">infoval()</a></code> accepts a
 <code>mask</code> argument. When you supply one:</p>
@@ -3321,7 +3560,7 @@ regions, run the metric once per mask:</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="worked-example-on-real-dataset">13. Worked example on real dataset<a class="anchor" aria-label="anchor" href="#worked-example-on-real-dataset"></a>
+<h2 id="worked-example-on-real-dataset">14. Worked example on real dataset<a class="anchor" aria-label="anchor" href="#worked-example-on-real-dataset"></a>
 </h2>
 <p>This section runs the package end-to-end on a published 2IFC dataset.
 The original paper reports the per-trait classification images and judge
@@ -3345,7 +3584,7 @@ numbers and figures alongside each chunk were computed on the open OSF
 data for this study. Copy the chunks into a fresh R session and run them
 on your own data to reproduce the analysis pattern.</p>
 <div class="section level3">
-<h3 id="loading-the-data">13.1 Loading the data<a class="anchor" aria-label="anchor" href="#loading-the-data"></a>
+<h3 id="loading-the-data">14.1 Loading the data<a class="anchor" aria-label="anchor" href="#loading-the-data"></a>
 </h3>
 <p>The original CSV is semicolon-separated. We read it with
 <code><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv2()</a></code>, then rename <code>subject</code> to the column
@@ -3368,7 +3607,7 @@ as numeric), and lower-case the trait labels for consistency:</p>
 <span><span class="co">#&gt; ...</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="modernizing-the-legacy-rcicr-0-3-0-rdata">13.2 Modernizing the legacy <code>rcicr</code> 0.3.0 rdata<a class="anchor" aria-label="anchor" href="#modernizing-the-legacy-rcicr-0-3-0-rdata"></a>
+<h3 id="modernizing-the-legacy-rcicr-0-3-0-rdata">14.2 Modernizing the legacy <code>rcicr</code> 0.3.0 rdata<a class="anchor" aria-label="anchor" href="#modernizing-the-legacy-rcicr-0-3-0-rdata"></a>
 </h3>
 <p>The 2015 rdata stores its noise basis under <code>s$sinusoids</code>
 and <code>s$sinIdx</code>; current rcicr expects <code>p$patches</code>
@@ -3388,7 +3627,7 @@ stimulus generation:</p>
 will read.</p>
 </div>
 <div class="section level3">
-<h3 id="diagnostics">13.3 Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
+<h3 id="diagnostics">14.3 Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
 </h3>
 <p>The diagnostic battery runs in one call:</p>
 <div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
@@ -3457,7 +3696,7 @@ biased in one trait):</p>
 <p>For this dataset, all ten trait conditions return PASS.</p>
 </div>
 <div class="section level3">
-<h3 id="per-trait-infoval">13.4 Per-trait infoVal<a class="anchor" aria-label="anchor" href="#per-trait-infoval"></a>
+<h3 id="per-trait-infoval">14.4 Per-trait infoVal<a class="anchor" aria-label="anchor" href="#per-trait-infoval"></a>
 </h3>
 <p><code><a href="../reference/infoval.html">infoval()</a></code> reports a per-producer Frobenius-norm z-score
 against a trial-count-matched reference. Running it on each of the ten
@@ -3541,7 +3780,7 @@ signal, so individual z values are systematically smaller than the
 group-mean equivalent on the same data.</p>
 </div>
 <div class="section level3">
-<h3 id="building-the-per-trait-signal-matrices">13.5 Building the per-trait signal matrices<a class="anchor" aria-label="anchor" href="#building-the-per-trait-signal-matrices"></a>
+<h3 id="building-the-per-trait-signal-matrices">14.5 Building the per-trait signal matrices<a class="anchor" aria-label="anchor" href="#building-the-per-trait-signal-matrices"></a>
 </h3>
 <p>The package builds the signal matrix for one trait in a single call.
 The output is a list whose <code>$signal_matrix</code> is what every
@@ -3582,7 +3821,7 @@ want a detailed walkthrough of how the function builds the per-producer
 mask, the four-step recipe in §3.3 walks it through.</p>
 </div>
 <div class="section level3">
-<h3 id="within-condition-reliability-per-trait">13.6 Within-condition reliability per trait<a class="anchor" aria-label="anchor" href="#within-condition-reliability-per-trait"></a>
+<h3 id="within-condition-reliability-per-trait">14.6 Within-condition reliability per trait<a class="anchor" aria-label="anchor" href="#within-condition-reliability-per-trait"></a>
 </h3>
 <p><code><a href="../reference/run_reliability.html">run_reliability()</a></code> returns split-half (with
 Spearman-Brown projection) and ICC(3,*) on a single signal matrix. Run
@@ -3748,7 +3987,7 @@ issue. <code><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distanc
 magnitude view on the same four traits:</p>
 <div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># `sm` is the named list of ten per-trait signal matrices built</span></span>
-<span><span class="co"># in §13.5. `plot_ci_distance_matrix()` reduces each matrix to</span></span>
+<span><span class="co"># in §14.5. `plot_ci_distance_matrix()` reduces each matrix to</span></span>
 <span><span class="co"># its group mean internally; no manual averaging is needed.</span></span>
 <span><span class="fu"><a href="../reference/plot_ci_distance_matrix.html">plot_ci_distance_matrix</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Trust     <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"trust"</span><span class="op">]</span><span class="op">]</span>,</span>
@@ -3794,7 +4033,7 @@ with dominance as a separate axis when split). The 2D paper figure for
 that hypothesis uses <code>k = 2L</code>:</p>
 <div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># `sm` is the named list of ten per-trait signal matrices built</span></span>
-<span><span class="co"># in §13.5. Pick the ten traits in display order, then relabel</span></span>
+<span><span class="co"># in §14.5. Pick the ten traits in display order, then relabel</span></span>
 <span><span class="co"># them with the pretty (display) names. `plot_ci_mds()` reduces</span></span>
 <span><span class="co"># per-producer matrices to group means internally, so we pass</span></span>
 <span><span class="co"># the matrices as-is.</span></span>
@@ -3917,7 +4156,7 @@ band. The dotted reference line marks group-mean z = 1.96.
 </div>
 </div>
 <div class="section level3">
-<h3 id="multi-contrast-discriminability-full-face">13.7 Multi-contrast discriminability (full face)<a class="anchor" aria-label="anchor" href="#multi-contrast-discriminability-full-face"></a>
+<h3 id="multi-contrast-discriminability-full-face">14.7 Multi-contrast discriminability (full face)<a class="anchor" aria-label="anchor" href="#multi-contrast-discriminability-full-face"></a>
 </h3>
 <p>Three motivating questions you can put to this dataset, going beyond
 the original paper:</p>
@@ -3942,7 +4181,7 @@ face. We summarize the overall magnitude of each divergence with
 <code class="sourceCode R"><span><span class="co"># Three contrasts. Each is a named list with `$a` and `$b`: the</span></span>
 <span><span class="co"># two per-trait signal matrices to compare. Building it this way</span></span>
 <span><span class="co"># means the same `contrasts` object can drive both the full-face</span></span>
-<span><span class="co"># tests below and the region-by-region tests in §13.8.</span></span>
+<span><span class="co"># tests below and the region-by-region tests in §14.8.</span></span>
 <span><span class="va">contrasts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Trust vs Friendly"</span>     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"trust"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>                                 b <span class="op">=</span> <span class="va">sm</span><span class="op">[[</span><span class="st">"friendly"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
@@ -4011,7 +4250,7 @@ this dataset, with the lower bound of the 95% percentile CI well above
 zero.</p>
 </div>
 <div class="section level3">
-<h3 id="region-by-region-cluster-tests">13.8 Region-by-region cluster tests<a class="anchor" aria-label="anchor" href="#region-by-region-cluster-tests"></a>
+<h3 id="region-by-region-cluster-tests">14.8 Region-by-region cluster tests<a class="anchor" aria-label="anchor" href="#region-by-region-cluster-tests"></a>
 </h3>
 <p>A typical follow-up question is whether the divergences are uniform
 across the face or driven by specific anatomical regions. Run the
@@ -4159,7 +4398,7 @@ is broad rather than localised; when the opposite holds, you have
 evidence for a localised contrast driven by one anatomical area.</p>
 </div>
 <div class="section level3">
-<h3 id="per-region-informational-value">13.9 Per-region informational value<a class="anchor" aria-label="anchor" href="#per-region-informational-value"></a>
+<h3 id="per-region-informational-value">14.9 Per-region informational value<a class="anchor" aria-label="anchor" href="#per-region-informational-value"></a>
 </h3>
 <p>Per-producer informational value also varies by region. A trait whose
 group CI looks weak overall may carry stronger signal in one specific
@@ -4298,7 +4537,7 @@ condition:</p>
 </tr>
 </tbody>
 </table>
-<p>Compared with the full-face infoVal table in §13.4, this
+<p>Compared with the full-face infoVal table in §14.4, this
 region-restricted view often shifts the picture. A trait whose group CI
 looks weak overall may carry stronger signal in one specific region, and
 a trait that looks strong overall may localise to one region rather than
@@ -4314,7 +4553,7 @@ Trustworthy localises broadly across the eyes and mouth without a clear
 regional peak, and competent’s signal is the most evenly spread across
 regions, though at uniformly modest levels. The headline full-face
 median for each trait masks these regional contrasts.</p>
-<p>The two grids (the cluster grid from §13.8 and the infoVal grid here)
+<p>The two grids (the cluster grid from §14.8 and the infoVal grid here)
 answer two different questions about the same masked region. The cluster
 test asks where conditions A and B disagree; infoVal asks how
 informative a single condition’s mask is when restricted to this region.
@@ -4322,7 +4561,7 @@ Reporting both side-by-side gives a fuller picture of how producers’
 representations organize across the face.</p>
 </div>
 <div class="section level3">
-<h3 id="pairwise-cluster-maps-for-two-motivating-contrasts">13.10 Pairwise cluster maps for two motivating contrasts<a class="anchor" aria-label="anchor" href="#pairwise-cluster-maps-for-two-motivating-contrasts"></a>
+<h3 id="pairwise-cluster-maps-for-two-motivating-contrasts">14.10 Pairwise cluster maps for two motivating contrasts<a class="anchor" aria-label="anchor" href="#pairwise-cluster-maps-for-two-motivating-contrasts"></a>
 </h3>
 <p>The two contrasts highlighted in this section are chosen because they
 sit at opposite ends of a methodological prediction. <strong>Trust
@@ -4440,9 +4679,9 @@ Friendly map. These maps extend Oliveira et al. (2019) by adding a
 between-condition inferential filter the original paper did not run.</p>
 </div>
 <div class="section level3">
-<h3 id="producer-agreement-maps-within-condition">13.11 Producer agreement maps (within-condition)<a class="anchor" aria-label="anchor" href="#producer-agreement-maps-within-condition"></a>
+<h3 id="producer-agreement-maps-within-condition">14.11 Producer agreement maps (within-condition)<a class="anchor" aria-label="anchor" href="#producer-agreement-maps-within-condition"></a>
 </h3>
-<p>The pairwise maps in §13.10 ask <em>where two conditions differ</em>.
+<p>The pairwise maps in §14.10 ask <em>where two conditions differ</em>.
 A complementary question is <em>where, within one condition, do
 producers agree with each other?</em>. <code><a href="../reference/plot_agreement_map.html">plot_agreement_map()</a></code>
 with <code>palette = "fire"</code> answers that visually: at each pixel
@@ -4509,12 +4748,12 @@ palette = diverging.
 </div>
 <p>Among the four traits on this dataset, friendly and dominant show the
 broadest spread of red across the face; competent’s agreement map looks
-more diffuse, consistent with its weaker group-mean infoVal (§13.4) and
-its low per-region median z (§13.9).</p>
+more diffuse, consistent with its weaker group-mean infoVal (§14.4) and
+its low per-region median z (§14.9).</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="brief-rc-end-to-end">14. Brief-RC end-to-end<a class="anchor" aria-label="anchor" href="#brief-rc-end-to-end"></a>
+<h2 id="brief-rc-end-to-end">15. Brief-RC end-to-end<a class="anchor" aria-label="anchor" href="#brief-rc-end-to-end"></a>
 </h2>
 <p>The Brief-RC workflow follows the same diagnose, compute, and assess
 flow with two practical differences. First, the response data has
@@ -4522,7 +4761,7 @@ multiple alternatives per trial (12 or 20, recorded as one row per trial
 carrying the chosen pool id and sign). Second, the noise matrix is
 consumed directly, without an <code>rcicr</code> wrapper.</p>
 <div class="section level3">
-<h3 id="brief-rc-variants-currently-supported">14.1 Brief-RC variants currently supported<a class="anchor" aria-label="anchor" href="#brief-rc-variants-currently-supported"></a>
+<h3 id="brief-rc-variants-currently-supported">15.1 Brief-RC variants currently supported<a class="anchor" aria-label="anchor" href="#brief-rc-variants-currently-supported"></a>
 </h3>
 <p><code><a href="../reference/ci_from_responses_briefrc.html">ci_from_responses_briefrc()</a></code> accepts two
 <code>method</code> values, both matching the variants validated in
@@ -4551,12 +4790,12 @@ but it does not branch the computation.</p>
 et al. (2024) discussion as possible future variants worth
 investigating, but they have not been validated and are not exposed in
 <code>rcisignal</code>. If you genuinely need to compute masks for one
-of those configurations, the §13.5 hand-rolled five-step recipe applies
+of those configurations, the §14.5 hand-rolled five-step recipe applies
 unchanged (the formula is symmetric in the per-trial split), but the
 result should be reported as exploratory.</p>
 </div>
 <div class="section level3">
-<h3 id="end-to-end-brief-rc-example">14.2 End-to-end Brief-RC example<a class="anchor" aria-label="anchor" href="#end-to-end-brief-rc-example"></a>
+<h3 id="end-to-end-brief-rc-example">15.2 End-to-end Brief-RC example<a class="anchor" aria-label="anchor" href="#end-to-end-brief-rc-example"></a>
 </h3>
 <div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/olivethree/rcisignal" class="external-link">rcisignal</a></span><span class="op">)</span></span>
@@ -4608,7 +4847,7 @@ result should be reported as exploratory.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="caveats-and-reporting-notes">15. Caveats and reporting notes<a class="anchor" aria-label="anchor" href="#caveats-and-reporting-notes"></a>
+<h2 id="caveats-and-reporting-notes">16. Caveats and reporting notes<a class="anchor" aria-label="anchor" href="#caveats-and-reporting-notes"></a>
 </h2>
 <p>A summary of what to keep in mind when reporting results.</p>
 <p><strong>Reliability and validity address different
@@ -4633,8 +4872,12 @@ visualization.</p>
 information.</strong> Per-producer Frobenius norms aggregate over the
 whole image and dilute localised signal, so individual z values are
 systematically lower than group-mean z even when the group CI is highly
-informative (the §13.4 pattern). Report both, framed as different-grain
-statistics.</p>
+informative (the §14.4 pattern). Report <strong>both</strong>, with the
+per-producer distribution (median z, % above 1.96) as the primary
+group-level summary per Brinkman et al. (2019) and the group-mean z as a
+supplementary headline number. The full reasoning — including a
+side-by-side simulation of the two reference distributions — is in
+§11.</p>
 <p><strong>FWER scope.</strong> <code><a href="../reference/rel_cluster_test.html">rel_cluster_test()</a></code> controls
 FWER across pixels within a single comparison.
 <code><a href="../reference/run_discriminability_pairwise.html">run_discriminability_pairwise()</a></code> adds a second layer of FWER
@@ -4668,7 +4911,7 @@ on. The release notes (<code>news(package = "rcisignal")</code>) list
 every breaking change.</p>
 </div>
 <div class="section level2">
-<h2 id="appendix-troubleshooting-low-or-negative-infoval">16. Appendix: troubleshooting low or negative infoVal<a class="anchor" aria-label="anchor" href="#appendix-troubleshooting-low-or-negative-infoval"></a>
+<h2 id="appendix-troubleshooting-low-or-negative-infoval">17. Appendix: troubleshooting low or negative infoVal<a class="anchor" aria-label="anchor" href="#appendix-troubleshooting-low-or-negative-infoval"></a>
 </h2>
 <p>This appendix expands on the brief interpretation note in §10. If you
 compute <code><a href="../reference/infoval.html">infoval()</a></code> and find that <em>most</em> or
@@ -4725,7 +4968,7 @@ If producers share a common spatial template, signal survives the
 averaging and the group-mean z grows roughly as sqrt(N) above the
 per-producer floor. If producer templates are idiosyncratic, averaging
 cancels signal as well as noise and the group-mean z stays modest. The
-Oliveira et al. (2019) reanalysis in §13.4 shows both regimes in the
+Oliveira et al. (2019) reanalysis in §14.4 shows both regimes in the
 same dataset: friendly / unfriendly, where per-producer signal is
 broadly shared, land at group-mean z of roughly 15-18; incompetent /
 unintelligent, where alignment is weaker, sit near z = 2. The ratio
@@ -4742,13 +4985,13 @@ pattern (their p. 13). The group-mean infoVal this package offers
 (<code>group_mean_z()</code>, called inside
 <code><a href="../reference/infoval_report.html">infoval_report()</a></code>) is a package-level extension of that
 recipe and has not been independently validated for social- face RC (see
-§1.2). The §13.4 worked example reports both numbers alongside; treat
+§1.2). The §14.4 worked example reports both numbers alongside; treat
 the group-mean z as a supplementary headline, not a replacement for the
 Brinkman-style per- producer distribution.</p>
 </li>
 </ol>
 <div class="section level3">
-<h3 id="diagnostic-recipe">16.1 Diagnostic recipe<a class="anchor" aria-label="anchor" href="#diagnostic-recipe"></a>
+<h3 id="diagnostic-recipe">17.1 Diagnostic recipe<a class="anchor" aria-label="anchor" href="#diagnostic-recipe"></a>
 </h3>
 <p>If a per-producer infoVal table looks worryingly low, work through
 these steps before reporting it:</p>
@@ -4787,12 +5030,12 @@ these steps before reporting it:</p>
 <span><span class="va">iv_grp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/infoval.html">infoval</a></span><span class="op">(</span><span class="va">group</span>, <span class="va">noise_matrix</span>, <span class="va">tc_grp</span>,</span>
 <span>                  iter <span class="op">=</span> <span class="fl">1000L</span>, seed <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
 <span><span class="va">iv_grp</span><span class="op">$</span><span class="va">infoval</span>                 <span class="co"># value depends on signal alignment;</span></span>
-<span>                               <span class="co"># see paragraph 5 of §16</span></span>
+<span>                               <span class="co"># see paragraph 5 of §17</span></span>
 <span></span>
 <span><span class="co"># 4. Sanity-check the chance baseline. A random-mask producer</span></span>
 <span><span class="co"># should give z ~ 0 within MAD noise. Build a fake producer's</span></span>
 <span><span class="co"># mask out of 300 random stimuli and 300 random +/-1 responses,</span></span>
-<span><span class="co"># the same way Step 3 of §13.5 builds a real one.</span></span>
+<span><span class="co"># the same way Step 3 of §14.5 builds a real one.</span></span>
 <span><span class="va">rnd_stim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">noise_matrix</span><span class="op">)</span>, <span class="fl">300L</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">rnd_resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,           <span class="fl">300L</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">random_mask</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">noise_matrix</span><span class="op">[</span>, <span class="va">rnd_stim</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">rnd_resp</span><span class="op">)</span> <span class="op">/</span> <span class="fl">300</span></span>
@@ -4809,7 +5052,7 @@ these steps before reporting it:</p>
 <span><span class="va">iv_rand</span><span class="op">$</span><span class="va">infoval</span>                 <span class="co"># should be ~ 0 within MAD noise</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="whats-up-with-negative-z-scores">16.2 What’s up with negative z-scores?<a class="anchor" aria-label="anchor" href="#whats-up-with-negative-z-scores"></a>
+<h3 id="whats-up-with-negative-z-scores">17.2 What’s up with negative z-scores?<a class="anchor" aria-label="anchor" href="#whats-up-with-negative-z-scores"></a>
 </h3>
 <p>A negative z indicates that the observed mask carries less Frobenius
 energy than the chance reference. This is informative rather than a
@@ -4821,7 +5064,7 @@ distributions, and any other attention checks before drawing
 conclusions.</p>
 </div>
 <div class="section level3">
-<h3 id="what-to-report">16.3 What to report<a class="anchor" aria-label="anchor" href="#what-to-report"></a>
+<h3 id="what-to-report">17.3 What to report<a class="anchor" aria-label="anchor" href="#what-to-report"></a>
 </h3>
 <p>For a publishable summary we typically recommend two complementary
 statistics:</p>
@@ -4832,7 +5075,7 @@ Brinkman et al.’s (2019) reporting choice.</li>
 <li>The <strong>group-mean CI’s infoVal z</strong> as a supplementary
 headline number. Under signal alignment this can be substantially larger
 than the per-producer median, with a sqrt(N)-style upper envelope; under
-weak alignment it stays close to per-producer values (paragraph 5 of §16
+weak alignment it stays close to per-producer values (paragraph 5 of §17
 spells out why). This metric is a package-level extension and has not
 been independently validated for social-face RC (§1.2), so report it as
 exploratory rather than primary.</li>
@@ -4843,7 +5086,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="citation">17. Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+<h2 id="citation">18. Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"rcisignal"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -4873,7 +5116,7 @@ you how informative the <em>condition’s average CI</em> is.</p>
 <span><span class="co">#&gt;   }</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="references">18. References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 id="references">19. References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <p>Brinkman, L., Goffin, S., van de Schoot, R., van Haren, N. E. M.,
 Dotsch, R., &amp; Aarts, H. (2019). Quantifying the informational value

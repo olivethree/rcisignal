@@ -159,10 +159,19 @@ equals the pool size by construction.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An <code><a href="rcisignal_diag_result.html">rcisignal_diag_result()</a></code>. <code>data</code> carries the rich output:</p><ul><li><p><code>random_responder_z</code> – numeric scalar.</p></li>
+    <p>An <code><a href="rcisignal_diag_result.html">rcisignal_diag_result()</a></code>. <code>data</code> carries the rich output:</p><ul><li><p><code>random_responder_z</code> – numeric scalar; a simulated random producer's
+z against the per-producer reference. Should land near 0; <code>|z| &gt; 2</code>
+indicates the reference is mis-calibrated.</p></li>
 <li><p><code>infoval_unmasked</code> – <code>rcisignal_diag_infoval</code> object (see <code><a href="infoval.html">infoval()</a></code>).</p></li>
 <li><p><code>infoval_masked</code> – <code>rcisignal_diag_infoval</code>; <code>NULL</code> when no mask.</p></li>
-<li><p><code>group_mean_z_unmasked</code>, <code>group_mean_z_masked</code> – scalars.</p></li>
+<li><p><code>group_mean_z_unmasked</code>, <code>group_mean_z_masked</code> – numeric scalars;
+the modified-z of the group-mean (across producers) CI's Frobenius
+norm against a reference distribution of <code>N</code> matched random producers
+averaged together (one simulated producer per real producer, at
+matched trial counts). Supplementary to the per-producer z
+distribution – treat the per-producer summary as primary
+(Brinkman et al., 2019). See <strong>Details</strong> above and
+<code><a href="../articles/rcisignal.html">vignette("rcisignal")</a></code> §11.</p></li>
 <li><p><code>tally</code> – named integer vector with counts per z band.</p></li>
 <li><p><code>mask</code> – logical vector or <code>NULL</code>.</p></li>
 <li><p><code>interpretation</code> – character vector of human-readable bullets.</p></li>
@@ -199,6 +208,26 @@ CI's z directly, but the mathematical extension (a group-mean CI
 compared against an N-producer-matched reference) is a useful
 aggregate when individual-level z is noisy, and <code>infoval_report()</code>
 reports it.</p>
+<p>Note on the group-mean z (<code>group_mean_z_unmasked</code> /
+<code>group_mean_z_masked</code> in the return value). This is <em>not</em>
+Brinkman's per-producer infoVal applied to a group CI. It is a
+related-but-distinct statistic: the modified-z of the
+producer-averaged CI's Frobenius norm against a Monte-Carlo
+reference of <code>N</code> random producers (one per real producer, at
+matched trial counts) averaged together. The reference correctly
+accounts for the ~<code>1/sqrt(N)</code> shrinkage of random-producer norms
+under averaging, so the z is calibrated; but Brinkman et al.'s
+Type-I and power validation work was done at the per-producer
+level and does not transfer to the group statistic. Brinkman et
+al. recommend reporting the <em>distribution</em> of per-producer
+infoVals (median z, % above 1.96 — both available from the
+<code>tally</code> and <code>infoval_*</code> fields) as the primary group-level
+summary. Treat the group-mean z as a supplementary headline
+number, not a replacement. <code><a href="../articles/rcisignal.html">vignette("rcisignal")</a></code> §11 unpacks
+how <code>group_mean_z()</code> builds its reference distribution, how it
+differs from per-producer infoVal, and how to read it
+appropriately — with a side-by-side illustration of the two
+nulls.</p>
 <p>For <code>method = "2ifc"</code>, the function calls <code>rcicr</code> to reconstruct
 per-trial noise patterns from <code>stimuli_params</code> and <code>p</code> (the
 <code>.RData</code> does not store the patterns themselves; see vignette

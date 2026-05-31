@@ -1,5 +1,30 @@
 # Changelog
 
+## rcisignal (development version)
+
+### Documentation
+
+- **Group-mean infoVal documentation expanded.** New vignette §11
+  (“Group-level signal summaries”) fully describes the group-mean z
+  statistic (`group_mean_z()`, surfaced via
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)):
+  how its reference distribution is constructed (one simulated random
+  producer per real producer, averaged before the norm is taken), how it
+  differs from Brinkman et al. (2019)’s per-producer infoVal (different
+  statistic, different null, validated only at the per-producer level),
+  and how to read it appropriately (necessary but not sufficient for
+  interpretability; pair with the per-producer distribution and the
+  spatial agreement map). A side-by-side simulation illustration shows
+  why the matched-N reference distribution shrinks with `N` – exactly
+  the calibration that makes the group-mean z meaningful.
+  [`?infoval_report`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+  gains a parallel **Details** block and an expanded **Return**
+  description for the `group_mean_z_*` fields; the printed bullet now
+  points to
+  [`?infoval_report`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+  for what the z tests. Subsequent section numbers shift by one (old §11
+  -\> §12, §12 -\> §13, …, §18 -\> §19); all cross-references updated.
+
 ## rcisignal 0.3.0
 
 ### Breaking changes
