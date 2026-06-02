@@ -168,8 +168,12 @@ internal <code><a href="pixel_t_test.html">pixel_t_test()</a></code> errors on a
     <p>Common scaffold (both methods):</p><ol><li><p>Compute observed pixel-wise Welch t (see <code><a href="pixel_t_test.html">pixel_t_test()</a></code>).</p></li>
 <li><p>Build the null via <code>n_permutations</code> stratified label
 permutations, each preserving <code>(N_A, N_B)</code> exactly.</p></li>
-<li><p>Max-statistic over the null controls FWER in the strong
-sense.</p></li>
+<li><p>Max-statistic over the null controls FWER for the family of
+clusters (the probability of any false-positive cluster under
+H0 is bounded by <code>alpha</code>). Pixel-level localization within a
+significant cluster is only weakly controlled
+(Maris &amp; Oostenveld, 2007, §4.4.3); use <code><a href="agreement_map_test.html">agreement_map_test()</a></code>
+when pixel-level FWER control is needed.</p></li>
 </ol><p>Method-specific step:</p><ul><li><p><code>method = "threshold"</code> (default): threshold at
 <code>|t| &gt; cluster_threshold</code>, label connected components with
 4-connectivity, cluster mass = sum of t-values within the

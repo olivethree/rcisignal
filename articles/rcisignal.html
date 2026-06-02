@@ -58,7 +58,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>rcisignal: User's Guide</h1>
             
-            <h4 data-toc-skip class="date">Last updated: 31-05-2026</h4>
+            <h4 data-toc-skip class="date">Last updated: 02-06-2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/vignettes/rcisignal.Rmd" class="external-link"><code>vignettes/rcisignal.Rmd</code></a></small>
       <div class="d-none name"><code>rcisignal.Rmd</code></div>
@@ -128,14 +128,21 @@ targets. Reporting accordingly matters.</p>
 <ul>
 <li>
 <strong>Per-producer infoVal for 2IFC</strong> (Brinkman et al.,
-2019). The z-score derivation, reference distribution, and the
-<code>z &gt;= 1.96</code> threshold all originate from the Brinkman et
-al. paper, which validated the metric on social-face 2IFC data.</li>
+2019). The Frobenius-norm magnitude statistic, its modified-z
+formulation against a random-responder reference distribution, and the
+Type-I/power validation on social-face 2IFC data all originate from the
+Brinkman et al. paper. (The reporting threshold itself,
+<code>z &gt;= 1.96</code>, is the conventional one-sided 5%
+standard-normal cutoff that Brinkman et al. adopt.)</li>
 <li>
 <strong>Pixel-test methodology</strong> (Chauvin et al., 2005). The
-Welch-style per-pixel t-statistic, plus its smoothing and inferential
-framing, are well-established in the classification-image and
-neuroimaging literatures.</li>
+per-pixel inferential test on smooth classification images — and the
+cluster-level companion — are well-established in the
+classification-image and neuroimaging literatures. Chauvin et al. use a
+per-pixel Z-statistic on the noise-response correlation calibrated by
+Random Field Theory; <code>rcisignal</code> adapts the same logic to the
+per-producer signal matrix and calibrates instead by sign-flip
+permutation (see §12.1).</li>
 <li>
 <strong>Cluster-based permutation tests for FWER control</strong>
 (Maris &amp; Oostenveld, 2007). Validated on EEG and MEG data, with the
@@ -611,10 +618,10 @@ that may be easy to confuse. In <code>rcisignal</code>, each one has
 exactly one job:</p>
 <table class="table">
 <colgroup>
-<col width="20%">
-<col width="39%">
-<col width="20%">
-<col width="20%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
 </colgroup>
 <thead><tr class="header">
 <th>Data type</th>
@@ -889,9 +896,9 @@ face mask.</p>
 Required columns:</p>
 <table class="table">
 <colgroup>
-<col width="17%">
-<col width="17%">
-<col width="64%">
+<col width="33%">
+<col width="33%">
+<col width="33%">
 </colgroup>
 <thead><tr class="header">
 <th>Column</th>
@@ -1067,9 +1074,9 @@ opposite signs, the two cancel and it contributes zero. The
 </h4>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="50%">
+<col width="33%">
+<col width="33%">
+<col width="33%">
 </colgroup>
 <thead><tr class="header">
 <th>Aspect</th>
@@ -1307,19 +1314,19 @@ defensible interpretation.</p>
 </h4>
 <p>A mask is a logical vector that decides which pixels enter the
 analysis. Every pixel inside the mask contributes to the statistic;
-every pixel outside is ignored. Imposing a premade oval mask on the
-FMNES base face from the Karolinska Directed Emotional Faces stimuli
-(Lundqvist, Flykt, &amp; Ohman, 1998), resized to 256 x 256, the visible
+every pixel outside is ignored. Imposing a premade oval mask on a base
+face from the Karolinska Directed Emotional Faces database (KDEF;
+Lundqvist, Flykt, &amp; Öhman, 1998), resized to 256 x 256, the visible
 difference is what is shown below.</p>
 <div class="figure">
-<img src="figures/face_masks/fmnes_raw.png" class="r-plt" alt="Effect of a face-region mask on a base image. Left: raw FMNES base face (Karolinska Directed Emotional Faces; Lundqvist et al. 1998). Right: same face with a premade full-face oval mask applied; pixels outside the mask are dimmed to light gray to make the analyzed region explicit. The reliability and discriminability metrics in this package will only see the inside-mask pixels when a mask is supplied via the `mask` argument." width="48%"><img src="figures/face_masks/fmnes_masked.png" class="r-plt" alt="Effect of a face-region mask on a base image. Left: raw FMNES base face (Karolinska Directed Emotional Faces; Lundqvist et al. 1998). Right: same face with a premade full-face oval mask applied; pixels outside the mask are dimmed to light gray to make the analyzed region explicit. The reliability and discriminability metrics in this package will only see the inside-mask pixels when a mask is supplied via the `mask` argument." width="48%"><p class="caption">
-Effect of a face-region mask on a base image. Left: raw FMNES base face
-(Karolinska Directed Emotional Faces; Lundqvist et al. 1998). Right:
-same face with a premade full-face oval mask applied; pixels outside the
-mask are dimmed to light gray to make the analyzed region explicit. The
-reliability and discriminability metrics in this package will only see
-the inside-mask pixels when a mask is supplied via the <code>mask</code>
-argument.
+<img src="figures/face_masks/fmnes_raw.png" class="r-plt" alt="Effect of a face-region mask on a base image. Left: raw base face from the Karolinska Directed Emotional Faces database (KDEF; Lundqvist, Flykt, &amp; Öhman, 1998). Right: same face with a premade full-face oval mask applied; pixels outside the mask are dimmed to light gray to make the analyzed region explicit. The reliability and discriminability metrics in this package will only see the inside-mask pixels when a mask is supplied via the `mask` argument." width="48%"><img src="figures/face_masks/fmnes_masked.png" class="r-plt" alt="Effect of a face-region mask on a base image. Left: raw base face from the Karolinska Directed Emotional Faces database (KDEF; Lundqvist, Flykt, &amp; Öhman, 1998). Right: same face with a premade full-face oval mask applied; pixels outside the mask are dimmed to light gray to make the analyzed region explicit. The reliability and discriminability metrics in this package will only see the inside-mask pixels when a mask is supplied via the `mask` argument." width="48%"><p class="caption">
+Effect of a face-region mask on a base image. Left: raw base face from
+the Karolinska Directed Emotional Faces database (KDEF; Lundqvist,
+Flykt, &amp; Öhman, 1998). Right: same face with a premade full-face
+oval mask applied; pixels outside the mask are dimmed to light gray to
+make the analyzed region explicit. The reliability and discriminability
+metrics in this package will only see the inside-mask pixels when a mask
+is supplied via the <code>mask</code> argument.
 </p>
 </div>
 <p>When <code><a href="../reference/make_face_mask.html">make_face_mask()</a></code> is used to generate the mask
@@ -1710,8 +1717,8 @@ threshold; PASS otherwise. Works with both 2IFC
 skipped. Each skipped check requires a specific additional argument:</p>
 <table class="table">
 <colgroup>
-<col width="37%">
-<col width="62%">
+<col width="50%">
+<col width="50%">
 </colgroup>
 <thead><tr class="header">
 <th>Check</th>
@@ -2165,21 +2172,23 @@ the observed distribution.</p>
 <p><em>Background.</em> The intraclass correlation coefficient (ICC) is
 a family of statistics for asking how much of the variability in
 repeated measurements is attributable to differences between the objects
-of measurement (here, producers) versus residual noise (McGraw &amp;
-Wong, 1996; Koo &amp; Li, 2016). Every producer has one CI vector with
-one entry per pixel, and the ICC asks how consistently the producers
-agree on that pixel-by-pixel pattern. A high ICC means producers’ CIs
-are similar to each other relative to noise; a low ICC means they are
-not.</p>
-<p>The “(3,*)” label is McGraw &amp; Wong’s notation for a two-way
-mixed-effects model in which the column factor (pixels in our case) is
-fixed and the row factor (producers) is random. The fixed-pixels choice
-reflects the reality of an RC experiment: the image grid is not a random
-sample from a population of pixels; it is the same set of pixels across
-all producers. The “3,1 vs 3,k” distinction is whether you want the
-reliability of a single producer’s CI (<code>3,1</code>) or of the
-group-averaged CI across <code>k</code> producers
-(<code>3,k</code>).</p>
+of measurement (here, producers) versus residual noise. The modern
+family of ICC variants was introduced by Shrout and Fleiss (1979),
+clarified and re-notated by McGraw and Wong (1996), and surveyed for
+practical reporting by Koo and Li (2016). Every producer has one CI
+vector with one entry per pixel, and the ICC asks how consistently the
+producers agree on that pixel-by-pixel pattern. A high ICC means
+producers’ CIs are similar to each other relative to noise; a low ICC
+means they are not.</p>
+<p>The “(3,*)” label is the McGraw-Wong update of Shrout and Fleiss’s
+notation for a two-way mixed-effects model in which the column factor
+(pixels in our case) is fixed and the row factor (producers) is random.
+The fixed-pixels choice reflects the reality of an RC experiment: the
+image grid is not a random sample from a population of pixels; it is the
+same set of pixels across all producers. The “3,1 vs 3,k” distinction is
+whether you want the reliability of a single producer’s CI
+(<code>3,1</code>) or of the group-averaged CI across <code>k</code>
+producers (<code>3,k</code>).</p>
 <p><code><a href="../reference/rel_icc.html">rel_icc()</a></code> returns both, computed from a two-way mixed
 model with pixels fixed and producers random:</p>
 <ul>
@@ -2411,8 +2420,18 @@ resulting distribution of maximum cluster masses is the empirical null,
 calibrated to <em>your</em> data without distributional assumptions. A
 real cluster’s p-value is the fraction of null max-masses that exceed
 it. Because every candidate cluster is tested against the
-<em>maximum</em> under the null, this controls the family-wise error
-rate in the strong sense (Nichols &amp; Holmes, 2002).</p>
+<em>maximum</em> cluster mass under the null, the family-wise error rate
+is controlled <strong>for the family of clusters</strong> — the
+probability of finding one or more false-positive clusters under H0 is
+bounded by alpha. This is the form of FWER control proposed by Maris and
+Oostenveld (2007); the precise pixel-level extent of a significant
+cluster is only weakly controlled (Maris &amp; Oostenveld, 2007,
+§4.4.3), so cluster boundaries should be read as “the broad region
+survives the family-wise correction” rather than “every pixel inside the
+contour is individually FWE-significant”. For pixel-level strong FWER
+control the relevant test is the voxel-wise max-statistic permutation
+used in §12.1’s <code><a href="../reference/agreement_map_test.html">agreement_map_test()</a></code> (Nichols &amp; Holmes,
+2002).</p>
 <p>One caveat: the cluster-forming threshold does not have a fully
 principled default. Lower thresholds favor broad and diffuse effects;
 higher thresholds favor focal and intense ones (Smith &amp; Nichols,
@@ -2447,8 +2466,11 @@ masses are recorded. A cluster’s p-value is the fraction of null masses
 <code>$null_distribution</code> (the <code>$pos</code> and
 <code>$neg</code> per-permutation max masses), and integer label
 matrices <code>$pos_labels</code> / <code>$neg_labels</code> for
-plotting. Maximum-statistic permutation provides FWER control in the
-strong sense (Nichols &amp; Holmes 2002).</p>
+plotting. Maximum-cluster-mass permutation provides FWER control at the
+cluster-family level (the probability of any false-positive cluster
+under H0 is bounded by alpha); pixel-level localization within a
+significant cluster is only weakly controlled (Maris &amp; Oostenveld,
+2007).</p>
 <p><strong><code>method = "tfce"</code></strong> (Smith &amp; Nichols
 2009): threshold-free cluster enhancement. Instead of picking one
 cluster-forming threshold, TFCE walks across many possible thresholds
@@ -2680,16 +2702,22 @@ max-statistic FWER control from the underlying
 <p><em>Background.</em> Per-producer infoVal (Brinkman et al., 2019)
 asks a single question: is this producer’s CI larger in magnitude than
 what a random responder would produce on the same task? The metric is a
-z-score. The numerator is the <strong>Frobenius norm</strong> of the CI
-mask (the square root of the summed squared pixel values, a scalar that
-summarizes overall mask “size”). The reference distribution comes from
-simulating many random <code>(stimulus, ±1)</code> response sequences
-through the same CI formula, computing the Frobenius norm of each
-simulated mask, and recording the mean and standard deviation of those
-norms. A producer’s infoVal of, say, 2.5 means their CI is 2.5 standard
-deviations larger than the random-responder mean; the conventional
-threshold for “more than chance” is <code>z &gt;= 1.96</code>, the
-standard one-sided 0.05 cutoff.</p>
+<strong>modified z-score</strong>. The numerator is the
+<strong>Frobenius norm</strong> of the CI mask (the square root of the
+summed squared pixel values, a scalar that summarizes overall mask
+“size”). The reference distribution comes from simulating many random
+<code>(stimulus, ±1)</code> response sequences through the same CI
+formula, computing the Frobenius norm of each simulated mask, and
+recording the <strong>median</strong> of those norms (the center) and
+the <strong>median absolute deviation (MAD) scaled by 1.4826</strong>
+(the spread). Brinkman et al. use the modified z deliberately because
+the reference distribution of Frobenius norms is left-skewed; median and
+scaled MAD are robust substitutes for the mean and SD that would
+otherwise be distorted by the skew. A producer’s infoVal of, say, 2.5
+means their CI is 2.5 scaled-MAD units above the random-responder
+median. The conventional threshold for “more than chance” is
+<code>z &gt;= 1.96</code>, the standard one-sided 0.05 cutoff that
+Brinkman et al. adopt.</p>
 <p>What infoVal does <em>not</em> tell you is whether the CI points at
 the <em>right</em> pattern. The Frobenius norm is a magnitude statistic
 only. A producer who clicked consistently but in a way that encodes an
@@ -2965,14 +2993,13 @@ resolution:</p>
 <ul>
 <li>
 <strong>The distribution of per-producer infoVals.</strong> Brinkman
-et al.
-<ol start="2019" style="list-style-type: decimal">
-<li>recommend this as the primary group-level report: the median z and
-the percentage of producers above z = 1.96, both already returned by
-<code><a href="../reference/infoval.html">infoval()</a></code> (§10) and surfaced inside
-<code><a href="../reference/infoval_report.html">infoval_report()</a></code> (§5.4).</li>
-</ol>
-</li>
+et al. (2019, p. 13) propose using the per-producer infoVal
+<em>distribution</em> as a group-level summary (specifically, the
+proportion of participants whose individual CIs exceed the chance
+reference). <code>rcisignal</code> operationalizes this as the
+<strong>median z</strong> and the <strong>percentage of producers above
+z = 1.96</strong>, both already returned by <code><a href="../reference/infoval.html">infoval()</a></code> (§10)
+and surfaced inside <code><a href="../reference/infoval_report.html">infoval_report()</a></code> (§5.4).</li>
 <li>
 <strong>Group-mean z</strong> (<code>group_mean_z()</code>). A
 single scalar summarizing whether the magnitude of the group-mean CI
@@ -3018,9 +3045,32 @@ modified-z used by per-producer <code><a href="../reference/infoval.html">infova
 <p>The reference is built once per call. Because the simulated producers
 are averaged <em>before</em> the norm is taken (not normed and then
 averaged), the reference distribution correctly accounts for the
-~<code>1/sqrt(N)</code> shrinkage that random-producer norms undergo
-under averaging. That calibration choice is what makes the resulting z
-meaningful — see §11.4 for the visual receipt.</p>
+shrinkage that random-producer norms undergo under averaging.</p>
+<p>What <em>shrinkage</em> means here, in plain terms: if you ask a
+single random responder to do the reverse-correlation task, their CI is
+mostly noise and its Frobenius norm (the length of the CI considered as
+one long vector of pixel values) ends up some moderate size, call it
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mn>1</mn></msub><annotation encoding="application/x-tex">L_1</annotation></semantics></math>.
+Now ask <code>N</code> random responders independently and average their
+CIs together pixel-by-pixel. Because their noise is independent
+(positive bumps in one producer’s noise cancel against negative bumps in
+another’s), the average CI sits much closer to zero everywhere, and its
+norm
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mi>N</mi></msub><annotation encoding="application/x-tex">L_N</annotation></semantics></math>
+is much smaller than
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mn>1</mn></msub><annotation encoding="application/x-tex">L_1</annotation></semantics></math>.
+Standard statistical theory says
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>N</mi></msub><mo>≈</mo><msub><mi>L</mi><mn>1</mn></msub><mi>/</mi><msqrt><mi>N</mi></msqrt></mrow><annotation encoding="application/x-tex">L_N \approx L_1 / \sqrt{N}</annotation></semantics></math>:
+averaging 20 random responders shrinks the typical random-noise norm by
+about
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mn>20</mn></msqrt><mo>≈</mo><mn>4.5</mn></mrow><annotation encoding="application/x-tex">\sqrt{20} \approx 4.5</annotation></semantics></math>x.
+So if you were to compare a group-averaged real CI against the
+single-responder noise floor, you would be using the wrong yardstick:
+the noise floor <em>itself</em> shifts down when you average.
+<code>group_mean_z()</code> builds its reference distribution by
+averaging <code>N</code> random producers in exactly the same way the
+real group CI is built, so the yardstick matches. See §11.4 for the
+visual receipt.</p>
 </div>
 <div class="section level3">
 <h3 id="how-it-differs-from-brinkmans-per-producer-infoval">11.2 How it differs from Brinkman’s per-producer infoVal<a class="anchor" aria-label="anchor" href="#how-it-differs-from-brinkmans-per-producer-infoval"></a>
@@ -3112,6 +3162,27 @@ agreement map from §12.1. Reporting only the group-mean z hides whether
 the signal comes from a coherent panel or from a handful of outliers
 averaged with noise.</li>
 <li>
+<strong>It tracks interrater agreement in practice.</strong>
+Although group-mean z is not itself a reliability coefficient,
+empirically it correlates very strongly with one. Across the 10 traits
+in Oliveira et al. (2019), the pixel-wise <code>ICC(3,k)</code> of
+producers’ raw CIs at the group level and the group-mean z are
+correlated at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>0.97</mn></mrow><annotation encoding="application/x-tex">r = 0.97</annotation></semantics></math>,
+95% CI
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0.88</mn><mo>,</mo><mn>0.99</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.88, 0.99]</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>.001</mn></mrow><annotation encoding="application/x-tex">p &lt; .001</annotation></semantics></math>
+(see the ICC-vs-group-mean-z subsection inside §14.6 of this vignette
+for the scatter and the linear fit). High group-mean z in those data
+went hand in hand with producers agreeing more about the spatial pattern
+of their CIs. The reading is correlational, not definitional: the metric
+becomes large when (a) producers’ CIs point in similar directions in
+pixel space and (b) the shared pattern survives averaging. Both of those
+are also what <code>ICC(3,k)</code> is sensitive to. Use this connection
+as a sanity check when interpreting a headline group-mean z, not as a
+substitute for the agreement-on-pixels evidence that an actual ICC or
+agreement map provides.</li>
+<li>
 <strong>Suggested framing when writing a report.</strong> <em>“The
 group-mean CI exceeded the matched-N random-responder null (group-mean z
 = X.XX). Per-producer infoVal had median z = Y.YY with Z out of N
@@ -3128,44 +3199,45 @@ random producers <em>before</em> taking the norm shrinks the noise floor
 relative to a single random producer, which is perhaps better
 illustrated visually. The figure below simulates both reference
 distributions on a synthetic noise matrix at 60 trials per producer,
-with the per-producer null on the left and the <code>N = 20</code>
-group-mean null on the right.</p>
+with the per-producer null in the top panel (A) and the
+<code>N = 20</code> group-mean null in the bottom panel (B). Both panels
+share the same x-axis so the shrinkage is easy to read off the page.</p>
 <div class="figure">
-<img src="rcisignal_files/figure-html/group-mean-illustration-1.png" class="r-plt" alt="Reference distributions for the per-producer and group-mean nulls, built on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at 60 trials per producer. Left: 300 simulated CIs from a single random responder, the reference used by per-producer `infoval()`. Right: 300 simulated *group-mean* CIs each built by averaging 20 random responders, the reference used by `group_mean_z()` at N = 20. Both panels share the x-axis. The right distribution sits near zero because averaging cancels independent noise; this ~1/sqrt(N) shrinkage is the calibration `group_mean_z()` uses when scoring the observed group-mean CI." width="100%"><p class="caption">
+<img src="rcisignal_files/figure-html/group-mean-illustration-1.png" class="r-plt" alt="Reference distributions for the per-producer and group-mean nulls, built on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at 60 trials per producer. Panel A (top): 300 simulated CIs from a single random responder, the reference used by per-producer infoval(). Panel B (bottom): 300 simulated group-mean CIs each built by averaging 20 random responders, the reference used by group_mean_z() at N = 20. Both panels share the x-axis. The bottom distribution sits much closer to zero because averaging cancels independent noise; this 1/sqrt(N) shrinkage is the calibration group_mean_z() uses when scoring the observed group-mean CI." width="85%"><p class="caption">
 Reference distributions for the per-producer and group-mean nulls, built
 on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at
-60 trials per producer. Left: 300 simulated CIs from a single random
-responder, the reference used by per-producer <code><a href="../reference/infoval.html">infoval()</a></code>.
-Right: 300 simulated <em>group-mean</em> CIs each built by averaging 20
-random responders, the reference used by <code>group_mean_z()</code> at
-N = 20. Both panels share the x-axis. The right distribution sits near
-zero because averaging cancels independent noise; this ~1/sqrt(N)
-shrinkage is the calibration <code>group_mean_z()</code> uses when
-scoring the observed group-mean CI.
+60 trials per producer. Panel A (top): 300 simulated CIs from a single
+random responder, the reference used by per-producer infoval(). Panel B
+(bottom): 300 simulated group-mean CIs each built by averaging 20 random
+responders, the reference used by group_mean_z() at N = 20. Both panels
+share the x-axis. The bottom distribution sits much closer to zero
+because averaging cancels independent noise; this 1/sqrt(N) shrinkage is
+the calibration group_mean_z() uses when scoring the observed group-mean
+CI.
 </p>
 </div>
 <div class="figure">
-<img src="rcisignal_files/figure-html/group-mean-illustration-2.png" class="r-plt" alt="Reference distributions for the per-producer and group-mean nulls, built on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at 60 trials per producer. Left: 300 simulated CIs from a single random responder, the reference used by per-producer `infoval()`. Right: 300 simulated *group-mean* CIs each built by averaging 20 random responders, the reference used by `group_mean_z()` at N = 20. Both panels share the x-axis. The right distribution sits near zero because averaging cancels independent noise; this ~1/sqrt(N) shrinkage is the calibration `group_mean_z()` uses when scoring the observed group-mean CI." width="100%"><p class="caption">
+<img src="rcisignal_files/figure-html/group-mean-illustration-2.png" class="r-plt" alt="Reference distributions for the per-producer and group-mean nulls, built on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at 60 trials per producer. Panel A (top): 300 simulated CIs from a single random responder, the reference used by per-producer infoval(). Panel B (bottom): 300 simulated group-mean CIs each built by averaging 20 random responders, the reference used by group_mean_z() at N = 20. Both panels share the x-axis. The bottom distribution sits much closer to zero because averaging cancels independent noise; this 1/sqrt(N) shrinkage is the calibration group_mean_z() uses when scoring the observed group-mean CI." width="85%"><p class="caption">
 Reference distributions for the per-producer and group-mean nulls, built
 on the same synthetic noise matrix (1024 pixels, 360-stimulus pool) at
-60 trials per producer. Left: 300 simulated CIs from a single random
-responder, the reference used by per-producer <code><a href="../reference/infoval.html">infoval()</a></code>.
-Right: 300 simulated <em>group-mean</em> CIs each built by averaging 20
-random responders, the reference used by <code>group_mean_z()</code> at
-N = 20. Both panels share the x-axis. The right distribution sits near
-zero because averaging cancels independent noise; this ~1/sqrt(N)
-shrinkage is the calibration <code>group_mean_z()</code> uses when
-scoring the observed group-mean CI.
+60 trials per producer. Panel A (top): 300 simulated CIs from a single
+random responder, the reference used by per-producer infoval(). Panel B
+(bottom): 300 simulated group-mean CIs each built by averaging 20 random
+responders, the reference used by group_mean_z() at N = 20. Both panels
+share the x-axis. The bottom distribution sits much closer to zero
+because averaging cancels independent noise; this 1/sqrt(N) shrinkage is
+the calibration group_mean_z() uses when scoring the observed group-mean
+CI.
 </p>
 </div>
 <p>The same logic applies under real noise matrices. The exact shrinkage
 factor depends on the noise structure (the synthetic noise above is iid
 standard normal; real sinusoidal-noise CIs also shrink, just with a
-different constant), but the qualitative picture (tight right-hand
-distribution, wide left-hand distribution) survives. The observed
+different constant), but the qualitative picture (wide distribution in
+panel A, tight distribution near zero in panel B) survives. The observed
 group-mean CI’s Frobenius norm is what gets compared against the red
-line on the right. <code>group_mean_z()</code> returns how many MADs
-above that median the observation sits.</p>
+median line in <strong>panel B</strong>. <code>group_mean_z()</code>
+returns how many MADs above that median the observation sits.</p>
 </div>
 <div class="section level3">
 <h3 id="why-group_mean_z-is-not-part-of-the-library">11.5 Why <code>group_mean_z()</code> is not part of the
@@ -3227,6 +3299,57 @@ in-mask pixels. The per-pixel one-sample t-statistic is</p>
 \bar{S}_i \,=\, \frac{1}{N} \sum_{j=1}^{N} S_{ij},
 \qquad
 s_i^2 \,=\, \frac{1}{N-1} \sum_{j=1}^{N}\left(S_{ij} - \bar{S}_i\right)^2.</annotation></semantics></math></p>
+<p>What the formula says, pixel by pixel: line up the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+producers at the same pixel
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+treat their signal values
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo>,</mo><msub><mi>S</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>S</mi><mrow><mi>N</mi><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">S_{1i}, S_{2i}, \dots, S_{Ni}</annotation></semantics></math>
+as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+numbers, and ask the standard one-sample question “is their mean
+different from zero?” In words:</p>
+<ul>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>S</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\bar S_i</annotation></semantics></math>
+is the <strong>average</strong> of the producers’ values at pixel
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>.
+If everyone has slightly positive values there,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>S</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\bar S_i</annotation></semantics></math>
+is a small positive number. If half are positive and half are negative,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>S</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\bar S_i</annotation></semantics></math>
+is near zero.</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>s</mi><mi>i</mi></msub><annotation encoding="application/x-tex">s_i</annotation></semantics></math>
+is the <strong>standard deviation</strong> of those values, i.e. how
+much producers disagree with each other at that pixel.</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub><mi>/</mi><msqrt><mi>N</mi></msqrt></mrow><annotation encoding="application/x-tex">s_i / \sqrt{N}</annotation></semantics></math>
+is the <strong>standard error of the mean</strong>: the same amount of
+disagreement gets damped down once you average over many people, because
+random noise cancels out as you add more producers.</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>i</mi></msub><annotation encoding="application/x-tex">t_i</annotation></semantics></math>
+divides the average by that standard error. A large
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>i</mi></msub><annotation encoding="application/x-tex">t_i</annotation></semantics></math>
+means “the producers’ average is far from zero, <em>and</em> they agree
+with each other about it.” A small
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>i</mi></msub><annotation encoding="application/x-tex">t_i</annotation></semantics></math>
+means either everyone averaged to roughly zero, or they disagreed wildly
+so the denominator is large.</li>
+</ul>
+<p>A worked example. Imagine
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">N = 20</annotation></semantics></math>
+producers and you look at one pixel sitting on the left eyebrow. Say
+their 20 signal values average to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>S</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>=</mo><mn>0.30</mn></mrow><annotation encoding="application/x-tex">\bar S_i = 0.30</annotation></semantics></math>
+with a standard deviation of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub><mo>=</mo><mn>0.40</mn></mrow><annotation encoding="application/x-tex">s_i = 0.40</annotation></semantics></math>.
+Then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>i</mi></msub><mo>=</mo><mn>0.30</mn><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>0.40</mn><mi>/</mi><msqrt><mn>20</mn></msqrt><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.30</mn><mi>/</mi><mn>0.089</mn><mo>≈</mo><mn>3.36</mn></mrow><annotation encoding="application/x-tex">t_i = 0.30 / (0.40 / \sqrt{20}) = 0.30 / 0.089 \approx 3.36</annotation></semantics></math>.
+Across the image you would compute one such
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>i</mi></msub><annotation encoding="application/x-tex">t_i</annotation></semantics></math>
+for every pixel, producing a map of agreement scores.</p>
 <p>The sign of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>i</mi></msub><annotation encoding="application/x-tex">t_i</annotation></semantics></math>
 tells you which way the producers agree at pixel
@@ -3243,36 +3366,59 @@ variant displays
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><msub><mi>t</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">|t_i|</annotation></semantics></math>
 on a single-hue ramp when only the strength of agreement is needed (see
 §12.2).</p>
-<p>The pixel-wise one-sample t against zero applied to
-reverse-correlation CIs is the same logic as the pixel test introduced
-by Chauvin, Mermillod, Guyader, and Marendaz (2005), and is used in this
-form by Brinkman, Goffin, van Engeland, and Zwarts (2019) on social-face
-CIs. The family-wise error rate is controlled by recomputing
+<p>This per-pixel one-sample t against zero is the same logic as the
+<strong>pixel test</strong> for smooth classification images introduced
+by Chauvin, Worsley, Schyns, Arguin, and Gosselin (2005), where a
+per-pixel z-statistic is computed against the null of no association
+between noise patterns and responses. The implementation here computes
+the analogous one-sample t on the per-producer CIs and controls
+family-wise error using <strong>sign-flip permutation</strong> in the
+manner of Maris and Oostenveld (2007) and Nichols and Holmes (2002).</p>
+<p>The intuition for sign-flip permutation: under the null hypothesis
+“this producer’s CI is just noise, with no consistent direction”, the
+producer’s signal would be just as likely to come out flipped to its
+mirror image. So you can simulate the null by literally flipping the
+sign of each producer’s CI independently at random (multiplying their
+whole CI by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">-1</annotation></semantics></math>
+or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math>),
+recomputing
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>i</mi></msub><annotation encoding="application/x-tex">t_i</annotation></semantics></math>
-under random per-producer sign-flip (under H0 the signal is symmetric
-around zero, so
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>S</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msub><mi>S</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Pr(S_{ij}) = \Pr(-S_{ij})</annotation></semantics></math>,
-making sign-flip an exact permutation null), recording
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>T</mi><mi>b</mi><mo>*</mo></msubsup><mo>=</mo><msub><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo></mrow><msup><mi>i</mi><mo>′</mo></msup></msub><mo stretchy="false" form="prefix">|</mo><msubsup><mi>t</mi><msup><mi>i</mi><mo>′</mo></msup><mo>*</mo></msubsup><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">T^*_b = \max_{i'} |t^*_{i'}|</annotation></semantics></math>
-on permutation
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>,
-and reporting</p>
+at every pixel from the flipped sample, and recording the largest
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><msubsup><mi>t</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">|t^*_i|</annotation></semantics></math>
+in that resampled map:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>T</mi><mi>b</mi><mo>*</mo></msubsup><mspace width="0.167em"></mspace><mo>=</mo><mspace width="0.167em"></mspace><munder><mi mathvariant="normal">max</mi><msup><mi>i</mi><mo>′</mo></msup></munder><mo stretchy="false" form="prefix">|</mo><msubsup><mi>t</mi><msup><mi>i</mi><mo>′</mo></msup><mo>*</mo></msubsup><mo stretchy="false" form="prefix">|</mo><mspace width="1.0em"></mspace><mrow><mtext mathvariant="normal">on permutation </mtext><mspace width="0.333em"></mspace></mrow><mi>b</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">T^*_b \,=\, \max_{i'} |t^*_{i'}| \quad \text{on permutation } b.</annotation></semantics></math></p>
+<p>Repeat for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
+permutations
+(e.g. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo>=</mo><mn>5000</mn></mrow><annotation encoding="application/x-tex">B = 5000</annotation></semantics></math>).
+You now have a null distribution of “biggest agreement that random
+sign-flipping could produce across the <em>whole</em> image”. Each
+observed pixel’s p-value is</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>i</mi></msub><mspace width="0.167em"></mspace><mo>=</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mspace width="-0.167em"></mspace><mrow><mo stretchy="true" form="prefix">(</mo><mspace width="0.167em"></mspace><msup><mi>T</mi><mo>*</mo></msup><mspace width="0.167em"></mspace><mo>≥</mo><mspace width="0.167em"></mspace><mo stretchy="false" form="prefix">|</mo><msub><mi>t</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo><mspace width="0.167em"></mspace><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">p_i \,=\, \Pr\!\left(\,T^* \,\geq\, |t_i|\,\right),</annotation></semantics></math></p>
-<p>the proportion of permutations whose maximum
+<p>i.e. the fraction of permutations whose image-wide maximum
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">|t|</annotation></semantics></math>
-across the image equals or exceeds the observed
+equalled or exceeded the actual
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><msub><mi>t</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">|t_i|</annotation></semantics></math>
 at pixel
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>.
-This max-statistic construction is the standard FWER control for
-spatially correlated maps (Nichols &amp; Holmes, 2002; Maris &amp;
-Oostenveld, 2007). Pixels with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>.</p>
+<p>Why the <em>maximum</em> across pixels, not pixel-by-pixel? With
+thousands of pixels tested simultaneously, some pixels would clear an
+uncorrected threshold
+(e.g. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mo>&gt;</mo><mn>1.96</mn></mrow><annotation encoding="application/x-tex">|t| &gt; 1.96</annotation></semantics></math>)
+by chance even with no real signal. Calibrating each pixel against the
+<em>maximum</em> statistic over all pixels in random data is the
+standard family-wise error rate (FWER) fix for spatially correlated maps
+(Nichols &amp; Holmes, 2002; Maris &amp; Oostenveld, 2007): it
+guarantees that the probability of even one false-positive pixel under
+H0 is bounded by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>.
+Pixels with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>i</mi></msub><mo>&lt;</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">p_i &lt; \alpha</annotation></semantics></math>
 (default
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.05</mn></mrow><annotation encoding="application/x-tex">\alpha = 0.05</annotation></semantics></math>)
-survive the correction; the FWER guarantee is that the probability of
-even one such pixel under H0 is bounded by
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>.</p>
+survive the correction.</p>
 <div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">am</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/agreement_map_test.html">agreement_map_test</a></span><span class="op">(</span><span class="va">signal_matrix</span>,</span>
 <span>                         n_permutations <span class="op">=</span> <span class="fl">5000L</span>,</span>
@@ -4999,17 +5145,22 @@ inflation factor; it is a joint readout of <code>N</code>,
 <code>T</code>, and producer alignment.</p>
 <p>Brinkman et al. (2019) only ever computed infoVal on individual CIs.
 They reported a mean per-producer infoVal of 3.9 (lab) and 2.9 (online),
-with 68% / 54% of producers individually exceeding 1.96 (their pp. 12,
-14). For group- level reporting they explicitly recommended inspecting
-the <em>distribution</em> of per-producer infoVals contributing to the
-group CI rather than computing a single infoVal on the averaged noise
-pattern (their p. 13). The group-mean infoVal this package offers
-(<code>group_mean_z()</code>, called inside
-<code><a href="../reference/infoval_report.html">infoval_report()</a></code>) is a package-level extension of that
-recipe and has not been independently validated for social- face RC (see
-§1.2). The §14.4 worked example reports both numbers alongside; treat
-the group-mean z as a supplementary headline, not a replacement for the
-Brinkman-style per- producer distribution.</p>
+with 68% / 54% of producers individually exceeding 1.96 (Brinkman et
+al., 2019, Part III, <em>Comparing data from lab and online samples
+using infoVal</em>). For group-level use they propose applying the
+infoVal metric to <em>individual</em> CIs and inspecting the resulting
+distribution — specifically the proportion of participants whose
+individual CIs cleared the chance reference — “to assess the proportion
+of participants that contributed to the group CI” (Brinkman et al.,
+2019, p. 13). They do not explicitly rule out computing infoVal on the
+averaged noise pattern, but they do not endorse it either; the
+group-mean infoVal this package offers (<code>group_mean_z()</code>,
+called inside <code><a href="../reference/infoval_report.html">infoval_report()</a></code>) is a package-level
+extension of the Brinkman recipe and has not been independently
+validated for social-face RC (see §1.2). The §14.4 worked example
+reports both numbers alongside; treat the group-mean z as a
+supplementary headline, not a replacement for the Brinkman-style
+per-producer distribution.</p>
 </li>
 </ol>
 <div class="section level3">
@@ -5166,6 +5317,11 @@ Classification Toolbox. <a href="https://github.com/rdotsch/rcicr" class="extern
 <p>Koo, T. K., &amp; Li, M. Y. (2016). A guideline of selecting and
 reporting intraclass correlation coefficients for reliability research.
 <em>Journal of Chiropractic Medicine</em>, 15(2), 155-163. <a href="https://doi.org/10.1016/j.jcm.2016.02.012" class="external-link uri">https://doi.org/10.1016/j.jcm.2016.02.012</a></p>
+<p>Kruskal, J. B. (1964). Multidimensional scaling by optimizing
+goodness of fit to a nonmetric hypothesis. <em>Psychometrika</em>,
+29(1), 1-27. <a href="https://doi.org/10.1007/BF02289565" class="external-link uri">https://doi.org/10.1007/BF02289565</a></p>
+<p>Lundqvist, D., Flykt, A., &amp; Öhman, A. (1998). Karolinska Directed
+Emotional Faces (KDEF) [Database record]. APA PsycTests. <a href="https://doi.org/10.1037/t27732-000" class="external-link uri">https://doi.org/10.1037/t27732-000</a></p>
 <p>Maris, E., &amp; Oostenveld, R. (2007). Nonparametric statistical
 testing of EEG- and MEG-data. <em>Journal of Neuroscience Methods</em>,
 164(1), 177-190. <a href="https://doi.org/10.1016/j.jneumeth.2007.03.024" class="external-link uri">https://doi.org/10.1016/j.jneumeth.2007.03.024</a></p>
