@@ -85,8 +85,12 @@ Common scaffold (both methods):
 \item Compute observed pixel-wise Welch t (see \code{\link[=pixel_t_test]{pixel_t_test()}}).
 \item Build the null via \code{n_permutations} stratified label
 permutations, each preserving \verb{(N_A, N_B)} exactly.
-\item Max-statistic over the null controls FWER in the strong
-sense.
+\item Max-statistic over the null controls FWER for the family of
+clusters (the probability of any false-positive cluster under
+H0 is bounded by \code{alpha}). Pixel-level localization within a
+significant cluster is only weakly controlled
+(Maris & Oostenveld, 2007, §4.4.3); use \code{\link[=agreement_map_test]{agreement_map_test()}}
+when pixel-level FWER control is needed.
 }
 
 Method-specific step:

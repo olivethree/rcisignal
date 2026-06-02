@@ -19,8 +19,12 @@
 #' 1. Compute observed pixel-wise Welch t (see [pixel_t_test()]).
 #' 2. Build the null via `n_permutations` stratified label
 #'    permutations, each preserving `(N_A, N_B)` exactly.
-#' 3. Max-statistic over the null controls FWER in the strong
-#'    sense.
+#' 3. Max-statistic over the null controls FWER for the family of
+#'    clusters (the probability of any false-positive cluster under
+#'    H0 is bounded by `alpha`). Pixel-level localization within a
+#'    significant cluster is only weakly controlled
+#'    (Maris & Oostenveld, 2007, §4.4.3); use [agreement_map_test()]
+#'    when pixel-level FWER control is needed.
 #'
 #' Method-specific step:
 #'
