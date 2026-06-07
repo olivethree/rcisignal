@@ -2191,6 +2191,7 @@ each, drawn from the same distribution) and records, per dataset,
 whether the bootstrap CI excludes zero and the permutation *p*:
 
 ```{r dissim-null-demo, eval = TRUE, warning = FALSE, message = FALSE}
+suppressPackageStartupMessages(library(rcisignal))
 options(rcisignal.silence_scaling_warning = TRUE)
 set.seed(7)
 reps   <- 60L
