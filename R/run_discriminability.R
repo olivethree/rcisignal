@@ -24,6 +24,20 @@
 #' package: blue = condition A larger; red = condition B larger;
 #' black contours bound FWE-significant clusters.
 #'
+#' @section Testing the dissimilarity against chance:
+#' The bundled [rel_dissimilarity()] runs with its default
+#' `null = "none"`, so the dissimilarity panel here reports the bootstrap
+#' *precision* interval only. That interval is biased upward by producer
+#' resampling and almost always excludes zero even when the two
+#' conditions do not differ, so it is not a test of "are these
+#' conditions distinguishable?" (see [rel_dissimilarity()]). For an
+#' above-chance test of overall magnitude, call
+#' `rel_dissimilarity(signal_matrix_a, signal_matrix_b,
+#' null = "permutation")` directly and read `$d_z` / `$d_ratio` and a
+#' permutation *p* against the permutation null. The cluster test in
+#' this report is already an FWER-controlled permutation test, so the
+#' spatial panel does test against chance.
+#'
 #' @section Reliability metrics expect raw masks:
 #' Both downstream metrics are scale-sensitive: the cluster test
 #' uses variance-based Welch t, and Euclidean distance in

@@ -84,17 +84,17 @@ Reporting accordingly matters.
 -   **Per-producer infoVal for 2IFC** (Brinkman et al., 2019). The
     Frobenius-norm magnitude statistic, its modified-z formulation
     against a random-responder reference distribution, and the
-    Type-I/power validation on social-face 2IFC data all originate
-    from the Brinkman et al. paper. (The reporting threshold itself,
-    `z >= 1.96`, is the conventional one-sided 5% standard-normal
-    cutoff that Brinkman et al. adopt.)
+    Type-I/power validation on social-face 2IFC data all originate from
+    the Brinkman et al. paper. (The reporting threshold itself,
+    `z >= 1.96`, is the conventional one-sided 5% standard-normal cutoff
+    that Brinkman et al. adopt.)
 -   **Pixel-test methodology** (Chauvin et al., 2005). The per-pixel
     inferential test on smooth classification images — and the
     cluster-level companion — are well-established in the
     classification-image and neuroimaging literatures. Chauvin et al.
     use a per-pixel Z-statistic on the noise-response correlation
-    calibrated by Random Field Theory; `rcisignal` adapts the same
-    logic to the per-producer signal matrix and calibrates instead by
+    calibrated by Random Field Theory; `rcisignal` adapts the same logic
+    to the per-producer signal matrix and calibrates instead by
     sign-flip permutation (see §12.1).
 -   **Cluster-based permutation tests for FWER control** (Maris &
     Oostenveld, 2007). Validated on EEG and MEG data, with the
@@ -1002,10 +1002,10 @@ number that has no defensible interpretation.
 
 A mask is a logical vector that decides which pixels enter the analysis.
 Every pixel inside the mask contributes to the statistic; every pixel
-outside is ignored. Imposing a premade oval mask on a base face from
-the Karolinska Directed Emotional Faces database (KDEF; Lundqvist,
-Flykt, & Öhman, 1998), resized to 256 x 256, the visible difference is
-what is shown below.
+outside is ignored. Imposing a premade oval mask on a base face from the
+Karolinska Directed Emotional Faces database (KDEF; Lundqvist, Flykt, &
+Öhman, 1998), resized to 256 x 256, the visible difference is what is
+shown below.
 
 ```{r mask-fmnes-fig, eval = TRUE, echo = FALSE, fig.show = "hold", out.width = "48%", fig.cap = "Effect of a face-region mask on a base image. Left: raw base face from the Karolinska Directed Emotional Faces database (KDEF; Lundqvist, Flykt, & Öhman, 1998). Right: same face with a premade full-face oval mask applied; pixels outside the mask are dimmed to light gray to make the analyzed region explicit. The reliability and discriminability metrics in this package will only see the inside-mask pixels when a mask is supplied via the `mask` argument."}
 imgs <- file.path("figures/face_masks",
@@ -1726,24 +1726,23 @@ percentile 95% CIs on the observed distribution.
 *Background.* The intraclass correlation coefficient (ICC) is a family
 of statistics for asking how much of the variability in repeated
 measurements is attributable to differences between the objects of
-measurement (here, producers) versus residual noise. The modern
-family of ICC variants was introduced by Shrout and Fleiss (1979),
-clarified and re-notated by McGraw and Wong (1996), and surveyed for
-practical reporting by Koo and Li (2016). Every producer has one CI
-vector with one entry per pixel, and the ICC asks how consistently
-the producers agree on that pixel-by-pixel pattern. A high ICC means
-producers' CIs are similar to each other relative to noise; a low ICC
-means they are not.
+measurement (here, producers) versus residual noise. The modern family
+of ICC variants was introduced by Shrout and Fleiss (1979), clarified
+and re-notated by McGraw and Wong (1996), and surveyed for practical
+reporting by Koo and Li (2016). Every producer has one CI vector with
+one entry per pixel, and the ICC asks how consistently the producers
+agree on that pixel-by-pixel pattern. A high ICC means producers' CIs
+are similar to each other relative to noise; a low ICC means they are
+not.
 
 The "(3,\*)" label is the McGraw-Wong update of Shrout and Fleiss's
 notation for a two-way mixed-effects model in which the column factor
-(pixels in our case) is fixed and the row factor (producers) is
-random. The fixed-pixels choice
-reflects the reality of an RC experiment: the image grid is not a random
-sample from a population of pixels; it is the same set of pixels across
-all producers. The "3,1 vs 3,k" distinction is whether you want the
-reliability of a single producer's CI (`3,1`) or of the group-averaged
-CI across `k` producers (`3,k`).
+(pixels in our case) is fixed and the row factor (producers) is random.
+The fixed-pixels choice reflects the reality of an RC experiment: the
+image grid is not a random sample from a population of pixels; it is the
+same set of pixels across all producers. The "3,1 vs 3,k" distinction is
+whether you want the reliability of a single producer's CI (`3,1`) or of
+the group-averaged CI across `k` producers (`3,k`).
 
 `rel_icc()` returns both, computed from a two-way mixed model with
 pixels fixed and producers random:
@@ -1972,20 +1971,19 @@ is to randomly relabel which producer is in which condition (preserving
 the per-condition `N`), recompute the per-pixel t and the maximum
 cluster mass, and repeat thousands of times. The resulting distribution
 of maximum cluster masses is the empirical null, calibrated to *your*
-data without distributional assumptions. A real cluster's p-value is
-the fraction of null max-masses that exceed it. Because every candidate
-cluster is tested against the *maximum* cluster mass under the null,
-the family-wise error rate is controlled **for the family of clusters**
-— the probability of finding one or more false-positive clusters under
-H0 is bounded by alpha. This is the form of FWER control proposed by
-Maris and Oostenveld (2007); the precise pixel-level extent of a
-significant cluster is only weakly controlled (Maris & Oostenveld,
-2007, §4.4.3), so cluster boundaries should be read as "the broad
-region survives the family-wise correction" rather than "every pixel
-inside the contour is individually FWE-significant". For pixel-level
-strong FWER control the relevant test is the voxel-wise max-statistic
-permutation used in §12.1's `agreement_map_test()` (Nichols & Holmes,
-2002).
+data without distributional assumptions. A real cluster's p-value is the
+fraction of null max-masses that exceed it. Because every candidate
+cluster is tested against the *maximum* cluster mass under the null, the
+family-wise error rate is controlled **for the family of clusters** —
+the probability of finding one or more false-positive clusters under H0
+is bounded by alpha. This is the form of FWER control proposed by Maris
+and Oostenveld (2007); the precise pixel-level extent of a significant
+cluster is only weakly controlled (Maris & Oostenveld, 2007, §4.4.3), so
+cluster boundaries should be read as "the broad region survives the
+family-wise correction" rather than "every pixel inside the contour is
+individually FWE-significant". For pixel-level strong FWER control the
+relevant test is the voxel-wise max-statistic permutation used in
+§12.1's `agreement_map_test()` (Nichols & Holmes, 2002).
 
 One caveat: the cluster-forming threshold does not have a fully
 principled default. Lower thresholds favor broad and diffuse effects;
@@ -2101,27 +2099,66 @@ by `sqrt(n_pixels)` to make distances comparable across resolutions, but
 cross-study comparison still requires care about scaling conventions and
 the underlying base image.
 
-In code:
+> **Why the bootstrap CI on the distance is not a test against zero.**
+> The Euclidean distance is a non-negative L2 norm. Resampling producers
+> with replacement adds variance to each resampled group mean, and that
+> variance enters the squared-distance sum at every pixel:
+> $E\!\left[(\bar{A}^{*}_i - \bar{B}^{*}_i)^2\right] \approx
+> (\bar{A}_i - \bar{B}_i)^2 + \mathrm{Var}(\bar{A}^{*}_i) +
+> \mathrm{Var}(\bar{B}^{*}_i)$. Summed over thousands of pixels the
+> upward bias is large, so the bootstrap distribution of the distance
+> sits above the observed value and its CI almost always excludes zero,
+> even when the two conditions come from the same population. The
+> bootstrap CI therefore answers only "how stable is my distance
+> estimate under producer resampling?", not "is there a difference?".
+> To test the distance against chance, set `null = "permutation"`: the
+> null shuffles condition labels and recomputes the distance, so it is
+> centred at the chance distance between two random subgroups of
+> producers, which is positive, not zero. Reject only when the observed
+> distance sits in the upper tail of that permutation null. The Pearson
+> fields carry the mirror-image bias: resampling attenuates *r*, so its
+> bootstrap CI sits below the observed value; benchmark *r* against a
+> permutation null too.
 
-Pair the spatial cluster test with a single overall magnitude summary:
-Euclidean distance between the two group-mean CIs, with percentile
-bootstrap CIs.
+In code, run the permutation null as the primary inferential output and
+keep the bootstrap CI as a secondary precision interval:
 
 ```{r dissim, eval = FALSE}
 dr <- rel_dissimilarity(
   signal_a, signal_b,
-  n_boot   = 2000L,
-  ci_level = 0.95,
-  seed     = 1L
+  n_boot         = 2000L,
+  null           = "permutation",
+  n_permutations = 2000L,
+  ci_level       = 0.95,
+  seed           = 1L
 )
 dr
+
+# Permutation p: proportion of null distances at or above the observed.
+p_perm <- (1 + sum(dr$null_distribution >= dr$euclidean)) /
+          (length(dr$null_distribution) + 1)
+
+# Primary inferential summary.
+c(d       = dr$euclidean,
+  M_null  = mean(dr$null_distribution),
+  SD_null = sd(dr$null_distribution),
+  d_z     = dr$d_z,
+  d_ratio = dr$d_ratio,
+  p_perm  = p_perm)
+
 plot(dr)
 ```
 
-`$euclidean` is the raw distance; `$euclidean_normalised` is
+`$euclidean` is the observed distance and `$euclidean_normalised` is
 `$euclidean / sqrt(n_pixels)`, useful for cross-resolution comparisons.
-`$boot_dist` is the full bootstrap distribution; `$ci_dist` and
-`$boot_se_dist` are the standard summaries.
+The permutation summaries (`$d_z`, `$d_ratio`, `$d_null_p95`, and the
+permutation *p* above) are the inferential output: they place the
+observed distance against the positive-centred chance baseline. The
+bootstrap fields (`$boot_dist`, `$ci_dist`, `$boot_se_dist`) are a
+*precision* interval on the distance estimate, useful for judging how
+stable the number is under producer resampling and for comparing
+relative magnitudes across contrasts. They are not a test against zero,
+for the reason in the callout above.
 
 The Pearson correlation fields (`$correlation`, `$boot_cor`, `$ci_cor`,
 `$boot_se_cor`) are returned as a **secondary** summary; they are not
@@ -2129,8 +2166,10 @@ recommended as a standalone similarity score. Two base-subtracted CIs
 share image-domain spatial structure (face shape, oval signal support)
 that pushes their correlation above zero even when the underlying mental
 representations are unrelated, so a "high" absolute *r* can reflect
-shared image scaffolding rather than shared mental content. Euclidean
-distance does not share this baseline issue and is the primary metric
+shared image scaffolding rather than shared mental content. The
+bootstrap CI on *r* carries the opposite bias to the distance CI:
+producer resampling attenuates *r*, so the CI sits *below* the observed
+value rather than spanning it. Euclidean distance is the primary metric
 here.
 
 If you do report *r* (for comparability with prior literature or with
@@ -2142,11 +2181,58 @@ conditions and recompute *r*) rather than zero. The image-domain
 scaffolding shifts the chance baseline upward, so "*r* \> 0" is not the
 right test.
 
-A `null = "permutation"` argument adds a chance baseline for the
-Euclidean distance: stratified condition-label permutation
-(between-subjects) or sign-flip on per-producer differences (paired).
-When set, the result includes `$d_null_p95`, `$d_z` (z-equivalent effect
-size), and `$d_ratio`.
+#### A worked illustration: identical conditions
+
+When two conditions are drawn from the same population there is no real
+difference to detect, yet the bootstrap CI on the distance still
+excludes zero. The permutation null is what behaves correctly. The
+example below runs 60 such null datasets (two conditions of 20 producers
+each, drawn from the same distribution) and records, per dataset,
+whether the bootstrap CI excludes zero and the permutation *p*:
+
+```{r dissim-null-demo, eval = TRUE, warning = FALSE, message = FALSE}
+options(rcisignal.silence_scaling_warning = TRUE)
+set.seed(7)
+reps   <- 60L
+n_pix  <- 24L * 24L   # small toy image, for speed
+n_prod <- 20L
+
+ci_excludes_zero <- logical(reps)
+p_perm           <- numeric(reps)
+first            <- NULL
+
+for (r in seq_len(reps)) {
+  # Two conditions from the SAME distribution: no real difference.
+  A <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+  B <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+  d <- rel_dissimilarity(A, B, n_boot = 400L, null = "permutation",
+                         n_permutations = 400L, progress = FALSE)
+  ci_excludes_zero[r] <- d$ci_dist[1] > 0
+  p_perm[r] <- (1 + sum(d$null_distribution >= d$euclidean)) /
+               (length(d$null_distribution) + 1)
+  if (r == 1L) first <- d
+}
+
+# One representative dataset: the bootstrap CI sits ABOVE the observed
+# distance and well clear of zero, yet the permutation p is unremarkable.
+c(observed_d = first$euclidean,
+  ci_low     = first$ci_dist[1],
+  ci_high    = first$ci_dist[2],
+  p_perm_1   = (1 + sum(first$null_distribution >= first$euclidean)) /
+               (length(first$null_distribution) + 1))
+
+# Across all 60 null datasets.
+c(pct_CI_excludes_zero = 100 * mean(ci_excludes_zero),
+  mean_p_perm          = mean(p_perm),
+  pct_p_perm_below_05  = 100 * mean(p_perm < 0.05))
+```
+
+The bootstrap CI excludes zero in essentially every null dataset, which
+would license a "difference" claim that is simply wrong. The permutation
+*p* is centred near .5 (a single *p* is uniform under the null, so any
+one value is luck of the draw) and rejects at *p* \< .05 only about as
+often as the nominal 5% rate. Read the distance against the permutation
+null, not against the bootstrap CI.
 
 #### Choosing between Pearson *r* and Euclidean distance
 
@@ -2275,11 +2361,11 @@ recording the **median** of those norms (the center) and the **median
 absolute deviation (MAD) scaled by 1.4826** (the spread). Brinkman et
 al. use the modified z deliberately because the reference distribution
 of Frobenius norms is left-skewed; median and scaled MAD are robust
-substitutes for the mean and SD that would otherwise be distorted by
-the skew. A producer's infoVal of, say, 2.5 means their CI is 2.5
-scaled-MAD units above the random-responder median. The conventional
-threshold for "more than chance" is `z >= 1.96`, the standard one-sided
-0.05 cutoff that Brinkman et al. adopt.
+substitutes for the mean and SD that would otherwise be distorted by the
+skew. A producer's infoVal of, say, 2.5 means their CI is 2.5 scaled-MAD
+units above the random-responder median. The conventional threshold for
+"more than chance" is `z >= 1.96`, the standard one-sided 0.05 cutoff
+that Brinkman et al. adopt.
 
 What infoVal does *not* tell you is whether the CI points at the *right*
 pattern. The Frobenius norm is a magnitude statistic only. A producer
@@ -2462,8 +2548,8 @@ complementary group-level summaries, in roughly increasing resolution:
     as a group-level summary (specifically, the proportion of
     participants whose individual CIs exceed the chance reference).
     `rcisignal` operationalizes this as the **median z** and the
-    **percentage of producers above z = 1.96**, both already returned
-    by `infoval()` (§10) and surfaced inside `infoval_report()` (§5.4).
+    **percentage of producers above z = 1.96**, both already returned by
+    `infoval()` (§10) and surfaced inside `infoval_report()` (§5.4).
 -   **Group-mean z** (`group_mean_z()`). A single scalar summarizing
     whether the magnitude of the group-mean CI exceeds what an
     equally-sized panel of random responders would produce. Useful as a
@@ -2517,8 +2603,8 @@ were to compare a group-averaged real CI against the single-responder
 noise floor, you would be using the wrong yardstick: the noise floor
 *itself* shifts down when you average. `group_mean_z()` builds its
 reference distribution by averaging `N` random producers in exactly the
-same way the real group CI is built, so the yardstick matches. See
-§11.4 for the visual receipt.
+same way the real group CI is built, so the yardstick matches. See §11.4
+for the visual receipt.
 
 ### 11.2 How it differs from Brinkman's per-producer infoVal
 
@@ -2564,23 +2650,22 @@ Consider this:
     agreement map from §12.1. Reporting only the group-mean z hides
     whether the signal comes from a coherent panel or from a handful of
     outliers averaged with noise.
--   **It tracks interrater agreement in practice.** Although
-    group-mean z is not itself a reliability coefficient, empirically
-    it correlates very strongly with one. Across the 10 traits in
-    Oliveira et al. (2019), the pixel-wise `ICC(3,k)` of producers'
-    raw CIs at the group level and the group-mean z are correlated at
-    $r = 0.97$, 95% CI $[0.88, 0.99]$, $p < .001$ (see the
-    ICC-vs-group-mean-z subsection inside §14.6 of this vignette for
-    the scatter and the linear fit). High group-mean z in those
-    data went hand in hand with producers agreeing more about the
-    spatial pattern of their CIs. The reading is correlational, not
-    definitional: the metric becomes large when (a) producers' CIs
-    point in similar directions in pixel space and (b) the shared
-    pattern survives averaging. Both of those are also what
+-   **It tracks interrater agreement in practice.** Although group-mean
+    z is not itself a reliability coefficient, empirically it correlates
+    very strongly with one. Across the 10 traits in Oliveira et al.
+    (2019), the pixel-wise `ICC(3,k)` of producers' raw CIs at the group
+    level and the group-mean z are correlated at $r = 0.97$, 95% CI
+    $[0.88, 0.99]$, $p < .001$ (see the ICC-vs-group-mean-z subsection
+    inside §14.6 of this vignette for the scatter and the linear fit).
+    High group-mean z in those data went hand in hand with producers
+    agreeing more about the spatial pattern of their CIs. The reading is
+    correlational, not definitional: the metric becomes large when (a)
+    producers' CIs point in similar directions in pixel space and (b)
+    the shared pattern survives averaging. Both of those are also what
     `ICC(3,k)` is sensitive to. Use this connection as a sanity check
-    when interpreting a headline group-mean z, not as a substitute
-    for the agreement-on-pixels evidence that an actual ICC or
-    agreement map provides.
+    when interpreting a headline group-mean z, not as a substitute for
+    the agreement-on-pixels evidence that an actual ICC or agreement map
+    provides.
 -   **Suggested framing when writing a report.** *"The group-mean CI
     exceeded the matched-N random-responder null (group-mean z = X.XX).
     Per-producer infoVal had median z = Y.YY with Z out of N producers
@@ -2664,10 +2749,10 @@ The same logic applies under real noise matrices. The exact shrinkage
 factor depends on the noise structure (the synthetic noise above is iid
 standard normal; real sinusoidal-noise CIs also shrink, just with a
 different constant), but the qualitative picture (wide distribution in
-panel A, tight distribution near zero in panel B) survives. The
-observed group-mean CI's Frobenius norm is what gets compared against
-the red median line in **panel B**. `group_mean_z()` returns how many
-MADs above that median the observation sits.
+panel A, tight distribution near zero in panel B) survives. The observed
+group-mean CI's Frobenius norm is what gets compared against the red
+median line in **panel B**. `group_mean_z()` returns how many MADs above
+that median the observation sits.
 
 ### 11.5 Why `group_mean_z()` is not part of the library?
 
@@ -2717,9 +2802,9 @@ $$t_i \,=\, \frac{\bar{S}_i}{s_i \,/\, \sqrt{N}},
 s_i^2 \,=\, \frac{1}{N-1} \sum_{j=1}^{N}\left(S_{ij} - \bar{S}_i\right)^2.$$
 
 What the formula says, pixel by pixel: line up the $N$ producers at the
-same pixel $i$, treat their signal values $S_{1i}, S_{2i}, \dots, S_{Ni}$
-as $N$ numbers, and ask the standard one-sample question "is their mean
-different from zero?" In words:
+same pixel $i$, treat their signal values
+$S_{1i}, S_{2i}, \dots, S_{Ni}$ as $N$ numbers, and ask the standard
+one-sample question "is their mean different from zero?" In words:
 
 -   $\bar S_i$ is the **average** of the producers' values at pixel $i$.
     If everyone has slightly positive values there, $\bar S_i$ is a
@@ -2755,14 +2840,14 @@ needed (see §12.2).
 This per-pixel one-sample t against zero is the same logic as the
 **pixel test** for smooth classification images introduced by Chauvin,
 Worsley, Schyns, Arguin, and Gosselin (2005), where a per-pixel
-z-statistic is computed against the null of no association between
-noise patterns and responses. The implementation here computes the
-analogous one-sample t on the per-producer CIs and controls family-wise
-error using **sign-flip permutation** in the manner of Maris and
-Oostenveld (2007) and Nichols and Holmes (2002).
+z-statistic is computed against the null of no association between noise
+patterns and responses. The implementation here computes the analogous
+one-sample t on the per-producer CIs and controls family-wise error
+using **sign-flip permutation** in the manner of Maris and Oostenveld
+(2007) and Nichols and Holmes (2002).
 
-The intuition for sign-flip permutation: under the null hypothesis
-"this producer's CI is just noise, with no consistent direction", the
+The intuition for sign-flip permutation: under the null hypothesis "this
+producer's CI is just noise, with no consistent direction", the
 producer's signal would be just as likely to come out flipped to its
 mirror image. So you can simulate the null by literally flipping the
 sign of each producer's CI independently at random (multiplying their
@@ -2772,18 +2857,18 @@ map:
 
 $$T^*_b \,=\, \max_{i'} |t^*_{i'}| \quad \text{on permutation } b.$$
 
-Repeat for $B$ permutations (e.g.\ $B = 5000$). You now have a null
+Repeat for $B$ permutations (e.g. $B = 5000$). You now have a null
 distribution of "biggest agreement that random sign-flipping could
 produce across the *whole* image". Each observed pixel's p-value is
 
 $$p_i \,=\, \Pr\!\left(\,T^* \,\geq\, |t_i|\,\right),$$
 
-i.e.\ the fraction of permutations whose image-wide maximum $|t|$
+i.e. the fraction of permutations whose image-wide maximum $|t|$
 equalled or exceeded the actual $|t_i|$ at pixel $i$.
 
 Why the *maximum* across pixels, not pixel-by-pixel? With thousands of
 pixels tested simultaneously, some pixels would clear an uncorrected
-threshold (e.g.\ $|t| > 1.96$) by chance even with no real signal.
+threshold (e.g. $|t| > 1.96$) by chance even with no real signal.
 Calibrating each pixel against the *maximum* statistic over all pixels
 in random data is the standard family-wise error rate (FWER) fix for
 spatially correlated maps (Nichols & Holmes, 2002; Maris & Oostenveld,
@@ -3578,9 +3663,11 @@ for (cname in names(contrasts)) {
 
   dissim_full[[cname]] <- rel_dissimilarity(
     a, b,
-    n_boot   = 2000L,
-    seed     = 1L,
-    progress = FALSE
+    n_boot         = 2000L,
+    null           = "permutation",
+    n_permutations = 2000L,
+    seed           = 1L,
+    progress       = FALSE
   )
 }
 
@@ -3594,15 +3681,45 @@ plot_dissimilarity_grid(
 
 On this dataset, the dissimilarity grid is:
 
-```{r olv-dissim-grid-fig, eval = TRUE, echo = FALSE, out.width = "90%", fig.cap = "Between-condition Euclidean distance for the three contrasts on the Oliveira et al. (2019) Study 1 data. Each row is one contrast. The white-bordered point is the observed Euclidean distance between the two group-mean CIs, computed across all 65,536 pixels of the 256 x 256 image. The bar around it is the 95% percentile bootstrap CI from 2000 producer-level resamples (each condition resampled independently with replacement, distance recomputed on the resample). The shaded silhouette is the kernel density of the bootstrap distribution, scaled to the row height for visual comparison; its width does not encode units. Larger values mean the two group CIs sit farther apart in pixel space; bars whose left end is well above zero indicate that the separation is robust to producer-level variability."}
+```{r olv-dissim-grid-fig, eval = TRUE, echo = FALSE, out.width = "90%", fig.cap = "Between-condition Euclidean distance for the three contrasts on the Oliveira et al. (2019) Study 1 data. Each row is one contrast. The white-bordered point is the observed Euclidean distance between the two group-mean CIs, computed across all 65,536 pixels of the 256 x 256 image. The bar around it is the 95% percentile bootstrap CI from 2000 producer-level resamples (each condition resampled independently with replacement, distance recomputed on the resample). The shaded silhouette is the kernel density of the bootstrap distribution, scaled to the row height for visual comparison; its width does not encode units. Larger values mean the two group CIs sit farther apart in pixel space. The bar shows how precisely each distance is estimated under producer resampling; because resampling biases the distance upward, a bar clear of zero is not itself a test of difference. The above-chance test is the permutation null reported in the table below."}
 if (olv_have_cache && file.exists(file.path(olv_fig, "dissim_grid.png")))
   knitr::include_graphics(file.path(olv_fig, "dissim_grid.png"))
 ```
 
-The numeric values can be inspected on the dissimilarity objects
-themselves; the figure shows that all three contrasts diverge clearly on
-this dataset, with the lower bound of the 95% percentile CI well above
-zero.
+The bootstrap bars in the figure show the *precision* of each distance
+estimate under producer resampling; because that resampling biases the
+distance upward, a bar clear of zero is not by itself evidence of a
+difference (see the §9.3 callout). The above-chance test is the
+permutation null, summarised per contrast below:
+
+```{r olv-dissim-perm-table, eval = TRUE, echo = FALSE, results = "asis"}
+if (olv_have_cache && file.exists(file.path(olv_cache, "dissim_full.rds"))) {
+  df <- readRDS(file.path(olv_cache, "dissim_full.rds"))
+  perm_tab <- do.call(rbind, lapply(names(df), function(nm) {
+    d <- df[[nm]]
+    p <- (1 + sum(d$null_distribution >= d$euclidean)) /
+         (length(d$null_distribution) + 1)
+    data.frame(
+      Contrast = nm,
+      d        = sprintf("%.2f", d$euclidean),
+      M_null   = sprintf("%.2f", mean(d$null_distribution)),
+      SD_null  = sprintf("%.3f", sd(d$null_distribution)),
+      d_z      = sprintf("%+.1f", d$d_z),
+      d_ratio  = sprintf("%.2f", d$d_ratio),
+      p_perm   = sprintf("%.4f", p),
+      stringsAsFactors = FALSE
+    )
+  }))
+  knitr::kable(perm_tab, row.names = FALSE,
+               col.names = c("Contrast", "d", "M null", "SD null",
+                             "z", "d/median", "p perm"))
+}
+```
+
+Each contrast sits in the upper tail of its own permutation null
+(*z* from +3.0 to +9.4, all *p* \< .01), so the divergences are larger
+than the chance distance between two random producer subgroups. That is
+the claim the bootstrap CI alone cannot support.
 
 ### 14.8 Region-by-region cluster tests
 
@@ -4063,6 +4180,18 @@ with no defensible interpretation.
 below N approximately 30 per condition. The package warns at N \< 30 and
 aborts at N \< 4. Aim for N \>= 60 per condition for stable assessment.
 
+**A bootstrap CI on a distance is not a test against zero.** The
+Euclidean distance from `rel_dissimilarity()` (and the matrices behind
+`plot_ci_distance_matrix()` / `plot_ci_mds()`) is a non-negative norm
+whose bootstrap CI is biased upward by producer resampling and almost
+always excludes zero even when two conditions do not differ. Read it as
+a precision interval and for relative magnitude comparisons, not as
+evidence of a difference. For an above-chance test, set
+`null = "permutation"` and read *d_z*, *d_ratio*, and a permutation *p*
+against the positive-centred permutation null. The Pearson *r* fields
+carry the mirror-image bias (resampling attenuates *r*, so its CI sits
+below the observed value). See §9.3.
+
 **Many-condition summary figures.** `plot_ci_distance_matrix()` and
 `plot_ci_mds()` share the same baseline-aware framing as
 `rel_dissimilarity()`: prefer Euclidean magnitude over absolute Pearson
@@ -4149,13 +4278,13 @@ tend to apply.
     (Brinkman et al., 2019, Part III, *Comparing data from lab and
     online samples using infoVal*). For group-level use they propose
     applying the infoVal metric to *individual* CIs and inspecting the
-    resulting distribution — specifically the proportion of
-    participants whose individual CIs cleared the chance reference —
-    "to assess the proportion of participants that contributed to the
-    group CI" (Brinkman et al., 2019, p. 13). They do not explicitly
-    rule out computing infoVal on the averaged noise pattern, but they
-    do not endorse it either; the group-mean infoVal this package
-    offers (`group_mean_z()`, called inside `infoval_report()`) is a
+    resulting distribution — specifically the proportion of participants
+    whose individual CIs cleared the chance reference — "to assess the
+    proportion of participants that contributed to the group CI"
+    (Brinkman et al., 2019, p. 13). They do not explicitly rule out
+    computing infoVal on the averaged noise pattern, but they do not
+    endorse it either; the group-mean infoVal this package offers
+    (`group_mean_z()`, called inside `infoval_report()`) is a
     package-level extension of the Brinkman recipe and has not been
     independently validated for social-face RC (see §1.2). The §14.4
     worked example reports both numbers alongside; treat the group-mean

@@ -50,6 +50,22 @@
   §12, §12 -> §13, ..., §18 -> §19); all cross-references
   updated.
 
+* **Dissimilarity inference reframed around the permutation null.**
+  `?rel_dissimilarity` gains a section explaining why the bootstrap
+  CI on the Euclidean distance is not a test against zero (the L2
+  norm is biased upward by producer resampling, so its CI excludes
+  zero even for identical conditions) and directing users to
+  `null = "permutation"` for an above-chance test; the Pearson
+  bootstrap-attenuation bias is now noted too. Vignette §9.3 leads
+  with the permutation null, adds a callout and a worked
+  identical-conditions illustration, and reframes the bootstrap CI
+  as a precision interval; §14.7 reports per-contrast permutation
+  summaries (*d*, *M* null, *SD* null, *z*, *d*-ratio, *p*) and §16
+  gains a matching caveat. `?run_discriminability` documents that
+  its dissimilarity panel is bootstrap-only and points to
+  `rel_dissimilarity(null = "permutation")` for the test. No change
+  to defaults or computations.
+
 # rcisignal 0.3.0
 
 ## Breaking changes

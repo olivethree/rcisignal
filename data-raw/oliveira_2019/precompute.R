@@ -235,7 +235,8 @@ dissim_full <- list()
 for (cname in names(contrasts)) {
   dr <- rel_dissimilarity(
     sm[[contrasts[[cname]]$a]], sm[[contrasts[[cname]]$b]],
-    n_boot = 2000L, seed = 1L, progress = FALSE
+    n_boot = 2000L, null = "permutation", n_permutations = 2000L,
+    seed = 1L, progress = FALSE
   )
   dissim_full[[cname]] <- dr
 }
