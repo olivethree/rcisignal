@@ -73,8 +73,8 @@ Reporting accordingly matters.
   a random-responder reference distribution, and the Type-I/power
   validation on social-face 2IFC data all originate from the Brinkman et
   al. paper. (The reporting threshold itself, `z >= 1.96`, is the
-  conventional one-sided 5% standard-normal cutoff that Brinkman et
-  al. adopt.)
+  conventional standard-normal cutoff that Brinkman et al. adopt: a
+  one-sided 2.5%, equivalently two-sided 5%, error rate.)
 - **Pixel-test methodology** (Chauvin et al., 2005). The per-pixel
   inferential test on smooth classification images — and the
   cluster-level companion — are well-established in the
@@ -326,9 +326,9 @@ str(sim, max.level = 1)
 |----|----|----|
 | `n_per_condition` | `50` | participants per condition |
 | `conditions` | `c("target", "control")` | any character vector works |
-| `n_trials` | `500` | per participant; equals noise pool size for 2IFC |
+| `n_trials` | `500` (2IFC); `NULL` (Brief-RC) | per participant; equals the noise pool size for 2IFC. For Brief-RC, `NULL` derives it from `noise_pool_size` |
 | `images_per_trial` (Brief-RC only) | `12` | = 6 original/inverted pairs |
-| `noise_pool_size` (Brief-RC only) | `n_trials * (images_per_trial / 2)` | shared across participants |
+| `noise_pool_size` (Brief-RC only) | `500` | shared across participants; if `n_trials` is given instead, it is `n_trials * (images_per_trial / 2)` |
 | `img_size` | `256` | pixels; matches the bundled base face |
 | `base_image` | `inst/extdata/sim_base_face.png` | a 256x256 grayscale artificial face; pass a path or matrix to override |
 | `signal_strength` | `"weak"` | also `"none"` (true null), `"strong"`, or a numeric coefficient |
@@ -949,10 +949,6 @@ They are reconstructed on demand from `stimuli_params` and `p`;
 [`rcisignal::read_noise_matrix()`](https://olivethree.github.io/rcisignal/reference/read_noise_matrix.md)
 does this automatically (§4.3) and caches the result.
 
-On macOS the file is saved with a lowercase `.Rdata` extension;
-`list.files(pattern = "\\.RData$")` is case-sensitive by default and
-will miss it. Use `ignore.case = TRUE` when searching.
-
 ### 4.3 The noise matrix
 
 The noise matrix is an `n_pixels x pool_size` numeric matrix where each
@@ -1547,7 +1543,7 @@ takes `responses` plus its check-specific arguments and returns an
   `|mean(response)| > bias_threshold` (WARN; default 0.6 corresponds to
   roughly an 80/20 split).
 - **`check_rt(col_rt = ...)`** scans response times for fast-clicking
-  (default RT \< 400 ms), implausibly slow trials, and low
+  (default RT \< 200 ms), implausibly slow trials, and low
   within-subject coefficient of variation. Defaults are conservative;
   tune them to your task.
 - **`check_stimulus_alignment(rdata = ... | noise_matrix = ...)`**
@@ -1581,8 +1577,8 @@ whether those numbers can be trusted:
     repeat.
 4.  Compare unmasked vs masked z to see whether masking lifts or
     depresses signal.
-5.  Sanity-check with a synthetic random responder (should land at
-    `|z| < 1`).
+5.  Sanity-check with a synthetic random responder (should land near 0;
+    `|z| > 2` flags a mis-calibrated reference).
 6.  Report whether the group-mean CI clears z = 1.96 even when
     per-producer medians do not.
 
@@ -1681,9 +1677,8 @@ dim(res$signal_matrix)   # n_pixels x n_participants
 
 Behind the scenes the function takes care of the steps that are easy to
 get wrong when calling rcicr directly: it loads the helper packages
-rcicr expects (`foreach`, `tibble`, `dplyr`), checks that responses are
-coded `{-1, +1}`, runs single-threaded by default, and matches the
-`.Rdata` filename in a case- insensitive way.
+rcicr expects (`foreach`, `tibble`, `dplyr`) and checks that responses
+are coded `{-1, +1}`.
 
 The two CI builders accept `base_image` the same way: a numeric matrix
 in `[0, 1]`, a path to a PNG / JPEG, or (for 2IFC) a label naming an
@@ -1757,6 +1752,13 @@ exposes a `scaling` argument with five values:
   independently (no shared range across CIs).
 - `"constant"`: multiplies the mask by a fixed constant.
 - `"none"`: no scaling. Output is `base + raw_mask`.
+
+Not every option is accepted by every builder:
+[`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md)
+takes `"none"`, `"matched"`, or `"constant"`;
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+takes `"autoscale"`, `"independent"`, `"constant"`, or `"none"`
+(forwarded to rcicr).
 
 The shipped `$signal_matrix` is the raw unscaled mask regardless of
 which `scaling` you pick; the `scaling` argument only affects the
@@ -2073,10 +2075,20 @@ unless `acknowledge_scaling = TRUE` is passed. Rendered scaling corrupts
 ICC values in non-recoverable ways, so the default behavior is
 conservative.
 
-A once-per-session warning fires when `n_targets > 50,000` and ICC(3,k)
-is requested, flagging that ICC(3,k) tends toward 1 at large image sizes
-(it is not resolution-comparable). Report ICC(3,1) as the primary
-statistic for cross-resolution comparisons.
+ICC(3,k) is the reliability of the group-mean CI across the k producers,
+so like any average-measures ICC it rises with the number of producers
+(Spearman-Brown: `ICC(3,k) = k * ICC(3,1) / (1 + (k - 1) * ICC(3,1))`,
+which approaches 1 as k grows). It is therefore not comparable across
+studies that pooled different numbers of producers; report ICC(3,1), the
+single-producer reliability, for cross-sample comparisons.
+
+Both ICCs also depend on which pixels enter the computation. When the
+signal is localized to a few face regions, an unmasked full-image ICC is
+diluted by the many off-signal background pixels and can be driven
+toward zero, more so at higher resolutions. Restrict the computation to
+the analysis region with `mask = make_face_mask(...)` for an
+interpretable value. A once-per-session warning fires when ICC(3,k) is
+requested over more than 50,000 pixels, as a reminder of both points.
 
 Empirically, ICC(3,k) and the group-mean infoVal z (see §10) track each
 other very closely on real data: both quantify how aligned the producers
@@ -2724,8 +2736,8 @@ of Frobenius norms is left-skewed; median and scaled MAD are robust
 substitutes for the mean and SD that would otherwise be distorted by the
 skew. A producer’s infoVal of, say, 2.5 means their CI is 2.5 scaled-MAD
 units above the random-responder median. The conventional threshold for
-“more than chance” is `z >= 1.96`, the standard one-sided 0.05 cutoff
-that Brinkman et al. adopt.
+“more than chance” is `z >= 1.96`, the standard normal cutoff Brinkman
+et al. adopt: a one-sided 2.5% (equivalently two-sided 5%) error rate.
 
 What infoVal does *not* tell you is whether the CI points at the *right*
 pattern. The Frobenius norm is a magnitude statistic only. A producer
@@ -2927,7 +2939,7 @@ condition, carries above-chance signal. The package offers three
 complementary group-level summaries, in roughly increasing resolution:
 
 - **The distribution of per-producer infoVals.** Brinkman et al. (2019,
-  p. 13) propose using the per-producer infoVal *distribution* as a
+  p. 2071) propose using the per-producer infoVal *distribution* as a
   group-level summary (specifically, the proportion of participants
   whose individual CIs exceed the chance reference). `rcisignal`
   operationalizes this as the **median z** and the **percentage of
@@ -3849,7 +3861,7 @@ friendly, competent, dominant), pairwise Pearson correlations between
 the group-mean CIs follow the expected valence structure: prosocial
 pairs correlate positively (trust–friendly +0.68, friendly–competent
 +0.48, trust–competent +0.42), and pairs that cross into dominance
-correlate negatively (friendly–dominant −0.51, trust–dominant −0.37).
+correlate negatively (friendly–dominant −0.50, trust–dominant −0.37).
 Competent–dominant is weakly negative (−0.22).
 
 Correlations are computed over the pixels inside the parametric oval
@@ -4260,6 +4272,11 @@ per region per condition:
 
 ``` r
 
+# 2IFC reference pool, reconstructed once from the modernised rdata
+# (the same file the signal matrices were built from in 14.5).
+noise_matrix <- read_noise_matrix("stimuli_modernised.RData",
+                                  base_image = "male")
+
 iv_grid <- expand.grid(
   trait  = c("trust", "friendly", "competent", "dominant"),
   region = regions,
@@ -4319,11 +4336,11 @@ Dominance carries comparatively strong signal in the **eyes** (median
 producer z noticeably higher than the other three traits in that region)
 and weaker, comparable signal in the **mouth** and **upper face**.
 Friendliness flips that pattern, with the **mouth** carrying its
-strongest regional signal and the **eyes** its weakest. Trustworthy
-localises broadly across the eyes and mouth without a clear regional
-peak, and competent’s signal is the most evenly spread across regions,
-though at uniformly modest levels. The headline full-face median for
-each trait masks these regional contrasts.
+strongest regional signal and the **upper face** its weakest.
+Trustworthy localises broadly across the eyes and mouth without a clear
+regional peak, and competent’s signal is the most evenly spread across
+regions, though at uniformly modest levels. The headline full-face
+median for each trait masks these regional contrasts.
 
 The two grids (the cluster grid from §14.8 and the infoVal grid here)
 answer two different questions about the same masked region. The cluster
@@ -4826,16 +4843,15 @@ data problem. Five reasons in roughly the order they tend to apply.
     Brinkman et al. (2019) only ever computed infoVal on individual CIs.
     They reported a mean per-producer infoVal of 3.9 (lab) and 2.9
     (online), with 68% / 54% of producers individually exceeding 1.96
-    (Brinkman et al., 2019, Part III, *Comparing data from lab and
-    online samples using infoVal*). For group-level use they propose
+    (Brinkman et al., 2019, p. 2070). For group-level use they propose
     applying the infoVal metric to *individual* CIs and inspecting the
-    resulting distribution — specifically the proportion of participants
-    whose individual CIs cleared the chance reference — “to assess the
-    proportion of participants that contributed to the group CI”
-    (Brinkman et al., 2019, p. 13). They do not explicitly rule out
-    computing infoVal on the averaged noise pattern, but they do not
-    endorse it either; the group-mean infoVal this package offers
-    (`group_mean_z()`, called inside
+    resulting distribution (specifically the proportion of participants
+    whose individual CIs cleared the chance reference), which they
+    describe as a way “to assess the proportion of participants that
+    contributed to the group CI” (Brinkman et al., 2019, p. 2071). They
+    do not explicitly rule out computing infoVal on the averaged noise
+    pattern, but they do not endorse it either; the group-mean infoVal
+    this package offers (`group_mean_z()`, called inside
     [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md))
     is a package-level extension of the Brinkman recipe and has not been
     independently validated for social-face RC (see §1.2). The §14.4
