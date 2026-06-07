@@ -267,7 +267,7 @@ print.rcisignal_rel_icc <- function(x, ...) {
   pad <- function(label, value) {
     sprintf("  %-14s %.4f\n", label, value)
   }
-  # Lead with ICC(3,1): single-producer reliability, resolution-comparable.
+  # Lead with ICC(3,1): single-producer reliability, comparable across samples.
   if ("3_1" %in% x$variants) {
     cat("\n  Primary: ICC(3,1) (single-producer reliability)\n")
     cat(pad("ICC(3,1):", x$icc_3_1))
@@ -276,8 +276,9 @@ print.rcisignal_rel_icc <- function(x, ...) {
     cat("\n  Secondary: ICC(3,k) (group-mean reliability)\n")
     cat(pad("ICC(3,k):", x$icc_3_k))
     if (isTRUE(x$n_targets > 50000L)) {
-      cat("  Note: ICC(3,k) approaches 1 at large pixel counts (resolution\n")
-      cat("  asymptote). For cross-resolution comparisons, report ICC(3,1).\n")
+      cat("  Note: a large pixel set with localized signal dilutes both ICCs\n")
+      cat("  (mask the analysis region); ICC(3,k) is also inflated by producer\n")
+      cat("  count, so report ICC(3,1) for cross-sample comparability.\n")
     }
   }
   shown_2 <- FALSE

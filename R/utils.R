@@ -378,11 +378,13 @@ warn_loo_sd_deprecated <- function() {
   invisible()
 }
 
-#' Emit the once-per-session ICC(3,k) resolution-asymptote warning
+#' Emit the once-per-session large-pixel-set ICC warning
 #'
-#' Called by `rel_icc()` when the image has more than 50,000 pixels.
-#' Flags that ICC(3,k) approaches 1 at large image sizes and is not
-#' resolution-comparable.
+#' Called by `rel_icc()` when ICC(3,k) is requested over more than
+#' 50,000 pixels. Flags that a large pixel set with localized signal
+#' dilutes the between-pixel variance (depressing both ICCs), and that
+#' ICC(3,k) is inflated by producer count (Spearman-Brown), so ICC(3,1)
+#' is the cross-sample-comparable statistic.
 #'
 #' @keywords internal
 #' @noRd
@@ -394,15 +396,16 @@ warn_icc_large_image <- function(n_targets) {
     return(invisible())
   }
   cli::cli_warn(c(
-    "ICC(3,k) tends toward 1 at large image sizes \\
-     ({n_targets} pixels).",
-    "i" = "This is a property of ICC(*,k), not a reliability \\
-           statement: the error mean square scales as \\
-           1/((n-1)(k-1)) while the row mean square scales as \\
-           1/(n-1), so ICC(3,k) asymptotes to 1 as n grows.",
-    "*" = "Report {.strong ICC(3,1)} as the primary, \\
-           resolution-comparable statistic when comparing across \\
-           image sizes.",
+    "ICC(3,k) requested over a large pixel set ({n_targets} pixels).",
+    "i" = "When the signal is localized to a few face regions, the \\
+           many off-signal background pixels dilute the between-pixel \\
+           variance and can drive both ICCs toward 0 (more so at \\
+           higher resolutions). Restrict to the analysis region with \\
+           {.code mask = make_face_mask(...)} for an interpretable value.",
+    "*" = "Separately, ICC(3,k) is inflated by the number of producers \\
+           (Spearman-Brown), so it is not comparable across samples \\
+           with different producer counts; report {.strong ICC(3,1)} \\
+           for cross-sample comparability.",
     "i" = "Silence: {.code options(rcisignal.silence_icc_warning = TRUE)}."
   ))
   .rcisignal_session_state$icc_resolution_warning_emitted <- TRUE

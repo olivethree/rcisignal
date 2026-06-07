@@ -86,7 +86,7 @@ test_that("rel_icc emits large-image warning above 50k pixels", {
   reset_session_warnings()
   expect_warning(
     rel_icc(m, variants = c("3_1", "3_k")),
-    regexp = "ICC\\(3,k\\) tends toward 1"
+    regexp = "ICC\\(3,k\\) requested over a large pixel set"
   )
 
   # Silenced via option.
@@ -95,6 +95,6 @@ test_that("rel_icc emits large-image warning above 50k pixels", {
   on.exit(options(op), add = TRUE)
   expect_no_warning(
     rel_icc(m, variants = c("3_1", "3_k")),
-    message = "ICC\\(3,k\\) tends toward 1"
+    message = "ICC\\(3,k\\) requested over a large pixel set"
   )
 })
