@@ -157,6 +157,22 @@ package: blue = condition A larger; red = condition B larger;
 black contours bound FWE-significant clusters.</p>
     </div>
     <div class="section level2">
+    <h2 id="testing-the-dissimilarity-against-chance">Testing the dissimilarity against chance<a class="anchor" aria-label="anchor" href="#testing-the-dissimilarity-against-chance"></a></h2>
+
+
+<p>The bundled <code><a href="rel_dissimilarity.html">rel_dissimilarity()</a></code> runs with its default
+<code>null = "none"</code>, so the dissimilarity panel here reports the bootstrap
+<em>precision</em> interval only. That interval is biased upward by producer
+resampling and almost always excludes zero even when the two
+conditions do not differ, so it is not a test of "are these
+conditions distinguishable?" (see <code><a href="rel_dissimilarity.html">rel_dissimilarity()</a></code>). For an
+above-chance test of overall magnitude, call
+<code>rel_dissimilarity(signal_matrix_a, signal_matrix_b, null = "permutation")</code> directly and read <code>$d_z</code> / <code>$d_ratio</code> and a
+permutation <em>p</em> against the permutation null. The cluster test in
+this report is already an FWER-controlled permutation test, so the
+spatial panel does test against chance.</p>
+    </div>
+    <div class="section level2">
     <h2 id="reliability-metrics-expect-raw-masks">Reliability metrics expect raw masks<a class="anchor" aria-label="anchor" href="#reliability-metrics-expect-raw-masks"></a></h2>
 
 

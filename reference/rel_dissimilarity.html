@@ -107,9 +107,13 @@ replicate so the paired covariance structure is preserved.</p></dd>
 
 
 <dt id="arg-null">null<a class="anchor" aria-label="anchor" href="#arg-null"></a></dt>
-<dd><p>One of <code>"none"</code> (default) or <code>"permutation"</code>.
-<code>"permutation"</code> builds an empirical chance baseline for the
-Euclidean distance.</p></dd>
+<dd><p>One of <code>"none"</code> (default) or <code>"permutation"</code>. Set
+<code>"permutation"</code> for any above-chance claim about the distance: it
+builds an empirical chance baseline by shuffling condition labels
+(or sign-flipping paired differences) and recomputing the distance.
+The default bootstrap CI is a precision interval only, not a test
+against zero (see the section on why a bootstrap CI is not a test
+against zero).</p></dd>
 
 
 <dt id="arg-n-permutations">n_permutations<a class="anchor" aria-label="anchor" href="#arg-n-permutations"></a></dt>
@@ -167,6 +171,39 @@ scaffolding alone, so a "high" correlation does not by itself
 license a similarity claim. Euclidean distance does not share
 this baseline issue, which is why it is the primary statistic
 here.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="why-a-bootstrap-ci-on-the-l-distance-is-not-a-test-against-zero">Why a bootstrap CI on the L2 distance is not a test against zero<a class="anchor" aria-label="anchor" href="#why-a-bootstrap-ci-on-the-l-distance-is-not-a-test-against-zero"></a></h2>
+
+
+<p>The Euclidean distance is a non-negative L2 norm of the difference
+between two group means. Resampling producers with replacement adds
+variance to each resampled group mean, and that variance enters the
+squared-distance sum at every pixel, so
+<code>E[(mean_a_boot - mean_b_boot)^2]</code> is roughly
+<code>(mean_a - mean_b)^2 + Var(mean_a_boot) + Var(mean_b_boot)</code>. Summed
+over thousands of pixels the upward bias is large: the bootstrap
+distribution of the distance sits <em>above</em> the observed value, and its
+confidence interval almost always excludes zero even when the two
+conditions are drawn from the same population. The bootstrap CI on
+this distance therefore does not answer "is there a difference?". It
+answers only "how stable is my distance estimate under producer
+resampling?", and it is useful for comparing relative magnitudes
+across contrasts where the bias is roughly constant.</p>
+<p>To test whether the observed distance is larger than chance, set
+<code>null = "permutation"</code>. The permutation null shuffles producer
+condition labels (or sign-flips per-producer differences in paired
+designs), recomputes the distance, and repeats. Its distribution is
+centred not at zero but at the chance distance between any two random
+subgroups of producers, which is itself positive because each
+subgroup mean carries within-group noise. Read the observed distance
+against the upper tail of <em>that</em> distribution via <code>$d_z</code>, <code>$d_ratio</code>,
+<code>$d_null_p95</code>, or a permutation <em>p</em> computed as the proportion of
+<code>$null_distribution</code> values at or above <code>$euclidean</code>. The Pearson
+fields carry the mirror-image bias: resampling <em>attenuates</em>
+correlation, so the bootstrap CI on <code>$correlation</code> sits <em>below</em> the
+observed value. Benchmark <em>r</em> against a permutation null as well,
+never against zero.</p>
 <p>The Pearson correlation fields (<code>$correlation</code>, <code>$boot_cor</code>,
 <code>$ci_cor</code>, <code>$boot_se_cor</code>) are returned alongside it as a
 secondary summary, for users who need to report <code>r</code> for
@@ -192,10 +229,13 @@ description for why and how to use it carefully if needed.</p><ul><li><p>The sha
 <code>ci_level</code>.</p></li>
 <li><p>The vertical line marks the <em>observed</em> statistic on the
 real data (not a bootstrap mean).</p></li>
-<li><p>A non-overlapping CI band away from zero on the Euclidean
-panel indicates the two group-mean CIs sit a non-trivial
-distance apart in pixel space, robust to participant-level
-resampling. The numbers are returned in <code>$ci_dist</code>.</p></li>
+<li><p>The Euclidean CI band is a <em>precision</em> interval on the distance
+estimate, not a test against zero. Producer resampling inflates the
+distance, so this band sits above the observed value and almost
+always excludes zero even for identical conditions; do not read
+"excludes zero" as evidence of a difference. For an above-chance
+test, run with <code>null = "permutation"</code>. The numbers are returned in
+<code>$ci_dist</code>.</p></li>
 <li><p>For visual comparison across multiple contrasts, pass each
 <code>rel_dissimilarity()</code> result to <code><a href="plot_dissimilarity_grid.html">plot_dissimilarity_grid()</a></code>,
 which lays them out as labelled CI bars on a shared axis.</p></li>
@@ -212,7 +252,11 @@ pair this with <code><a href="rel_cluster_test.html">rel_cluster_test()</a></cod
 <li><p><code>$euclidean_normalised</code>, <code>$euclidean / sqrt(n_pixels)</code>. Use
 for cross-resolution comparisons.</p></li>
 <li><p><code>$boot_dist</code>, <code>$ci_dist</code>, <code>$boot_se_dist</code>, bootstrap
-distribution, percentile CI, and SE of the Euclidean distance.</p></li>
+distribution, percentile CI, and SE of the Euclidean distance.
+The CI is a precision interval on the estimate, not a test against
+zero: it is biased upward by resampling and excludes zero even for
+identical conditions. Use <code>null = "permutation"</code> to test against
+chance.</p></li>
 <li><p><code>$null</code> (character), the null mode used.</p></li>
 <li><p><code>$null_distribution</code>, when <code>null != "none"</code>: numeric vector
 of per-iteration Euclidean distances under the chosen null.</p></li>

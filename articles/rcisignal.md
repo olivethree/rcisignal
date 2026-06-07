@@ -2439,28 +2439,67 @@ by `sqrt(n_pixels)` to make distances comparable across resolutions, but
 cross-study comparison still requires care about scaling conventions and
 the underlying base image.
 
-In code:
+> **Why the bootstrap CI on the distance is not a test against zero.**
+> The Euclidean distance is a non-negative L2 norm. Resampling producers
+> with replacement adds variance to each resampled group mean, and that
+> variance enters the squared-distance sum at every pixel:
+> $`E\!\left[(\bar{A}^{*}_i - \bar{B}^{*}_i)^2\right] \approx
+> (\bar{A}_i - \bar{B}_i)^2 + \mathrm{Var}(\bar{A}^{*}_i) +
+> \mathrm{Var}(\bar{B}^{*}_i)`$. Summed over thousands of pixels the
+> upward bias is large, so the bootstrap distribution of the distance
+> sits above the observed value and its CI almost always excludes zero,
+> even when the two conditions come from the same population. The
+> bootstrap CI therefore answers only “how stable is my distance
+> estimate under producer resampling?”, not “is there a difference?”. To
+> test the distance against chance, set `null = "permutation"`: the null
+> shuffles condition labels and recomputes the distance, so it is
+> centred at the chance distance between two random subgroups of
+> producers, which is positive, not zero. Reject only when the observed
+> distance sits in the upper tail of that permutation null. The Pearson
+> fields carry the mirror-image bias: resampling attenuates *r*, so its
+> bootstrap CI sits below the observed value; benchmark *r* against a
+> permutation null too.
 
-Pair the spatial cluster test with a single overall magnitude summary:
-Euclidean distance between the two group-mean CIs, with percentile
-bootstrap CIs.
+In code, run the permutation null as the primary inferential output and
+keep the bootstrap CI as a secondary precision interval:
 
 ``` r
 
 dr <- rel_dissimilarity(
   signal_a, signal_b,
-  n_boot   = 2000L,
-  ci_level = 0.95,
-  seed     = 1L
+  n_boot         = 2000L,
+  null           = "permutation",
+  n_permutations = 2000L,
+  ci_level       = 0.95,
+  seed           = 1L
 )
 dr
+
+# Permutation p: proportion of null distances at or above the observed.
+p_perm <- (1 + sum(dr$null_distribution >= dr$euclidean)) /
+          (length(dr$null_distribution) + 1)
+
+# Primary inferential summary.
+c(d       = dr$euclidean,
+  M_null  = mean(dr$null_distribution),
+  SD_null = sd(dr$null_distribution),
+  d_z     = dr$d_z,
+  d_ratio = dr$d_ratio,
+  p_perm  = p_perm)
+
 plot(dr)
 ```
 
-`$euclidean` is the raw distance; `$euclidean_normalised` is
+`$euclidean` is the observed distance and `$euclidean_normalised` is
 `$euclidean / sqrt(n_pixels)`, useful for cross-resolution comparisons.
-`$boot_dist` is the full bootstrap distribution; `$ci_dist` and
-`$boot_se_dist` are the standard summaries.
+The permutation summaries (`$d_z`, `$d_ratio`, `$d_null_p95`, and the
+permutation *p* above) are the inferential output: they place the
+observed distance against the positive-centred chance baseline. The
+bootstrap fields (`$boot_dist`, `$ci_dist`, `$boot_se_dist`) are a
+*precision* interval on the distance estimate, useful for judging how
+stable the number is under producer resampling and for comparing
+relative magnitudes across contrasts. They are not a test against zero,
+for the reason in the callout above.
 
 The Pearson correlation fields (`$correlation`, `$boot_cor`, `$ci_cor`,
 `$boot_se_cor`) are returned as a **secondary** summary; they are not
@@ -2468,8 +2507,10 @@ recommended as a standalone similarity score. Two base-subtracted CIs
 share image-domain spatial structure (face shape, oval signal support)
 that pushes their correlation above zero even when the underlying mental
 representations are unrelated, so a “high” absolute *r* can reflect
-shared image scaffolding rather than shared mental content. Euclidean
-distance does not share this baseline issue and is the primary metric
+shared image scaffolding rather than shared mental content. The
+bootstrap CI on *r* carries the opposite bias to the distance CI:
+producer resampling attenuates *r*, so the CI sits *below* the observed
+value rather than spanning it. Euclidean distance is the primary metric
 here.
 
 If you do report *r* (for comparability with prior literature or with
@@ -2481,11 +2522,64 @@ conditions and recompute *r*) rather than zero. The image-domain
 scaffolding shifts the chance baseline upward, so “*r* \> 0” is not the
 right test.
 
-A `null = "permutation"` argument adds a chance baseline for the
-Euclidean distance: stratified condition-label permutation
-(between-subjects) or sign-flip on per-producer differences (paired).
-When set, the result includes `$d_null_p95`, `$d_z` (z-equivalent effect
-size), and `$d_ratio`.
+#### A worked illustration: identical conditions
+
+When two conditions are drawn from the same population there is no real
+difference to detect, yet the bootstrap CI on the distance still
+excludes zero. The permutation null is what behaves correctly. The
+example below runs 60 such null datasets (two conditions of 20 producers
+each, drawn from the same distribution) and records, per dataset,
+whether the bootstrap CI excludes zero and the permutation *p*:
+
+``` r
+
+suppressPackageStartupMessages(library(rcisignal))
+options(rcisignal.silence_scaling_warning = TRUE)
+set.seed(7)
+reps   <- 60L
+n_pix  <- 24L * 24L   # small toy image, for speed
+n_prod <- 20L
+
+ci_excludes_zero <- logical(reps)
+p_perm           <- numeric(reps)
+first            <- NULL
+
+for (r in seq_len(reps)) {
+  # Two conditions from the SAME distribution: no real difference.
+  A <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+  B <- matrix(rnorm(n_pix * n_prod), n_pix, n_prod)
+  d <- rel_dissimilarity(A, B, n_boot = 400L, null = "permutation",
+                         n_permutations = 400L, progress = FALSE)
+  ci_excludes_zero[r] <- d$ci_dist[1] > 0
+  p_perm[r] <- (1 + sum(d$null_distribution >= d$euclidean)) /
+               (length(d$null_distribution) + 1)
+  if (r == 1L) first <- d
+}
+
+# One representative dataset: the bootstrap CI sits ABOVE the observed
+# distance and well clear of zero, yet the permutation p is unremarkable.
+c(observed_d = first$euclidean,
+  ci_low     = first$ci_dist[1],
+  ci_high    = first$ci_dist[2],
+  p_perm_1   = (1 + sum(first$null_distribution >= first$euclidean)) /
+               (length(first$null_distribution) + 1))
+#> observed_d     ci_low    ci_high   p_perm_1 
+#>  7.4024848  9.4964286 11.6554809  0.8354115
+
+# Across all 60 null datasets.
+c(pct_CI_excludes_zero = 100 * mean(ci_excludes_zero),
+  mean_p_perm          = mean(p_perm),
+  pct_p_perm_below_05  = 100 * mean(p_perm < 0.05))
+#> pct_CI_excludes_zero          mean_p_perm  pct_p_perm_below_05 
+#>          100.0000000            0.4707814           10.0000000
+```
+
+The bootstrap CI excludes zero in essentially every null dataset, which
+would license a “difference” claim that is simply wrong. The permutation
+*p* is centred near .5 (a single *p* is uniform under the null, so any
+one value is luck of the draw) and rejects at *p* \< .05 only about as
+often as the nominal 5% rate. Read the distance against the permutation
+null, not against the bootstrap CI.
 
 #### Choosing between Pearson *r* and Euclidean distance
 
@@ -2949,18 +3043,18 @@ Consider this:
   with noise.
 - **It tracks interrater agreement in practice.** Although group-mean z
   is not itself a reliability coefficient, empirically it correlates
-  very strongly with one. Across the 10 traits in Oliveira et
-  al. (2019), the pixel-wise `ICC(3,k)` of producers’ raw CIs at the
-  group level and the group-mean z are correlated at $`r = 0.97`$, 95%
-  CI $`[0.88, 0.99]`$, $`p < .001`$ (see the ICC-vs-group-mean-z
-  subsection inside §14.6 of this vignette for the scatter and the
-  linear fit). High group-mean z in those data went hand in hand with
-  producers agreeing more about the spatial pattern of their CIs. The
-  reading is correlational, not definitional: the metric becomes large
-  when (a) producers’ CIs point in similar directions in pixel space
-  and (b) the shared pattern survives averaging. Both of those are also
-  what `ICC(3,k)` is sensitive to. Use this connection as a sanity check
-  when interpreting a headline group-mean z, not as a substitute for the
+  very strongly with one. Across the 10 traits in Oliveira et al.
+  (2019), the pixel-wise `ICC(3,k)` of producers’ raw CIs at the group
+  level and the group-mean z are correlated at $`r = 0.97`$, 95% CI
+  $`[0.88, 0.99]`$, $`p < .001`$ (see the ICC-vs-group-mean-z subsection
+  inside §14.6 of this vignette for the scatter and the linear fit).
+  High group-mean z in those data went hand in hand with producers
+  agreeing more about the spatial pattern of their CIs. The reading is
+  correlational, not definitional: the metric becomes large when (a)
+  producers’ CIs point in similar directions in pixel space and (b) the
+  shared pattern survives averaging. Both of those are also what
+  `ICC(3,k)` is sensitive to. Use this connection as a sanity check when
+  interpreting a headline group-mean z, not as a substitute for the
   agreement-on-pixels evidence that an actual ICC or agreement map
   provides.
 - **Suggested framing when writing a report.** *“The group-mean CI
@@ -4018,9 +4112,11 @@ for (cname in names(contrasts)) {
 
   dissim_full[[cname]] <- rel_dissimilarity(
     a, b,
-    n_boot   = 2000L,
-    seed     = 1L,
-    progress = FALSE
+    n_boot         = 2000L,
+    null           = "permutation",
+    n_permutations = 2000L,
+    seed           = 1L,
+    progress       = FALSE
   )
 }
 
@@ -4043,9 +4139,12 @@ producer-level resamples (each condition resampled independently with
 replacement, distance recomputed on the resample). The shaded silhouette
 is the kernel density of the bootstrap distribution, scaled to the row
 height for visual comparison; its width does not encode units. Larger
-values mean the two group CIs sit farther apart in pixel space; bars
-whose left end is well above zero indicate that the separation is robust
-to producer-level variability.](figures/oliveira_2019/dissim_grid.png)
+values mean the two group CIs sit farther apart in pixel space. The bar
+shows how precisely each distance is estimated under producer
+resampling; because resampling biases the distance upward, a bar clear
+of zero is not itself a test of difference. The above-chance test is the
+permutation null reported in the table
+below.](figures/oliveira_2019/dissim_grid.png)
 
 Between-condition Euclidean distance for the three contrasts on the
 Oliveira et al. (2019) Study 1 data. Each row is one contrast. The
@@ -4056,14 +4155,28 @@ producer-level resamples (each condition resampled independently with
 replacement, distance recomputed on the resample). The shaded silhouette
 is the kernel density of the bootstrap distribution, scaled to the row
 height for visual comparison; its width does not encode units. Larger
-values mean the two group CIs sit farther apart in pixel space; bars
-whose left end is well above zero indicate that the separation is robust
-to producer-level variability.
+values mean the two group CIs sit farther apart in pixel space. The bar
+shows how precisely each distance is estimated under producer
+resampling; because resampling biases the distance upward, a bar clear
+of zero is not itself a test of difference. The above-chance test is the
+permutation null reported in the table below.
 
-The numeric values can be inspected on the dissimilarity objects
-themselves; the figure shows that all three contrasts diverge clearly on
-this dataset, with the lower bound of the 95% percentile CI well above
-zero.
+The bootstrap bars in the figure show the *precision* of each distance
+estimate under producer resampling; because that resampling biases the
+distance upward, a bar clear of zero is not by itself evidence of a
+difference (see the §9.3 callout). The above-chance test is the
+permutation null, summarised per contrast below:
+
+| Contrast              | d    | M null | SD null | z    | d/median | p perm |
+|:----------------------|:-----|:-------|:--------|:-----|:---------|:-------|
+| Trust vs Friendly     | 0.28 | 0.23   | 0.015   | +3.0 | 1.20     | 0.0040 |
+| Competent vs Dominant | 0.35 | 0.25   | 0.020   | +5.2 | 1.42     | 0.0005 |
+| Trust vs Dominant     | 0.45 | 0.25   | 0.022   | +9.4 | 1.84     | 0.0005 |
+
+Each contrast sits in the upper tail of its own permutation null (*z*
+from +3.0 to +9.4, all *p* \< .01), so the divergences are larger than
+the chance distance between two random producer subgroups. That is the
+claim the bootstrap CI alone cannot support.
 
 ### 14.8 Region-by-region cluster tests
 
@@ -4607,6 +4720,22 @@ vice versa) yields a number with no defensible interpretation.
 **Sample size.** Reliability estimates themselves become unreliable
 below N approximately 30 per condition. The package warns at N \< 30 and
 aborts at N \< 4. Aim for N \>= 60 per condition for stable assessment.
+
+**A bootstrap CI on a distance is not a test against zero.** The
+Euclidean distance from
+[`rel_dissimilarity()`](https://olivethree.github.io/rcisignal/reference/rel_dissimilarity.md)
+(and the matrices behind
+[`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
+/
+[`plot_ci_mds()`](https://olivethree.github.io/rcisignal/reference/plot_ci_mds.md))
+is a non-negative norm whose bootstrap CI is biased upward by producer
+resampling and almost always excludes zero even when two conditions do
+not differ. Read it as a precision interval and for relative magnitude
+comparisons, not as evidence of a difference. For an above-chance test,
+set `null = "permutation"` and read *d_z*, *d_ratio*, and a permutation
+*p* against the positive-centred permutation null. The Pearson *r*
+fields carry the mirror-image bias (resampling attenuates *r*, so its CI
+sits below the observed value). See §9.3.
 
 **Many-condition summary figures.**
 [`plot_ci_distance_matrix()`](https://olivethree.github.io/rcisignal/reference/plot_ci_distance_matrix.md)
