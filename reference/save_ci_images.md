@@ -2,8 +2,9 @@
 
 Writes each column of a `signal_matrix` (one CI) to disk as its own
 image. The default output matches what
-[`rcicr::generateCI()`](https://rdrr.io/pkg/rcicr/man/generateCI.html) /
-[`rcicr::generateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/generateCI2IFC.html)
+[`rcicr::generateCI()`](https://rdotsch.github.io/rcicr/reference/generateCI.html)
+/
+[`rcicr::generateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/generateCI2IFC.html)
 would write for the same CI: a grayscale luminance image of the CI noise
 scaled into `[0, 1]` and averaged with the base face (no color palette).
 Two palette overlays are available as opt-ins for visualization:

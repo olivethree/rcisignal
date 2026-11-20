@@ -8,9 +8,9 @@ the participant picks one image. Output is shape-compatible with
 and the reliability / discriminability functions.
 
 Noise pool is generated once via
-[`rcicr::generateNoisePattern()`](https://rdrr.io/pkg/rcicr/man/generateNoisePattern.html)
+[`rcicr::generateNoisePattern()`](https://rdotsch.github.io/rcicr/reference/generateNoisePattern.html)
 and
-[`rcicr::generateNoiseImage()`](https://rdrr.io/pkg/rcicr/man/generateNoiseImage.html)
+[`rcicr::generateNoiseImage()`](https://rdotsch.github.io/rcicr/reference/generateNoiseImage.html)
 and then sampled per trial (without replacement within a participant;
 the same pool is shared across participants).
 

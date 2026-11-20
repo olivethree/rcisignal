@@ -134,12 +134,12 @@ efficient.
 
 Choice of statistic: the **Frobenius norm** is the correct form per
 Schmitz, Rougier, & Yzerbyt (2020 comment + 2020 erratum). The original
-[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
+[`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html)
 already uses it (`norm(matrix(target_ci[["ci"]]), "f")`); this function
 matches that convention for both 2IFC and Brief-RC data.
 
 Trial-count matching: the original
-[`rcicr::generateReferenceDistribution2IFC()`](https://rdrr.io/pkg/rcicr/man/generateReferenceDistribution2IFC.html)
+[`rcicr::generateReferenceDistribution2IFC()`](https://rdotsch.github.io/rcicr/reference/generateReferenceDistribution2IFC.html)
 builds the reference using the full pool size. For Brief-RC the
 producer's recorded `n_trials` is typically smaller than `n_pool`, so a
 pool-size reference biases infoVal downward. `infoval()` closes this gap

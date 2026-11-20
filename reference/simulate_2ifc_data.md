@@ -10,9 +10,9 @@ quickstart sandbox and as a building block for simulation studies
 sensitivity to contamination).
 
 The function generates the noise pool on the fly via
-[`rcicr::generateNoisePattern()`](https://rdrr.io/pkg/rcicr/man/generateNoisePattern.html)
+[`rcicr::generateNoisePattern()`](https://rdotsch.github.io/rcicr/reference/generateNoisePattern.html)
 and
-[`rcicr::generateNoiseImage()`](https://rdrr.io/pkg/rcicr/man/generateNoiseImage.html),
+[`rcicr::generateNoiseImage()`](https://rdotsch.github.io/rcicr/reference/generateNoiseImage.html),
 so it requires the `rcicr` package to be installed. With default
 arguments (50 participants per condition, 500 trials, 256-pixel images)
 the noise generation step takes one to a few minutes; a progress bar is
@@ -88,7 +88,7 @@ simulate_2ifc_data(
 - noise_type, nscales, sigma:
 
   Forwarded to
-  [`rcicr::generateNoisePattern()`](https://rdrr.io/pkg/rcicr/man/generateNoisePattern.html).
+  [`rcicr::generateNoisePattern()`](https://rdotsch.github.io/rcicr/reference/generateNoisePattern.html).
   Defaults match rcicr's defaults (`"sinusoid"`, `5`, `25`).
 
 - rdata_dir:

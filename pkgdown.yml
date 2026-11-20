@@ -1,10 +1,10 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   rcisignal: rcisignal.html
   validation_rcicr: validation_rcicr.html
-last_built: 2026-06-07T21:55Z
+last_built: 2026-11-20T16:09Z
 urls:
   reference: https://olivethree.github.io/rcisignal/reference
   article: https://olivethree.github.io/rcisignal/articles

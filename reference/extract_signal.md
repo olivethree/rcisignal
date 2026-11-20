@@ -67,7 +67,7 @@ are sensitive to the scaling transform; only correlation-based metrics
 [`rel_loo()`](https://olivethree.github.io/rcisignal/reference/rel_loo.md))
 survive a single uniform linear scaling unmodified, and even those break
 under per-CI `"matched"`-style scaling. The standard 2IFC infoVal path
-([`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html))
+([`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html))
 extracts the raw `$ci` internally from the rcicr CI-list and is **not**
 affected; hand-rolled `infoVal` implementations (Brief-RC, custom code)
 **are**, and should be fed the raw mask. Prefer

@@ -1,7 +1,7 @@
 # Compute individual 2IFC CIs from trial-level responses
 
 Thin wrapper around
-[`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html)
+[`rcicr::batchGenerateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/batchGenerateCI2IFC.html)
 that handles the known rcicr-integration gotchas and exposes a uniform
 return shape across the 2IFC and Brief-RC paths.
 
@@ -39,7 +39,7 @@ ci_from_responses_2ifc(
 - rdata_path:
 
   Path to the `.Rdata` file produced by
-  [`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html).
+  [`rcicr::generateStimuli2IFC()`](https://rdotsch.github.io/rcicr/reference/generateStimuli2IFC.html).
   Either `rdata_path` or `stimuli` must be supplied; if both are given
   `stimuli` wins.
 
@@ -77,7 +77,7 @@ ci_from_responses_2ifc(
 
   rcicr scaling option; one of `"autoscale"`, `"independent"`,
   `"constant"`, `"none"`. Passed through to
-  [`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html).
+  [`rcicr::batchGenerateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/batchGenerateCI2IFC.html).
   Scaling only affects the `$combined` (rendered) image, not `$ci`, so
   the returned `$signal_matrix` is the raw mask regardless of this
   argument.
@@ -146,7 +146,7 @@ What the wrapper does for you:
   **Visualization only.**
 
 - `$rcicr_result` is the raw return value of
-  [`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html).
+  [`rcicr::batchGenerateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/batchGenerateCI2IFC.html).
 
 ## Common mistakes
 
@@ -160,7 +160,7 @@ What the wrapper does for you:
 ## See also
 
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md),
-[`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html),
+[`rcicr::batchGenerateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/batchGenerateCI2IFC.html),
 [`group_ci()`](https://olivethree.github.io/rcisignal/reference/group_ci.md),
 [`save_ci_images()`](https://olivethree.github.io/rcisignal/reference/save_ci_images.md)
 

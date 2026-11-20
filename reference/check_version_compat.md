@@ -1,7 +1,7 @@
 # Check rcicr version compatibility with a 2IFC rdata file
 
 The `.RData` produced by
-[`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html)
+[`rcicr::generateStimuli2IFC()`](https://rdotsch.github.io/rcicr/reference/generateStimuli2IFC.html)
 stores a `generator_version` field. When a different rcicr version is
 used later to reconstruct CIs from that rdata, subtle numerical or API
 changes may produce wrong results silently. This check compares the

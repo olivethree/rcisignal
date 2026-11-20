@@ -8,9 +8,9 @@
   default output now matches rcicr.** The default is
   `palette = "grayscale"`, which writes the raw pixel luminance image
   (no color palette) that
-  [`rcicr::generateCI()`](https://rdrr.io/pkg/rcicr/man/generateCI.html)
+  [`rcicr::generateCI()`](https://rdotsch.github.io/rcicr/reference/generateCI.html)
   /
-  [`rcicr::generateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/generateCI2IFC.html)
+  [`rcicr::generateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/generateCI2IFC.html)
   would produce for the same CI. For each column of `signal_matrix`, the
   raw noise is scaled into `[0, 1]` via the chosen `scaling` method and
   averaged with the base via `(scaled + base) / 2` before writing. Two
@@ -71,6 +71,21 @@
   documents that its dissimilarity panel is bootstrap-only and points to
   `rel_dissimilarity(null = "permutation")` for the test. No change to
   defaults or computations.
+
+- **Removed a miscalibrated group-CI infoVal recipe from the user
+  guide.** Vignette §10 (example d), §11.5, and §17.1 (step 3) showed
+  [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+  applied to a group CI with the summed trial count of the group as the
+  reference. That single-producer reference is not calibrated for an
+  average of N producers: in simulation, a group CI at a correctly
+  calibrated z of 3 scored anywhere from about 0.5 to about 7 under the
+  summed-count reference, depending on trial counts and pool size. The
+  guide now states that
+  [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
+  treats every column as one producer’s CI and points to
+  [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
+  (`data$group_mean_z_unmasked` / `_masked`, run per condition) for the
+  matched-N group-mean z described in §11. No change to code.
 
 ## rcisignal 0.3.0
 

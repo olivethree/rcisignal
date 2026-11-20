@@ -35,7 +35,7 @@ to the upstream [`rcicr`](https://github.com/rdotsch/rcicr) package
 (Dotsch, 2016, 2023).
 [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
 is a small convenience function around
-[`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html)
+[`rcicr::batchGenerateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/batchGenerateCI2IFC.html)
 that takes care of the integration quirks. Brief-RC support (Schmitz,
 Rougier, & Yzerbyt, 2024) is provided directly by rcisignal via
 [`ci_from_responses_briefrc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_briefrc.md).
@@ -217,8 +217,9 @@ save_ci_images(res$group_ci, base_image = sim$base_face,
 ```
 
 The default output is a grayscale luminance image that matches what
-[`rcicr::generateCI()`](https://rdrr.io/pkg/rcicr/man/generateCI.html) /
-[`rcicr::generateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/generateCI2IFC.html)
+[`rcicr::generateCI()`](https://rdotsch.github.io/rcicr/reference/generateCI.html)
+/
+[`rcicr::generateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/generateCI2IFC.html)
 would write for the same CI: the raw signed noise is scaled into
 `[0, 1]` via the chosen `scaling` method (default `"independent"`,
 matching rcicr’s default) and then averaged with the base via
@@ -281,14 +282,14 @@ reliability and discriminability metrics, sensitivity to contamination).
   milliseconds).
 - **Noise pool.** A `pixels x n_trials` numeric matrix, generated on the
   fly via
-  [`rcicr::generateNoisePattern()`](https://rdrr.io/pkg/rcicr/man/generateNoisePattern.html)
+  [`rcicr::generateNoisePattern()`](https://rdotsch.github.io/rcicr/reference/generateNoisePattern.html)
   and
-  [`rcicr::generateNoiseImage()`](https://rdrr.io/pkg/rcicr/man/generateNoiseImage.html).
+  [`rcicr::generateNoiseImage()`](https://rdotsch.github.io/rcicr/reference/generateNoiseImage.html).
   (`rcicr` must be installed; with the default 256-pixel images and 500
   trials the pool takes roughly one to three minutes, with a `cli`
   progress bar.)
 - **For 2IFC**, an `.Rdata` file in the format that
-  [`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html)
+  [`rcicr::generateStimuli2IFC()`](https://rdotsch.github.io/rcicr/reference/generateStimuli2IFC.html)
   writes, so
   [`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md),
   [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md),
@@ -334,7 +335,7 @@ str(sim, max.level = 1)
 | `signal_strength` | `"weak"` | also `"none"` (true null), `"strong"`, or a numeric coefficient |
 | `signal_region` | `"eyes"` | any region accepted by [`make_face_mask()`](https://olivethree.github.io/rcisignal/reference/make_face_mask.md) |
 | `rt_contamination_fast` / `_slow` | `0.02` / `0.02` | fraction of trials replaced by uniform-fast (50-200 ms) / uniform-slow (5000-20000 ms) responses |
-| `noise_type`, `nscales`, `sigma` | `"sinusoid"`, `5`, `25` | forwarded to [`rcicr::generateNoisePattern()`](https://rdrr.io/pkg/rcicr/man/generateNoisePattern.html) |
+| `noise_type`, `nscales`, `sigma` | `"sinusoid"`, `5`, `25` | forwarded to [`rcicr::generateNoisePattern()`](https://rdotsch.github.io/rcicr/reference/generateNoisePattern.html) |
 | `rdata_dir` | `NULL` | optional directory for a stable-path stimuli `.Rdata`; pass to keep the sim usable across R sessions |
 | `seed` | `NULL` | a random seed is drawn and stored on the result |
 | `progress` | `TRUE` | shows a `cli` progress bar during noise generation |
@@ -623,7 +624,7 @@ stopping the analysis; silence it with
 `options(rcisignal.silence_scaling_warning = TRUE)`.
 
 One important exception:
-[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
+[`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html)
 is unaffected by display scaling. It reads the raw `$ci` element from
 the rcicr CI list internally (`norm(matrix(target_ci[["ci"]]), "f")`)
 regardless of the `scaling` argument used at generation, so the standard
@@ -924,7 +925,7 @@ responses <- read_responses("study1data.csv", method = "2ifc")
 ### 4.2 The `.RData` from `rcicr::generateStimuli2IFC()`
 
 The 2IFC pipeline uses an `.RData` file produced by
-[`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html).
+[`rcicr::generateStimuli2IFC()`](https://rdotsch.github.io/rcicr/reference/generateStimuli2IFC.html).
 The objects in this file that the analysis actually uses are:
 
 - `base_faces`: the loaded base-face matrices, grayscale in `[0, 1]`.
@@ -941,7 +942,7 @@ Several other fields (`n_trials`, `seed`, `label`, `generator_version`,
 and so on) are bookkeeping carried by rcicr; analysis functions in this
 package ignore them. `reference_norms` is created and inserted in place
 by
-[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
+[`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html)
 on its first call; copy the rdata first if you want it untouched.
 
 The actual per-trial noise patterns are **not stored** in the rdata.
@@ -1571,7 +1572,7 @@ whether those numbers can be trusted:
 1.  Compute observed Frobenius norm per producer (and group-mean).
 2.  Compare against a reference distribution at each producer’s actual
     trial count (closes the calibration gap in
-    [`rcicr::generateReferenceDistribution2IFC()`](https://rdrr.io/pkg/rcicr/man/generateReferenceDistribution2IFC.html),
+    [`rcicr::generateReferenceDistribution2IFC()`](https://rdotsch.github.io/rcicr/reference/generateReferenceDistribution2IFC.html),
     which keys on pool size).
 3.  Apply a face mask (default `"auto"` = parametric full-face oval) and
     repeat.
@@ -1657,7 +1658,7 @@ Once the diagnostics pass, compute CIs.
 ### 6.1 From raw responses
 
 The 2IFC path delegates to
-[`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html)
+[`rcicr::batchGenerateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/batchGenerateCI2IFC.html)
 and returns a list with `$signal_matrix` (raw mask, ready for `rel_*`),
 optionally `$rendered_ci` for visualization, plus metadata.
 
@@ -1739,7 +1740,7 @@ that PNG-derived signals are scaled. Silence with
 
 ### 6.3 CI scaling options
 
-[`rcicr::batchGenerateCI2IFC()`](https://rdrr.io/pkg/rcicr/man/batchGenerateCI2IFC.html)
+[`rcicr::batchGenerateCI2IFC()`](https://rdotsch.github.io/rcicr/reference/batchGenerateCI2IFC.html)
 exposes a `scaling` argument with five values:
 
 - `"autoscale"`: stretches each producer’s mask to a fixed symmetric
@@ -1765,7 +1766,7 @@ which `scaling` you pick; the `scaling` argument only affects the
 optional `$rendered_ci` field that `keep_rendered = TRUE` returns.
 
 Recommendation: feed the raw `$signal_matrix` to every metric. For
-[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
+[`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html)
 the choice does not matter (it reads `$ci` internally). For Brief-RC,
 treat any non-`none` scaling as visualization-only and never pass it to
 `rel_*` or to hand-rolled `infoVal`.
@@ -2802,33 +2803,41 @@ infoval(res$signal_matrix[, "P012", drop = FALSE], noise,
 keep <- c("P012", "P015", "P019")
 infoval(res$signal_matrix[, keep, drop = FALSE], noise,
         trial_counts = tc[keep])$infoval
-
-# (d) Group CIs. One z per group column, against a trial-count-
-#     matched reference per group.
-group_tc <- tapply(tc, responses$condition[match(names(tc),
-                   responses$participant_id)], sum)
-infoval(res$group_ci, noise,
-        trial_counts = group_tc)$infoval
-#>    happy      sad
-#>   12.40    11.95
 ```
 
 In each case
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
-just iterates over columns; the “per-producer vs per-group” distinction
-is entirely about what columns mean and what trial count their reference
-must match. For per-producer CIs `trial_counts` is the named vector of
-how many trials each producer contributed (which is what the responses
-table tells you via `table(responses[[col_participant]])`, or what the
-responses-aware form
+iterates over columns and treats every column as **one producer’s** CI:
+its reference distribution is a single random responder at that column’s
+trial count. `trial_counts` is the named vector of how many trials each
+producer contributed (which is what the responses table tells you via
+`table(responses[[col_participant]])`, or what the responses-aware form
 `infoval(..., responses = responses, col_participant = "participant_id")`
-derives for you). For group CIs the reference must be matched to the
-*sum* of the trial counts of the producers in that group, because the
-group CI is built from N producer masks summed (then averaged) at their
-individual trial counts. Passing a per-producer trial count for a group
-column would calibrate the reference against the wrong N and return a
-misleading z (see §17 for what goes wrong in detail; the per-producer /
-group-mean distinction there carries the same matching requirement).
+derives for you).
+
+**Do not pass group CIs to
+[`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md).**
+A group CI averages N producer masks, and no single-producer reference
+matches that, whatever trial count you give it. Passing the per-producer
+count makes the reference far too wide; passing the *summed* count of
+the group is closer but still miscalibrated, because once the summed
+count exceeds the noise pool the simulated responder has to resample
+stimuli, which changes the spread of the reference. Depending on the
+design, the summed-count z can land well below or well above the
+correctly calibrated value. The calibrated group-level statistic
+averages N simulated random producers, each at its real trial count;
+that is the group-mean z described in §11, available per condition
+through
+[`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md):
+
+``` r
+
+# One group-mean z per condition: run infoval_report() on each
+# condition's subset of the responses.
+sapply(split(responses, responses$condition), function(d) {
+  infoval_report(d, noise_matrix = noise)$data$group_mean_z_unmasked
+})
+```
 
 The function unifies 2IFC and Brief-RC infoVal under one implementation.
 The only difference between paradigms is what you pass as
@@ -2840,7 +2849,7 @@ simulation cost is paid once per distinct trial count rather than once
 per producer.
 
 **Trial-count matching closes a calibration gap.** The original
-[`rcicr::generateReferenceDistribution2IFC()`](https://rdrr.io/pkg/rcicr/man/generateReferenceDistribution2IFC.html)
+[`rcicr::generateReferenceDistribution2IFC()`](https://rdotsch.github.io/rcicr/reference/generateReferenceDistribution2IFC.html)
 keys its reference on the full pool size. For 2IFC this is appropriate
 (every producer typically responds to every pool item). For Brief-RC,
 where the recorded number of mask contributions equals `n_trials` and is
@@ -2855,7 +2864,7 @@ Because
 [`rcisignal::infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
 is a reimplementation, it is useful to know how its numbers line up with
 the established
-[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html).
+[`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html).
 The companion vignette *Validation: rcisignal vs rcicr infoVal
 convergence* runs both implementations on the open data from Oliveira,
 Garcia-Marques, Dotsch & Garcia-Marques (2019), ten traits, twenty
@@ -2883,7 +2892,7 @@ a Monte-Carlo reference distribution. In practical terms the choice
 between
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
 and
-[`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html)
+[`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html)
 makes no difference to the conclusions you would draw about individual
 producers on a 2IFC dataset of this size.
 
@@ -3156,12 +3165,13 @@ invite people to read its output as *the* group-level number, which is
 exactly the framing this section is asking you to avoid. If you want the
 statistic, run
 [`infoval_report()`](https://olivethree.github.io/rcisignal/reference/infoval_report.md)
-and pull `data$group_mean_z_unmasked` or `data$group_mean_z_masked`; if
-you want the full Monte-Carlo machinery in a different context, calling
+and pull `data$group_mean_z_unmasked` or `data$group_mean_z_masked` (for
+several conditions, run it once per condition subset, as in §10).
+Calling
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
-on a single group-CI column with the right `trial_counts` (the *sum* of
-the producer trial counts in the group, per §10’s group-CI recipe)
-returns the analogous comparison built from the per-producer engine.
+on a group-CI column is not a substitute: its single-producer reference
+is not calibrated for an average of N producers, even with the summed
+trial count (§10).
 
 ## 12. Agreement maps and publication-ready figures
 
@@ -4463,23 +4473,20 @@ through.
 ![FWER-controlled pairwise cluster-agreement maps on the male base face.
 Left: Trust minus Friendly. Right: Dominant minus Competent. Each map
 shows the difference of the two group-mean CIs only at pixels belonging
-to a cluster that is significant at p \< .05 under FWER-controlled
-cluster-based permutation testing (cluster threshold \|t\| \> 2.0; 2000
-stratified label permutations; max-mass null). Color convention as in
-the descriptive maps above (blue = first condition stronger; red =
-second condition stronger; opacity = magnitude). Compare with the
-descriptive maps to see how much of the raw pattern survives the
-inferential
-filter.](figures/oliveira_2019/pairwise_trust_vs_friendly.png)![FWER-controlled
-pairwise cluster-agreement maps on the male base face. Left: Trust minus
-Friendly. Right: Dominant minus Competent. Each map shows the difference
-of the two group-mean CIs only at pixels belonging to a cluster that is
-significant at p \< .05 under FWER-controlled cluster-based permutation
-testing (cluster threshold \|t\| \> 2.0; 2000 stratified label
+to a cluster that is significant at p 2.0; 2000 stratified label
 permutations; max-mass null). Color convention as in the descriptive
 maps above (blue = first condition stronger; red = second condition
 stronger; opacity = magnitude). Compare with the descriptive maps to see
 how much of the raw pattern survives the inferential
+filter.](figures/oliveira_2019/pairwise_trust_vs_friendly.png)![FWER-controlled
+pairwise cluster-agreement maps on the male base face. Left: Trust minus
+Friendly. Right: Dominant minus Competent. Each map shows the difference
+of the two group-mean CIs only at pixels belonging to a cluster that is
+significant at p 2.0; 2000 stratified label permutations; max-mass
+null). Color convention as in the descriptive maps above (blue = first
+condition stronger; red = second condition stronger; opacity =
+magnitude). Compare with the descriptive maps to see how much of the raw
+pattern survives the inferential
 filter.](figures/oliveira_2019/pairwise_dominant_vs_competent.png)
 
 FWER-controlled pairwise cluster-agreement maps on the male base face.
@@ -4889,18 +4896,16 @@ iv_masked <- infoval(sm, noise_matrix, tc, mask = fm,
                      iter = 1000L, seed = 1L)
 median(iv_masked$infoval)
 
-# 3. Compute the group-mean CI's infoVal. We treat the group as
-# a single "producer" whose trial count is the sum of the
-# individual counts.
-group <- matrix(rowMeans(sm), ncol = 1,
-                dimnames = list(NULL, "group"))
-tc_grp <- sum(tc)
-names(tc_grp) <- "group"
-
-iv_grp <- infoval(group, noise_matrix, tc_grp,
-                  iter = 1000L, seed = 1L)
-iv_grp$infoval                 # value depends on signal alignment;
-                               # see paragraph 5 of §17
+# 3. Compute the group-mean z. Its reference averages one simulated
+# random producer per real producer, each at that producer's trial
+# count (§11). Do not run infoval() on rowMeans(sm): its
+# single-producer reference is miscalibrated for a group average,
+# even with the summed trial count (§10). `responses` is the
+# trial-level data frame for this condition.
+rep_iv <- infoval_report(responses, noise_matrix = noise_matrix,
+                         iter = 1000L, seed = 1L)
+rep_iv$data$group_mean_z_unmasked   # value depends on signal alignment;
+rep_iv$data$group_mean_z_masked     # see paragraph 5 of §17
 
 # 4. Sanity-check the chance baseline. A random-mask producer
 # should give z ~ 0 within MAD noise. Build a fake producer's

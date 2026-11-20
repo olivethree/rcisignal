@@ -212,7 +212,7 @@ For `method = "2ifc"`, the function calls `rcicr` to reconstruct
 per-trial noise patterns from `stimuli_params` and `p` (the `.RData`
 does not store the patterns themselves; see vignette "What data the
 package expects"). The reconstruction is one
-[`rcicr::generateNoiseImage()`](https://rdrr.io/pkg/rcicr/man/generateNoiseImage.html)
+[`rcicr::generateNoiseImage()`](https://rdotsch.github.io/rcicr/reference/generateNoiseImage.html)
 call per pool item, which is fast (seconds) but does require `rcicr` to
 be installed. The Brief-RC path needs no `rcicr` dependency.
 

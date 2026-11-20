@@ -37,7 +37,7 @@ check_stimulus_alignment(
 - rdata:
 
   Path to the `.RData` file produced by
-  [`rcicr::generateStimuli2IFC()`](https://rdrr.io/pkg/rcicr/man/generateStimuli2IFC.html).
+  [`rcicr::generateStimuli2IFC()`](https://rdotsch.github.io/rcicr/reference/generateStimuli2IFC.html).
   Required when `method = "2ifc"`.
 
 - noise_matrix:

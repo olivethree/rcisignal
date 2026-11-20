@@ -24,7 +24,7 @@ Supported sources, with no `format` flag — detection is automatic:
   does not store the noise matrix directly — it stores `stimuli_params`
   (per-trial parameter rows) and `p` (the sinusoid / gabor basis). This
   loader reconstructs each trial's noise pattern via
-  [`rcicr::generateNoiseImage()`](https://rdrr.io/pkg/rcicr/man/generateNoiseImage.html)
+  [`rcicr::generateNoiseImage()`](https://rdotsch.github.io/rcicr/reference/generateNoiseImage.html)
   and caches the result to `<basename>.rds`. Requires `rcicr` to be
   installed for the first read; subsequent reads from the cache do not.
 
@@ -143,7 +143,7 @@ names and operate independently.
 - `reference_norms`:
 
   Random-responder Frobenius norms, inserted in place by
-  [`rcicr::computeInfoVal2IFC()`](https://rdrr.io/pkg/rcicr/man/computeInfoVal2IFC.html).
+  [`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html).
   Not present at first.
 
 Trial-level noise images are not stored in the rdata; this loader
