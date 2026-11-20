@@ -66,6 +66,18 @@
   `rel_dissimilarity(null = "permutation")` for the test. No change
   to defaults or computations.
 
+* **Removed a miscalibrated group-CI infoVal recipe from the user
+  guide.** Vignette §10 (example d), §11.5, and §17.1 (step 3) showed
+  `infoval()` applied to a group CI with the summed trial count of the
+  group as the reference. That single-producer reference is not
+  calibrated for an average of N producers: in simulation, a group CI
+  at a correctly calibrated z of 3 scored anywhere from about 0.5 to
+  about 7 under the summed-count reference, depending on trial counts
+  and pool size. The guide now states that `infoval()` treats every
+  column as one producer's CI and points to `infoval_report()`
+  (`data$group_mean_z_unmasked` / `_masked`, run per condition) for
+  the matched-N group-mean z described in §11. No change to code.
+
 # rcisignal 0.3.0
 
 ## Breaking changes

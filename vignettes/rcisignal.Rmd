@@ -2437,31 +2437,36 @@ infoval(res$signal_matrix[, "P012", drop = FALSE], noise,
 keep <- c("P012", "P015", "P019")
 infoval(res$signal_matrix[, keep, drop = FALSE], noise,
         trial_counts = tc[keep])$infoval
-
-# (d) Group CIs. One z per group column, against a trial-count-
-#     matched reference per group.
-group_tc <- tapply(tc, responses$condition[match(names(tc),
-                   responses$participant_id)], sum)
-infoval(res$group_ci, noise,
-        trial_counts = group_tc)$infoval
-#>    happy      sad
-#>   12.40    11.95
 ```
 
-In each case `infoval()` just iterates over columns; the "per-producer
-vs per-group" distinction is entirely about what columns mean and what
-trial count their reference must match. For per-producer CIs
-`trial_counts` is the named vector of how many trials each producer
-contributed (which is what the responses table tells you via
-`table(responses[[col_participant]])`, or what the responses-aware form
+In each case `infoval()` iterates over columns and treats every column
+as **one producer's** CI: its reference distribution is a single random
+responder at that column's trial count. `trial_counts` is the named
+vector of how many trials each producer contributed (which is what the
+responses table tells you via `table(responses[[col_participant]])`, or
+what the responses-aware form
 `infoval(..., responses = responses, col_participant = "participant_id")`
-derives for you). For group CIs the reference must be matched to the
-*sum* of the trial counts of the producers in that group, because the
-group CI is built from N producer masks summed (then averaged) at their
-individual trial counts. Passing a per-producer trial count for a group
-column would calibrate the reference against the wrong N and return a
-misleading z (see §17 for what goes wrong in detail; the per-producer /
-group-mean distinction there carries the same matching requirement).
+derives for you).
+
+**Do not pass group CIs to `infoval()`.** A group CI averages N producer
+masks, and no single-producer reference matches that, whatever trial
+count you give it. Passing the per-producer count makes the reference
+far too wide; passing the *summed* count of the group is closer but
+still miscalibrated, because once the summed count exceeds the noise
+pool the simulated responder has to resample stimuli, which changes the
+spread of the reference. Depending on the design, the summed-count z
+can land well below or well above the correctly calibrated value. The
+calibrated group-level statistic averages N simulated random producers,
+each at its real trial count; that is the group-mean z described in
+§11, available per condition through `infoval_report()`:
+
+```{r infoval-group, eval = FALSE}
+# One group-mean z per condition: run infoval_report() on each
+# condition's subset of the responses.
+sapply(split(responses, responses$condition), function(d) {
+  infoval_report(d, noise_matrix = noise)$data$group_mean_z_unmasked
+})
+```
 
 The function unifies 2IFC and Brief-RC infoVal under one implementation.
 The only difference between paradigms is what you pass as
@@ -2778,11 +2783,10 @@ pipeline. Second, exposing the function as a public entry point would
 invite people to read its output as *the* group-level number, which is
 exactly the framing this section is asking you to avoid. If you want the
 statistic, run `infoval_report()` and pull `data$group_mean_z_unmasked`
-or `data$group_mean_z_masked`; if you want the full Monte-Carlo
-machinery in a different context, calling `infoval()` on a single
-group-CI column with the right `trial_counts` (the *sum* of the producer
-trial counts in the group, per §10's group-CI recipe) returns the
-analogous comparison built from the per-producer engine.
+or `data$group_mean_z_masked` (for several conditions, run it once per
+condition subset, as in §10). Calling `infoval()` on a group-CI column
+is not a substitute: its single-producer reference is not calibrated
+for an average of N producers, even with the summed trial count (§10).
 
 ## 12. Agreement maps and publication-ready figures
 
@@ -4336,18 +4340,16 @@ iv_masked <- infoval(sm, noise_matrix, tc, mask = fm,
                      iter = 1000L, seed = 1L)
 median(iv_masked$infoval)
 
-# 3. Compute the group-mean CI's infoVal. We treat the group as
-# a single "producer" whose trial count is the sum of the
-# individual counts.
-group <- matrix(rowMeans(sm), ncol = 1,
-                dimnames = list(NULL, "group"))
-tc_grp <- sum(tc)
-names(tc_grp) <- "group"
-
-iv_grp <- infoval(group, noise_matrix, tc_grp,
-                  iter = 1000L, seed = 1L)
-iv_grp$infoval                 # value depends on signal alignment;
-                               # see paragraph 5 of §17
+# 3. Compute the group-mean z. Its reference averages one simulated
+# random producer per real producer, each at that producer's trial
+# count (§11). Do not run infoval() on rowMeans(sm): its
+# single-producer reference is miscalibrated for a group average,
+# even with the summed trial count (§10). `responses` is the
+# trial-level data frame for this condition.
+rep_iv <- infoval_report(responses, noise_matrix = noise_matrix,
+                         iter = 1000L, seed = 1L)
+rep_iv$data$group_mean_z_unmasked   # value depends on signal alignment;
+rep_iv$data$group_mean_z_masked     # see paragraph 5 of §17
 
 # 4. Sanity-check the chance baseline. A random-mask producer
 # should give z ~ 0 within MAD noise. Build a fake producer's
