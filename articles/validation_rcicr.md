@@ -322,19 +322,19 @@ sim_signal <- simulate_briefrc_data(
   signal_strength = "strong",
   seed            = 11L
 )
-#> Generating noise pool ■■                                 3% | ETA: 33s
-#> Generating noise pool ■■■■                               9% | ETA: 21s
-#> Generating noise pool ■■■■■■■■                          24% | ETA: 16s
-#> Generating noise pool ■■■■■■■■■■■■■                     39% | ETA: 12s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■                 55% | ETA:  9s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■            70% | ETA:  6s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       86% | ETA:  3s
+#> Generating noise pool ■■                                 3% | ETA: 30s
+#> Generating noise pool ■■■■■                             14% | ETA: 19s
+#> Generating noise pool ■■■■■■■■■■                        29% | ETA: 15s
+#> Generating noise pool ■■■■■■■■■■■■■■■                   45% | ETA: 11s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■               60% | ETA:  8s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■          76% | ETA:  5s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      90% | ETA:  2s
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 #> ℹ Wrote stimuli to
-#>   /tmp/RtmpIOkSBO/rcisignal_sim_1f7358d86b0/rcisignal_sim_briefrc_stimuli.Rdata
+#>   /tmp/Rtmp1VOGpd/rcisignal_sim_1cf464a332d9/rcisignal_sim_briefrc_stimuli.Rdata
 #>   (session tempdir).
 #> ℹ Wrote base face to
-#>   /tmp/RtmpIOkSBO/rcisignal_sim_1f7358d86b0/rcisignal_sim_briefrc_base_face.png
+#>   /tmp/Rtmp1VOGpd/rcisignal_sim_1cf464a332d9/rcisignal_sim_briefrc_base_face.png
 #>   (session tempdir).
 #>   Pass `rdata_dir` to persist across R sessions, or hand `$stimuli` to
 #>   downstream consumers.
@@ -344,17 +344,19 @@ sim_noise <- simulate_briefrc_data(
   signal_strength = "none",
   seed            = 12L
 )
-#> Generating noise pool ■■■                                6% | ETA: 17s
-#> Generating noise pool ■■■■■■■                           22% | ETA: 13s
-#> Generating noise pool ■■■■■■■■■■■■■■                    44% | ETA:  8s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             66% | ETA:  5s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       86% | ETA:  2s
+#> Generating noise pool ■■■                                5% | ETA: 19s
+#> Generating noise pool ■■■■                              10% | ETA: 18s
+#> Generating noise pool ■■■■■■■■■                         28% | ETA: 13s
+#> Generating noise pool ■■■■■■■■■■■■■■■                   46% | ETA:  9s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■              64% | ETA:  6s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         81% | ETA:  3s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■   99% | ETA:  0s
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 #> ℹ Wrote stimuli to
-#>   /tmp/RtmpIOkSBO/rcisignal_sim_1f732e67bd62/rcisignal_sim_briefrc_stimuli.Rdata
+#>   /tmp/Rtmp1VOGpd/rcisignal_sim_1cf430fd12b3/rcisignal_sim_briefrc_stimuli.Rdata
 #>   (session tempdir).
 #> ℹ Wrote base face to
-#>   /tmp/RtmpIOkSBO/rcisignal_sim_1f732e67bd62/rcisignal_sim_briefrc_base_face.png
+#>   /tmp/Rtmp1VOGpd/rcisignal_sim_1cf430fd12b3/rcisignal_sim_briefrc_base_face.png
 #>   (session tempdir).
 #>   Pass `rdata_dir` to persist across R sessions, or hand `$stimuli` to
 #>   downstream consumers.
