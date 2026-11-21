@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Validation: rcisignal vs rcicr infoVal convergence</h1>
             
-            <h4 data-toc-skip class="date">Last updated: 20-11-2026</h4>
+            <h4 data-toc-skip class="date">Last updated: 21-11-2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/olivethree/rcisignal/blob/main/vignettes/validation_rcicr.Rmd" class="external-link"><code>vignettes/validation_rcicr.Rmd</code></a></small>
       <div class="d-none name"><code>validation_rcicr.Rmd</code></div>
@@ -79,11 +79,11 @@ build the same reference distribution under matched conditions, so the
 per-producer z scores they yield are mathematically equivalent.</li>
 <li>
 <strong>2IFC real-data side-by-side</strong>: on the Oliveira et
-al. (2019) Study 1 data, the two implementations produce ordinally
-consistent per-producer z scores. They diverge in absolute magnitude by
-a predictable, documented amount that comes from the two
-implementations’ different default reference-distribution choices
-(per-trial-count vs pool-size).</li>
+al. (2019) Study 1 data, where every producer saw every stimulus in the
+pool, the two implementations produce numerically interchangeable
+per-producer z scores. Their default reference choices (per-trial-count
+vs pool-size) only diverge when producers see fewer trials than the
+pool.</li>
 <li>
 <strong>Brief-RC signal-recovery sensitivity</strong>:
 <code>rcicr</code> has no Brief-RC <code>computeInfoVal</code> path, so
@@ -94,7 +94,7 @@ above 1.96 while no-signal data should not.</li>
 <p>This vignette is the canonical home for the per-producer 2IFC
 validation claim in <a href="rcisignal.html#validation-status"><code>vignette("rcisignal")</code></a>
 (§1.2). For everything else about infoVal (when to use it, how to read
-the z, group-mean caveats), read §9 of the main user guide.</p>
+the z, group-mean caveats), read §10 and §11 of the main user guide.</p>
 </div>
 <div class="section level2">
 <h2 id="ifc-engine-equivalence">2. 2IFC engine equivalence<a class="anchor" aria-label="anchor" href="#ifc-engine-equivalence"></a>
@@ -171,28 +171,34 @@ gap below 5%.</p>
 <div class="section level2">
 <h2 id="ifc-on-oliveira-et-al--2019-per-producer-side-by-side">3. 2IFC on Oliveira et al. (2019): per-producer side-by-side<a class="anchor" aria-label="anchor" href="#ifc-on-oliveira-et-al--2019-per-producer-side-by-side"></a>
 </h2>
-<p>Engine equivalence is the easy half. The harder question is what the
-two implementations produce on real data when their defaults
-diverge:</p>
+<p>Engine equivalence is the easy half. The harder question is whether
+the two implementations agree on real data, end to end:</p>
 <ul>
 <li>
 <code><a href="../reference/infoval.html">rcisignal::infoval()</a></code> uses a reference distribution
 matched to each producer’s actual trial count (300 trials in this
 study).</li>
 <li>
-<code><a href="https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html" class="external-link">rcicr::computeInfoVal2IFC()</a></code> uses a reference
-distribution at the full pool size (4096 in this study), the convention
-from Brinkman et al. (2019).</li>
+<code><a href="https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html" class="external-link">rcicr::computeInfoVal2IFC()</a></code> uses, by default, a
+reference distribution over the full stimulus pool, the convention from
+Brinkman et al. (2019). The pool in this study holds 300 stimuli, and
+every producer responded to all of them.</li>
 </ul>
-<p>Because both reference distributions are built from random sign
-sequences run through the same mask formula, and the producer’s observed
-Frobenius norm is the same input on both sides, the two should agree
-closely on a 2IFC dataset of this size. We expect tight per-producer
-correlations and very similar (though not identical) absolute z
-values.</p>
+<p>So in this dataset the two defaults describe the same reference, and
+the comparison tests whether the two implementations compute it the same
+way. Both build it from random sign sequences run through the same mask
+formula, and the producer’s observed Frobenius norm is the same input on
+both sides, so we expect tight per-producer correlations and very
+similar (though not identical, because of Monte Carlo noise) absolute z
+values. The defaults diverge when producers see fewer trials than the
+pool, as in Brief-RC or after dropped trials; there a pool-size
+reference inflates z (see §10 of the user guide).</p>
 <p>Each per-trait per-participant pair was computed with both
 implementations at <code>iter = 10000</code> (rcicr’s recommended value)
-during precompute. The cached output is loaded here:</p>
+during precompute, originally with rcicr 1.0.1. Re-running the
+precompute with rcicr 1.6.1, whose default reference calculation changed
+(<code>reference_method = "gram"</code>), reproduced every rcicr z to
+within 1e-13. The cached output is loaded here:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">per_trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">val_cache</span>, <span class="st">"rcicr_per_trait.rds"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -456,17 +462,19 @@ near zero in the no-signal condition.</p>
 <span>  signal_strength <span class="op">=</span> <span class="st">"strong"</span>,</span>
 <span>  seed            <span class="op">=</span> <span class="fl">11L</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■                              </span>   4% | ETA: 23s</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■                          </span>  16% | ETA: 14s</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■                    </span>  36% | ETA: 10s</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■              </span>  58% | ETA:  6s</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■       </span>  80% | ETA:  3s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■                              </span>   3% | ETA: 33s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■                            </span>   9% | ETA: 21s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■                        </span>  24% | ETA: 16s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■                   </span>  39% | ETA: 12s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■               </span>  55% | ETA:  9s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■          </span>  70% | ETA:  6s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■■■     </span>  86% | ETA:  3s</span></span>
 <span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ </span> 100% | ETA:  0s</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Wrote stimuli to</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB;">/tmp/RtmpASq2Sh/rcisignal_sim_1dee7b102eb2/rcisignal_sim_briefrc_stimuli.Rdata</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">/tmp/RtmpIOkSBO/rcisignal_sim_1f7358d86b0/rcisignal_sim_briefrc_stimuli.Rdata</span></span></span>
 <span><span class="co">#&gt;   (session tempdir).</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Wrote base face to</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB;">/tmp/RtmpASq2Sh/rcisignal_sim_1dee7b102eb2/rcisignal_sim_briefrc_base_face.png</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">/tmp/RtmpIOkSBO/rcisignal_sim_1f7358d86b0/rcisignal_sim_briefrc_base_face.png</span></span></span>
 <span><span class="co">#&gt;   (session tempdir).</span></span>
 <span><span class="co">#&gt;   Pass `rdata_dir` to persist across R sessions, or hand `$stimuli` to</span></span>
 <span><span class="co">#&gt;   downstream consumers.</span></span>
@@ -476,16 +484,17 @@ near zero in the no-signal condition.</p>
 <span>  signal_strength <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  seed            <span class="op">=</span> <span class="fl">12L</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■                             </span>   8% | ETA: 13s</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■                     </span>  34% | ETA:  8s</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■             </span>  61% | ETA:  4s</span></span>
-<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■■■     </span>  88% | ETA:  1s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■                             </span>   6% | ETA: 17s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■                         </span>  22% | ETA: 13s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■                  </span>  44% | ETA:  8s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■           </span>  66% | ETA:  5s</span></span>
+<span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■■■     </span>  86% | ETA:  2s</span></span>
 <span><span class="co">#&gt; Generating noise pool <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ </span> 100% | ETA:  0s</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Wrote stimuli to</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB;">/tmp/RtmpASq2Sh/rcisignal_sim_1dee32aad69/rcisignal_sim_briefrc_stimuli.Rdata</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">/tmp/RtmpIOkSBO/rcisignal_sim_1f732e67bd62/rcisignal_sim_briefrc_stimuli.Rdata</span></span></span>
 <span><span class="co">#&gt;   (session tempdir).</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Wrote base face to</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB;">/tmp/RtmpASq2Sh/rcisignal_sim_1dee32aad69/rcisignal_sim_briefrc_base_face.png</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">/tmp/RtmpIOkSBO/rcisignal_sim_1f732e67bd62/rcisignal_sim_briefrc_base_face.png</span></span></span>
 <span><span class="co">#&gt;   (session tempdir).</span></span>
 <span><span class="co">#&gt;   Pass `rdata_dir` to persist across R sessions, or hand `$stimuli` to</span></span>
 <span><span class="co">#&gt;   downstream consumers.</span></span>
@@ -585,8 +594,8 @@ work that used the rcicr default.</p>
 Dotsch, R., &amp; Aarts, H. (2019). Quantifying the informational value
 of classification images. <em>Behavior Research Methods</em>,
 <em>51</em>(5), 2059-2073. </li>
-<li>Dotsch, R. (2016, 2023). <em>rcicr: Reverse-correlation
-image-classification toolbox</em> [R package]. <a href="https://github.com/rdotsch/rcicr" class="external-link uri">https://github.com/rdotsch/rcicr</a>
+<li>Dotsch, R. (2016, 2026). <em>rcicr: Reverse-correlation
+image-classification toolbox</em> (Version 1.6.1) [R package]. <a href="https://github.com/rdotsch/rcicr" class="external-link uri">https://github.com/rdotsch/rcicr</a>
 </li>
 <li>Oliveira, M., Garcia-Marques, T., Dotsch, R., &amp; Garcia-Marques,
 L. (2019). Dominance and competence face to face: Dissociations obtained

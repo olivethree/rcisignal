@@ -242,9 +242,9 @@ other string) to override the auto-derived filename prefix.
 remotes::install_github("olivethree/rcisignal",
                         dependencies = TRUE)
 
-# rcicr is a Suggests dep; install it if you need the 2IFC path.
-install.packages("rcicr")               # CRAN
-remotes::install_github("rdotsch/rcicr") # development
+# rcicr (>= 1.6.1) is a Suggests dep; install it if you need the
+# 2IFC path.
+install.packages("rcicr")
 ```
 
 The mandatory dependencies are minimal (`cli` and `data.table`, plus the
@@ -1571,9 +1571,10 @@ whether those numbers can be trusted:
 
 1.  Compute observed Frobenius norm per producer (and group-mean).
 2.  Compare against a reference distribution at each producer’s actual
-    trial count (closes the calibration gap in
-    [`rcicr::generateReferenceDistribution2IFC()`](https://rdotsch.github.io/rcicr/reference/generateReferenceDistribution2IFC.html),
-    which keys on pool size).
+    trial count (by default,
+    [`rcicr::generateReferenceDistribution2IFC()`](https://rdotsch.github.io/rcicr/reference/generateReferenceDistribution2IFC.html)
+    keys on the full pool, which inflates z when producers saw fewer
+    trials than the pool; see §10).
 3.  Apply a face mask (default `"auto"` = parametric full-face oval) and
     repeat.
 4.  Compare unmasked vs masked z to see whether masking lifts or
@@ -1677,9 +1678,11 @@ dim(res$signal_matrix)   # n_pixels x n_participants
 ```
 
 Behind the scenes the function takes care of the steps that are easy to
-get wrong when calling rcicr directly: it loads the helper packages
-rcicr expects (`foreach`, `tibble`, `dplyr`) and checks that responses
-are coded `{-1, +1}`.
+get wrong when calling rcicr directly: it checks that responses are
+coded `{-1, +1}`, passes them to rcicr as a plain data frame (so tibbles
+are grouped correctly), and returns one column per producer, matched to
+rcicr’s output by producer id rather than by position (columns follow
+the order in which producers first appear in `responses`).
 
 The two CI builders accept `base_image` the same way: a numeric matrix
 in `[0, 1]`, a path to a PNG / JPEG, or (for 2IFC) a label naming an
@@ -1732,6 +1735,18 @@ and
 are also available on their own, for cases where you want to do
 something between reading the PNGs and subtracting the base
 (e.g. masking, cropping, or swapping the base image).
+
+Column names come from the filenames, so each file must be named for the
+producer it belongs to. CIs saved by
+`rcicr::generateCI(participants = ..., save_individual_cis = TRUE)` (an
+`individual_cis/` folder) with a GitHub install of rcicr 0.4.0 to 1.2.3
+could carry another participant’s filename. If that is how your files
+were made, run the check in the [rcicr
+advisory](https://rdotsch.github.io/rcicr/articles/rcicr-individual-ci-advisory.html)
+and rename the files before reading them. CRAN installs of rcicr and the
+batch functions (`batchGenerateCI2IFC()`, which
+[`ci_from_responses_2ifc()`](https://olivethree.github.io/rcisignal/reference/ci_from_responses_2ifc.md)
+uses) were not affected.
 
 The first call to any Mode-1 reader emits the once-per-session warning
 that PNG-derived signals are scaled. Silence with
@@ -2848,15 +2863,19 @@ masks. Producers sharing a trial count share a reference, so the
 simulation cost is paid once per distinct trial count rather than once
 per producer.
 
-**Trial-count matching closes a calibration gap.** The original
+**Trial-count matching closes a calibration gap.** By default,
 [`rcicr::generateReferenceDistribution2IFC()`](https://rdotsch.github.io/rcicr/reference/generateReferenceDistribution2IFC.html)
-keys its reference on the full pool size. For 2IFC this is appropriate
-(every producer typically responds to every pool item). For Brief-RC,
-where the recorded number of mask contributions equals `n_trials` and is
-typically smaller than `n_pool`, a pool-size reference biases infoVal
-downward.
+builds its reference over the full stimulus pool. For 2IFC this is
+appropriate (every producer typically responds to every pool item). For
+Brief-RC, where the recorded number of mask contributions equals
+`n_trials` and is typically smaller than `n_pool`, a pool-size reference
+**inflates** infoVal: a mask averaged over fewer trials has a larger
+norm, so even a random responder lands far above a reference built from
+the whole pool.
 [`infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
-uses each producer’s actual recorded trial count.
+uses each producer’s actual recorded trial count. (rcicr 1.6.0 and later
+can also match its reference to the stimuli a CI used, through the
+`reference_stimuli` argument.)
 
 ### 10.1 Validation against `rcicr` on real data
 
@@ -4975,7 +4994,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #> To cite package 'rcisignal' in publications use:
 #> 
 #>   Oliveira, M. (2026). rcisignal: Quality checks for
-#>   reverse-correlation data and classification images (Version 0.3.1) [R
+#>   reverse-correlation data and classification images (Version 0.3.2) [R
 #>   package]. Zenodo. https://doi.org/10.5281/zenodo.19961180
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -4984,7 +5003,7 @@ if (requireNamespace("rcisignal", quietly = TRUE)) {
 #>     title = {rcisignal: Quality checks for reverse-correlation data and classification images},
 #>     author = {Manuel Oliveira},
 #>     year = {2026},
-#>     note = {R package version 0.3.1},
+#>     note = {R package version 0.3.2},
 #>     doi = {10.5281/zenodo.19961180},
 #>     url = {https://doi.org/10.5281/zenodo.19961180},
 #>   }
@@ -5022,8 +5041,12 @@ regression. *Technometrics*, 19(1), 15-18.
 DeBruine, L. (2022). webmorphR: Reproducible stimuli.
 <https://github.com/debruine/webmorphR>
 
-Dotsch, R. (2016, 2023). rcicr: Reverse-Correlation Image-
-Classification Toolbox. <https://github.com/rdotsch/rcicr>
+Dotsch, R. (2016, 2026). rcicr: Reverse-Correlation Image-
+Classification Toolbox (Version 1.6.1).
+<https://github.com/rdotsch/rcicr>
+
+Dotsch, R. (2026). rcicr individual classification image advisory.
+<https://rdotsch.github.io/rcicr/articles/rcicr-individual-ci-advisory.html>
 
 Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting
 intraclass correlation coefficients for reliability research. *Journal

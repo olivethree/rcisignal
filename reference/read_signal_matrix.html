@@ -23,7 +23,7 @@ basis noise patterns from stimulus generation."><meta property="og:image" conten
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,6 +119,9 @@ CI PNG instead of the base face used at stimulus-generation
 time). The dimension check catches a wholly wrong image but
 not a wrong-base-of-the-right-size.</p></li>
 <li><p>Treating the result as raw mask. See note below.</p></li>
+<li><p>Reading an <code>individual_cis/</code> folder written by an affected
+rcicr version, whose filenames may name the wrong producers.
+See the matching item in <code><a href="read_cis.html">read_cis()</a></code>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="raw-vs-rendered-cis">Raw vs. rendered CIs<a class="anchor" aria-label="anchor" href="#raw-vs-rendered-cis"></a></h2>

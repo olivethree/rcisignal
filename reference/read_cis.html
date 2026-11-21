@@ -21,7 +21,7 @@ subtraction step."><meta property="og:image" content="https://olivethree.github.
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,6 +123,16 @@ through <code><a href="extract_signal.html">extract_signal()</a></code> before a
 aborts with a clear error rather than silently misaligning.</p></li>
 <li><p>Trusting variance-based reliability numbers without first
 reading the note below on raw vs. rendered CIs.</p></li>
+<li><p>Trusting filenames as producer IDs for CIs saved by
+<code>rcicr::generateCI(participants = ..., save_individual_cis = TRUE)</code>
+(the <code>individual_cis/</code> folder) with a GitHub install of rcicr
+0.4.0 to 1.2.3. Those versions could save each image under
+another participant's filename; the images themselves are
+correct. If <code>identical(unique(participants), sort(unique(participants)))</code> is <code>FALSE</code> for the participant
+vector originally passed, rename the files before reading them,
+following the rcicr advisory:
+<a href="https://rdotsch.github.io/rcicr/articles/rcicr-individual-ci-advisory.html" class="external-link">https://rdotsch.github.io/rcicr/articles/rcicr-individual-ci-advisory.html</a>.
+CRAN installs of rcicr and its batch functions were not affected.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="raw-vs-rendered-cis">Raw vs. rendered CIs<a class="anchor" aria-label="anchor" href="#raw-vs-rendered-cis"></a></h2>

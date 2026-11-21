@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,9 +73,9 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"olivethree/rcisignal"</span><span class="op">)</span></span></code></pre></div>
-<p>If you ran a 2IFC study, you will also need <code>rcicr</code> (used to compute the individual CIs):</p>
+<p>If you ran a 2IFC study, you will also need <code>rcicr</code> 1.6.1 or later (used to compute the individual CIs):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"rdotsch/rcicr"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rcicr"</span><span class="op">)</span></span></code></pre></div>
 <p>Brief-RC users can skip <code>rcicr</code>; the Brief-RC code is fully native to <code>rcisignal</code>.</p>
 <blockquote>
 <p><strong>Re-install before each fresh analysis.</strong> <code>rcisignal</code> is in an experimental stage and exported functions are still being refined. Re-running <code>remotes::install_github("olivethree/rcisignal")</code> at the start of an analysis session pulls the latest version; the <a href="https://olivethree.github.io/rcisignal/articles/rcisignal.html">user guide</a> is kept in sync with new and updated functions.</p>
@@ -157,7 +157,7 @@
 </h2>
 <p>If <code>rcisignal</code> helps your research, please cite it:</p>
 <blockquote>
-<p>Oliveira, M. (2026). <em>rcisignal: Quality checks for reverse-correlation data and classification images</em> (Version 0.3.1) [R package]. Zenodo. <a href="https://doi.org/10.5281/zenodo.19961180" class="external-link uri">https://doi.org/10.5281/zenodo.19961180</a></p>
+<p>Oliveira, M. (2026). <em>rcisignal: Quality checks for reverse-correlation data and classification images</em> (Version 0.3.2) [R package]. Zenodo. <a href="https://doi.org/10.5281/zenodo.19961180" class="external-link uri">https://doi.org/10.5281/zenodo.19961180</a></p>
 </blockquote>
 <p>Run <code>citation("rcisignal")</code> in R for a BibTeX entry.</p>
 <p>Please also cite the methodological sources appropriate to your pipeline:</p>
@@ -174,7 +174,7 @@
 <ul>
 <li>Brinkman, L., Goffin, S., van de Schoot, R., van Haren, N. E. M., Dotsch, R., &amp; Aarts, H. (2019). Quantifying the informational value of classification images. <em>Behavior Research Methods</em>, <em>51</em>(5), 2059-2073. <a href="https://doi.org/10.3758/s13428-019-01232-2" class="external-link">https://doi.org/10.3758/s13428-019-01232-2</a>
 </li>
-<li>Dotsch, R. (2016, 2023). <em>rcicr: Reverse-correlation image-classification toolbox</em> [R package]. <a href="https://github.com/rdotsch/rcicr" class="external-link">https://github.com/rdotsch/rcicr</a>
+<li>Dotsch, R. (2016, 2026). <em>rcicr: Reverse-correlation image-classification toolbox</em> (Version 1.6.1) [R package]. <a href="https://github.com/rdotsch/rcicr" class="external-link">https://github.com/rdotsch/rcicr</a>
 </li>
 <li>Oliveira, M., Garcia-Marques, T., Dotsch, R., &amp; Garcia-Marques, L. (2019). Dominance and competence face to face: Dissociations obtained with a reverse correlation approach. <em>European Journal of Social Psychology</em>. <a href="https://doi.org/10.1002/ejsp.2569" class="external-link">https://doi.org/10.1002/ejsp.2569</a>
 </li>

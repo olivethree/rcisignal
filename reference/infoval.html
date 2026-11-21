@@ -17,7 +17,7 @@ the statistic is computed."><meta property="og:image" content="https://olivethre
 
     <a class="navbar-brand me-2" href="../index.html">rcisignal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -180,13 +180,15 @@ per Schmitz, Rougier, &amp; Yzerbyt (2020 comment + 2020 erratum).
 The original <code><a href="https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html" class="external-link">rcicr::computeInfoVal2IFC()</a></code> already uses it
 (<code>norm(matrix(target_ci[["ci"]]), "f")</code>); this function matches
 that convention for both 2IFC and Brief-RC data.</p>
-<p>Trial-count matching: the original
+<p>Trial-count matching: by default,
 <code><a href="https://rdotsch.github.io/rcicr/reference/generateReferenceDistribution2IFC.html" class="external-link">rcicr::generateReferenceDistribution2IFC()</a></code> builds the
-reference using the full pool size. For Brief-RC the producer's
-recorded <code>n_trials</code> is typically smaller than <code>n_pool</code>, so a
-pool-size reference biases infoVal downward. <code>infoval()</code> closes
-this gap by keying the reference on the actual per-producer
-recorded trial count.</p>
+reference over the full stimulus pool (rcicr &gt;= 1.6.0 can match
+it to the stimuli actually used via <code>reference_stimuli</code>). For
+Brief-RC the producer's recorded <code>n_trials</code> is typically smaller
+than <code>n_pool</code>. A mask averaged over fewer trials has a larger
+norm, so a pool-size reference inflates infoVal, strongly so
+when <code>n_trials</code> is much smaller than <code>n_pool</code>. <code>infoval()</code> keys
+the reference on each producer's recorded trial count.</p>
 <p>What infoVal measures (and what it does not). The Frobenius
 norm is a <strong>magnitude</strong> statistic, not a target-alignment one.
 Cross-paradigm comparisons need care; stability and

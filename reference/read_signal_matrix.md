@@ -67,6 +67,11 @@ PNG-derived signals are scaled, not raw.
 
 - Treating the result as raw mask. See note below.
 
+- Reading an `individual_cis/` folder written by an affected rcicr
+  version, whose filenames may name the wrong producers. See the
+  matching item in
+  [`read_cis()`](https://olivethree.github.io/rcisignal/reference/read_cis.md).
+
 ## Raw vs. rendered CIs
 
 PNG pixel values are necessarily what was rendered to disk:

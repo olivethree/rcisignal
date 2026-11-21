@@ -133,8 +133,8 @@ What the wrapper does for you:
   image and stacks it as `$rendered_ci` for visualization (display only,
   not for downstream stats).
 
-`rcicr` must be installed (it is a Suggests dep; install with
-`remotes::install_github("rdotsch/rcicr")` if needed).
+`rcicr` (\>= 1.6.1) must be installed (it is a Suggests dep; install
+with `install.packages("rcicr")` if needed).
 
 ## Reading the result
 

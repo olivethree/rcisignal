@@ -12,11 +12,10 @@ This vignette shows the receipts:
   reference distribution under matched conditions, so the per-producer z
   scores they yield are mathematically equivalent.
 - **2IFC real-data side-by-side**: on the Oliveira et al. (2019) Study 1
-  data, the two implementations produce ordinally consistent
-  per-producer z scores. They diverge in absolute magnitude by a
-  predictable, documented amount that comes from the two
-  implementations’ different default reference-distribution choices
-  (per-trial-count vs pool-size).
+  data, where every producer saw every stimulus in the pool, the two
+  implementations produce numerically interchangeable per-producer z
+  scores. Their default reference choices (per-trial-count vs pool-size)
+  only diverge when producers see fewer trials than the pool.
 - **Brief-RC signal-recovery sensitivity**: `rcicr` has no Brief-RC
   `computeInfoVal` path, so no convergence comparison is possible. The
   substitute is a sensitivity check on simulated data: planted signal
@@ -27,7 +26,7 @@ This vignette is the canonical home for the per-producer 2IFC validation
 claim in
 [`vignette("rcisignal")`](https://olivethree.github.io/rcisignal/articles/rcisignal.html#validation-status)
 (§1.2). For everything else about infoVal (when to use it, how to read
-the z, group-mean caveats), read §9 of the main user guide.
+the z, group-mean caveats), read §10 and §11 of the main user guide.
 
 ## 2. 2IFC engine equivalence
 
@@ -94,25 +93,33 @@ iterations and asserts the median gap below 3% and the MAD gap below 5%.
 
 ## 3. 2IFC on Oliveira et al. (2019): per-producer side-by-side
 
-Engine equivalence is the easy half. The harder question is what the two
-implementations produce on real data when their defaults diverge:
+Engine equivalence is the easy half. The harder question is whether the
+two implementations agree on real data, end to end:
 
 - [`rcisignal::infoval()`](https://olivethree.github.io/rcisignal/reference/infoval.md)
   uses a reference distribution matched to each producer’s actual trial
   count (300 trials in this study).
 - [`rcicr::computeInfoVal2IFC()`](https://rdotsch.github.io/rcicr/reference/computeInfoVal2IFC.html)
-  uses a reference distribution at the full pool size (4096 in this
-  study), the convention from Brinkman et al. (2019).
+  uses, by default, a reference distribution over the full stimulus
+  pool, the convention from Brinkman et al. (2019). The pool in this
+  study holds 300 stimuli, and every producer responded to all of them.
 
-Because both reference distributions are built from random sign
-sequences run through the same mask formula, and the producer’s observed
-Frobenius norm is the same input on both sides, the two should agree
-closely on a 2IFC dataset of this size. We expect tight per-producer
-correlations and very similar (though not identical) absolute z values.
+So in this dataset the two defaults describe the same reference, and the
+comparison tests whether the two implementations compute it the same
+way. Both build it from random sign sequences run through the same mask
+formula, and the producer’s observed Frobenius norm is the same input on
+both sides, so we expect tight per-producer correlations and very
+similar (though not identical, because of Monte Carlo noise) absolute z
+values. The defaults diverge when producers see fewer trials than the
+pool, as in Brief-RC or after dropped trials; there a pool-size
+reference inflates z (see §10 of the user guide).
 
 Each per-trait per-participant pair was computed with both
 implementations at `iter = 10000` (rcicr’s recommended value) during
-precompute. The cached output is loaded here:
+precompute, originally with rcicr 1.0.1. Re-running the precompute with
+rcicr 1.6.1, whose default reference calculation changed
+(`reference_method = "gram"`), reproduced every rcicr z to within 1e-13.
+The cached output is loaded here:
 
 ``` r
 
@@ -315,17 +322,19 @@ sim_signal <- simulate_briefrc_data(
   signal_strength = "strong",
   seed            = 11L
 )
-#> Generating noise pool ■■                                 4% | ETA: 23s
-#> Generating noise pool ■■■■■■                            16% | ETA: 14s
-#> Generating noise pool ■■■■■■■■■■■■                      36% | ETA: 10s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■                58% | ETA:  6s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  3s
+#> Generating noise pool ■■                                 3% | ETA: 33s
+#> Generating noise pool ■■■■                               9% | ETA: 21s
+#> Generating noise pool ■■■■■■■■                          24% | ETA: 16s
+#> Generating noise pool ■■■■■■■■■■■■■                     39% | ETA: 12s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■                 55% | ETA:  9s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■            70% | ETA:  6s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       86% | ETA:  3s
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 #> ℹ Wrote stimuli to
-#>   /tmp/RtmpASq2Sh/rcisignal_sim_1dee7b102eb2/rcisignal_sim_briefrc_stimuli.Rdata
+#>   /tmp/RtmpIOkSBO/rcisignal_sim_1f7358d86b0/rcisignal_sim_briefrc_stimuli.Rdata
 #>   (session tempdir).
 #> ℹ Wrote base face to
-#>   /tmp/RtmpASq2Sh/rcisignal_sim_1dee7b102eb2/rcisignal_sim_briefrc_base_face.png
+#>   /tmp/RtmpIOkSBO/rcisignal_sim_1f7358d86b0/rcisignal_sim_briefrc_base_face.png
 #>   (session tempdir).
 #>   Pass `rdata_dir` to persist across R sessions, or hand `$stimuli` to
 #>   downstream consumers.
@@ -335,16 +344,17 @@ sim_noise <- simulate_briefrc_data(
   signal_strength = "none",
   seed            = 12L
 )
-#> Generating noise pool ■■■                                8% | ETA: 13s
-#> Generating noise pool ■■■■■■■■■■■                       34% | ETA:  8s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■               61% | ETA:  4s
-#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% | ETA:  1s
+#> Generating noise pool ■■■                                6% | ETA: 17s
+#> Generating noise pool ■■■■■■■                           22% | ETA: 13s
+#> Generating noise pool ■■■■■■■■■■■■■■                    44% | ETA:  8s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■             66% | ETA:  5s
+#> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■       86% | ETA:  2s
 #> Generating noise pool ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 #> ℹ Wrote stimuli to
-#>   /tmp/RtmpASq2Sh/rcisignal_sim_1dee32aad69/rcisignal_sim_briefrc_stimuli.Rdata
+#>   /tmp/RtmpIOkSBO/rcisignal_sim_1f732e67bd62/rcisignal_sim_briefrc_stimuli.Rdata
 #>   (session tempdir).
 #> ℹ Wrote base face to
-#>   /tmp/RtmpASq2Sh/rcisignal_sim_1dee32aad69/rcisignal_sim_briefrc_base_face.png
+#>   /tmp/RtmpIOkSBO/rcisignal_sim_1f732e67bd62/rcisignal_sim_briefrc_base_face.png
 #>   (session tempdir).
 #>   Pass `rdata_dir` to persist across R sessions, or hand `$stimuli` to
 #>   downstream consumers.
@@ -433,8 +443,8 @@ work that used the rcicr default.
   Dotsch, R., & Aarts, H. (2019). Quantifying the informational value of
   classification images. *Behavior Research Methods*, *51*(5),
   2059-2073.
-- Dotsch, R. (2016, 2023). *rcicr: Reverse-correlation
-  image-classification toolbox* \[R package\].
+- Dotsch, R. (2016, 2026). *rcicr: Reverse-correlation
+  image-classification toolbox* (Version 1.6.1) \[R package\].
   <https://github.com/rdotsch/rcicr>
 - Oliveira, M., Garcia-Marques, T., Dotsch, R., & Garcia-Marques, L.
   (2019). Dominance and competence face to face: Dissociations obtained

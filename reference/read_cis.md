@@ -70,6 +70,17 @@ not a raw mask.
 - Trusting variance-based reliability numbers without first reading the
   note below on raw vs. rendered CIs.
 
+- Trusting filenames as producer IDs for CIs saved by
+  `rcicr::generateCI(participants = ..., save_individual_cis = TRUE)`
+  (the `individual_cis/` folder) with a GitHub install of rcicr 0.4.0 to
+  1.2.3. Those versions could save each image under another
+  participant's filename; the images themselves are correct. If
+  `identical(unique(participants), sort(unique(participants)))` is
+  `FALSE` for the participant vector originally passed, rename the files
+  before reading them, following the rcicr advisory:
+  <https://rdotsch.github.io/rcicr/articles/rcicr-individual-ci-advisory.html>.
+  CRAN installs of rcicr and its batch functions were not affected.
+
 ## Raw vs. rendered CIs
 
 PNG pixel values are necessarily what was rendered to disk:
