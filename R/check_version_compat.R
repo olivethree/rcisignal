@@ -57,7 +57,7 @@ check_version_compat <- function(rdata, ...) {
       c(
         sprintf("rdata was produced by rcicr %s.", gen_ver),
         "rcicr is not installed in the current R session.",
-        "Install it to generate CIs: remotes::install_github(\"rdotsch/rcicr\")"
+        "Install it to generate CIs: install.packages(\"rcicr\")"
       ),
       data = list(generator_version = gen_ver, installed_version = inst_ver)
     ))

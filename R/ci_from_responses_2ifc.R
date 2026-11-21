@@ -24,8 +24,8 @@
 #'   `$combined` image and stacks it as `$rendered_ci` for
 #'   visualization (display only, not for downstream stats).
 #'
-#' `rcicr` must be installed (it is a Suggests dep; install with
-#' `remotes::install_github("rdotsch/rcicr")` if needed).
+#' `rcicr` (>= 1.6.1) must be installed (it is a Suggests dep; install
+#' with `install.packages("rcicr")` if needed).
 #'
 #' @section Reading the result:
 #' * `$signal_matrix` is the **raw mask** (rcicr's `$ci` per
@@ -139,7 +139,7 @@ ci_from_responses_2ifc <- function(responses,
     cli::cli_abort(c(
       "The 2IFC CI path requires the {.pkg rcicr} package.",
       "i" = "Install via: \\
-             {.run remotes::install_github(\"rdotsch/rcicr\")}"
+             {.run install.packages(\"rcicr\")}"
     ))
   }
 
@@ -183,12 +183,12 @@ ci_from_responses_2ifc <- function(responses,
   rdata_path <- resolved$rdata_path
   img_dims   <- resolved$img_dims
 
-  ensure_attached(c("foreach", "tibble", "dplyr"))
+  attach_rcicr_runtime_deps()
 
   dir.create(targetpath, recursive = TRUE, showWarnings = FALSE)
 
   cis <- rcicr::batchGenerateCI2IFC(
-    data        = responses,
+    data        = as.data.frame(responses),
     by          = col_participant,
     stimuli     = col_stimulus,
     responses   = col_response,

@@ -110,8 +110,8 @@ for \verb{rel_*()}.
 visualization (display only, not for downstream stats).
 }
 
-\code{rcicr} must be installed (it is a Suggests dep; install with
-\code{remotes::install_github("rdotsch/rcicr")} if needed).
+\code{rcicr} (>= 1.6.1) must be installed (it is a Suggests dep; install
+with \code{install.packages("rcicr")} if needed).
 }
 \section{Reading the result}{
 

@@ -33,6 +33,17 @@
 #'   aborts with a clear error rather than silently misaligning.
 #' * Trusting variance-based reliability numbers without first
 #'   reading the note below on raw vs. rendered CIs.
+#' * Trusting filenames as producer IDs for CIs saved by
+#'   `rcicr::generateCI(participants = ..., save_individual_cis = TRUE)`
+#'   (the `individual_cis/` folder) with a GitHub install of rcicr
+#'   0.4.0 to 1.2.3. Those versions could save each image under
+#'   another participant's filename; the images themselves are
+#'   correct. If `identical(unique(participants),
+#'   sort(unique(participants)))` is `FALSE` for the participant
+#'   vector originally passed, rename the files before reading them,
+#'   following the rcicr advisory:
+#'   <https://rdotsch.github.io/rcicr/articles/rcicr-individual-ci-advisory.html>.
+#'   CRAN installs of rcicr and its batch functions were not affected.
 #'
 #' @section Raw vs. rendered CIs:
 #' PNG pixel values are necessarily what was rendered to disk:
@@ -145,6 +156,9 @@ read_cis <- function(dir,
 #'   time). The dimension check catches a wholly wrong image but
 #'   not a wrong-base-of-the-right-size.
 #' * Treating the result as raw mask. See note below.
+#' * Reading an `individual_cis/` folder written by an affected
+#'   rcicr version, whose filenames may name the wrong producers.
+#'   See the matching item in [read_cis()].
 #'
 #' @inheritSection read_cis Raw vs. rendered CIs
 #'

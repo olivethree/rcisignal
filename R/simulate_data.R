@@ -508,7 +508,7 @@ ensure_rcicr <- function() {
       "Simulating data requires the {.pkg rcicr} package for noise \\
        generation.",
       "i" = "Install: \\
-             {.run remotes::install_github(\"rdotsch/rcicr\")}"
+             {.run install.packages(\"rcicr\")}"
     ))
   }
   invisible(TRUE)

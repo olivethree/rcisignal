@@ -358,10 +358,10 @@ build_inputs_2ifc <- function(responses, rdata, base_image,
   if (!requireNamespace("rcicr", quietly = TRUE)) {
     cli::cli_abort(c(
       "Package {.pkg rcicr} is required for the 2IFC path.",
-      "i" = "Install with {.code remotes::install_github(\"rdotsch/rcicr\")}."
+      "i" = "Install with {.code install.packages(\"rcicr\")}."
     ))
   }
-  ensure_attached(c("foreach", "tibble", "dplyr"))
+  attach_rcicr_runtime_deps()
 
   env <- new.env(parent = emptyenv())
   load(rdata, envir = env)

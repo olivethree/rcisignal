@@ -311,7 +311,7 @@ parse_noise_rdata <- function(path, base_image, stimuli_object) {
         "Reconstructing the noise matrix from an rcicr rdata \\
          requires the {.pkg rcicr} package.",
         "i" = "Install: \\
-               {.run remotes::install_github(\"rdotsch/rcicr\")}"
+               {.run install.packages(\"rcicr\")}"
       ))
     }
     labels <- names(env$stimuli_params)

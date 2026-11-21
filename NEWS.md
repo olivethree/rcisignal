@@ -1,54 +1,71 @@
-# rcisignal 0.3.1
+# rcisignal 0.3.2
 
-## Breaking changes
+## rcicr compatibility
 
-* **`save_ci_images()` default output now matches rcicr.** The
-  default is `palette = "grayscale"`, which writes the raw pixel
-  luminance image (no color palette) that `rcicr::generateCI()` /
-  `rcicr::generateCI2IFC()` would produce for the same CI. For
-  each column of `signal_matrix`, the raw noise is scaled into
-  `[0, 1]` via the chosen `scaling` method and averaged with the
-  base via `(scaled + base) / 2` before writing. Two new
-  arguments mirror rcicr's API:
-  - `scaling = c("independent", "constant", "matched", "none")`
-    (default `"independent"`, matching rcicr).
-  - `scaling_constant = 0.1` (default matches rcicr).
-  Callers that explicitly want the previous colored overlay can
-  pass `palette = "diverging"`; `palette = "fire"` continues to
-  produce the unipolar `|t|`-style yellow-to-red ramp. Code that
-  called `save_ci_images(sm, base, dir)` and relied on the
-  diverging overlay needs to add `palette = "diverging"` to
-  preserve the prior output.
+* **rcicr 1.6.1 or later is now required for the 2IFC path.** The
+  `Suggests` entry is `rcicr (>= 1.6.1)` and `Remotes` pins
+  `rdotsch/rcicr@v1.6.1`, so the package is checked against a fixed
+  rcicr release instead of its development branch. rcicr 1.6.1 is on
+  CRAN; install it with `install.packages("rcicr")`. Install hints in
+  the README, the user guide and error messages now point there.
+  rcisignal's own computations are unchanged.
 
-## Documentation
+* **`dplyr` and `tibble` are no longer needed with rcicr >= 1.6.1.**
+  `ci_from_responses_2ifc()` and `infoval_report()` used to attach
+  `foreach`, `tibble` and `dplyr` before calling rcicr. rcicr 1.6.1
+  imports what it needs, so nothing is attached any more; older rcicr
+  versions keep the previous behavior.
 
-* `?save_ci_images` and vignette §1.4 rewritten to describe the
-  grayscale default and the rcicr-style `scaling` /
-  `scaling_constant` arguments.
+* `ci_from_responses_2ifc()` now passes `responses` to
+  `rcicr::batchGenerateCI2IFC()` as a plain data frame, so a tibble
+  input is grouped by producer under any rcicr version (rcicr 1.1.0 to
+  1.4.1 mis-grouped multi-group tibbles).
 
-# rcisignal (development version)
+* The 2IFC smoke test now uses a base image with contrast, which rcicr
+  >= 1.3.0 requires.
 
 ## Documentation
 
-* **Group-mean infoVal documentation expanded.** New vignette §11
-  ("Group-level signal summaries") fully describes the group-mean z
-  statistic (`group_mean_z()`, surfaced via `infoval_report()`):
-  how its reference distribution is constructed (one simulated
-  random producer per real producer, averaged before the norm is
-  taken), how it differs from Brinkman et al. (2019)'s
-  per-producer infoVal (different statistic, different null,
-  validated only at the per-producer level), and how to read it
-  appropriately (necessary but not sufficient for interpretability;
-  pair with the per-producer distribution and the spatial
-  agreement map). A side-by-side simulation illustration shows why
-  the matched-N reference distribution shrinks with `N` --
-  exactly the calibration that makes the group-mean z meaningful.
-  `?infoval_report` gains a parallel **Details** block and an
-  expanded **Return** description for the `group_mean_z_*` fields;
-  the printed bullet now points to `?infoval_report` for what the
-  z tests. Subsequent section numbers shift by one (old §11 ->
-  §12, §12 -> §13, ..., §18 -> §19); all cross-references
-  updated.
+* **Note on the rcicr individual-CI filename bug.** `?read_cis`,
+  `?read_signal_matrix` and user guide §6.2 now warn that these readers
+  take producer IDs from filenames, and that CIs saved by
+  `rcicr::generateCI(participants = ..., save_individual_cis = TRUE)`
+  with a GitHub install of rcicr 0.4.0 to 1.2.3 could carry another
+  participant's filename. They link the rcicr advisory, which gives the
+  check and the renaming code. CIs built by rcisignal itself
+  (`ci_from_responses_2ifc()` uses `batchGenerateCI2IFC()`) were not
+  affected.
+
+* **Direction of the pool-size reference bias corrected.** `?infoval`
+  and user guide §5.4 and §10 said a reference built over the full
+  stimulus pool biases infoVal *downward* when producers saw fewer
+  trials than the pool. It inflates it: a mask averaged over fewer
+  trials has a larger norm. In a simulation with 60 trials from a
+  300-stimulus pool, pure-noise producers scored a median z of about
+  0 against a trial-count-matched reference and about 58 against the
+  pool-size one. `infoval()` always used the matched reference, so no
+  computed value changes. The guide now also mentions rcicr's
+  `reference_stimuli` argument (rcicr >= 1.6.0).
+
+* **Validation vignette clarified.** In the Oliveira et al. (2019)
+  data every producer saw all 300 stimuli of the pool, so rcicr's
+  pool-size default and rcisignal's trial-count reference coincide.
+  The vignette previously gave the pool as 4096 (the number of
+  sinusoid parameters per stimulus) and said the engines diverge by a
+  documented amount, which contradicted its own results. Its rcicr
+  numbers were re-run with rcicr 1.6.1 and reproduced to within
+  1e-13, so the cached results and the user guide's §10.1 table are
+  unchanged.
+
+* **ICC(3,k) large-image note corrected.** The `rel_icc()` warning and
+  print note no longer say ICC(3,k) tends toward 1 at large pixel
+  counts. They now say that many off-signal background pixels dilute
+  both ICCs (restrict with `mask = make_face_mask(...)`) and that
+  ICC(3,k) is inflated by producer count, so ICC(3,1) is the
+  cross-sample-comparable statistic.
+
+* **Accuracy sweep of the user guide and `?rel_cluster_test`**
+  (citations, scope of FWER control, group-mean z wording).
 
 * **Dissimilarity inference reframed around the permutation null.**
   `?rel_dissimilarity` gains a section explaining why the bootstrap
@@ -77,6 +94,54 @@
   column as one producer's CI and points to `infoval_report()`
   (`data$group_mean_z_unmasked` / `_masked`, run per condition) for
   the matched-N group-mean z described in §11. No change to code.
+
+# rcisignal 0.3.1
+
+## Breaking changes
+
+* **`save_ci_images()` default output now matches rcicr.** The
+  default is `palette = "grayscale"`, which writes the raw pixel
+  luminance image (no color palette) that `rcicr::generateCI()` /
+  `rcicr::generateCI2IFC()` would produce for the same CI. For
+  each column of `signal_matrix`, the raw noise is scaled into
+  `[0, 1]` via the chosen `scaling` method and averaged with the
+  base via `(scaled + base) / 2` before writing. Two new
+  arguments mirror rcicr's API:
+  - `scaling = c("independent", "constant", "matched", "none")`
+    (default `"independent"`, matching rcicr).
+  - `scaling_constant = 0.1` (default matches rcicr).
+  Callers that explicitly want the previous colored overlay can
+  pass `palette = "diverging"`; `palette = "fire"` continues to
+  produce the unipolar `|t|`-style yellow-to-red ramp. Code that
+  called `save_ci_images(sm, base, dir)` and relied on the
+  diverging overlay needs to add `palette = "diverging"` to
+  preserve the prior output.
+
+## Documentation
+
+* `?save_ci_images` and vignette §1.4 rewritten to describe the
+  grayscale default and the rcicr-style `scaling` /
+  `scaling_constant` arguments.
+
+* **Group-mean infoVal documentation expanded.** New vignette §11
+  ("Group-level signal summaries") fully describes the group-mean z
+  statistic (`group_mean_z()`, surfaced via `infoval_report()`):
+  how its reference distribution is constructed (one simulated
+  random producer per real producer, averaged before the norm is
+  taken), how it differs from Brinkman et al. (2019)'s
+  per-producer infoVal (different statistic, different null,
+  validated only at the per-producer level), and how to read it
+  appropriately (necessary but not sufficient for interpretability;
+  pair with the per-producer distribution and the spatial
+  agreement map). A side-by-side simulation illustration shows why
+  the matched-N reference distribution shrinks with `N` --
+  exactly the calibration that makes the group-mean z meaningful.
+  `?infoval_report` gains a parallel **Details** block and an
+  expanded **Return** description for the `group_mean_z_*` fields;
+  the printed bullet now points to `?infoval_report` for what the
+  z tests. Subsequent section numbers shift by one (old §11 ->
+  §12, §12 -> §13, ..., §18 -> §19); all cross-references
+  updated.
 
 # rcisignal 0.3.0
 

@@ -29,6 +29,15 @@ ensure_attached <- function(pkgs) {
   invisible(TRUE)
 }
 
+# rcicr >= 1.6.1 imports foreach and no longer needs tibble/dplyr, so
+# only older rcicr versions need their unqualified calls attached.
+attach_rcicr_runtime_deps <- function() {
+  if (utils::packageVersion("rcicr") < "1.6.1") {
+    ensure_attached(c("foreach", "tibble", "dplyr"))
+  }
+  invisible(TRUE)
+}
+
 #' Validate that a file path exists
 #'
 #' @param path Character scalar.

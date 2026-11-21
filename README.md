@@ -32,11 +32,11 @@ From GitHub:
 remotes::install_github("olivethree/rcisignal")
 ```
 
-If you ran a 2IFC study, you will also need `rcicr` (used to compute
-the individual CIs):
+If you ran a 2IFC study, you will also need `rcicr` 1.6.1 or later (used
+to compute the individual CIs):
 
 ``` r
-remotes::install_github("rdotsch/rcicr")
+install.packages("rcicr")
 ```
 
 Brief-RC users can skip `rcicr`; the Brief-RC code is fully native to
@@ -109,7 +109,7 @@ vignette has the engine-equivalence receipts for the per-producer
 If `rcisignal` helps your research, please cite it:
 
 > Oliveira, M. (2026). *rcisignal: Quality checks for reverse-correlation
-> data and classification images* (Version 0.3.1) [R package]. Zenodo.
+> data and classification images* (Version 0.3.2) [R package]. Zenodo.
 > https://doi.org/10.5281/zenodo.19961180
 
 Run `citation("rcisignal")` in R for a BibTeX entry.
@@ -124,7 +124,7 @@ pipeline:
 ## References
 
 - Brinkman, L., Goffin, S., van de Schoot, R., van Haren, N. E. M., Dotsch, R., & Aarts, H. (2019). Quantifying the informational value of classification images. *Behavior Research Methods*, *51*(5), 2059-2073. [https://doi.org/10.3758/s13428-019-01232-2](https://doi.org/10.3758/s13428-019-01232-2)
-- Dotsch, R. (2016, 2023). *rcicr: Reverse-correlation image-classification toolbox* [R package]. [https://github.com/rdotsch/rcicr](https://github.com/rdotsch/rcicr)
+- Dotsch, R. (2016, 2026). *rcicr: Reverse-correlation image-classification toolbox* (Version 1.6.1) [R package]. [https://github.com/rdotsch/rcicr](https://github.com/rdotsch/rcicr)
 - Oliveira, M., Garcia-Marques, T., Dotsch, R., & Garcia-Marques, L. (2019). Dominance and competence face to face: Dissociations obtained with a reverse correlation approach. *European Journal of Social Psychology*. [https://doi.org/10.1002/ejsp.2569](https://doi.org/10.1002/ejsp.2569)
 - Schmitz, M., Rougier, M., & Yzerbyt, V. (2024). Introducing the brief reverse correlation: An improved tool to assess visual representations. *European Journal of Social Psychology*. [https://doi.org/10.1002/ejsp.3100](https://doi.org/10.1002/ejsp.3100)
 

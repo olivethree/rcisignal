@@ -115,13 +115,15 @@ The original \code{rcicr::computeInfoVal2IFC()} already uses it
 (\code{norm(matrix(target_ci[["ci"]]), "f")}); this function matches
 that convention for both 2IFC and Brief-RC data.
 
-Trial-count matching: the original
+Trial-count matching: by default,
 \code{rcicr::generateReferenceDistribution2IFC()} builds the
-reference using the full pool size. For Brief-RC the producer's
-recorded \code{n_trials} is typically smaller than \code{n_pool}, so a
-pool-size reference biases infoVal downward. \code{infoval()} closes
-this gap by keying the reference on the actual per-producer
-recorded trial count.
+reference over the full stimulus pool (rcicr >= 1.6.0 can match
+it to the stimuli actually used via \code{reference_stimuli}). For
+Brief-RC the producer's recorded \code{n_trials} is typically smaller
+than \code{n_pool}. A mask averaged over fewer trials has a larger
+norm, so a pool-size reference inflates infoVal, strongly so
+when \code{n_trials} is much smaller than \code{n_pool}. \code{infoval()} keys
+the reference on each producer's recorded trial count.
 
 What infoVal measures (and what it does not). The Frobenius
 norm is a \strong{magnitude} statistic, not a target-alignment one.

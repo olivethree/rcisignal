@@ -53,6 +53,9 @@ CI PNG instead of the base face used at stimulus-generation
 time). The dimension check catches a wholly wrong image but
 not a wrong-base-of-the-right-size.
 \item Treating the result as raw mask. See note below.
+\item Reading an \verb{individual_cis/} folder written by an affected
+rcicr version, whose filenames may name the wrong producers.
+See the matching item in \code{\link[=read_cis]{read_cis()}}.
 }
 }
 

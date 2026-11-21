@@ -43,13 +43,15 @@
 #' (`norm(matrix(target_ci[["ci"]]), "f")`); this function matches
 #' that convention for both 2IFC and Brief-RC data.
 #'
-#' Trial-count matching: the original
+#' Trial-count matching: by default,
 #' `rcicr::generateReferenceDistribution2IFC()` builds the
-#' reference using the full pool size. For Brief-RC the producer's
-#' recorded `n_trials` is typically smaller than `n_pool`, so a
-#' pool-size reference biases infoVal downward. `infoval()` closes
-#' this gap by keying the reference on the actual per-producer
-#' recorded trial count.
+#' reference over the full stimulus pool (rcicr >= 1.6.0 can match
+#' it to the stimuli actually used via `reference_stimuli`). For
+#' Brief-RC the producer's recorded `n_trials` is typically smaller
+#' than `n_pool`. A mask averaged over fewer trials has a larger
+#' norm, so a pool-size reference inflates infoVal, strongly so
+#' when `n_trials` is much smaller than `n_pool`. `infoval()` keys
+#' the reference on each producer's recorded trial count.
 #'
 #' What infoVal measures (and what it does not). The Frobenius
 #' norm is a **magnitude** statistic, not a target-alignment one.

@@ -60,6 +60,16 @@ through \code{\link[=extract_signal]{extract_signal()}} before any reliability m
 aborts with a clear error rather than silently misaligning.
 \item Trusting variance-based reliability numbers without first
 reading the note below on raw vs. rendered CIs.
+\item Trusting filenames as producer IDs for CIs saved by
+\code{rcicr::generateCI(participants = ..., save_individual_cis = TRUE)}
+(the \verb{individual_cis/} folder) with a GitHub install of rcicr
+0.4.0 to 1.2.3. Those versions could save each image under
+another participant's filename; the images themselves are
+correct. If \code{identical(unique(participants), sort(unique(participants)))} is \code{FALSE} for the participant
+vector originally passed, rename the files before reading them,
+following the rcicr advisory:
+\url{https://rdotsch.github.io/rcicr/articles/rcicr-individual-ci-advisory.html}.
+CRAN installs of rcicr and its batch functions were not affected.
 }
 }
 

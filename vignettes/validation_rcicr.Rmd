@@ -36,11 +36,11 @@ This vignette shows the receipts:
   same reference distribution under matched conditions, so the
   per-producer z scores they yield are mathematically equivalent.
 - **2IFC real-data side-by-side**: on the Oliveira et al. (2019)
-  Study 1 data, the two implementations produce ordinally
-  consistent per-producer z scores. They diverge in absolute
-  magnitude by a predictable, documented amount that comes from
-  the two implementations' different default reference-distribution
-  choices (per-trial-count vs pool-size).
+  Study 1 data, where every producer saw every stimulus in the
+  pool, the two implementations produce numerically
+  interchangeable per-producer z scores. Their default reference
+  choices (per-trial-count vs pool-size) only diverge when
+  producers see fewer trials than the pool.
 - **Brief-RC signal-recovery sensitivity**: `rcicr` has no
   Brief-RC `computeInfoVal` path, so no convergence comparison is
   possible. The substitute is a sensitivity check on simulated
@@ -51,7 +51,7 @@ This vignette is the canonical home for the per-producer 2IFC
 validation claim in
 [`vignette("rcisignal")`](rcisignal.html#validation-status) (§1.2).
 For everything else about infoVal (when to use it, how to read
-the z, group-mean caveats), read §9 of the main user guide.
+the z, group-mean caveats), read §10 and §11 of the main user guide.
 
 ## 2. 2IFC engine equivalence
 
@@ -109,26 +109,33 @@ the MAD gap below 5%.
 ## 3. 2IFC on Oliveira et al. (2019): per-producer side-by-side
 
 Engine equivalence is the easy half. The harder question is
-what the two implementations produce on real data when their
-defaults diverge:
+whether the two implementations agree on real data, end to end:
 
 - `rcisignal::infoval()` uses a reference distribution matched
   to each producer's actual trial count (300 trials in this
   study).
-- `rcicr::computeInfoVal2IFC()` uses a reference distribution
-  at the full pool size (4096 in this study), the convention
-  from Brinkman et al. (2019).
+- `rcicr::computeInfoVal2IFC()` uses, by default, a reference
+  distribution over the full stimulus pool, the convention from
+  Brinkman et al. (2019). The pool in this study holds 300
+  stimuli, and every producer responded to all of them.
 
-Because both reference distributions are built from random
-sign sequences run through the same mask formula, and the
-producer's observed Frobenius norm is the same input on both
-sides, the two should agree closely on a 2IFC dataset of this
-size. We expect tight per-producer correlations and very
-similar (though not identical) absolute z values.
+So in this dataset the two defaults describe the same reference,
+and the comparison tests whether the two implementations compute
+it the same way. Both build it from random sign sequences run
+through the same mask formula, and the producer's observed
+Frobenius norm is the same input on both sides, so we expect tight
+per-producer correlations and very similar (though not identical,
+because of Monte Carlo noise) absolute z values. The defaults
+diverge when producers see fewer trials than the pool, as in
+Brief-RC or after dropped trials; there a pool-size reference
+inflates z (see §10 of the user guide).
 
 Each per-trait per-participant pair was computed with both
 implementations at `iter = 10000` (rcicr's recommended value)
-during precompute. The cached output is loaded here:
+during precompute, originally with rcicr 1.0.1. Re-running the
+precompute with rcicr 1.6.1, whose default reference calculation
+changed (`reference_method = "gram"`), reproduced every rcicr z
+to within 1e-13. The cached output is loaded here:
 
 ```{r oliveira-load, eval = val_have_cache}
 per_trait <- readRDS(file.path(val_cache, "rcicr_per_trait.rds"))
@@ -304,6 +311,6 @@ work that used the rcicr default.
 ## References
 
 - Brinkman, L., Goffin, S., van de Schoot, R., van Haren, N. E. M., Dotsch, R., & Aarts, H. (2019). Quantifying the informational value of classification images. *Behavior Research Methods*, *51*(5), 2059-2073. \doi{10.3758/s13428-019-01232-2}
-- Dotsch, R. (2016, 2023). *rcicr: Reverse-correlation image-classification toolbox* [R package]. <https://github.com/rdotsch/rcicr>
+- Dotsch, R. (2016, 2026). *rcicr: Reverse-correlation image-classification toolbox* (Version 1.6.1) [R package]. <https://github.com/rdotsch/rcicr>
 - Oliveira, M., Garcia-Marques, T., Dotsch, R., & Garcia-Marques, L. (2019). Dominance and competence face to face: Dissociations obtained with a reverse correlation approach. *European Journal of Social Psychology*. \doi{10.1002/ejsp.2569}
 - Schmitz, M., Rougier, M., & Yzerbyt, V. (2024). Introducing the brief reverse correlation: An improved tool to assess visual representations. *European Journal of Social Psychology*. \doi{10.1002/ejsp.3100}

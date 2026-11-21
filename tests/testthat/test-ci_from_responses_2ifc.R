@@ -7,7 +7,9 @@ test_that("2IFC wrapper smokes against the original rcicr if available", {
   # generate a tiny stimulus set on the fly. img_size has to be even.
   tmp <- withr::local_tempdir()
   base_path <- file.path(tmp, "base.jpg")
-  jpeg::writeJPEG(matrix(0.5, 32L, 32L), base_path, quality = 1)
+  # rcicr >= 1.3.0 rejects a base with no contrast, so use a gradient.
+  jpeg::writeJPEG(outer(seq(0.2, 0.8, length.out = 32L), rep(1, 32L)),
+                  base_path, quality = 1)
 
   withr::with_dir(tmp, {
     set.seed(1)
